@@ -100,7 +100,7 @@ namespace ProEstimator.Admin.Controllers
 
                 if (match.Success)
                 {
-                    if (System.IO.File.Exists(diskPath) && Path.GetFullPath(diskPath).StartsWith(@"C:\ProUserContent\Admin", StringComparison.OrdinalIgnoreCase))
+                    if (Path.GetFullPath(diskPath).StartsWith(@"C:\ProUserContent\Admin", StringComparison.OrdinalIgnoreCase))
                     {
                         if (System.IO.File.Exists(diskPath))
                         {
