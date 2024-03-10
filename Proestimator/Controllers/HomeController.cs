@@ -687,10 +687,13 @@ namespace Proestimator.Controllers
         public ActionResult ViewAttachment(string filename = "")
         {
             string diskPath = Path.Combine(ConfigurationManager.AppSettings.Get("UserContentPath").ToString(), "FrameImagePdf", filename);
-            if (!string.IsNullOrEmpty(diskPath) && System.IO.File.Exists(diskPath))
+            if (!string.IsNullOrEmpty(diskPath) && Path.GetFullPath(diskPath).StartsWith(Path.Combine(ConfigurationManager.AppSettings.Get("UserContentPath").ToString(), "FrameImagePdf"), StringComparison.OrdinalIgnoreCase))
             {
-                var fileStream = new FileStream(diskPath, FileMode.Open, FileAccess.Read);
-                return new FileStreamResult(fileStream, "application/pdf");
+                if(System.IO.File.Exists(diskPath))
+                {
+                    var fileStream = new FileStream(diskPath, FileMode.Open, FileAccess.Read);
+                    return new FileStreamResult(fileStream, "application/pdf");
+                }
             }
 
             //filename from querystring or estimate id from session is not valid...show the error message instead of blank screen.
