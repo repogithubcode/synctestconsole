@@ -1,0 +1,150 @@
+﻿@model Proestimator.ViewModel.Contracts.SignContractVM
+
+@using ProEstimatorData.Models.SubModel
+@{
+
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_SignAgreement;
+    var vehicleinfo = Model;
+}
+
+<style>
+    body {
+        border: 0px;
+        margin: 0px;
+        width: 100%;
+        height: 100%;
+
+        opacity: 0;
+    }
+
+    .contract-wrapper {
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+
+    .signature-wrapper {
+        width: 50%;
+        padding-top: 40px;
+        margin: 0px auto;
+        font-size: initial;
+    }
+
+    h1 {
+        font-size: 1.2em;
+        text-align: center;
+    }
+
+    .column-container {
+        column-count: 2;
+        max-width: 900px;
+        margin: 0px auto;
+            
+    }
+
+    .column-container p {
+        text-align: justify;
+        margin-right: 10px;
+    }
+
+    .section-title {
+        font-weight: bold;
+        text-decoration: underline;
+    }
+
+    .section-item {
+        margin-left: 10px;
+    }
+
+    .contract-table-wrapper {
+        max-width: 900px;
+        margin: 0px auto;
+        border: 5px solid gray;
+        margin-bottom: 20px;
+    }
+
+    .contract-table-wrapper table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .contract-table-wrapper thead {
+        border-bottom: 4px solid gray;
+        font-weight: bold !important;
+    }
+
+    .contract-table-wrapper td {
+        padding: 5px;
+    }
+</style>
+
+<script>
+    $(document).ready(function () {
+        $("#SubmitButton").click(function () {
+            var signature = $("#SignatureName").val().replace(/ /g, "");
+            var length = signature.length;
+            if (length < 1)
+            {
+                $("#ErrorMessage").show();
+                event.preventDefault();
+                return false;
+            }
+        });
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <text>$('html, body').scrollTop($(document).height() - $(window).height());</text>
+        }
+
+        $('body').css('opacity', 1);
+    });
+</script>
+
+<div id="workDesk" class="page-container">
+
+    @using (Html.BeginForm("SignContract", "DigitalSignature", FormMethod.Post, new { @id = "estimateForm", @class = "container" }))
+    {
+        @Html.HiddenFor(o => o.LoginID);
+        @Html.HiddenFor(o => o.ContractID);        
+        
+        if (Model.ShowForm)
+        {
+            @Html.Raw(Model.ContractText)
+        
+            <div class="contract-wrapper">
+                <div style="height: 30px;"></div>
+                <hr />
+                <p style="text-align: center; margin-top: 30px;">@Proestimator.Resources.ProStrings.DigitalSignatureSignContractMessage</p>
+            </div>
+
+            <div class="signature-wrapper">
+                <div style="text-align: center;">
+                    <span id="ErrorMessage" class="error-message" style="display: none;">@Proestimator.Resources.ProStrings.EnterYourName.</span>
+                </div>
+
+                <div class="field-wrapper-half">
+                    <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.ECheck_FullName</label>
+                    <div class="field-control-half">
+                        @Html.TextBoxFor(model => model.InputValue, new { autocomplete = "off" })
+                    </div>
+                </div>
+
+                <div class="field-wrapper-half">
+                    <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.TodaysDate</label>
+                    <div class="field-control-half">
+                        @Html.TextBoxFor(model => model.SignatureDate, new { autocomplete = "off", style="margin-bottom: 0px;" })
+                    </div>
+                </div>
+
+                <div class="field-wrapper" style="text-align: center;">
+                    <input id="SubmitButton" class="button nav-btn" type="submit" value="@Proestimator.Resources.ProStrings.Submit" />
+
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <p class="error-message">@Model.ErrorMessage</p>
+                    }
+                </div>
+
+            </div>
+        }
+    }
+</div>

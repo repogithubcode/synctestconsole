@@ -1,0 +1,139 @@
+﻿@model Proestimator.ViewModel.Profiles.PresetChargesVM
+@{
+    ViewBag.Title = @Proestimator.Resources.ProStrings.PageTitle_PresetCharges;
+}
+
+<style>
+    .manual-entry-container 
+    {
+        position: inherit !important;
+    }
+
+    @@media screen and (max-width:700px) {
+        #smEstimateNavRow {
+            border: 1px solid #349ad8;
+            background-color: #f5f9fb;
+            max-width: 100%;
+            padding-right: 30px;
+        }
+
+        #estimateNavigation {
+            margin-top: 15px;
+        }
+    }
+
+    @@media screen and (max-width:900px) {
+
+        #lgGraphicalGrid {
+            margin-left: -15px;
+        }
+
+    }
+
+    .me-form-header {
+        display: none;
+    }
+
+</style>
+
+<script src="~/Scripts/PaintCalculations.js?18"></script>
+
+<script>
+
+    var _supplement = 0;        // Not used on PresetCharages, needed because ManualEntryList needs it when it's used on AddParts
+
+    // Load the passed part ID into the details form for editing.
+    function EditLineItem(partID) {
+        $.getJSON('@Url.Action("EditME", "RateProfile")', { userID: @ViewBag.UserID, EstimateID: 0, lineID: partID, meMode: "Preset" }, function (data) {
+            loadDetails(data.detail, false);
+        });
+    }
+
+    $(document).ready(function () {
+        $(".form-container").css("bottom", "0px");
+
+        // Set up the draggable split bar
+        var bottomElem = $(".resizable-bottom");
+        var bottomElemOriginalHeight = bottomElem.height();
+        $(".resizable-top").resizable({
+            handles: 's',
+            resize: function (event, ui) {
+                var bottomHeight = bottomElemOriginalHeight - (ui.element.outerHeight() - ui.originalSize.height);
+                bottomElem.height(bottomHeight);
+
+                // If the Manual Entry form is showing, we need to manually set the bottom position of the form-container div
+                $(".form-container").css("bottom", (bottomHeight) + "px");
+
+                bottomHeightPct = ($(".resizable-bottom").height() / ($(".resizable-bottom").height() + $(".resizable-top").height())) * 100;
+            },
+            stop: function (event, ui) {
+                bottomElemOriginalHeight = bottomElem.height();
+            }
+        });
+
+        bottomHeightPct = ($(".resizable-bottom").height() / ($(".resizable-bottom").height() + $(".resizable-top").height())) * 100;
+        var bottomHeight = $(".resizable-bottom").height();
+        $(".form-container").css("bottom", bottomHeight + "px");
+    });
+</script>
+
+<div id="workDesk" class="page-container">
+
+    @if (!Model.ProfileIsValid)
+    {
+        <h2>@Proestimator.Resources.ProStrings.InvalidProfile</h2>
+    }
+    else
+    {
+        using (Html.BeginForm("PresetCharges", "RateProfile", FormMethod.Post, new { @class = "container" }))
+        {
+            @Html.Partial("RateProfileTopMenu", Model.ProfileID)
+
+            @Html.HiddenFor(model => model.LoginID)
+            @Html.HiddenFor(model => model.ProfileID)
+            @Html.HiddenFor(model => model.EstimateID)
+
+            Html.EnableClientValidation(false);
+
+            <input type="hidden" id="redirectData" name="redirectDataField" />
+
+            <div class="tabcontent container">
+
+                <div id="formHeader">
+
+                    <div id="profileName" class="container rate-ProfileName">
+                        <label>
+                            <b>@Proestimator.Resources.ProStrings.RateProfile_ProfileName: @Model.ProfileName</b>
+
+                            <p class="profile-message">
+                                @if (Model.IsGlobalProfile)
+                                {
+                                    @Proestimator.Resources.ProStrings.ProfileMessage_Global
+                                }
+                                else
+                                {
+                                    @Proestimator.Resources.ProStrings.ProfileMessage_Estimate
+                                }
+                            </p>
+                        </label>
+                    </div>
+                    <div id="pageBtns">
+                        <div id="prvItemBtnView" class="col sm_2_4 md_2_8 lg_3_12 xl_2_14">
+                            <a class="button" href="@Url.Action("Taxes", "RateProfile", new { ProfileID = Model.ProfileID })">&lt;&lt; @Proestimator.Resources.ProStrings.Taxes</a>
+                        </div>
+
+                        <input type="button" class="button nav-btn btnAdd" value=@Proestimator.Resources.ProStrings.AddButton />
+                        <input type="button" class="button nav-btn btnClear do-not-disable" value=@Proestimator.Resources.ProStrings.ClearButton />
+
+                    </div>
+                </div>
+
+                <div id="lgRow1" class="container">
+                    @Html.EditorFor(model => model.ManualEntry)
+                </div>
+
+            </div>
+        }
+    }
+
+</div>

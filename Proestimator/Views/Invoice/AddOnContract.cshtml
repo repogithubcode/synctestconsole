@@ -1,0 +1,446 @@
+﻿@model Proestimator.ViewModel.Contracts.PickAddOnsVM
+
+@using Proestimator.ViewModel;
+@using Proestimator.ViewModel.Contracts;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_RenewSubscription;
+}
+
+<style>
+    .datagrid {
+        cursor: pointer;
+    }
+
+    .addon-grid {
+        padding-top: 10px;
+        display: none;
+    }
+
+    .page-link {
+        color: black !important;
+        font-weight: normal;
+        text-decoration: underline;
+    }
+
+    .selected-summary {
+        float: left;
+        padding-right: 10px;
+    }
+
+    .addon-grid {
+        max-width: 500px;
+        padding-top: 20px;
+    }
+
+    .bundle-selection {
+        margin-top: 20px;
+    }
+
+    .page-half-container {
+        display: block;
+        overflow: auto;
+        padding-bottom: 20px;
+    }
+
+    .page-half {
+        height: 100%;
+    }
+
+    .page-half-center {
+        font-weight: bold;
+        font-size: 1.2em;
+        text-align: center;
+    }
+
+    .page-half-content {
+        width: 100%;
+        height: 100%;
+    }
+
+    .page-half .addon-grid {
+        margin: 0px auto;
+    }
+
+    .addon-grid p {
+        margin: 0px;
+    }
+
+    .bundle-wrapper {
+        border: 1px solid #349ad8;
+    }
+
+    .bundle-wrapper-title {
+        background-color: #f5f9fb;
+        border-bottom: 1px solid #349ad8;
+        padding: 10px;
+    }
+
+    .disabled {
+        opacity: .5;
+    }
+
+    .bottom-wrapper > .addon-grid {
+        margin: 0px auto;
+    }
+
+    .continue-button-wrapper {
+        padding-top: 10px;
+        padding-bottom: 15px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: white;
+        text-align: center;
+        border-top: 1px solid black;
+    }
+
+    @@media (min-width: 1100px) {
+
+        .page-half {
+            width: calc(50% - 25px);
+            float: left;
+            height: 100%;
+        }
+
+        .page-half-center {
+            width: 50px;
+            float: left;
+            margin-top: 50px;
+        }
+    }
+
+    .existing-add-on {
+        font-size: 12px;
+    }
+</style>
+
+<script type="text/javascript">
+
+    // Tell the grid to load data and show the grid
+    function LoadAddOnTerms(addOnTypeID) {
+
+        // Before fading out all grids, find out if our grid is already showing
+        var gridContainer = $("#AddOnGridContainer" + addOnTypeID);
+
+        var grid = $("#AddOnGrid" + addOnTypeID).data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+
+        if (!gridContainer.is(":visible")) {
+            gridContainer.animate({ height: "show", opacity: 100 }, 300);
+        }
+    }
+
+    function AddOnGridDataChanged(e) {
+        var addOnGridContainer = e.sender.table.closest(".addon-grid");
+        var selectedID = addOnGridContainer.find(".selected-id").val();
+        var rows = addOnGridContainer.find("tbody").find("tr");
+
+        rows.each(function (i, row) {
+            if ($(row).find("td").first().html() == selectedID) {
+                $(row).addClass("k-state-selected");
+            }
+        });
+    }
+
+    function BundleGridSelectionChange(arg) {
+        var selectedID = $.map(this.select(), function (item) {
+            return $(item).find("td").first().html();
+        });
+
+        var addOnTypeID = $.map(this.select(), function (item) {
+            return $(item).closest(".addon-grid").attr("id").replace("AddOnGridContainer", "");
+        });
+
+        ToggleGridSelection(selectedID, addOnTypeID);
+
+        ClearGridSelection(9);
+        ClearGridSelection(10);
+        ClearGridSelection(11);
+        ClearGridSelection(13);
+
+        $(".BundledHalf").removeClass("disabled");
+        $(".NonBundledHalf").addClass("disabled");
+    }
+
+    function NonBundleGridSelectionChange(arg) {
+        var selectedID = $.map(this.select(), function (item) {
+            return $(item).find("td").first().html();
+        });
+
+        var addOnTypeID = $.map(this.select(), function (item) {
+            return $(item).closest(".addon-grid").attr("id").replace("AddOnGridContainer", "");
+        });
+
+        ToggleGridSelection(selectedID, addOnTypeID);
+
+        ClearGridSelection(12);
+
+        $(".NonBundledHalf").removeClass("disabled");
+        $(".BundledHalf").addClass("disabled");
+    }
+
+    function AddOnGridLineSelectionChanged(arg) {
+        var selectedID = $.map(this.select(), function (item) {
+            return $(item).find("td").first().html();
+        });
+
+        var addOnTypeID = $.map(this.select(), function (item) {
+            return $(item).closest(".addon-grid").attr("id").replace("AddOnGridContainer", "");
+        });
+
+        ToggleGridSelection(selectedID, addOnTypeID);
+    }
+
+    function ToggleGridSelection(selectedID, addOnTypeID) {
+        var addOnGridContainer = $("#AddOnGridContainer" + addOnTypeID);
+        var selectedIDInput = addOnGridContainer.find(".selected-id");
+
+        if (selectedIDInput.val() == selectedID) {
+            selectedIDInput.val(0);
+            addOnGridContainer.find(".k-state-selected").removeClass("k-state-selected");
+        }
+        else {
+            selectedIDInput.val(selectedID);
+        }
+    }
+
+    function ClearGridSelection(addOnTypeID) {
+        var addOnGridContainer = $("#AddOnGridContainer" + addOnTypeID);
+        var selectedIDInput = addOnGridContainer.find(".selected-id");
+        selectedIDInput.val(0);
+        addOnGridContainer.find(".k-state-selected").removeClass("k-state-selected");
+    }
+
+</script>
+
+<div class="page-container" style="padding-top: 20px;">
+    @if (Model.GoodData)
+    {
+        using (Html.BeginForm())
+        {
+            @Html.HiddenFor(model => model.LoginID)
+            @Html.HiddenFor(model => model.ContractID)
+
+            if (ViewBag.AddOnsPermit)
+            {
+                <h1>@Html.Raw(Model.ContractMessage)</h1>
+
+                <div class="bundle-wrapper" style="display: @(Model.HasBundle ? "none;" : "block")">
+                    <div class="bundle-wrapper-title">
+                        <h1 style="margin: 0px;">Pro-Estimator Premium Bundle – A $303.00 Savings</h1>
+                        <p style="text-align: center; font-size: 0.8em; margin: 0px; padding: 0px;">(Includes: Pro-Advisor, QuickBooks Exporter, Enterprise Image Editor & Enterprise Reporting)</p>
+                    </div>
+
+                    <div class="page-half-container">
+                        <div class="page-half BundledHalf">
+                            <div class="page-half-content">
+                                <div class="addon-grid" id="AddOnGridContainer12">
+                                    <p>@Model.AddOnDetails[0].AddOnType</p>
+
+                                    <div class="datagrid">
+                                        @(Html.Kendo().Grid<ContractTermsVM>()
+                        .Name("AddOnGrid" + Model.AddOnDetails[0].AddOnTypeID)
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.ContractPriceLevelID).Hidden();
+                            columns.Bound(item => item.TermDescription).Title(@Proestimator.Resources.ProStrings.TermDescription);
+                            columns.Bound(item => item.TermTotal).Format("{0:c}").Title(@Proestimator.Resources.ProStrings.TermTotal);
+                            columns.Bound(item => item.Summary).Title(@Proestimator.Resources.ProStrings.Summary);
+                        })
+                        .Selectable()
+                        .Events(events => events
+                            .DataBound("AddOnGridDataChanged")
+                            .Change("BundleGridSelectionChange")
+                        )
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Sort(sort => sort.Add("NumberOfPayments"))
+                            .Read(read => read.Action("GetAddOnContractOptions", "Invoice", new { userID = ViewBag.UserID, loginID = Model.LoginID, contractID = Model.ContractID, contractTypeID = Model.AddOnDetails[0].AddOnTypeID }))
+                            .PageSize(20)
+                        )
+                        .AutoBind(false)
+                                    )
+                                    </div>
+
+                                    @Html.HiddenFor(model => Model.AddOnDetails[0].SelectedID, new { @class = "selected-id" })
+                                    @Html.HiddenFor(model => Model.AddOnDetails[0].AddOnTypeID)
+
+                                    <script>
+                                    $(document).ready(function () {
+                                            LoadAddOnTerms(@Model.AddOnDetails[0].AddOnTypeID);
+                                    });
+                                    </script>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="page-half-center">
+                            <p>OR</p>
+                        </div>
+
+                        <div class="page-half NonBundledHalf disabled">
+                            <div class="page-half-content">
+                                @for (int i = 1; i < 5; i++)
+                                {
+                                    <div class="addon-grid" id="@("AddOnGridContainer" + Model.AddOnDetails[i].AddOnTypeID)">
+                                        <p>@Model.AddOnDetails[i].AddOnType</p>
+
+                                        @if (Model.AddOnDetails[i].HasPayment)
+                                        {
+                                            <p class="existing-add-on">@Model.AddOnDetails[i].TermDescription</p>
+                                        }
+                                        else
+                                        {
+                                            <div class="datagrid">
+                                                @(Html.Kendo().Grid<ContractTermsVM>()
+                            .Name("AddOnGrid" + Model.AddOnDetails[i].AddOnTypeID)
+                            .Columns(columns =>
+                            {
+                                columns.Bound(item => item.ContractPriceLevelID).Hidden();
+                                columns.Bound(item => item.TermDescription).Title(@Proestimator.Resources.ProStrings.TermDescription);
+                                columns.Bound(item => item.TermTotal).Format("{0:c}").Title(@Proestimator.Resources.ProStrings.TermTotal);
+                                columns.Bound(item => item.Summary).Title(@Proestimator.Resources.ProStrings.Summary);
+                            })
+                            .Selectable()
+                            .Events(events => events
+                                .DataBound("AddOnGridDataChanged")
+                                .Change("NonBundleGridSelectionChange")
+                            )
+                            .DataSource(dataSource => dataSource
+                                .Ajax()
+                                .ServerOperation(false)
+                                .Sort(sort => sort.Add("NumberOfPayments"))
+                                .Read(read => read.Action("GetAddOnContractOptions", "Invoice", new { userID = ViewBag.UserID, loginID = Model.LoginID, contractID = Model.ContractID, contractTypeID = Model.AddOnDetails[i].AddOnTypeID }))
+                                .PageSize(20)
+                            )
+                            .AutoBind(false)
+                                        )
+                                            </div>
+                                        }
+
+                                        @Html.HiddenFor(model => Model.AddOnDetails[i].SelectedID, new { @class = "selected-id" })
+                                        @Html.HiddenFor(model => Model.AddOnDetails[i].AddOnTypeID)
+
+                                        <script>
+                                        $(document).ready(function () {
+                                                LoadAddOnTerms(@Model.AddOnDetails[i].AddOnTypeID);
+                                        });
+                                        </script>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bottom-wrapper">
+                    @for (int i = 5; i < 8; i++)
+                    {
+                        <div class="addon-grid" id="@("AddOnGridContainer" + Model.AddOnDetails[i].AddOnTypeID)">
+                            <p>@Model.AddOnDetails[i].AddOnType</p>
+
+                            <div class="datagrid">
+                                @(Html.Kendo().Grid<ContractTermsVM>()
+                                .Name("AddOnGrid" + Model.AddOnDetails[i].AddOnTypeID)
+                                .Columns(columns =>
+                                {
+                                columns.Bound(item => item.ContractPriceLevelID).Hidden();
+                                columns.Bound(item => item.TermDescription).Title(@Proestimator.Resources.ProStrings.TermDescription);
+                                columns.Bound(item => item.TermTotal).Format("{0:c}").Title(@Proestimator.Resources.ProStrings.TermTotal);
+                                columns.Bound(item => item.Summary).Title(@Proestimator.Resources.ProStrings.Summary);
+                                })
+                                .Selectable()
+                                .Events(events => events
+                                .DataBound("AddOnGridDataChanged")
+                                .Change("AddOnGridLineSelectionChanged")
+                                )
+                                .DataSource(dataSource => dataSource
+                                .Ajax()
+                                .ServerOperation(false)
+                                .Sort(sort => sort.Add("NumberOfPayments"))
+                                .Read(read => read.Action("GetAddOnContractOptions", "Invoice").Data("GetAddOnContractOptionsParameters" + i))
+                                .PageSize(20)
+                                )
+                                .AutoBind(false)
+                                )
+                                @if (Model.AddOnDetails[i].IsMultiAdd && Model.AddOnDetails[i].AddOnQtys.Count() > 0)
+                                {
+                                    <table style="margin-bottom: 0px;">
+                                        <tr>
+                                            <td style="text-align: right;">Quantity:&nbsp;&nbsp;</td>
+                                            <td>@Html.DropDownList("SelectedAddOnQty" + i, Model.AddOnDetails[i].AddOnQtys)</td>
+                                        </tr>
+                                    </table>
+                                    <text>
+                                        <script>
+
+                                        $("@("#SelectedAddOnQty" + i)").val(@Model.AddOnDetails[i].SelectedAddOnQty);
+                                        $("@(".SelectedAddOnQty" + i)").val(@Model.AddOnDetails[i].SelectedAddOnQty);
+                                        $(document).ready(function () {
+                                            $("@("#SelectedAddOnQty" + i)").change(function () {
+                                                $("@(".SelectedAddOnQty" + i)").val($("@("#SelectedAddOnQty" + i)").val());
+                                                LoadAddOnTerms(@Model.AddOnDetails[i].AddOnTypeID);
+                                            });
+                                        });
+                                        </script>
+                                    </text>
+                                }
+                            </div>
+
+                            @Html.HiddenFor(model => Model.AddOnDetails[i].SelectedID, new { @class = "selected-id" })
+                            @Html.HiddenFor(model => Model.AddOnDetails[i].AddOnTypeID)
+                            @Html.HiddenFor(model => Model.AddOnDetails[i].IsMultiAdd)
+                            @Html.HiddenFor(model => Model.AddOnDetails[i].SelectedAddOnQty, new { @class = "SelectedAddOnQty" + i })
+
+                            <script>
+                                    function @("GetAddOnContractOptionsParameters" + i)() {
+                                        var qty = 1;
+                                        if ($("@("#SelectedAddOnQty" + i)").val() != undefined) {
+                                            qty = $("@("#SelectedAddOnQty" + i)").val();
+                                        }
+                                        var result =
+                                        {
+                                            userID: @ViewBag.UserID
+                                          , loginID: @Model.LoginID
+                                          , contractID: @Model.ContractID
+                                          , contractTypeID: @Model.AddOnDetails[i].AddOnTypeID
+                                          , qty: qty
+                                        };
+                                        return result;
+                                    }
+                                    $(document).ready(function () {
+                                            LoadAddOnTerms(@Model.AddOnDetails[i].AddOnTypeID);
+                                    });
+                            </script>
+                        </div>
+
+
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="container">
+                    <p>You do NOT have permission to add AddOns.</p>
+                </div>
+            }
+
+            <div class="continue-button-wrapper">
+                <input id="submitButton" class="button forward nav-btn" type="submit" name="Save" value="@Proestimator.Resources.ProStrings.Confirm_Purchase" />
+                <a class="button nav-btn" href="/@ViewBag.UserID">@Proestimator.Resources.ProStrings.Cancel_Purchase</a>
+                <span class="error-message">@Model.Errors</span>
+            </div>
+        }
+    }
+    else
+    {
+        <h1>@Proestimator.Resources.ProStrings.InvalidContractID</h1>
+    }
+
+</div>

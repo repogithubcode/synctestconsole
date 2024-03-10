@@ -1,0 +1,44 @@
+﻿@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_ContactWebEst;
+}
+
+<style>
+    .datagrid {
+        cursor: pointer;
+    }
+
+    .hide-small {
+    }
+
+    .hide-large {
+        display: none;
+    }
+
+   .message-area-contact{
+        border: 1px solid red;
+        max-width: 470px;
+        margin: 10px auto;
+        padding-left: 10px;
+        padding-right: 10px;
+        padding-bottom: 20px;
+    }
+
+    @@media (max-width: 700px) {
+        .hide-small {
+            display: none;
+        }
+
+        .hide-large {
+            display: block;
+        }
+    }
+</style>
+
+<div class="page-container">
+    <div class="message-area-contact">
+        <div class="message-wrapper">
+            <p>@Html.Raw(@ViewBag.Message)</p>
+            <a class="button nav-btn" href="/@ViewBag.UserID/estimate/@ViewBag.EstimateID/printing">@Proestimator.Resources.ProStrings.ClickHere</a> @Proestimator.Resources.ProStrings.ToReturnOnPreviousScreen
+        </div>
+    </div>
+</div>

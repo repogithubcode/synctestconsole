@@ -1,0 +1,315 @@
+﻿@model ProEstimator.Admin.ViewModel.UserFeedbackBug.UserFeedbackBugVM
+
+@using ProEstimator.Admin.ViewModel.UserFeedbackBug;
+
+@{
+    ViewBag.Title = "Administration - Error Log";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<style>
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .padd-top {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    .k-grid td {
+        white-space: normal;
+    }
+
+    .notes-input {
+        width: 100% !important;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        height: 50px;
+    }
+
+</style>
+
+<script>
+
+    function GetSearchParameters() {
+        return {
+            reporterNameFilter: $("#ReporterName").val(), rangeStartFilter: $("#RangeStart").val(), rangeEndFilter: $("#RangeEnd").val()
+        };
+    }
+
+    var displayImage = function (index, base64Data) {
+
+        var imag = "<b style='margin-bottom:5px;'>Image " + (index + 1) + "</b> <img style='width:100%;height:60%;'"
+            + " src='" + "data:image/png;base64,"
+            + base64Data + "'/>";
+
+        return imag;
+    };
+
+    function OpenImageViewer(imageStringValue, loginID) {
+
+        var imgs;
+        var index;
+        var image;
+        var imageList = '';
+
+        $("#myModal").dialog({
+            modal: true,
+            autoOpen: false,
+            title: "Feedback/Bug report Images",
+            width: 800
+            , position: {
+                my: "top",
+                at: "top",
+                of: "#mainDivID",
+                collision: "none"
+            }
+        });
+
+        $.getJSON("/UserFeedBackBugReport/GetReportImages", {
+            imageString: imageStringValue
+            , loginId: loginID
+        }, function (data) {
+            if (data.Success === true) {
+                imgs = data.ImageDataList;
+                for (index = 0; index < imgs.length; index++) {
+                    image = displayImage(index, imgs[index]);
+
+                    imageList = imageList + "<br/>" + image;
+                }
+
+                $("#myModal").removeClass('modal'); // remove this class otherwise image won't display.
+                $("#myModal").removeClass('fade'); // remove this class otherwise image won't display.
+
+                $("#divImageHolder").html(imageList)
+                $('#myModal').dialog('open').html(imageList);
+            }
+        });
+    }
+
+    $(document).ready(function () {
+
+        // Set up calendar controls
+        $("#RangeStart").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        // Set up calendar controls
+        $("#RangeEnd").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        // Do the UserFeedbackBug search
+        $("#btnUserFeedbackBugReport").click(function () {
+
+            // Refresh the history grid
+            var grid = $("#userfeedbackbugreport-grid").data("kendoGrid");
+
+            if (grid) {
+                grid.dataSource.read();
+            }
+        });
+
+        $("#filter").on("input", function (e) {
+
+            var grid = $("#userfeedbackbugreport-grid").data("kendoGrid");
+            var valuetoFilter = e.target.value;
+
+            var filter = KendogridSearchFilter(grid, valuetoFilter);
+
+            grid.dataSource.filter(filter);
+        });
+
+        var currentDate = new Date();
+        var dateChange = new Date();
+        dateChange.setDate(currentDate.getDate() - 60)
+
+        // RangeStart
+        var rangeStart = GetDayMonthYear(dateChange);
+        $("#RangeStart").val(rangeStart);
+
+        // RangeEnd
+        dateChange = new Date();
+        var rangeEnd = GetDayMonthYear(dateChange);
+        $("#RangeEnd").val(rangeEnd);
+
+        function GetDayMonthYear(dateChange) {
+            var d = dateChange.getDate();
+            var day = (d < 10) ? '0' + d : d;
+            var m = dateChange.getMonth() + 1;
+            var month = (m < 10) ? '0' + m : m;
+            var yy = dateChange.getYear();
+            var year = (yy < 1000) ? yy + 1900 : yy;
+
+            var dateRange = month + "/" + day + "/" + year;
+
+            return dateRange;
+        }
+    });
+
+    var prevUserFeedbackID = '';
+    function DetailsLineSelectionChanged(arg) {
+        var row = $("#userfeedbackbugreport-grid").find(".k-state-selected").first();
+        var userFeedbackID = row.find("td").first().html();
+        var actionNote = $('#ActionNote' + userFeedbackID).text();
+        
+        if (prevUserFeedbackID != userFeedbackID) {
+            if (prevUserFeedbackID != '') {
+                HideNotesInput(prevUserFeedbackID);
+            }
+            UnhideNotesInput(userFeedbackID);
+            $('#NotesInput' + userFeedbackID).val(actionNote);
+            $('#NotesInput' + userFeedbackID).focus();
+            prevUserFeedbackID = userFeedbackID;
+        }
+        else {
+            HideNotesInput(userFeedbackID);
+            prevUserFeedbackID = ''; // setting it just to toggle IF statement
+        }
+    }
+
+    function HideNotesInput(userFeedbackID) {
+        $('#NotesInput' + userFeedbackID).css({ display: "none" });
+        $('#SaveButton' + userFeedbackID).css({ display: "none" });
+        $('#ActionNote' + userFeedbackID).css({ display: "block" });
+    }
+
+    function UnhideNotesInput(userFeedbackID) {
+        $('#NotesInput' + userFeedbackID).css({ display: "block" });
+        $('#SaveButton' + userFeedbackID).css({ display: "block" });
+        $('#ActionNote' + userFeedbackID).css({ display: "none" });
+    }
+
+    function SaveActionNote(userFeedbackID) {
+
+        var notes = $('#NotesInput' + userFeedbackID).val();
+        
+        $.ajax({
+            url: "/UserFeedBackBugReport/SaveActionNote",
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({
+                "UserFeedbackID": userFeedbackID, "ActionNote": notes
+            }),
+            success: function (data) {
+                $('#ActionNote' + userFeedbackID).text(notes);
+                HideNotesInput(prevUserFeedbackID);
+            },
+            error: function () {
+                console.log("error occured");
+            }
+        });
+    }
+
+</script>
+
+<div class="page-container" id="mainDivID">
+    <div class="row padd-top">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>User Feedback/Bug Report</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="col-lg-4">
+                            <div class="input-group">
+                                <span class="input-group-addon">Range Start</span>
+                                <input type="text" class="input-group-addon" placeholder="Range Start" aria-describedby="RangeStart" id="RangeStart" readonly="true" />
+                            </div>
+                            <br />
+                            <div class="input-group">
+                                <span class="input-group-addon">RangeEnd</span>
+                                <input type="text" class="input-group-addon" placeholder="Range End" aria-describedby="RangeEnd" id="RangeEnd" readonly="true" />
+                            </div>
+                            <br />
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="input-group">
+                                <span class="input-group-addon">Reporter Name</span>
+                                <input type="text" class="form-control" placeholder="Reporter Name" aria-describedby="loginId" id="ReporterName" />
+                            </div>
+                            <br />
+                            <div class="text-center">
+                                <a class="btn btn-primary" href="javascript:void(0);" style="width:95% !important" id="btnUserFeedbackBugReport" role="button">Search</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>User Feedback/Bug Report</h4>
+            </div>
+            <div style="text-align: right;margin-top:5px;">
+                Search: <input type="text" id="filter" />
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="errorlogreport-grid-container" class="datagrid">
+                        @(Html.Kendo().Grid<UserFeedbackBugVM>()
+                                .Name("userfeedbackbugreport-grid")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(item => item.UserFeedbackID).Title("UserFeedbackID").Hidden();
+                                    columns.Bound(item => item.LoginID).Title("LoginID").Width(35);
+                                    columns.Bound(item => item.ReporterName).Title("Reporter").Width(35);
+                                    columns.Bound(item => item.Phone).Title("Phone").Width(45);
+                                    columns.Bound(item => item.CompanyName).Title("Company").Width(55);
+                                    columns.Bound(item => item.CreatedDate).Title("Date Occurred").Width(35);
+                                    columns.Bound(item => item.FeedbackText).Title("Feedback").Encoded(false).Width(135);
+                                    columns.Bound(item => item.ActionNote).Template(@<text></text>).ClientTemplate("<textarea id='NotesInput#= UserFeedbackID#' autofocus class='notes-input' style='display:none'></textarea><input id='SaveButton#= UserFeedbackID#' class='btn btn-primary' style='display:none' type='button' value='Save' onclick='SaveActionNote(#= UserFeedbackID#);' /><label id='ActionNote#= UserFeedbackID#'>#= ActionNote#</label>").Title("ActionNote").Width(185);
+                                    columns.Template(@<text></text>).ClientTemplate("  " + "# if (ImagePaths != '') { #" + "<a href='javascript: void(0);' onclick=\"OpenImageViewer('#=ImagePaths#', '#=LoginID#')\" style=\"cursor: pointer;\">View</a>" + "# } #").Title("").Width(25);
+                                })
+                                .Selectable()
+                                .Sortable()
+                                .Pageable(pageable => pageable
+                                    .Refresh(false)
+                                )
+                                .Events(events => events
+                                    .Change("DetailsLineSelectionChanged")
+                                )
+                                .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .ServerOperation(false)
+                                    .Read(read => read.Action("GetUserFeedBackBugReport", "UserFeedBackBugReport").Data("GetSearchParameters"))
+                                    .PageSize(10)
+                                ))
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="divImageHolder">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+

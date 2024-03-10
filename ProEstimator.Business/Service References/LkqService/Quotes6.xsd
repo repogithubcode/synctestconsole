@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Requests" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Requests" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="https://lkqintegrationcteqc.ekeyconnect.com/Quotes.svc?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" />
+  <xs:complexType name="GetCustomerShipToAddressesRequest">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" base="q1:UserRequest">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="CompanyCode" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="CustomerNumber" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="RepairFacilityId" nillable="true" type="xs:string" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="GetCustomerShipToAddressesRequest" nillable="true" type="tns:GetCustomerShipToAddressesRequest" />
+</xs:schema>

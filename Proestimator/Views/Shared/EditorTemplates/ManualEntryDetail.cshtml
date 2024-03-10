@@ -1,0 +1,1434 @@
+﻿@model ProEstimatorData.Models.EditorTemplateModel.ManualEntryDetail
+
+<script src="~/Content/jQuery-TE_v.1.4.0/jquery-te-1.4.0.min.js"></script>
+<link href="~/Content/jQuery-TE_v.1.4.0/jquery-te-1.4.0.css" rel="stylesheet" />
+
+@functions {
+    public List<SelectListItem> ToSelectListItems(List<SimpleListItem> simpleListItems)
+    {
+        List<SelectListItem> selectListItems = new List<SelectListItem>();
+
+        foreach(SimpleListItem simpleListItem in simpleListItems)
+        {
+            selectListItems.Add(new SelectListItem() { Text = simpleListItem.Text, Value = simpleListItem.Value });
+        }
+
+        return selectListItems;
+    }
+
+    public List<SelectListItem> ToSelectListItems(List<string> strings)
+    {
+        List<SelectListItem> selectListItems = new List<SelectListItem>();
+
+        foreach (string stringValue in strings)
+        {
+            selectListItems.Add(new SelectListItem() { Text = stringValue, Value = stringValue });
+        }
+
+        return selectListItems;
+    }
+}
+
+<script>
+
+    var graphicalPage = @((Model.MEMode == "Graphical").ToString().ToLower());
+
+    var paintGain_Blend = @Model.PaintGainValues.PaintGain_Blend;
+    var paintGain_TwoThreeBlend = @Model.PaintGainValues.PaintGain_ThreeTwoBlend;
+    var paintGain_Underside = @Model.PaintGainValues.PaintGain_Underside;
+    var paintGain_EdgingMin = @Model.PaintGainValues.PaintGain_EdgingMin;
+
+    var paintGain_2ToneMajor = @Model.PaintGainValues.PaintGain_2ToneMajor;
+    var paintGain_2ToneNonAdjacent = @Model.PaintGainValues.PaintGain_2ToneNonAdjacent;
+    var paintGain_3StageMajor = @Model.PaintGainValues.PaintGain_3StageMajor;
+    var paintGain_3StageNonAdjacent = @Model.PaintGainValues.PaintGain_3StageNonAdjacent;
+
+    var paintGain_ClearCoatMajor = @Model.PaintGainValues.PaintGain_ClearCoatMajor;
+    var paintGain_ClearCoatNonAdj = @Model.PaintGainValues.PaintGain_ClearCoatNonAdj;
+
+    var paintDeduction_AllowAdjacentDeductions = @Model.PaintGainValues.PaintDeduction_AllowAdjacentDeductions.ToString().ToLower();;
+    var paintDeduction_Adjacent = @Model.PaintGainValues.PaintDeduction_Adjacent;
+    var paintDeduction_NonAdjacent = @Model.PaintGainValues.PaintDeduction_NonAdjacent;
+
+    var _closeAfterSaving = true;
+
+    var _isPALine = false;
+
+    $(document).ready(function () {
+
+        refreshPaintPanel();
+        calculatePaintValues();
+        refreshOtherChargeVisibility();
+        wireUpPaintCalculations();
+        $(".graphical-container").css("top", "70px");
+        $("#DropDownListPaintType").change(function () {
+            refreshPaintPanel();
+        });
+
+        $(".btnClear").click(function () {
+            clearFieldsOnly();
+        });
+
+        // Bug 350 : Restrictions needed on Quantity Field of the Manual Entry page
+        // Don't allow dot(.) in quantity field
+        $("#ManualEntry_Details_Quantity").on("keypress", function(evt) {
+            var keycode = evt.charCode || evt.keyCode;
+            if (keycode == 46) {
+                return false;
+            }
+        });
+
+        $(".btnClose").click(function () {
+            clearFields();
+        });
+
+        $("#ManualEntry_Details_BettermentType").change(function() {
+            refreshBettermentControls();
+        });
+
+        $("#ManualEntry_Details_PartSource").change(function() {
+            console.debug("Getting vendors for " + $("#ManualEntry_Details_PartSource").val());
+
+            refreshVendorDropDownVisiblity();
+            refreshVendorDropDown();
+            refreshPartNumberBoxVisibility();
+        });
+
+        $("#ManualEntry_Details_LaborHours").change(function() {
+            $("#ManualEntry_Details_LaborHours").val(roundNumber($("#ManualEntry_Details_LaborHours").val()));
+        });
+
+
+
+        $(".PresetDDL").change(function () {
+            var id = $(this).val();
+            console.debug("Calling GetPresetME");
+
+            if(id == -1) {
+                $( "#btnAddNewManual" ).click();
+                return;
+            }
+
+            $.getJSON('@Url.Action("GetPresetME", "RateProfile")', { userID: @ViewBag.UserID, estimateID: @ViewBag.EstimateID, PresetID: id, ts: new Date() }, function (data) {
+                console.debug("returned data from GetPresetME");
+                var d = data.detail;
+                console.debug(d);
+                loadDetails(d, true);
+
+                $("#ManualEntry_Details_LineID").val(-1);
+                $("#ManualEntry_Details_Action").val("Add");
+
+                var items = "<option value='-1' selected></option>";
+                $.each(d.PartsList, function (i, item) {
+                    items += "<option value='" + item.Value + "'>" + item.Text + "</option>";
+                });
+                $("#PartSearchDDL").html(items);
+
+                console.debug('Selected Vendor: ' + d.SelectedVendor);
+                $("#ManualEntry_Details_SelectedVendor").val(d.SelectedVendor);
+
+                try {
+                    items = "<option value='-1'></option>";
+                    $.each(d.SectionList, function (i, item) {
+                        if (item.Value = d.SelectedSection) {
+                            items += "<option selected value='" + item.Value + "'>" + item.Text + "</option>";
+                        }
+                        items += "<option value='" + item.Value + "'>" + item.Text + "</option>";
+                    });
+                    $("#ManualEntry_Details_SelectedSection").html(items);
+                }
+                catch (err)
+                {
+                    console.debug(err);
+                }
+
+                $(".btnAdd").val('@Proestimator.Resources.ProStrings.ButtonAdd');
+                $("#ManualEntry_Details_Action").val("Add");
+
+                try {
+                    console.debug("PresetDDL change showing MEDetails");
+                    $("#MEDetails").show();
+                }
+                catch (err) { }
+
+                ScrollToDetail();
+                //$("#estimate_StateID").val(data.);
+            });
+        });
+
+        $(".btnAdd").click(function () {
+            @if (Model.EstimateIsLocked)
+            {
+                <text>alert("@Proestimator.Resources.ProStrings.ReopenLockedEstimate.");</text>
+            }
+            else
+            {
+                <text>addUpdateItem();</text>
+            }
+        });
+
+        $("#ManualEntry_Details_OtherChargeType").change(function () {
+            refreshOtherChargeVisibility();
+        });
+
+        $("#ManualEntry_Details_OtherCharge").change(function () {
+            refreshOtherChargeVisibility();
+        });
+
+        refreshPartNumberBoxVisibility();
+        refreshBettermentControls();
+
+        $("#ManualEntry_Details_OperationType").change(function () {
+            calculatePaintValues();
+
+            EnableDisableControlOnOperationType($("#ManualEntry_Details_OperationType").val());
+
+            if($("#ManualEntry_Details_OperationType").val() == 'Replace')
+            {
+                var quantityVal = $("#ManualEntry_Details_Quantity").val();
+
+                if (quantityVal == "" || quantityVal == 0) {
+                    $("#ManualEntry_Details_Quantity").val(1);
+                }
+            }
+        });
+
+        $("#ManualEntry_Details_LaborType").change(function () {
+            RefreshLaborTimeVisibility();
+        });
+
+        $("#ManualEntry_Details_Quantity").on("change", function(evt) {
+            refreshQuantityOptionsVisibility();
+        });
+
+
+    });
+
+    function IFrameLoaded()
+    {
+        document.getElementById("EditorFrame").contentWindow.SetupEditor();
+    }
+
+    function RefreshLaborTimeVisibility()
+    {
+        if ($("#ManualEntry_Details_LaborType").val() == -1)
+        {
+            $("#laborHoursWrapper").hide();
+        }
+        else {
+            $("#laborHoursWrapper").show();
+        }
+    }
+
+    function refreshBettermentControls()
+    {
+        var bettermentType = $("#ManualEntry_Details_BettermentType").val();
+        console.debug("bettermentType: " + bettermentType);
+
+        if (bettermentType == "") {
+            $(".betterment-options").hide();
+        } else {
+            $(".betterment-options").show();
+
+            if (bettermentType == "P") {
+                $("#bettermentValueLabel").text("Betterment %");
+                // For now the checkboxes are always hidden, % only applies to the part price
+                // $(".betterment-checkbox").hide();
+            } else {
+                $("#bettermentValueLabel").text("Betterment $");
+                // $(".betterment-checkbox").hide();
+            }
+        }
+    }
+
+    function refreshOtherChargeVisibility() {
+        var otherChargeType = $("#ManualEntry_Details_OtherChargeType").val();
+        var otherCharge = $("#ManualEntry_Details_OtherCharge").val();
+
+        if (otherChargeType == -1 && otherCharge != '') {
+            $("#otherChargesMessage").show();
+        } else {
+            $("#otherChargesMessage").hide();
+        }
+    }
+
+    function refreshQuantityOptionsVisibility() {
+        var quantityVal = $("#ManualEntry_Details_Quantity").val();
+
+        if (quantityVal > 1) {
+            $(".quantity-options").show();
+        } else {
+            $(".quantity-options").hide();
+        }
+    }
+
+    function refreshVendorDropDownVisiblity() {
+        var partSourceType = $("#ManualEntry_Details_PartSource").val();
+        if (partSourceType == "Other")
+        {
+            $("#VendorLabel").hide();
+            $("#ManualEntry_Details_SelectedVendor").hide();
+        }
+        else
+        {
+            $("#VendorLabel").show();
+            $("#ManualEntry_Details_SelectedVendor").show();
+        }
+    }
+
+    function refreshVendorDropDown() {
+        var partSourceType = $("#ManualEntry_Details_PartSource").val();
+
+        if (partSourceType != "Other")
+        {
+            // This is hacky... The function takes an int but this page uses a string
+            var partSourceID = 0;
+            if (partSourceType == "OEM") {
+                partSourceID = 6;
+            }
+            else if (partSourceType == "LKQ") {
+                partSourceID = 5;
+            }
+            else if (partSourceType == "After") {
+                partSourceID = 2;
+            }
+            else if (partSourceType == "Reman") {
+                partSourceID = 7;
+            }
+
+            $("#ManualEntry_Details_SelectedVendor").html("<option value='0' selected>@Proestimator.Resources.ProStrings.Loading............</option>");
+            $.getJSON('@Url.Action("GetVendorList", "Estimate")', { userID: @ViewBag.UserID, loginID: @ViewBag.LoginID, type: partSourceID }, function (data) {
+                var items = "";
+                $.each(data, function (i, item) {
+                    items += "<option value='" + item.Value + "'>" + item.Text + "</option>";
+                });
+                $("#ManualEntry_Details_SelectedVendor").html(items);
+            });
+        }
+    }
+
+    function clearFields() {
+        clearFieldsOnly();
+
+        //hide manual entry section
+        if (graphicalPage) {
+            console.debug("clearFields hiding MEDetails");
+            $("#MEDetails").hide();
+            $("#graphical-page-stuff").show();
+            $(".graphic-top-row").show();
+            $(".graphical-container").css("top", "70px");
+
+            $(".resizable-bottom").css("height", bottomHeightPct + '%');
+            $(".resizable-top").css("height", (100 - bottomHeightPct) + '%');
+
+            _closeAfterSaving = true;
+        }
+
+        ScrollToDetail();
+    }
+
+    var _isSaving = false;
+
+    function addUpdateItem() {
+        if (_isSaving === true)
+        {
+            console.debug("Already saving, canceling.");
+            return;
+        }
+
+        if ($("#ManualEntry_Details_Action").val() == "Add" && isBlankAdd())
+        {
+            console.debug("Nothing to add, canceling.");
+            $(".btnAdd").attr("disabled", false);
+            return;
+        }
+
+        console.debug("addUpdateItem");
+
+        _isSaving = true;
+        $(".btnAdd").attr("disabled", true);
+        $(".btnAdd").css("opacity", 0.4);
+
+        try {
+            var AllowanceHours = $("#TextboxAllowanceTime").val() || 0;
+            var Barcode = $("#ManualEntry_Details_Barcode").val() || "";
+            var BettermentType = $("#ManualEntry_Details_BettermentType").val();
+            var BettermentValue = $("#ManualEntry_Details_BettermentValue").val() || 0;
+            var BlendHours = $("#TextboxBlendTime").val() || 0;
+            var ClearcoatHours = $("#TextboxClearcoatTime").val() || 0;
+            var EdgingHours = $("#TextboxEdgingTime").val() || 0;
+            var ExternalNotes = document.getElementById("EditorFrame").contentWindow.GetTemplate() || "";
+            var IncludeAllowance = $("#CheckBoxIncludeAllowance").is(':checked');
+            var IncludeBlend = $("#CheckBoxIncludeBlend").is(':checked');
+            var IncludeClearcoat = $("#CheckBoxIncludeClearcoat").is(':checked');
+            var IncludeEdging = $("#CheckBoxIncludeEdging").is(':checked');
+            var IncludeUnderside = $("#CheckBoxIncludeUnderside").is(':checked');
+            var InternalNotes = $("#ManualEntry_Details_InternalNotes").val() || "";
+            var LaborHours = $("#ManualEntry_Details_LaborHours").val() || 0;
+            var LaborType = $("#ManualEntry_Details_LaborType").val() || "-1";
+            var LaborIncluded = $("#ManualEntry_Details_LaborIncluded").is(':checked');
+            var LineID = $("#ManualEntry_Details_LineID").val() || 0;
+            var OperationDescription = $("#ManualEntry_Details_OperationDescription").val() || "";
+            var OperationType = $("#ManualEntry_Details_OperationType").val() || "-1";
+            var OtherCharge = $("#ManualEntry_Details_OtherCharge").val() || 0;
+            var OtherChargeType = $("#ManualEntry_Details_OtherChargeType").val() || 0;
+            var Overhaul = $("#ManualEntry_Details_Overhaul").is(':checked');
+            var PaintHours = $("#TextBoxPaintTime").val() || 0;
+            var PaintType = $("#DropDownListPaintType").val() || 0;
+
+            var PanelType = $("#DropDownListOverlap").val() || "0";
+            if ($(".panel-type-wrapper").is(":visible") == false)
+            {
+                PanelType = "";
+            }
+
+            var PartDescription = $("#ManualEntry_Details_PartDescription").val() || "";
+            var PartNumber = $("#ManualEntry_Details_PartNumber").val() || "";
+            var SourcePartNumber = $("#ManualEntry_Details_SourcePartNumber").val() || "";
+            var PartPrice = $("#ManualEntry_Details_PartPrice").val() || 0;
+            var PartSource = $("#ManualEntry_Details_PartSource").val() || "";
+            var Quantity = $("#ManualEntry_Details_Quantity").val() || 0;
+            var StepID = $("#ManualEntry_Details_StepID").val() || 0;
+            var Sublet = $("#ManualEntry_Details_Sublet").is(':checked');
+            var UndersideHours = $("#TextboxUndersideTime").val() || 0;
+            var Action1 = $("#ManualEntry_Details_Action").val();
+            var TheID = $("#TheID").val();
+            if (!TheID) {
+                TheID = estimateID;
+            }
+            var SelectedSection = $("#ManualEntry_Details_SelectedSection").val();
+            var SelectedVendor = $("#ManualEntry_Details_SelectedVendor").val();
+            var SelectedPart = "";
+
+            var LockAllowance = $("#CheckBoxLockAllowance").is(':checked');
+            var LockClearcoat = $("#CheckBoxLockClearcoat").is(':checked');
+            var LockBlend = $("#CheckBoxLockBlend").is(':checked');
+            var LockEdging = $("#CheckBoxLockEdging").is(':checked');
+            var LockUnderside = $("#CheckBoxLockUnderside").is(':checked');
+
+            var BettermentParts = $("#ManualEntry_Details_BettermentParts").is(':checked');
+            var BettermentMaterials = $("#ManualEntry_Details_BettermentMaterials").is(':checked');
+            var BettermentPaint = $("#ManualEntry_Details_BettermentPaint").is(':checked');
+            var BettermentLabor = $("#ManualEntry_Details_BettermentLabor").is(':checked');
+
+            var IsPartsQuantity = $("#ManualEntry_Details_IsPartsQuantity").is(':checked');
+            var IsLaborQuantity = $("#ManualEntry_Details_IsLaborQuantity").is(':checked');
+            var IsPaintQuantity = $("#ManualEntry_Details_IsPaintQuantity").is(':checked');
+            var IsOtherCharges = $("#ManualEntry_Details_IsOtherCharges").is(':checked');
+
+            var isPreset = $("#ManualEntry_Details_PresetDDL").val() != null && $("#ManualEntry_Details_PresetDDL").val() > -1;
+
+            // no clearcoat for 2 tone or 3 stage
+            if (PaintType == 18 || PaintType == 29)
+            {
+                ClearcoatHours = 0;
+                IncludeClearcoat = false;
+                LockClearcoat = false;
+            }
+
+            var UpdateBaseRecord = $("#checkboxUpdateBaseRecord").is(':checked');
+
+            $(".error-message").text("@Proestimator.Resources.ProStrings.SavingData...");
+
+            console.debug("Calling AddUpdateLineItem");
+
+            $.getJSON('@Url.Action("AddUpdateLineItem", "Estimate")', {
+                  userID: @ViewBag.UserID
+                , estimateID: estimateID
+                , meMode: '@Model.MEMode'
+                , AllowanceHours: AllowanceHours
+                , Barcode: Barcode
+                , BettermentType: BettermentType
+                , BettermentValue: BettermentValue
+                , BlendHours: BlendHours
+                , ClearcoatHours: ClearcoatHours
+                , EdgingHours: EdgingHours
+                , ExternalNotes: ExternalNotes
+                , IncludeAllowance: IncludeAllowance
+                , IncludeBlend: IncludeBlend
+                , IncludeClearcoat: IncludeClearcoat
+                , IncludeEdging: IncludeEdging
+                , IncludeUnderside: IncludeUnderside
+                , InternalNotes: InternalNotes
+                , LaborHours: LaborHours
+                , LaborType: LaborType
+                , LaborIncluded: LaborIncluded
+                , LineID: LineID
+                , LockPanelType: false
+                , OperationDescription: OperationDescription
+                , OperationType: OperationType
+                , OtherCharge: OtherCharge
+                , OtherChargeType: OtherChargeType
+                , Overhaul: Overhaul
+                , PaintHours: PaintHours
+                , PaintType: PaintType
+                , PanelType: PanelType
+                , PartDescription: PartDescription
+                , PartNumber: PartNumber
+                , SourcePartNumber: SourcePartNumber
+                , PartPrice: PartPrice
+                , PartSource: PartSource
+                , Quantity: Quantity
+                , SelectedPart: SelectedPart
+                , SelectedSection: SelectedSection
+                , SelectedVendor: SelectedVendor
+                , StepID: StepID
+                , Sublet: Sublet
+                , UndersideHours: UndersideHours
+                , Action1: Action1
+                , TheID: TheID
+                , LockAllowance: LockAllowance
+                , LockClearcoat: LockClearcoat
+                , LockBlend: LockBlend
+                , LockEdging: LockEdging
+                , LockUnderside: LockUnderside
+                , BettermentParts: BettermentParts
+                , BettermentMaterials: BettermentMaterials
+                , BettermentLabor: BettermentLabor
+                , BettermentPaint: BettermentPaint
+                , UpdateBaseRecord: UpdateBaseRecord
+                , isPreset: isPreset
+                , IsPartsQuantity: IsPartsQuantity
+                , IsLaborQuantity: IsLaborQuantity
+                , IsPaintQuantity: IsPaintQuantity
+                , IsOtherCharges: IsOtherCharges
+            }, function (data) {
+                console.log(data);
+
+                    LoadEstimateLineItemList();
+
+                    var overlapRows = $("#OverlapsTable").find("tr");
+
+                if (overlapRows.length == 0)
+                {
+                    FinishSave(data.Success, data.Message);
+                }
+                else
+                {
+                    var rowDataRecords = [];
+
+                    overlapRows.each(function() {
+                        var overlapID = $(this).find(".overlap-id").text();
+                        var isIncluded = $(this).find(".is-included").is(":checked");
+                        var amount = $(this).find(".input-amount").val();
+                        var minimum = $(this).find(".input-minimum").val();
+                        var userAccepted = $(this).find(".is-active").is(":checked");
+
+                        console.log(overlapID + " " + isIncluded + " " + amount + " " + minimum + " " + userAccepted);
+                        if (overlapID)
+                        {
+                            rowDataRecords.push({ OverlapID: overlapID, IsIncluded: isIncluded, Amount: amount, Minimum: minimum, UserAccepted: userAccepted, Description: "" });
+                        }
+                    });
+
+                    console.log(rowDataRecords);
+
+                    var data = JSON.stringify({ "UserID": @ViewBag.UserID, "EstimateID": @ViewBag.EstimateID, "LineItemID": LineID, "Details": rowDataRecords });
+                    console.log(data);
+
+                    $.ajax({
+                        contentType: 'application/json; charset=utf-8',
+                        dataType: "json",
+                        type: "POST",
+                        url: "/Estimate/SaveOverlaps",
+                        data: data,
+                        success: function (response) {
+                            FinishSave(response === "", response);
+                        }
+                    });
+                }
+
+                // Reset controls enable/disable once everything is saved
+                enableControl("ManualEntry_Details_PartPrice");
+                enableControl("DropDownListPaintType");
+                enableControl("ManualEntry_Details_BettermentType");
+            });
+        }
+        catch(err) {
+            $(".btnAdd").attr("disabled", false);
+            _isSaving = false;
+            console.debug("Error: " + err.message);
+            $(".error-message").text(err.message);
+        }
+    }
+
+    function isBlankAdd() {
+        if ($("#ManualEntry_Details_OperationDescription").val() == "" &&
+            $("#ManualEntry_Details_PartDescription").val() == "" &&
+            $("#ManualEntry_Details_LaborType").val() == "-1" &&
+            $("#ManualEntry_Details_LaborHours").val() == "0" &&
+            $("#ManualEntry_Details_OtherCharge").val() == "" &&
+            $("#ManualEntry_Details_OtherChargeType").val() == "-1" &&
+            $("#ManualEntry_Details_PartPrice").val() == "" &&
+            $("#ManualEntry_Details_Quantity").val() == "1" &&
+            $("#ManualEntry_Details_PartNumber").val() == "" &&
+            $("#DropDownListPaintType").val() == "0" &&
+            $("#ManualEntry_Details_SelectedSection").val() == "-1" &&
+            $("#ManualEntry_Details_OperationType").prop("selectedIndex") == 0 &&
+            $("#ManualEntry_Details_PartSource").prop("selectedIndex") == 0 &&
+            !$("#ManualEntry_Details_Sublet").prop("checked") &&
+            !$("#ManualEntry_Details_IsPartsQuantity").prop("checked") &&
+            !$("#ManualEntry_Details_IsPaintQuantity").prop("checked") &&
+            !$("#ManualEntry_Details_IsLaborQuantity").prop("checked") &&
+            !$("#ManualEntry_Details_IsOtherCharges").prop("checked") &&
+            !$("#ManualEntry_Details_Overhaul").prop("checked") &&
+            $("#ManualEntry_Details_InternalNotes").val() == "" &&
+            document.getElementById("EditorFrame").contentWindow.GetTemplate() == "") { return true; }
+        return false;
+    }
+
+    function FinishSave(success, message)
+    {
+        $(".btnAdd").attr("disabled", false);
+        $(".btnAdd").css("opacity", 1);
+
+        _isSaving = false;
+
+        try{
+
+            if (success === true) {
+                clearFieldsOnly();
+                LoadEstimateLineItemList();
+
+                if (_closeAfterSaving == true)
+                {
+                    clearFields();
+                }
+            }
+            else {
+                ScrollToDetail();
+            }
+
+            if (_closeAfterSaving == false)
+            {
+                $(".error-message").text(message);
+            }
+
+            RefreshHeaderInfo(@ViewBag.EstimateID);
+        }
+        catch(err) {
+            console.debug("Error: " + err.message);
+            $(".error-message").text(err.message);
+        }
+    }
+
+    function clearFieldsOnly() {
+        $("#PresetDiv").show();
+
+        $("#TextboxAllowanceTime").val("");
+        $("#ManualEntry_Details_Barcode").val("");
+        $("#ManualEntry_Details_BettermentType").val("");
+        $("#ManualEntry_Details_BettermentValue").val("");
+        $("#TextboxBlendTime").val("");
+        $("#TextboxClearcoatTime").val("");
+        $("#TextboxEdgingTime").val("");
+        document.getElementById("EditorFrame").contentWindow.SetEditorText("");
+        $("#ManualEntry_Details_InternalNotes").val("");
+        $("#ManualEntry_Details_LaborHours").val(0);
+        $("#ManualEntry_Details_LaborType").val("-1");
+        $("#ManualEntry_Details_LineID").val("0");
+        $("#ManualEntry_Details_OperationDescription").val("");
+        $("#ManualEntry_Details_OtherCharge").val("");
+        $("#ManualEntry_Details_OtherChargeType").val("-1");
+        $("#TextBoxPaintTime").val("");
+        $("#DropDownListPaintType").val(0);
+        $("#DropDownListOverlap").val("");
+        $("#ManualEntry_Details_PartDescription").val("");
+        $("#ManualEntry_Details_PartNumber").val("");
+        $("#ManualEntry_Details_SourcePartNumber").val("");
+
+        $("#ManualEntry_Details_OperationType").prop("selectedIndex",0);
+        $("#ManualEntry_Details_PartSource").prop("selectedIndex",0);
+        $("#ManualEntry_Details_SelectedSection").prop("selectedIndex",0);
+
+        refreshPartNumberBoxVisibility();
+
+        $("#ManualEntry_Details_PartPrice").val("");
+        $("#ManualEntry_Details_SelectedVendor").empty();
+        var items = "<option value='0'></option>";
+        $("#ManualEntry_Details_SelectedVendor").html(items);
+        $("#ManualEntry_Details_SelectedVendor").val("0");
+        $("#ManualEntry_Details_PresetDDL").val("");
+        $("#ManualEntry_Details_Quantity").val(1);
+        $("#ManualEntry_Details_IsPartsQuantity").prop("checked", false);
+        $("#ManualEntry_Details_IsPaintQuantity").prop("checked", false);
+        $("#ManualEntry_Details_IsLaborQuantity").prop("checked", false);
+        $("#ManualEntry_Details_IsOtherCharges").prop("checked", false);
+        $("#ManualEntry_Details_StepID").val("");
+        $("#TextboxUndersideTime").val("");
+        $("#ManualEntry_Details_Action").val("Add");
+        $("#ManualEntry_Details_Betterment").prop("checked", false);
+        $("#ManualEntry_Details_Sublet").prop("checked", false);
+        $("#ManualEntry_Details_Overhaul").prop("checked", false);
+        $("#CheckBoxAdjacentDeductionLock").prop("checked", false);
+        $("#CheckBoxIncludeAllowance").prop("checked", false);
+        $("#CheckBoxIncludeClearcoat").prop("checked", false);
+        $("#CheckBoxIncludeBlend").prop("checked", false);
+        $("#CheckBoxIncludeEdging").prop("checked", false);
+        $("#CheckBoxIncludeUnderside").prop("checked", false);
+        $("#CheckBoxLockAllowance").prop("checked", false);
+        $("#CheckBoxLockClearcoat").prop("checked", false);
+        $("#CheckBoxLockBlend").prop("checked", false);
+        $("#CheckBoxLockEdging").prop("checked", false);
+        $("#CheckBoxLockUnderside").prop("checked", false);
+
+        $("#ManualEntry_Details_BettermentParts").prop("checked", false);
+        $("#ManualEntry_Details_BettermentMaterials").prop("checked", false);
+        $("#ManualEntry_Details_BettermentPaint").prop("checked", false);
+        $("#ManualEntry_Details_BettermentLabor").prop("checked", false);
+
+        $(".error-message").text("");
+
+        $("#OverlapsTable").find("tbody").find("tr").remove();
+        $("#OverlapsTable").hide();
+
+        $(".btnAdd").val('@Proestimator.Resources.ProStrings.ButtonAdd');
+
+        RefreshLaborTimeVisibility();
+
+        refreshPaintPanel();
+        refreshVendorDropDown();
+        refreshQuantityOptionsVisibility();
+    }
+
+    function ScrollToDetail() {
+        try {
+            $('html, body').animate({
+                scrollTop: $("#chargeHeader").offset().top
+            }, 1000);
+        } catch (err) { }
+    }
+
+    function refreshPaintPanel() {
+        var paintType = getPaintType("");
+        if (paintType == 0) {
+            $(".paint-controls").hide();
+
+            $("#CheckBoxIncludeAllowance").prop("checked", false);
+            $("#CheckBoxIncludeBlend").prop("checked", false);
+            $("#CheckBoxIncludeClearcoat").prop("checked", false);
+            $("#CheckBoxIncludeEdging").prop("checked", false);
+            $("#CheckBoxIncludeUnderside").prop("checked", false);
+        } else {
+            $(".paint-controls").show();
+        }
+
+        refreshPanelTypeWrapper();
+    }
+
+    function refreshPartNumberBoxVisibility() {
+        var partSource = $("#ManualEntry_Details_PartSource").val();
+
+        if (partSource == "OEM")
+        {
+            $("#ManualEntry_Details_SourcePartNumber").hide();
+            $("#ManualEntry_Details_PartNumber").show();
+        }
+        else
+        {
+            $("#ManualEntry_Details_SourcePartNumber").show();
+            $("#ManualEntry_Details_PartNumber").hide();
+        }
+    }
+
+    function loadDetails(d, isPreset) {
+        console.debug("LoadDetails");
+        console.debug(d);
+        if (d.AllowanceHours != undefined) {
+            $("#TextboxAllowanceTime").val(d.AllowanceHours);
+        }
+
+        $("#ManualEntry_Details_Barcode").val(d.Barcode);
+        $("#ManualEntry_Details_BettermentType").val(d.BettermentType);
+        $("#ManualEntry_Details_BettermentValue").val(d.BettermentValue);
+        $("#TextboxBlendTime").val(d.BlendHours);
+        $("#TextboxClearcoatTime").val(d.ClearcoatHours);
+        $("#TextboxEdgingTime").val(d.EdgingHours);
+        document.getElementById("EditorFrame").contentWindow.SetEditorText(d.ExternalNotes);
+        $("#CheckBoxIncludeAllowance").prop("checked", d.IncludeAllowance);
+        $("#CheckBoxIncludeBlend").prop("checked", d.IncludeBlend);
+        $("#CheckBoxIncludeClearcoat").prop("checked", d.IncludeClearcoat);
+        $("#CheckBoxIncludeEdging").prop("checked", d.IncludeEdging);
+        $("#CheckBoxIncludeUnderside").prop("checked", d.IncludeUnderside);
+        $("#ManualEntry_Details_InternalNotes").val(d.InternalNotes);
+        $("#ManualEntry_Details_LaborHours").val(d.LaborHours);
+        $("#ManualEntry_Details_LaborType").val(d.LaborType);
+        $("#ManualEntry_Details_LineID").val(d.LineID);
+        $("#ManualEntry_Details_OperationDescription").val(d.OperationDescription);
+        $("#ManualEntry_Details_OperationType").val(d.OperationType);
+        $("#ManualEntry_Details_OtherCharge").val(d.OtherCharge);
+
+        if (d.OtherChargeType == 0)
+        {
+            d.OtherChargeType = -1;
+        }
+        $("#ManualEntry_Details_OtherChargeType").val(d.OtherChargeType);
+        $("#ManualEntry_Details_Overhaul").prop("checked", d.Overhaul);
+        $("#TextBoxPaintTime").val(d.PaintHours);
+        $("#DropDownListPaintType").val(d.PaintType);
+        $("#DropDownListOverlap").val(d.PanelType);
+        $("#ManualEntry_Details_PartDescription").val(d.PartDescription);
+        $("#ManualEntry_Details_PartNumber").val(d.PartNumber);
+        $("#ManualEntry_Details_SourcePartNumber").val(d.SourcePartNumber);
+        $("#ManualEntry_Details_PartPrice").val(d.PartPrice);
+        $("#ManualEntry_Details_PartSource").val(d.PartSource);
+        $("#ManualEntry_Details_Quantity").val(d.Quantity);
+        $("#ManualEntry_Details_StepID").val(d.StepID);
+        $("#ManualEntry_Details_Sublet").prop("checked", d.Sublet);
+        $("#TextboxUndersideTime").val(d.UndersideHours);
+        $("#CheckBoxLockAllowance").prop("checked", d.LockAllowance);
+        $("#CheckBoxLockClearcoat").prop("checked", d.LockClearcoat);
+        $("#CheckBoxLockBlend").prop("checked", d.LockBlend);
+        $("#CheckBoxLockEdging").prop("checked", d.LockEdging);
+        $("#CheckBoxLockUnderside").prop("checked", d.LockUnderside);
+        $("#ManualEntry_Details_SelectedSection").val(d.SelectedSection);
+        $("#ManualEntry_Details_LaborIncluded").prop("checked", d.LaborIncluded);
+
+        $("#ManualEntry_Details_BettermentParts").prop("checked", d.BettermentParts);
+        $("#ManualEntry_Details_BettermentMaterials").prop("checked", d.BettermentMaterials);
+        $("#ManualEntry_Details_BettermentPaint").prop("checked", d.BettermentPaint);
+        $("#ManualEntry_Details_BettermentLabor").prop("checked", d.BettermentLabor);
+
+        _isPALine = d.IsPALine;
+
+        $(".error-message").text("");
+
+        refreshPartNumberBoxVisibility();
+
+        var items;
+
+        if (d.PartsList) {
+            items = "<option value='-1' selected></option>";
+            $.each(d.PartsList, function (i, item) {
+                items += "<option value='" + item.Value + "'>" + item.Text + "</option>";
+            });
+            $("#PartSearchDDL").html(items);
+        }
+
+        if (d.VendorList) {
+            items = "";
+            $.each(d.VendorList, function (i, item) {
+                items += "<option value='" + item.Value + "'>" + item.Text + "</option>";
+            });
+            $("#ManualEntry_Details_SelectedVendor").html(items);
+        }
+
+        $("#ManualEntry_Details_SelectedVendor").val(d.SelectedVendor);
+
+        $(".btnAdd").val('@Proestimator.Resources.ProStrings.ButtonUpdate');
+        $("#ManualEntry_Details_Action").val("Update");
+
+        try {
+            console.debug("loadDetails showing MEDetails");
+            $("#MEDetails").show();
+            HideTopRow();
+        }
+        catch (err)
+        {
+            console.debug(err);
+        }
+
+        var paintType = $("#DropDownListPaintType").val();
+
+        if (paintType == 18 || paintType == 29) {
+            disableControl("TextboxClearcoatTime");
+            disableControl("CheckBoxIncludeClearcoat");
+            disableControl("CheckBoxLockClearcoat");
+
+            $("#toneStageContainer").show();
+        } else {
+            $("#toneStageContainer").hide();
+        }
+
+        $("#PresetDiv").hide();
+
+        UpdateFormattedText();
+        refreshPaintPanel();
+        refreshPanelTypeWrapper();
+        //calculatePaintValues();
+        refreshOtherChargeVisibility();
+        refreshVendorDropDownVisiblity();
+        refreshBettermentControls();
+        RefreshLaborTimeVisibility();
+
+        $("#ManualEntry_Details_IsPartsQuantity").prop("checked", d.IsPartsQuantity);
+        $("#ManualEntry_Details_IsLaborQuantity").prop("checked", d.IsLaborQuantity);
+        $("#ManualEntry_Details_IsPaintQuantity").prop("checked", d.IsPaintQuantity);
+        $("#ManualEntry_Details_IsOtherCharges").prop("checked", d.IsOtherCharges);
+
+        refreshQuantityOptionsVisibility();
+
+        if (isPreset == false) {
+            LoadOverlapData(d.LineID);
+        }
+
+        ScrollToDetail();
+
+        EnableDisableControlOnOperationType(d.OperationType);
+    }
+
+    function EnableDisableControlOnOperationType(operationType)
+    {
+        enableControl("ManualEntry_Details_PartPrice");
+        enableControl("DropDownListPaintType");
+        enableControl("ManualEntry_Details_BettermentType");
+
+        if (_isPALine === true) {
+            return;
+        }
+
+        switch(operationType) {
+            case 'Repair':
+            case 'Refinish':
+            case 'Blend':
+                // PartPrice
+                $("#ManualEntry_Details_PartPrice").val("");
+                disableControl("ManualEntry_Details_PartPrice");
+                break;
+
+            case 'R&I':
+            case 'Align':
+            case 'Overhaul':
+                // BettermentType
+                $("#ManualEntry_Details_BettermentValue").val("");
+                disableControl("ManualEntry_Details_BettermentType");
+
+                // PaintType
+                $("#DropDownListPaintType").val(0);
+                disableControl("DropDownListPaintType");
+
+                // PartPrice
+                $("#ManualEntry_Details_PartPrice").val("");
+                disableControl("ManualEntry_Details_PartPrice");
+
+                break;
+
+            default:
+        }
+    }
+
+    function LoadOverlapData(lineItemID)
+    {
+        // Load overlap data
+        $.getJSON('@Url.Action("GetLineOverlapDetails", "Estimate")', { userID: @ViewBag.UserID, lineItemID: lineItemID }, function (data) {
+            $("#OverlapsTable").find("tbody").find("tr").remove();
+
+            if (data.length > 0)
+            {
+                $("#OverlapsTable").show();
+
+                for(i = 0; i < data.length; i++)
+                {
+                    $("#OverlapsTable > tbody:last-child").append(
+                        "<tr><td><span class='overlap-id' style='display: none;'>" + data[i].OverlapID + "</span><span class='description-label'>" + data[i].Description + "</span></td>" +
+                           "<td style='text-align: center; @(Model.OverlapDetails == true ? "" : "display: none;")'><input type='checkbox' class='is-included' " + (data[i].IsIncluded ? " checked" : "") + " /></td>" +
+                           "<td style='@(Model.OverlapDetails == true ? "" : "display: none;")'><input type='text' class='input-amount' value='" + (data[i].IsIncluded ? "" : data[i].Amount) + "' />@(Model.OverlapDetails ? "" : " style='display: none;'")</td>" +
+                           "<td style='@(Model.OverlapDetails == true ? "" : "display: none;")'><input type='text' class='input-minimum' value='" + data[i].Minimum + "' /></td>" +
+                           "<td style='text-align: center;'><input type='checkbox' class='is-active' " + (data[i].UserAccepted ? " checked" : "") + " /></td></tr>");
+                }
+
+                $(".is-included").on("change", function() {
+                    RefreshAmountTextbox($(this));
+                });
+
+                $(".is-included").each(function() {
+                    RefreshAmountTextbox($(this));
+                })
+
+                $(".is-active").on("change", function() {
+                    RefreshActiveCheckbox($(this));
+                });
+
+                $(".is-active").each(function() {
+                    RefreshActiveCheckbox($(this));
+                })
+            }
+            else{
+                $("#OverlapsTable").hide();
+            }
+        });
+    }
+
+    function RefreshAmountTextbox(checkbox)
+    {
+        var amountTextBox = checkbox.closest("tr").find(".input-amount");
+        UpdateControlIsActive(amountTextBox, !checkbox.is(":checked"));
+    }
+
+    function RefreshActiveCheckbox(checkbox)
+    {
+        var isActive = checkbox.is(":checked");
+        var parentRow = checkbox.closest("tr");
+
+        UpdateControlIsActive(parentRow.find(".description-label"), isActive);
+        UpdateControlIsActive(parentRow.find(".is-included"), isActive);
+        UpdateControlIsActive(parentRow.find(".input-amount"), isActive);
+        UpdateControlIsActive(parentRow.find(".input-minimum"), isActive);
+
+        if (isActive)
+        {
+            RefreshAmountTextbox(parentRow.find(".is-included"));
+        }
+    }
+
+    function UpdateControlIsActive(element, isActive)
+    {
+        if (isActive === true)
+        {
+            element.prop("disabled", false);
+            element.css("color", "black");
+            element.css("opacity", "1");
+        }
+        else
+        {
+            element.prop("disabled", true);
+            element.css("color", "grey");
+            element.css("opacity", "0.5");
+        }
+    }
+
+    function HideTopRow() {
+        $("#graphical-page-stuff").hide();
+        $(".graphic-top-row").hide();
+        $(".graphical-container").css("top", "0px");
+
+        $(".resizable-bottom").css("height", bottomHeightPct + '%');
+        $(".resizable-top").css("height", (100 - bottomHeightPct) + '%');
+    }
+
+    function OpenMitchellPages() {
+        window.open("https://static.mymitchell.com/static/Webhelp/ppages/ceg/1033/index.htm", "Mitchell P Pages");
+    }
+
+</script>
+
+<style>
+    #EditorFrame {
+        width: 100%;
+        height: 130px;
+        border: 0px;
+    }
+
+    @@media (max-width: 700px) {
+        #EditorFrame {
+            height: 175px;
+        }
+    }
+</style>
+
+@using ProEstimatorData.Models.SubModel;
+
+@Html.HiddenFor(model => model.StepID)
+@Html.HiddenFor(model => model.Barcode)
+@Html.HiddenFor(model => model.LineID)
+@Html.HiddenFor(model => model.Action)
+
+<div id="estimateFormHeader" class="me-form-header">
+    <div id="formHeader-center">
+        @if (Model.EstimateIsLocked)
+        {
+            <p style="color: red; margin: 5px;">@Proestimator.Resources.ProStrings.Graphcial_LockMessage2</p>
+        }
+        else
+        {
+            /*
+            if (SiteSession.Current.IsImpersonated)
+            {
+                <label><input type="checkbox" id="checkboxUpdateBaseRecord" />Update base record</label>
+            }
+            */
+
+            <input type="button" class="button nav-btn btnAdd do-not-disable hide-when-locked" value=@Proestimator.Resources.ProStrings.AddButton />
+            <input type="button" class="button nav-btn btnClear do-not-disable hide-when-locked" value=@Proestimator.Resources.ProStrings.ClearButton />
+        }
+
+        <input type="button" class="button nav-btn btnClose do-not-disable" value=@Proestimator.Resources.ProStrings.Close />
+        <a class="button nav-btn btnClear do-not-disable" href="#" onclick="javascript:window.open('@Proestimator.Resources.ProStrings.Mitchell_P_Pages_Document_Path', '@Proestimator.Resources.ProStrings.Mitchell_P_Pages');">@Proestimator.Resources.ProStrings.Mitchell_P_Pages</a>
+        <div>
+            <p class="error-message"></p>
+        </div>
+    </div>
+</div>
+
+<div class="form-container manual-entry-container" style="padding-top: 0px;">
+
+    <div id="lgRowPreset" class="container mobileSpacer">
+
+        <div class="half-container">
+
+            <fieldset>
+                <legend><span class="number">1</span> @Proestimator.Resources.ProStrings.AddChargeHeader</legend>
+
+                @if (Model.MEMode != "Preset")
+                {
+                    <div id="PresetDiv" class="field-wrapper">
+                        <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.PresetCharge</label>
+                        <div class="field-control">
+                            @Html.DropDownList("PresetDDL", new SelectList(Model.PresetList, "Value", "Text"), new { @class = "PresetDDL" })
+                        </div>
+                        <div>
+                            <label class="form-label" style="text-align: center;">@Proestimator.Resources.ProStrings.AddChargeNote</label>
+                        </div>
+                    </div>
+                }
+
+                <div class="field-wrapper">
+                    <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Operation</label>
+                    <div class="field-control">
+                        @Html.CheckBoxFor(model => model.Sublet)
+                        <label class="light">@Proestimator.Resources.ProStrings.Sublet</label>
+                        &nbsp;&nbsp;
+                        @Html.DropDownListFor(model => model.OperationType, ToSelectListItems(Model.OperationTypes), new { @style = "width: auto !important;" })
+                    </div>
+                </div>
+
+                <div class="field-wrapper">
+                    <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.OpDescription</label>
+                    <div class="field-control">
+                        @Html.TextBoxFor(model => model.OperationDescription)
+                    </div>
+                </div>
+
+            </fieldset>
+        </div>
+
+        <div id="partInfoContainer" class="half-container">
+
+            <fieldset id="partInfoChargeSet">
+
+                <legend>&nbsp;</legend>
+
+                <div class="field-wrapper">
+                    <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.PartDescription</label>
+
+                    <div class="field-control">
+                        @Html.TextBoxFor(model => model.PartDescription, new { autocomplete = "off" })
+                    </div>
+                </div>
+
+                <div class="field-wrapper-half">
+                    <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.PartSource</label>
+                    <div class="field-control-half">
+                        @Html.DropDownListFor(model => model.PartSource, ToSelectListItems(Model.PartSourceList))
+                    </div>
+                </div>
+
+                <div class="field-wrapper-half">
+                    <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.PartNumber</label>
+                    <div class="field-control-half">
+                        @Html.TextBoxFor(model => model.PartNumber)
+                        @Html.TextBoxFor(model => model.SourcePartNumber)
+                    </div>
+                </div>
+
+                <div class="field-wrapper">
+                    <label id="VendorLabel" class="inputLabel field-label">@Proestimator.Resources.ProStrings.Vendor</label>
+                    <div class="field-control">
+                        @Html.DropDownListFor(model => model.SelectedVendor, new SelectList(Model.VendorList, "Value", "Text"))
+                    </div>
+                </div>
+
+                <div class="field-wrapper-half">
+                    <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.PartPrice $</label>
+                    <div class="field-control-half">
+                        @Html.TextBoxFor(model => model.PartPrice, new { @class = "currency", autocomplete = "off" })
+                    </div>
+                </div>
+                <div class="field-wrapper-half">
+                    <div class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Quantity</div>
+                    <div class="field-control-half">
+                        @Html.EditorFor(model => model.Quantity)
+                    </div>
+                </div>
+
+                @*Multi quantities changes*@
+                <div class="field-wrapper-half quantity-options">
+                    <div class="inputLabel field-label-half"></div>
+                    <div class="field-control-half">
+                        @Html.CheckBoxFor(model => model.IsPartsQuantity) @Proestimator.Resources.ProStrings.Parts
+                    </div>
+                </div>
+
+                <div class="field-wrapper-half quantity-options">
+                    <div class="inputLabel field-label-half"></div>
+                    <div class="field-control-half">
+                        @Html.CheckBoxFor(model => model.IsLaborQuantity) @Proestimator.Resources.ProStrings.Labor
+                    </div>
+                </div>
+
+                <div class="field-wrapper-half quantity-options">
+                    <div class="inputLabel field-label-half"></div>
+                    <div class="field-control-half">
+                        @Html.CheckBoxFor(model => model.IsPaintQuantity) @Proestimator.Resources.ProStrings.Paint
+                    </div>
+                </div>
+
+                <div class="field-wrapper-half quantity-options">
+                    <div class="inputLabel field-label-half"></div>
+                    <div class="field-control-half">
+                        @Html.CheckBoxFor(model => model.IsOtherCharges) @Proestimator.Resources.ProStrings.OtherCharges
+                    </div>
+                </div>
+
+                <div class="field-wrapper-half">
+                    <div class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.BettermentType</div>
+                    <div class="field-control-half">
+                        @Html.DropDownListFor(model => model.BettermentType, ToSelectListItems(Model.BettermentTypeList))
+                    </div>
+                </div>
+                <div class="field-wrapper-half betterment-options">
+                    <div class="inputLabel field-label-half"><span id="bettermentValueLabel">@Proestimator.Resources.ProStrings.BettermentAmount</span></div>
+                    <div class="field-control-half">
+                        @Html.TextBoxFor(model => model.BettermentValue)
+                    </div>
+                </div>
+
+                <div class="field-wrapper-half betterment-options betterment-checkbox">
+                    <div class="inputLabel field-label-half"></div>
+                    <div class="field-control-half">
+                        @Html.CheckBoxFor(model => model.BettermentParts) @Proestimator.Resources.ProStrings.BettermentParts
+                    </div>
+                </div>
+
+                <div class="field-wrapper-half betterment-options betterment-checkbox">
+                    <div class="inputLabel field-label-half"></div>
+                    <div class="field-control-half">
+                        @Html.CheckBoxFor(model => model.BettermentMaterials) @Proestimator.Resources.ProStrings.BettermentMaterials
+                    </div>
+                </div>
+
+                <div class="field-wrapper-half betterment-options betterment-checkbox">
+                    <div class="inputLabel field-label-half"></div>
+                    <div class="field-control-half">
+                        @Html.CheckBoxFor(model => model.BettermentLabor) @Proestimator.Resources.ProStrings.BettermentLabor
+                    </div>
+                </div>
+
+                <div class="field-wrapper-half betterment-options betterment-checkbox">
+                    <div class="inputLabel field-label-half"></div>
+                    <div class="field-control-half">
+                        @Html.CheckBoxFor(model => model.BettermentPaint) @Proestimator.Resources.ProStrings.BettermentPaint
+                    </div>
+                </div>
+
+                <div class="col sm_push_1_4 sm_3_4">
+                    @Html.CheckBoxFor(model => model.Overhaul)
+                    <label class="light">@Proestimator.Resources.ProStrings.OverhaulNote</label><br />
+                </div>
+
+                <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Section</label>
+                <div class="field-control">
+                    <div>
+                        @try
+                        {
+                            @Html.DropDownListFor(model => model.SelectedSection, new SelectList(Model.SectionList, "Value", "Text"))
+                        }
+                        catch
+                        {
+                            <select id="ManualEntry_Details_SelectedSection" name="ManualEntry.Details.SelectedSection">
+                                <option value="-1">@Proestimator.Resources.ProStrings.NoSections</option>
+                            </select>
+                        }
+                    </div>
+                </div>
+
+            </fieldset>
+        </div>
+
+    </div>
+
+    <div class="container">
+
+        <div id="laborHeader" class="container">
+            <fieldset>
+                <legend>
+                    <span class="number">2</span> @Proestimator.Resources.ProStrings.AddLaborHeader
+                </legend>
+            </fieldset>
+        </div>
+
+        <div class="half-container">
+            <fieldset>
+                <div class="field-wrapper-half">
+                    <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.LaborType</label>
+                    <div class="field-control-half">
+                        @Html.DropDownListFor(model => model.LaborType, ToSelectListItems(Model.LaborTypeList))
+                    </div>
+                </div>
+
+                <div class="field-wrapper-half" id="laborHoursWrapper">
+                    <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.LaborTime</label>
+                    <div class="field-control-half">
+                        @Html.TextBoxFor(model => model.LaborHours, new { Style = "background:#D3D3D3;" })
+                    </div>
+                    <div style="clear: right;">
+                        <div class="inputLabel field-label-half"></div>
+                        <div class="field-control-half">
+                            @Html.CheckBoxFor(model => model.LaborIncluded) Force @Proestimator.Resources.ProStrings.Labor @Proestimator.Resources.ProStrings.Included 
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="clear: both;">
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.OtherCharges $</label>
+                        <div class="field-control-half">
+                            @Html.TextBoxFor(model => model.OtherCharge, new { @class = "currency", autocomplete = "off" })
+                        </div>
+                        <br />
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.OtherType</label>
+                        <div class="field-control-half">
+                            @Html.DropDownListFor(model => model.OtherChargeType, ToSelectListItems(Model.OtherChargeTypeList))
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper" id="otherChargesMessage">
+                        <label class="inputLabel field-label">&nbsp;</label>
+                        <div class="field-control">
+                            <p>@Proestimator.Resources.ProStrings.OtherChargeMessage</p>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="half-container">
+            <fieldset>
+                <table id="OverlapsTable">
+                    <thead>
+                        <tr>
+                            <td><b>@Proestimator.Resources.ProStrings.OverlapsWith</b></td>
+                            <td width="50"><b>@Proestimator.Resources.ProStrings.Included</b></td>
+                            <td width="70" style="text-align: center; @(Model.OverlapDetails == true ? "" : "display: none;")"><b>@Proestimator.Resources.ProStrings.Amount</b></td>
+                            <td width="70" style="text-align: center; @(Model.OverlapDetails == true ? "" : "display: none;")"><b>@Proestimator.Resources.ProStrings.Minimum</b></td>
+                            <td width="50" style='@(Model.OverlapDetails == true ? "" : "display: none;")'><b>@Proestimator.Resources.ProStrings.Active</b></td>
+                        </tr>
+                    </thead>
+
+                    <tbody></tbody>
+                </table>
+            </fieldset>
+        </div>
+    </div>
+
+    <div id="typeField" class="container">
+
+        <div id="laborHeader" class="container">
+            <fieldset>
+                <legend>
+                    <span class="number">3</span> @Proestimator.Resources.ProStrings.AddPaintHeader
+                </legend>
+            </fieldset>
+        </div>
+
+        <div class="half-container">
+            <fieldset>
+                <div class="field-wrapper-half">
+                    <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.PaintType</label>
+                    <div class="field-control-half">
+                        @Html.DropDownListFor(model => model.PaintType, ToSelectListItems(Model.PaintTypeList), new { @id = "DropDownListPaintType" })
+                    </div>
+                </div>
+                <div class="field-wrapper-half paint-controls">
+                    <div class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.PaintTime</div>
+                    <div class="field-control-half">
+                        @Html.TextBoxFor(model => model.PaintHours, new { @id = "TextBoxPaintTime" })
+                    </div>
+                </div>
+                <div class="field-wrapper-half paint-controls panel-type-wrapper">
+                    <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.PanelType</label>
+                    <div class="field-control-half">
+                        @Html.DropDownListFor(model => model.PanelType, ToSelectListItems(Model.PanelTypeList), new { @id = "DropDownListOverlap" })
+                    </div>
+                </div>
+
+                <div class="field-wrapper-half paint-controls">
+                    <div class="inputLabel field-label-half"></div>
+                    <div class="field-control-half">
+                    </div>
+                </div>
+
+            </fieldset>
+        </div>
+
+        <div class="half-container paint-controls">
+            <fieldset>
+                <div class="field-wrapper-half">
+                    <div class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.ClearcoatTime</div>
+                    <div class="field-control-half">
+                        @Html.TextBoxFor(model => model.ClearcoatHours, new { @id = "TextboxClearcoatTime" })
+                        <label>@Html.CheckBoxFor(model => model.IncludeClearcoat, new { @id = "CheckBoxIncludeClearcoat" }) @Proestimator.Resources.ProStrings.Include</label>
+                        <label>@Html.CheckBoxFor(model => model.LockClearcoat, new { @id = "CheckBoxLockClearcoat" }) @Proestimator.Resources.ProStrings.LockedCheckbox</label>
+                    </div>
+                </div>
+
+                <div class="field-wrapper-half">
+                    <div class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.BlendTime</div>
+                    <div class="field-control-half">
+                        @Html.TextBoxFor(model => model.BlendHours, new { @id = "TextboxBlendTime" })
+                        <label>@Html.CheckBoxFor(model => model.IncludeBlend, new { @id = "CheckBoxIncludeBlend" }) @Proestimator.Resources.ProStrings.Include</label>
+                        <label>@Html.CheckBoxFor(model => model.LockBlend, new { @id = "CheckBoxLockBlend" }) @Proestimator.Resources.ProStrings.LockedCheckbox</label>
+                    </div>
+                </div>
+
+                <div class="field-wrapper-half">
+                    <div class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.EdgingTime</div>
+                    <div class="field-control-half">
+                        @Html.TextBoxFor(model => model.EdgingHours, new { @id = "TextboxEdgingTime" })
+                        <label>@Html.CheckBoxFor(model => model.IncludeEdging, new { @id = "CheckBoxIncludeEdging" }) @Proestimator.Resources.ProStrings.Include</label>
+                        <label>@Html.CheckBoxFor(model => model.LockEdging, new { @id = "CheckBoxLockEdging" }) @Proestimator.Resources.ProStrings.LockedCheckbox</label>
+                    </div>
+                </div>
+
+                <div class="field-wrapper-half">
+                    <div class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.UndersideTime</div>
+                    <div class="field-control-half">
+                        @Html.TextBoxFor(model => model.UndersideHours, new { @id = "TextboxUndersideTime" })
+                        <label>@Html.CheckBoxFor(model => model.IncludeUnderside, new { @id = "CheckBoxIncludeUnderside" }) @Proestimator.Resources.ProStrings.Include</label>
+                        <label>@Html.CheckBoxFor(model => model.LockUnderside, new { @id = "CheckBoxLockUnderside" }) @Proestimator.Resources.ProStrings.LockedCheckbox</label>
+                    </div>
+                </div>
+
+                <div class="field-wrapper-half" id="toneStageContainer">
+                    <div class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.ToneStageNote</div>
+                    <div class="field-control-half">
+                        @Html.TextBoxFor(model => model.AllowanceHours, new { @id = "TextboxAllowanceTime" })
+                        <label>@Html.CheckBoxFor(model => model.IncludeAllowance, new { @id = "CheckBoxIncludeAllowance" }) @Proestimator.Resources.ProStrings.Include</label>
+                        <label>@Html.CheckBoxFor(model => model.LockAllowance, new { @id = "CheckBoxLockAllowance" }) @Proestimator.Resources.ProStrings.LockedCheckbox</label>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+
+        <div style="clear: both"></div>
+
+        @* Part 4. Add Notes *@
+        <div class="container">
+            <div class="container">
+                <fieldset>
+                    <legend>
+                        <span class="number">4</span> @Proestimator.Resources.ProStrings.AddNotesHeader
+                    </legend>
+                </fieldset>
+            </div>
+            <fieldset>
+                <div class="field-wrapper">
+                    <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.CustomerNotes</label>
+                    <div class="field-control">
+                        @Html.TextBoxFor(model => model.ExternalNotes, new { style = "display: none;" })
+                        <iframe id="EditorFrame" src="~/Files/TemplateEditorSmall.html?r=1"></iframe>
+                    </div>
+                </div>
+                <div class="field-wrapper">
+                    <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.ShopNotes</label>
+                    <div class="field-control">
+                        @Html.TextBoxFor(model => model.InternalNotes)
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+</div>

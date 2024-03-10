@@ -1,0 +1,2382 @@
+﻿@model ProEstimator.Admin.ViewModel.Logins.LoginsPageVM
+
+@using ProEstimator.Admin.ViewModel.Logins;
+@using ProEstimator.Admin.ViewModel.EmailReport;
+@using ProEstimatorData.DataModel.Contracts;
+
+@{
+    ViewBag.Title = "Administration - Contracts";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<script>
+
+    var _extendDays = 0;
+    var _userID = 0;
+    var IsClicked = false;
+    var _feature = "";
+    var _startDate = "";
+    var _endDate = "";
+
+    $(document).ready(function () {
+
+        // Set up calendar controls
+        $("#RangeStart").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+        $("#RangeEnd").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        var currentDate = new Date();
+        var dateChange = new Date();
+        dateChange.setDate(currentDate.getDate() - 7);
+
+        // RangeStart
+        _startDate = GetDayMonthYear(dateChange);
+        $("#RangeStart").val(_startDate);
+
+        // RangeEnd
+        _endDate = GetDayMonthYear(currentDate);
+        $("#RangeEnd").val(_endDate);
+
+        function GetDayMonthYear(dateChange) {
+            var d = dateChange.getDate();
+            var day = (d < 10) ? '0' + d : d;
+            var m = dateChange.getMonth() + 1;
+            var month = (m < 10) ? '0' + m : m;
+            var yy = dateChange.getYear();
+            var year = (yy < 1000) ? yy + 1900 : yy;
+
+            var dateRange = month + "/" + day + "/" + year;
+
+            return dateRange;
+        }
+
+        $("#btnFeatureCount").click(function () {
+            Refreshes();
+        });
+
+        $(".search-input").keypress(function (e) {
+            var key = e.which;
+
+            if (key == 13)  // the enter key code
+            {
+                $("#btnLoginSearch").click();
+                return false;
+            }
+        });
+
+        // Do the acount id search
+        $("#btnLoginSearch").click(function () {
+
+            // Refresh the history grid
+            var grid = $("#login-grid").data("kendoGrid");
+
+            if (grid) {
+                ShowLoadingOverlay();
+                grid.dataSource.read();
+            }
+        });
+
+        $("#btnCreate3DayTrial").click(function () {
+            ExtendConfirm(3);
+        });
+
+        $("#btnCreate14DayTrial").click(function () {
+            ExtendConfirm(14);
+        });
+
+        $("#btnExtendConformYes").click(function () {
+            ExtendTrial(_extendDays);
+        });
+
+        $("#btnExtendConformNo").click(function () {
+            $("#rowExtendConfirm").hide();
+        });
+
+        $("#btnHistory").click(function() {
+            var historyRow = $("#rowHistory");
+            if (historyRow.is(":visible"))
+            {
+                historyRow.hide();
+                $('#add-on-grid-container').css('margin-top',"-25px");
+            }
+            else{
+                historyRow.show();
+                $('#add-on-grid-container').css('margin-top',"-50px");
+            }
+        });
+
+        $("#btnNewConfirm").click(function() {
+            @if (Model.LoginID > 0)
+            {
+                <text>
+            window.location.href = "/Logins/List/-1";
+            </text>
+            }
+            else
+            {
+                <text>
+            $("#AccountDetailsPanel").show();
+            </text>
+            }
+        });
+
+        $("input[type='text']").keyup(function () {
+            ValidateForm();
+        });
+
+        $("select").change(function () {
+            ValidateForm();
+        });
+
+        $("#Organization").change(function() {
+            if ($("#CompanyName").val() == "" && $("#Organization").val() != "")
+            {
+                $("#CompanyName").val($("#Organization").val());
+            }
+        });
+
+        $("#isAutoRenew").change(function () {
+            var bChecked = $(this).is(":checked");
+            var action = "Are you sure to turn Auto Renew " + (bChecked ? "ON ?" : "OFF ?");
+            if (confirm(action)) {
+                $.getJSON("/Logins/AutoRenewStatusChange", { loginID: @Model.LoginID, salesRepID: @ViewBag.SessionSalesRepID, isEnabled: $(this).is(":checked") }, function (data) {
+                    if (data.Success) {
+                        var grid = $("#autoRenewHistory-grid").data("kendoGrid");
+                        if (grid) {
+                            grid.dataSource.read();
+                        }
+                        console.log("A database entry in LoginsAutoRenew table for Auto Renew Status Change has been created");
+                    }
+                    else {
+                        $(this).prop('checked', !bChecked);
+                    }
+                });
+            }
+            else {
+                $(this).prop('checked', !bChecked);
+            }
+        });
+
+        $("#isRemoteSupport").change(function () {
+            var bChecked = $(this).is(":checked");
+            var action = "Are you sure to turn Remote Support " + (bChecked ? "ON ?" : "OFF ?");
+            if (confirm(action)) {
+                $.getJSON("/Logins/ToggleRemoteSupport", { loginID: @Model.LoginID, isRemoteSupportEnable: $(this).is(":checked") }, function (data) {
+                    if (data.Success) {
+                         console.log(data);
+                    }
+                    else {
+                        $(this).prop('checked', !bChecked);
+                    }
+                });
+            }
+            else {
+                $(this).prop('checked', !bChecked);
+            }
+        });
+
+        $("#btnAutoRenewHistory").click(function () {
+            var rowAutoRenew = $("#autoRenewHistory");
+            if (rowAutoRenew.is(":visible")) {
+                rowAutoRenew.hide();
+            }
+            else {
+                rowAutoRenew.show();
+            }
+        });
+
+        $("#ContentWrapper").show();
+
+        $("#searchLoginID").focus();
+
+        $("#MainTabs").tabs();
+
+        ValidateForm();
+
+        $(window).on("scroll", function(){
+            $("#ScrollPosition").val($(window).scrollTop());
+        });
+
+        @if (!string.IsNullOrEmpty(Model.SelectedTab))
+        {
+            <text>
+        $("#@Model.SelectedTab").click();
+        </text>
+        }
+
+        @if (Model.ScrollPosition > 0)
+        {
+            <text>
+        $(window).scrollTop(@Model.ScrollPosition);
+        </text>
+        }
+
+        @if (string.IsNullOrEmpty(Model.LoginName))
+        {
+            <text>
+        $(window).scrollTop($(document).height());
+        $("#LoginName").focus();
+        </text>
+        }
+
+        @if (Model.LoginID > 0 || Model.CreateNewLogin || !string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <text>
+        $("#AccountDetailsPanel").show();
+        </text>
+        }
+
+        $("#SelectedStripeInfoID").val(0);
+        $("#chkIncludeDeletedPaymentInfo").change(function() {
+            $("#SavedPaymentInfoDetails").hide();
+            RefreshPaymentInfoGrid();
+        });
+
+        // Disable the Contact form inputs if no permission
+        @if (!ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "UserContactInfo"))
+        {
+            <text>
+        $(".contact-info-form").find("input").prop("readonly", "readonly");
+        $(".contact-info-form").find("input").css("color", "grey");
+        $(".contact-info-form").find("input").css("opacity", "0.5");
+
+        $(".contact-info-form").find("select").css("display", "none");
+        </text>
+        }
+
+        @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "CreateNewUsers"))
+        {
+            <text>
+        $("#btnClearUserForm").click(function() {
+            ClearUserForm();
+        });
+
+        $("#btnSaveUser").click(function() {
+            SaveUserForm();
+        });
+
+        $("#btnDeleteUser").click(function() {
+            DeleteUser();
+        });
+
+        RefreshSaveUserButton();
+        </text>
+        }
+
+        $("#chkIncludeDeletedUsers").click(function() {
+            RefreshUsersGrid();
+        });
+
+        $("#chkInclude").change(function () {
+            Refreshes();
+        });
+
+        if ($("#btnImpersonate")) {
+            $("#btnImpersonate").click(function () {
+                var chkAutoSaveTurnedOnTechSupport = $("#chkAutoSaveTurnedOnTechSupport").is(":checked");
+                var chkAutoSaveTurnedOnSiteUser = $("#chkAutoSaveTurnedOnSiteUser").is(":checked");
+                var impersonateLink = $("#ddlImpersonateLinks").val() + "&autosaveturnedontechsupport=" + chkAutoSaveTurnedOnTechSupport;
+                impersonateLink = impersonateLink + "&autosaveturnedonsiteuser=" + chkAutoSaveTurnedOnSiteUser;
+                window.open(impersonateLink, '_blank');
+            });
+        }
+
+        RefreshImpersonateLinks();
+
+        $('.auto_remove_space').on('focusout',function(e) {
+            $( this).val($.trim($( this ).val()));
+        });
+
+        @if (!Model.ContractActive)
+        {
+            <text>
+        $("#tdContractDetails").css("color", "red");
+        </text>
+        }
+
+        RefreshCarfaxGrid();
+
+    });
+
+    function ExtendConfirm(days)
+    {
+        if ($("#rowExtendConfirm").is(":visible"))
+        {
+            $("#rowExtendConfirm").hide();
+        }
+        else
+        {
+            _extendDays = days;
+            $("#rowExtendConfirm").show();
+        }
+    }
+
+    function ExtendTrial(days) {
+        $("#contractLoading").show();
+        $("#rowExtendConfirm").hide();
+
+        $.getJSON("/Logins/ExtendTrial", { loginID: @Model.LoginID, days: days, salesRepID: @ViewBag.SessionSalesRepID }, function (data) {
+            $("#contractLoading").hide();
+            if (data.Success) {
+                $("#tdContractDetails").html(data.Response);
+                if (data.TrialActive) {
+                    $("#tdContractDetails").css("color", "");
+                }
+                else {
+                    $("#tdContractDetails").css("color", "red");
+                }
+                // Refresh the history grid
+                var grid = $("#history-grid").data("kendoGrid");
+
+                if (grid) {
+                    grid.dataSource.read();
+                }
+                var grid = $("#add-on-grid").data("kendoGrid");
+                if (grid) {
+                    grid.dataSource.read();
+                }
+            }
+            else {
+                alert(data.ErrorMessage);
+            }
+        });
+    }
+
+    function GetHistoryParams() {
+        var result =
+        {
+            loginID: @Model.LoginID,
+        };
+        return result;
+    }
+
+    function GetLoginContractAddOnListParams() {
+        var result =
+        {
+            loginID: @Model.LoginID,
+        };
+        return result;
+    }
+
+    function GetLoginSearchParams() {
+        var result =
+        {
+            loginID: $("#searchLoginID").val()
+            , loginName: $("#searchLoginName").val()
+            , estimateID: $("#searchEstimateID").val()
+            , emailAddress: $("#searchEmailAddress").val()
+            , vin: $("#searchVin").val()
+        };
+        return result;
+    }
+
+    function LoginGridDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#login-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+
+        var grid = $("#login-grid").data("kendoGrid");
+        var models = grid.dataSource.data();
+
+        $("#NoSearchResults").hide();
+
+        if (models.length > 1)
+        {
+            $("#GoodDataForm").hide();
+            HideLoadingOverlay();
+            $("#LoginGridContainer").show();
+        }
+        else if (models.length == 1)
+        {
+            window.location.href = "/Logins/List/" + models[0].LoginID;
+        }
+        else if (models.length == 0)
+        {
+            HideLoadingOverlay();
+
+            var fullSearch = $("#searchLoginID").val() + $("#searchLoginName").val() + $("#searchEstimateID").val() + $("#searchEmailAddress").val() + $("#searchVin").val();
+
+            if (fullSearch != "")
+            {
+                $("#NoSearchResults").show();
+                $("#GoodDataForm").hide();
+            }
+
+            $("#LoginGridContainer").hide();
+        }
+    }
+
+    function LoginGridLineSelectionChanged(arg) {
+        var row = $("#login-grid").find(".k-state-selected").first();
+        var loginID = row.find("td").first().html();
+        window.location.href = "/Logins/List/" + loginID;
+    }
+
+    function ValidateForm() {
+        if ($("#GoodDataForm").is(":visible"))
+        {
+            $(".past-due").removeClass("past-due");
+            $(".field-invalid").removeClass("field-invalid");
+
+            ValueRequired("LoginName", "tabTitleLoginInfo");
+            ValueRequired("Organization", "tabTitleLoginInfo");
+            ValueRequired("Password", "tabTitleLoginInfo");
+            ValueRequired("NewSalesRepID", "tabTitleLoginInfo");
+
+            ValueRequired("FirstName", "tabTitleContactInfo");
+            ValueRequired("LastName", "tabTitleContactInfo");
+            //ValueRequired("EmailAddress", "tabTitleContactInfo");
+            ValueRequired("JobTitle", "tabTitleContactInfo");
+            ValueRequired("State", "tabTitleContactInfo");
+
+            @if (Model.LoginID == 0)
+            {
+                <text>
+            var selectedRepID = $("#NewSalesRepID").val();
+            if (selectedRepID == -1)
+            {
+                $("#NewSalesRepID").addClass("field-invalid");
+                $("#tabTitleLoginInfo").addClass("past-due");
+            }
+            </text>
+            }
+
+        }
+    }
+
+    function ValueRequired(fieldName, tabID)
+    {
+        try
+        {
+            var input = $("#" + fieldName);
+            if (input && input.val().trim() == "")
+            {
+                input.addClass("field-invalid");
+                $("#" + tabID).addClass("past-due");
+            }
+        }
+        catch (err) {}
+    }
+
+    function SetSelectedTab(tabID)
+    {
+        $("#SelectedTab").val(tabID);
+    }
+
+
+    function GetSavedPaymentInfoParams() {
+        var result =
+        {
+            loginID: @Model.LoginID,
+            deleteFlag: $("#chkIncludeDeletedPaymentInfo").is(":checked")
+        };
+        return result;
+    }
+
+    function PaymentInfoGridDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#savedpaymentinfo-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+
+        var grid = $("#savedpaymentinfo-grid").data("kendoGrid");
+        var models = grid.dataSource.data();
+
+        for(i = 0; i < models.length; i++)
+        {
+            var row = grid.table.find("[data-uid=" + models[i].uid + "]");
+
+            if (models[i].DeleteFlag === true)
+            {
+                //grid.select(row);
+                row.addClass("deleted-row");
+            }
+        }
+    }
+
+    function PaymentInfoGridLineSelectionChanged(arg) {
+
+        // Get the selected item and call the ClickedItem event
+        var row = $("#savedpaymentinfo-grid").find(".k-state-selected").first();
+        var stripeInfoID = row.find("td").first().html();
+
+        if (stripeInfoID != $("#SelectedStripeInfoID").val())
+        {
+            $("#SelectedStripeInfoID").val(stripeInfoID);
+
+            if (stripeInfoID > 0)
+            {
+                $("#SavedPaymentInfoDetails").show();
+                $("#SavedPaymentInfoDetails").css("Opacity", "0.2");
+
+                $.getJSON("/Logins/GetSavedPaymentInfoDetails", { stripeInfoID: stripeInfoID, salesRepID: @ViewBag.SessionSalesRepID}, function (data) {
+
+                    $("#SavedPaymentInfoDetails").css("Opacity", "1.0");
+                    $("#SavedPaymentInfoDetails").show();
+
+                    $("#lblStripeCustomerID").text(data.StripeCustomerID);
+                    $("#lblStripeCardID").text(data.StripeCardID);
+
+                    $("#chkCardError").prop("checked", data.CardError);
+
+                    $("#txtErrorMessage").text(data.ErrorMessage);
+                    $("#chkAutoPay").prop("checked", data.AutoPay);
+                    $("#chkDeleteFlag").prop("checked", data.DeleteFlag);
+
+                    var status = "";
+                    $.each(data.DeleteStatus, function (index, itemdata) {
+                        status += "<tr><td>" + itemdata.When + "</td><td>" + itemdata.Action + "</td><td>" + itemdata.SalesRepName + "</td></tr>";
+                    });
+                    $("#DeleteHistory").html(status);
+                });
+            }
+            else
+            {
+                $("#SavedPaymentInfoDetails").hide();
+            }
+        }
+    }
+
+    function RefreshPaymentInfoGrid()
+    {
+        var grid = $("#savedpaymentinfo-grid").data("kendoGrid");
+        grid.dataSource.read();
+    }
+
+
+
+
+    function GetAutoPayParams() {
+        var result =
+        {
+            loginID: @Model.LoginID
+        };
+        return result;
+    }
+
+    function AutoPayGridDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#autopay-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+    }
+
+
+    function RefreshUsersGrid()
+    {
+        var grid = $("#users-grid").data("kendoGrid");
+        grid.dataSource.read();
+    }
+
+    function GetUsersParams() {
+        var result =
+        {
+            loginID: @Model.LoginID,
+            deleteFlag: $("#chkIncludeDeletedUsers").is(":checked")
+        };
+        return result;
+    }
+
+    function GetUsersDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#users-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+
+        var grid = $("#users-grid").data("kendoGrid");
+        var models = grid.dataSource.data();
+
+        if (models.length > 0)
+        {
+            $("#user-grid-container").show();
+            $("#UserGridNoData").hide();
+        }
+        else
+        {
+            $("#user-grid-container").hide();
+            $("#UserGridNoData").show();
+        }
+
+        for(i = 0; i < models.length; i++)
+        {
+            var row = grid.table.find("[data-uid=" + models[i].uid + "]");
+
+            if (models[i].IsDeleted === true)
+            {
+                //grid.select(row);
+                row.addClass("deleted-row");
+            }
+
+            if(models[i].ID == _userID)
+            {
+                grid.select(row);
+                break;
+            }
+        }
+    }
+
+    function UpdateUsersGridSelection()
+    {
+        var grid = $("#users-grid").data("kendoGrid");
+        grid.clearSelection();
+
+        var models = grid.dataSource.data();
+
+        for(i = 0; i < models.length; i++)
+        {
+            if(models[i].ID == _userID)
+            {
+                var row = grid.table.find("[data-uid=" + models[i].uid + "]");
+
+                grid.select(row);
+                break;
+            }
+        }
+    }
+
+    function GetUsersSelectionChanged(arg) {
+
+        // Get the selected item and call the ClickedItem event
+        var row = $("#users-grid").find(".k-state-selected").first();
+        var userID = row.find("td").first().html();
+
+        LoadUser(userID);
+    }
+
+    function ClearUserForm()
+    {
+        _userID = 0;
+        $("#Users_Name").val("");
+        $("#Users_EmailAddress").val("");
+        $("#Users_Password").val("");
+
+        $("#btnDeleteUser").hide();
+
+        $("#PermissionsContainer").find("input").attr("checked", false);
+        $("#PermissionsContainer").find("input").prop('readonly', '');
+
+        $("#passwordErrorMessage").text("");
+
+        $("#user-grid-container").find(".k-state-selected").removeClass("k-state-selected");
+
+        RefreshSaveUserButton();
+        ClearUsersError();
+    }
+
+    function RefreshSaveUserButton()
+    {
+        if (_userID == 0)
+        {
+            $("#btnSaveUser").val("Create New User");
+            $("#btnDeleteUser").hide();
+        }
+        else
+        {
+            $("#btnSaveUser").val("Save User");
+            $("#btnDeleteUser").show();
+        }
+    }
+
+    function SaveUserForm()
+    {
+        ShowLoadingOverlay();
+        ClearUsersError();
+
+        var name = $("#Users_Name").val();
+        var emailAddress = $("#Users_EmailAddress").val();
+        var password = $("#Users_Password").val();
+
+        var permissionsSave = "";
+        $("#PermissionsContainer").find("input").each(function(){
+            var tag = $(this).attr("class");
+            var isChecked = $(this).is(":checked");
+
+            if (tag == "Admin" && isChecked) {
+                permissionsSave = tag + "-" + isChecked;
+                return false;
+            }
+
+            permissionsSave += tag + "-" + isChecked + "|";
+        });
+
+        $.getJSON("/Logins/SaveUserData", { userID: _userID, loginID: @Model.LoginID, name: name, emailAddress: emailAddress, password: password, permissions: permissionsSave  }, function (data) {
+            HideLoadingOverlay();
+
+            if (data.Success)
+            {
+                _userID = data.NewID;
+                RefreshUsersGrid();
+                RefreshSaveUserButton();
+
+                RefreshImpersonateLinks();
+
+                $("#Users_Password").val("");
+            }
+            else {
+                ShowUsersError(data.ErrorMessage)
+            }
+        });
+    }
+
+    function LoadUser(userID)
+    {
+        if (userID > 0)
+        {
+            ShowLoadingOverlay();
+            ClearUsersError();
+
+            $.getJSON("/Logins/GetUserData", { userID: userID }, function (data) {
+                HideLoadingOverlay();
+
+                _userID = data.ID;
+                $("#UserActivityGridRow").show();
+                RefreshUserActivityGrid();
+                $("#Users_Name").val(data.Name);
+                $("#Users_EmailAddress").val(data.EmailAddress);
+                $("#Users_Password").val(data.Password);
+
+                ValidateEmail("Users_EmailAddress");
+
+                RefreshSaveUserButton();
+
+                $("#btnDeleteUser").show();
+
+                if (data.IsDeleted)
+                {
+                    $("#btnDeleteUser").val("Restore User");
+                }
+                else
+                {
+                    $("#btnDeleteUser").val("Delete User");
+                }
+
+                var adminChecked = true;
+                $("#PermissionsContainer").find("input").prop("checked", true);
+                $("#PermissionsContainer").find("input").prop('readonly', '');
+                for (var i = 0; i < data.HasPermissions.length; i++)
+                {
+                    $("#PermissionsContainer").find("input[class='" + data.HasPermissions[i].Tag + "']").prop("checked", data.HasPermissions[i].HasPermission);
+                    if (data.HasPermissions[i].Tag == "Admin") {
+                        adminChecked = data.HasPermissions[i].HasPermission;
+                    }
+                }
+                if (adminChecked) {
+                    $("#PermissionsContainer").find("input[type='checkbox']").each(function () {
+                        if ($(this).attr("class") != "Admin") {
+                            $(this).prop('checked', adminChecked);
+                            $(this).prop('readonly', 'readonly');
+                        }
+                    });
+                }
+            });
+        }
+        else
+        {
+            ClearUserForm();
+        }
+    }
+
+    function DeleteUser()
+    {
+        if (_userID > 0)
+        {
+            ShowLoadingOverlay();
+
+            $.getJSON("/Logins/DeleteUser", { userID: _userID }, function (data) {
+                console.log(data);
+
+                HideLoadingOverlay();
+
+                if (data.Success === true) {
+                    _userID = 0;
+                    RefreshUsersGrid();
+                    ClearUserForm();
+                    RefreshImpersonateLinks();
+                }
+                else {
+                    ShowUsersError(data.ErrorMessage);
+                }
+
+            });
+        }
+    }
+
+    function ShowUsersError(error)
+    {
+        $("#usersErrorWrapper").show();
+        $("#usersErrorMessage").text(error);
+    }
+
+    function ClearUsersError()
+    {
+        $("#usersErrorWrapper").hide();
+        $("#usersErrorMessage").text("");
+    }
+
+    function RefreshImpersonateLinks() {
+        if ($("#divImpersonate")) {
+            $.getJSON("/Logins/GetImpersonateLinks", { loginID: @Model.LoginID }, function (data) {
+
+                if(data.length <= 0)
+                {
+                    $("#btnImpersonate").attr("disabled", true);
+                }
+                else
+                {
+                    $("#btnImpersonate").attr("disabled", false);
+                }
+
+                var ddl = $("#ddlImpersonateLinks");
+                ddl.empty();
+
+                for (var i = 0; i < data.length; i++) {
+                    ddl.append("<option value='" + data[i].Link + "'>" + data[i].UserName + "</option>");
+                }
+            });
+        }
+    }
+
+    function FeatureCountGridDataChanged(arg) {
+        // Wire up hilighting the row when hovering.
+        $("#featuregroup-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+    }
+
+    function FeatureCountGridLineSelectionChanged(arg) {
+
+        // Get the selected item and call the ClickedItem event
+        var row = $("#featuregroup-grid").find(".k-state-selected").first();
+        _feature = row.find("td").first().html();
+
+        if (_feature != "") {
+            $("#FeatureLogGridRow").show();
+            $("#FeatureLogGridRow").css("Opacity", "0.2");
+
+            RefreshFeatureLogGrid();
+
+            $("#FeatureLogGridRow").css("Opacity", "1.0");
+        }
+        else {
+            $("#FeatureLogGridRow").hide();
+        }
+    }
+
+    function GetFeatureGroupParams() {
+        var result =
+        {
+            loginID: @Model.LoginID,
+            startDate: _startDate,
+            endDate: _endDate,
+            incImperson: $("#chkInclude").is(":checked")
+        };
+        return result;
+    }
+
+    function GetFeatureLogParams() {
+        var result =
+        {
+            loginID: @Model.LoginID,
+            featureTag: _feature,
+            startDate: _startDate,
+            endDate: _endDate,
+            incImperson: $("#chkInclude").is(":checked")
+        };
+        return result;
+    }
+
+    function GetCarfaxParams() {
+        var result =
+        {
+            loginID: @Model.LoginID,
+        };
+        return result;
+    }
+
+    function Refreshes() {
+        _feature = "";
+        _startDate = $("#RangeStart").val();
+        _endDate = $("#RangeEnd").val();
+
+        $("#FeatureGroupGridRow").css("Opacity", "0.2");
+        $("#FeatureLogGridRow").css("Opacity", "0.2");
+
+        RefreshFeatureGroupGrid();
+        RefreshFeatureLogGrid();
+
+        $("#FeatureGroupGridRow").css("Opacity", "1.0");
+        $("#FeatureLogGridRow").css("Opacity", "1.0");
+    }
+
+    function RefreshFeatureGroupGrid() {
+        var grid = $("#featuregroup-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+    }
+
+    function RefreshCarfaxGrid() {
+        var grid = $("#carfax-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+    }
+
+    function RefreshFeatureLogGrid() {
+        var grid = $("#featurelog-grid").data("kendoGrid");
+
+        if (grid) {
+            if (grid.dataSource.page() != 1) {
+                grid.dataSource.page(1);
+            }
+            grid.dataSource.read();
+        }
+    }
+
+    function GetUserActivityParams() {
+        var result =
+        {
+            loginID: @Model.LoginID,
+            userID: _userID
+        };
+        return result;
+    }
+
+    function RefreshUserActivityGrid() {
+        var grid = $("#useractivity-grid").data("kendoGrid");
+
+        if (grid) {
+            if (grid.dataSource.page() != 1) {
+                grid.dataSource.page(1);
+            }
+            grid.dataSource.read();
+        }
+    }
+
+    function CheckboxClick(checkbox) {
+        var checked = checkbox.checked;
+        var tag = $(checkbox).attr("class");
+
+        if (tag == "Admin") {
+            $("#PermissionsContainer").find("input[type='checkbox']").prop('checked', checked);
+
+            if (checked) {
+                $("#PermissionsContainer").find("input[type='checkbox']").each(function () {
+                    if ($(this).attr("class") != "Admin") {
+                        $(this).prop('readonly', 'readonly');
+                    }
+                });
+            }
+            else {
+                $("#PermissionsContainer").find("input[type='checkbox']").each(function () {
+                    if ($(this).attr("class") != "Admin") {
+                        $(this).prop('readonly', '');
+                    }
+                });
+            }
+        }
+    }
+
+</script>
+
+@if (Model.GoodSave)
+{
+    <script>
+        window.setTimeout(function () {
+            $("#goodSaveContainer").hide();
+        }, 3000);
+    </script>
+}
+
+<style>
+    .header {
+        padding-bottom: 15px;
+        width: 100%;
+    }
+
+    .details-form {
+        padding-top: 15px;
+        padding-bottom: 15px;
+        width: 100%;
+    }
+
+        .details-form:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+    .panel-body td {
+        padding: 3px;
+    }
+
+    .details-column {
+        float: left;
+        width: 50%;
+    }
+
+    .save-container {
+        text-align: center;
+        padding: 10px;
+    }
+
+        .save-container input {
+            padding: 10px;
+            width: 150px;
+            font-size: 1.1em;
+        }
+
+    .checkbox-row {
+        padding-bottom: 20px;
+    }
+
+        .checkbox-row label {
+            padding-right: 20px;
+        }
+
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    #LoginGridContainer {
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    #GoodDataForm {
+        margin-top: 20px;
+        padding-top: 5px;
+    }
+
+    .disabled-dropdown {
+        color: grey;
+        opacity: 0.5;
+        background-color: #eeeeee;
+    }
+
+    .option-wrapper {
+        clear: both;
+        padding: 5px;
+        height: 30px;
+    }
+
+    .option-left {
+        width: 30%;
+        float: left;
+        padding-left: 10px;
+    }
+
+    .option-wrapper label {
+        font-size: 15px !important;
+        padding: 5px;
+    }
+
+    .option-right {
+        width: 70%;
+        float: right;
+    }
+
+    input[type="checkbox"][readonly] {
+        pointer-events: none;
+        opacity: 0.5;
+    }
+</style>
+
+<div id="ContentWrapper" style="display: none;">
+
+    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "AccountMaintenance"))
+    {
+        using (Html.BeginForm("Index", "Logins", FormMethod.Post, new { autocomplete = "off" }))
+        {
+            @Html.HiddenFor(model => model.LoginID)
+            @Html.HiddenFor(model => model.ContractDetails)
+            @Html.HiddenFor(model => model.TotalDueDetails)
+            @Html.HiddenFor(model => model.NumberOfEstimates)
+            @Html.HiddenFor(model => model.SessionSalesRepID)
+            @Html.HiddenFor(model => model.Password)
+            @Html.HiddenFor(model => model.ContractActive)
+            @Html.HiddenFor(model => model.SelectedStripeInfoID)
+
+            @Html.HiddenFor(model => model.UseDefaultRateProfile)
+            @Html.HiddenFor(model => model.UseDefaultPDRRateProfile)
+            @Html.HiddenFor(model => model.PartsNow)
+            @Html.HiddenFor(model => model.OverlapAdmin)
+
+            <div>
+                <div>
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4>Customer Search</h4>
+                        </div>
+                        <div class="panel-body">
+                            <div class="col-lg-6">
+                                <div class="input-group">
+                                    <span class="input-group-addon">Login ID</span>
+                                    <input type="text" autocomplete="new-password" id="searchLoginID" name="searchLoginID" class="search-input form-control ng-pristine ng-untouched ng-valid ng-empty auto_remove_space" placeholder="Login ID">
+                                </div>
+                                <br>
+                                <div class="input-group">
+                                    <span class="input-group-addon">Vin</span>
+                                    <input type="text" autocomplete="new-password" id="searchVin" name="searchVin" class="search-input form-control ng-pristine ng-untouched ng-valid ng-empty auto_remove_space" placeholder="Vin">
+                                </div>
+                                <br>
+                                <div class="input-group">
+                                    <span class="input-group-addon">Login Name</span>
+                                    <input type="text" autocomplete="new-password" id="searchLoginName" name="searchLoginName" class="search-input form-control ng-pristine ng-untouched ng-valid ng-empty auto_remove_space" placeholder="Login Name">
+                                </div>
+                                <br>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="input-group">
+                                    <span class="input-group-addon">Estimate ID</span>
+                                    <input type="text" autocomplete="new-password" id="searchEstimateID" name="searchEstimateID" class="search-input form-control ng-pristine ng-untouched ng-valid ng-empty auto_remove_space" placeholder="Estimate ID">
+                                </div>
+                                <br>
+                                <div class="input-group">
+                                    <span class="input-group-addon">Email Address</span>
+                                    <input type="text" autocomplete="new-password" id="searchEmailAddress" name="searchEmailAddress" class="search-input form-control ng-pristine ng-untouched ng-valid ng-empty auto_remove_space" placeholder="Email Address">
+                                </div>
+                                <br>
+                            </div>
+
+                        </div>
+                        <div class="panel-footer">
+                            <p class="pull-left">
+                                If more than one customer matches the search criteria
+                                you will be provided with a list from which to choose.
+                            </p>
+
+                            <input type="button" id="btnLoginSearch" class="btn btn-default pull-right" value="Search" />
+                            <div class="clearfix"></div>
+
+                            <div id="NoSearchResults" style="display: none; text-align: center; color: red; padding: 0px; padding-top: 10px; margin-top: 10px; background-color: pink; border-bottom: 1px solid black; border-top: 1px solid black;">
+                                <p>No account matches.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="LoginGridContainer" class="datagrid" style="display: none;">
+                        @(Html.Kendo().Grid<LoginSearchVM>()
+                    .Name("login-grid")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(item => item.LoginID);
+                        columns.Bound(item => item.LoginName);
+                        columns.Bound(item => item.Name).Title("User Name");
+                        columns.Bound(item => item.Email).Title("User Login Email");
+                        columns.Bound(item => item.Organization);
+                        columns.Bound(item => item.CreationDate).Format("{0:MM/dd/yyyy}").Title("Login Creation Date");
+                        columns.Bound(item => item.SalesRep);
+                        columns.Template(@<text></text>).ClientTemplate("# if (UserDeleted) { #" + "<img src='/images/checkmark.png' />" + "# } #").Title("Deleted");
+                    })
+                    .Selectable()
+                    .Events(events => events
+                        .DataBound("LoginGridDataChanged")
+                        .Change("LoginGridLineSelectionChanged")
+                    )
+                    .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .ServerOperation(false)
+                        .Read(read => read.Action("GetLoginsSearch", "Logins").Data("GetLoginSearchParams"))
+                        .PageSize(20)
+                    )
+                    .Pageable(pageable => pageable
+                        .Refresh(false)
+                        .ButtonCount(8)
+                    )
+                        )
+                    </div>
+
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "CreateNewLogins"))
+                    {
+                        <div class="row" ng-show="userMaint.Permissions.userMaintCreate" style="">
+                            <div class="col-md-4">
+                                Or click the create button to create a new user:
+                            </div>
+                            <div class="col-md-2">
+                                <input type="button" id="btnNewConfirm" class="btn btn-default pull-right" value="Create New Account" />
+                            </div>
+                        </div>
+                    }
+
+                </div>
+
+                @if (Model.GoodData)
+                {
+                    <div id="GoodDataForm">
+
+                        @if (Model.LoginID > 0)
+                        {
+                            <div class="panel panel-default">
+                                <div class="panel-heading" style="height: 62px;">
+                                    <h4 style="float: left;">Account Summary</h4>
+
+                                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "UserImpersonate"))
+                                    {
+                                        <div id="divImpersonate" class="pull-right">
+                                            <select id="ddlImpersonateLinks" class="form-control" style="min-width: 250px; width: auto; float: left; margin-right: 10px;"></select>
+                                            <input id="btnImpersonate" type="button" class="btn btn-default" value="Impersonate" />
+                                            <label>
+                                                Auto Save Turned On
+                                            </label>
+                                            <label>
+                                                <strong>IMPERSONATOR</strong>
+                                                <input type="checkbox" id="chkAutoSaveTurnedOnTechSupport" name="chkAutoSaveTurnedOnTechSupport" />
+                                            </label>
+                                            <label>
+                                                <strong>Site User</strong>
+                                                    <input type="checkbox" id="chkAutoSaveTurnedOnSiteUser" name="chkAutoSaveTurnedOnSiteUser" checked />
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="panel-body">
+                                    <table style="width: 100%; font-size: 15px;">
+
+                                        <tr>
+
+                                            <td style="width:75%">
+                                                <table style="font-size: 15px;">
+                                                    <tr>
+                                                        <td width="200"><b>Login ID</b></td>
+                                                        <td><b>@Model.LoginID</b></td>
+                                                        <td></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Current Contract</td>
+                                                        <td>
+                                                            @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "ContractsAndInvoices"))
+                                                            {
+                                                                <a id="tdContractDetails" href="/Contract/List/@Model.LoginID" target="_blank">@Model.ContractDetails</a>
+                                                            }
+                                                            else
+                                                            {
+                                                                <lable id="tdContractDetails">@Model.ContractDetails</lable>
+                                                            }
+
+                                                            <img id="contractLoading" src="~/images/loading.gif" style="height: 20px; padding-left: 10px; margin-top: -7px; display: none;" />
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>
+
+                                                    <tr>
+                                                        <td></td>
+                                                        <td>
+                                                            @if (!Model.HasActiveContract)
+                                                            {
+                                                                <input id="btnCreate3DayTrial" type="button" class="btn btn-default" value="Create 3 Day Trial" />
+                                                                <input id="btnCreate14DayTrial" type="button" class="btn btn-default" value="Create 14 Day Trial" />
+                                                            }
+                                                            <a id="btnHistory" style="cursor: pointer;">Toggle Extension History</a>
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>
+                                                    <tr id="rowExtendConfirm" style="height: 40px; display: none;">
+                                                        <td></td>
+                                                        <td colspan="2">
+                                                            Are you sure you want to extend this trial?
+                                                            <input id="btnExtendConformYes" type="button" value="Yes" />
+                                                            <input id="btnExtendConformNo" type="button" value="Cancel" />
+                                                        </td>
+                                                    </tr>
+
+
+                                                    <tr id="rowHistory" style="display: none;">
+                                                        <td></td>
+                                                        <td>
+                                                            <div class="datagrid">
+                                                                @(Html.Kendo().Grid<ExtensionHistoryVM>()
+                                                            .Name("history-grid")
+                                                            .Columns(columns =>
+                                                            {
+                                                                columns.Bound(item => item.FromDate).Format("{0:MM/dd/yyyy}");
+                                                                columns.Bound(item => item.ToDate).Format("{0:MM/dd/yyyy}");
+                                                                columns.Bound(item => item.ExtendedBy);
+                                                                columns.Bound(item => item.OnDate).Format("{0:MM/dd/yyyy h:mm tt}");
+                                                            })
+                                                            .Selectable()
+                                                            .DataSource(dataSource => dataSource
+                                                                .Ajax()
+                                                                .ServerOperation(false)
+                                                                .Read(read => read.Action("GetExtensionHistory", "Logins").Data("GetHistoryParams"))
+                                                            )
+                                                                )
+                                                            </div>
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Total Due</td>
+                                                        @if (Model.TotalDueDetails == "$0.00")
+                                                        {
+                                                            <td>@Model.TotalDueDetails</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td style="color: red; font-weight: bold;">@Model.TotalDueDetails</td>
+                                                        }
+                                                        <td></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td># of Estimates</td>
+                                                        <td>@Model.NumberOfEstimates</td>
+                                                        <td></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Sales Rep</td>
+                                                        <td>@Html.DropDownListFor(model => model.SalesRepID, (SelectList)Model.SalesReps, new { @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty", @style = "width: 350px;" })</td>
+                                                        <td></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Auto Renew</td>
+                                                        <td colspan="2">
+                                                            @Html.CheckBoxFor(model => model.IsAutoRenew, new { id = "isAutoRenew" })
+                                                            <a id="btnAutoRenewHistory" style="cursor: pointer;">View Auto Renew Status Change Log</a>
+                                                        </td>
+                                                    </tr>
+
+                                                    <tr id="autoRenewHistory" style="display: none;">
+                                                        <td></td>
+                                                        <td>
+                                                            <div class="datagrid">
+                                                                @(Html.Kendo().Grid<AutoRenewStatusVM>()
+                                                            .Name("autoRenewHistory-grid")
+                                                            .Columns(columns =>
+                                                            {
+                                                                columns.Bound(item => item.When).Format("{0:MM/dd/yyyy}");
+                                                                columns.Bound(item => item.Action).Width(10);
+                                                                columns.Bound(item => item.SalesRepName).Width(50);
+                                                            })
+                                                            .Selectable()
+                                                            .DataSource(dataSource => dataSource
+                                                                .Ajax()
+                                                                .ServerOperation(false)
+                                                                .Read(read => read.Action("GetAutoRenewHistory", "Logins").Data("GetHistoryParams"))
+                                                            )
+                                                                )
+                                                            </div>
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>
+
+                                                    @if (Model.ProAdvisorEstimateTotal > 0)
+                                                    {
+                                                        <tr>
+                                                            <td>Pro Advisor Estimate Total</td>
+                                                            <td>@Model.ProAdvisorEstimateTotal.ToString("C")</td>
+                                                            <td></td>
+                                                        </tr>
+                                                    }
+
+                                                    <tr>
+                                                        <td>Last Activity</td>
+                                                        <td>@Model.LastActivityTime</td>
+                                                        <td></td>
+                                                    </tr>
+
+                                                    <tr>
+                                                        <td>Remote Support</td>
+                                                        <td colspan="2">
+                                                            @Html.CheckBoxFor(model => model.IsRemoteSupportOn, new { id = "isRemoteSupport" })
+                                                        </td>
+                                                    </tr>
+
+                                                </table>
+                                            </td>
+
+                                            <td style="width:25%">
+                                                <div class="datagrid" style="margin-top:-5px" id="add-on-grid-container">
+                                                    @(Html.Kendo().Grid<LoginContractAddOnVM>()
+                                                    .Name("add-on-grid")
+                                                    .Columns(columns =>
+                                                    {
+                                                        columns.Bound(item => item.AddOnName).Title("Add-On Name");
+                                                        columns.Template(@<text></text>).ClientTemplate("# if (HasAddOn) { #" + "<img src='/images/checkmark.png' />" + "# } #").Title("Paid").Width(90);
+                                                        columns.Template(@<text></text>).ClientTemplate("# if (IsActiveTrial) { #" + "<img src='/images/checkmark.png' />" + "# } #").Title("Trial").Width(90);
+                                                        columns.Template(@<text></text>).ClientTemplate("# if (HasPermission) { #" + "<img src='/images/checkmark.png' />" + "# } #").Title("Permission").Width(90);
+                                                    })
+                                                    .Selectable()
+                                                    .DataSource(dataSource => dataSource
+                                                        .Ajax()
+                                                        .ServerOperation(false)
+                                                        .Read(read => read.Action("GetLoginContractAddOnList", "Logins").Data("GetLoginContractAddOnListParams"))
+                                                    )
+                                                    )
+                                                </div>
+                                            </td>
+
+                                        </tr>
+
+                                    </table>
+                                </div>
+                            </div>
+                        }
+
+                        <div id="AccountDetailsPanel" class="panel panel-default" style="display: none;">
+                            <div class="panel-heading" style="height: 62px;">
+                                @if (Model.LoginID > 0)
+                                {
+                                    <h4 style="float: left;">Account Details</h4>
+                                }
+                                else
+                                {
+                                    <h4 style="float: left;">New Account Details</h4>
+                                }
+
+                                <input type="submit" class="btn btn-default pull-right" value="@(Model.LoginID == 0 ? "Save New Account" : "Save")" onclick="if (!IsClicked) { IsClicked = true; return true; } else { return false; }" />
+                            </div>
+                            <div class="panel-body">
+
+                                <div style="display: none;">
+                                    @Html.TextBoxFor(model => model.ScrollPosition)
+                                    @Html.TextBoxFor(model => model.SelectedTab)
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                                {
+                                    <div class="details-form" style="text-align: center; color: red; padding: 0px; background-color: pink; border-bottom: 1px solid black; border-top: 1px solid black;">
+                                        <h1 style="margin-top: 0px; font-size: 32px;">Save Errors</h1>
+                                        <p>@Html.Raw(Model.ErrorMessage)</p>
+                                    </div>
+                                }
+
+                                @if (Model.GoodSave)
+                                {
+                                    <div id="goodSaveContainer" class="details-form" style="text-align: center; color: green; padding: 0px;">
+                                        <h1 style="margin-top: 0px; font-size: 32px; background-color: lightgreen; margin-bottom: 15px; padding: 10px;">Data Saved</h1>
+                                        @if (!string.IsNullOrEmpty(Model.ExtraSaveMessage))
+                                        {
+                                            <p>@Model.ExtraSaveMessage</p>
+                                        }
+                                    </div>
+                                }
+
+                            <div id="MainTabs" style="clear: both;">
+                                <ul>
+                                    <li><a href="#MainTabs-LoginInfo" id="tabTitleLoginInfo" onclick="SetSelectedTab('tabTitleLoginInfo')">Login Info</a></li>
+                                    <li><a href="#MainTabs-ContactInfo" id="tabTitleContactInfo" onclick="SetSelectedTab('tabTitleContactInfo')">Contact Info</a></li>
+                                    <li><a href="#MainTabs-Details" id="tabTitleDetails" onclick="SetSelectedTab('tabTitleDetails')">Details</a></li>
+                                    <li><a href="#MainTabs-Users" id="tabTitleUsers" onclick="SetSelectedTab('tabTitleUsers')">Users</a></li>
+                                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "CarFax"))
+                                    {
+                                        <li><a href="#MainTabs-Carfax" id="tabCarfaxDetails" onclick="SetSelectedTab('tabCarfaxDetails')">Carfax</a></li>
+                                    }
+                                    <li><a href="#MainTabs-SavedPaymentInfo" id="tabSavedPaymentInfo" onclick="SetSelectedTab('tabSavedPaymentInfo')">Saved Payment Info</a></li>
+                                    <li><a href="#MainTabs-ActivityHistory" id="tabActivityHistory" onclick="SetSelectedTab('tabActivityHistory')">Activity History</a></li>
+                                    <li><a href="#MainTabs-CreditCardPaymentInfo" id="tabCreditCardPaymentInfo" onclick="SetSelectedTab('tabCreditCardPaymentInfo')">IntelliPay Info</a></li>
+                                </ul>
+
+                                <div id="MainTabs-LoginInfo">
+                                    <div class="details-form">
+
+                                        <div class="checkbox-row">
+                                            <label>@Html.CheckBoxFor(model => model.Disabled) Disabled</label>
+                                            <label>@Html.CheckBoxFor(model => model.DoubtfulAccount) Doubtful Account</label>
+                                            <label>@Html.CheckBoxFor(model => model.StaffAccount) Staff Account</label>
+                                            <label>@Html.CheckBoxFor(model => model.Appraiser) Appraiser</label>
+                                        </div>
+
+                                        <div class="col-lg-12">
+
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label class="col-lg-6 control-label">Company Origin</label>
+                                                        <div class="col-lg-12">
+                                                            @Html.DropDownListFor(model => model.CompanyOrigin, (SelectList)Model.CompanyOrigins, new { @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                </div>
+
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label class="col-lg-6 control-label">Tech Support Password</label>
+                                                        <div class="col-lg-12">
+                                                            @Html.TextBoxFor(model => model.TechSupportPassword, new { autocomplete = "new-password", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label class="col-lg-6 control-label">Login Name</label>
+                                                        <div class="col-lg-12">
+                                                            @Html.TextBoxFor(model => model.LoginName, new { autocomplete = "new-password", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                </div>
+
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label class="col-lg-6 control-label">Number Of Logins</label>
+                                                        <div class="col-lg-12">
+                                                            @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "ChangeNumberOfLogins"))
+                                                            {
+                                                                @Html.TextBoxFor(model => model.NoOfLogins, new { autocomplete = "new-password", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty", @readonly = "readonly" })
+                                                            }
+                                                            else
+                                                            {
+                                                                @Model.NoOfLogins
+                                                                @Html.HiddenFor(o => o.NoOfLogins)
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label class="col-lg-6 control-label">Organization</label>
+                                                        <div class="col-lg-12">
+                                                            @Html.TextBoxFor(model => model.Organization, new { @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                </div>
+
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label class="col-lg-6 control-label">Language</label>
+                                                        <div class="col-lg-12">
+                                                            @Html.DropDownListFor(model => model.LanguageID, (SelectList)Model.LanguageList, new { @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                </div>
+                                            </div>
+                                            @if (Model.LoginID == 0)
+                                            {
+                                                <div class="row">
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label class="col-lg-6 control-label">Sales Rep</label>
+                                                            <div class="col-lg-12">
+                                                                @Html.DropDownListFor(model => model.NewSalesRepID, (SelectList)Model.NewSalesReps, new { @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="MainTabs-ContactInfo">
+                                    <div class="details-form contact-info-form">
+
+                                        <div class="col-lg-12">
+
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <div class="col-lg-12">
+                                                            <div href="#" class="dropdown-toggle ng-binding">Company Name</div>
+                                                            @Html.TextBoxFor(model => model.CompanyName, new { autocomplete = "new-password", tabindex = "20", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <div class="col-lg-12">
+                                                            <div href="#" class="dropdown-toggle ng-binding">Address 1</div>
+                                                            @Html.TextBoxFor(model => model.Address1, new { autocomplete = "new-password", tabindex = "30", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <div class="col-lg-12">
+                                                            <div href="#" class="dropdown-toggle ng-binding">First Name</div>
+                                                            @Html.TextBoxFor(model => model.FirstName, new { autocomplete = "new-password", tabindex = "21", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <div class="col-lg-12">
+                                                            <div href="#" class="dropdown-toggle ng-binding">Address 2</div>
+                                                            @Html.TextBoxFor(model => model.Address2, new { autocomplete = "new-password", tabindex = "31", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <div class="col-lg-12">
+                                                            <div href="#" class="dropdown-toggle ng-binding">Last Name</div>
+                                                            @Html.TextBoxFor(model => model.LastName, new { autocomplete = "new-password", tabindex = "22", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <div class="col-lg-12">
+                                                            <div href="#" class="dropdown-toggle ng-binding">City</div>
+                                                            @Html.TextBoxFor(model => model.City, new { autocomplete = "new-password", tabindex = "32", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <div class="col-lg-12">
+                                                            <div href="#" class="dropdown-toggle ng-binding">Job Title</div>
+                                                            @Html.TextBoxFor(model => model.JobTitle, new { autocomplete = "new-password", tabindex = "23", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <div class="col-lg-12">
+                                                            <div href="#" class="dropdown-toggle ng-binding">State</div>
+                                                            @Html.DropDownListFor(model => model.State, (SelectList)Model.States, new { tabindex = "33", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+
+                                                            @if (!ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "UserContactInfo"))
+                                                            {
+                                                                <label class="form-control ng-pristine ng-untouched ng-valid ng-not-empty disabled-dropdown">@Model.State</label>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <div class="col-lg-12">
+                                                            <div href="#" class="dropdown-toggle ng-binding">Email Address</div>
+                                                            @Html.TextBoxFor(model => model.EmailAddress, new { autocomplete = "new-password", tabindex = "24", @class = "form-control ng-pristine ng-untouched" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <div class="col-lg-12">
+                                                            <div href="#" class="dropdown-toggle ng-binding">Zip</div>
+                                                            @Html.TextBoxFor(model => model.Zip, new { autocomplete = "new-password", tabindex = "34", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <div class="col-lg-12">
+                                                            <div href="#" class="dropdown-toggle ng-binding">Header Message (optional)</div>
+                                                            @Html.TextBoxFor(model => model.HeaderContact, new { autocomplete = "new-password", tabindex = "25", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+
+                                                </div>
+                                            </div>
+
+                                            <div style="padding-top: 30px"></div>
+
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <div class="col-lg-12">
+                                                            <div href="#" class="dropdown-toggle ng-binding">Phone Type 1</div>
+                                                            @Html.DropDownListFor(model => model.PhoneType1, (SelectList)Model.PhoneTypes, new { tabindex = "40", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+
+                                                            @if (!ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "UserContactInfo"))
+                                                            {
+                                                                <label class="form-control ng-pristine ng-untouched ng-valid ng-not-empty disabled-dropdown">@Model.PhoneType1</label>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <div class="col-lg-12">
+                                                            <div href="#" class="dropdown-toggle ng-binding">Phone Number 1</div>
+                                                            @Html.TextBoxFor(model => model.PhoneNumber1, new { autocomplete = "new-password", tabindex = "41", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty phone" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <div class="col-lg-12">
+                                                            <div href="#" class="dropdown-toggle ng-binding">Phone Type 2</div>
+                                                            @Html.DropDownListFor(model => model.PhoneType2, (SelectList)Model.PhoneTypes, new { tabindex = "42", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+
+                                                            @if (!ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "UserContactInfo"))
+                                                            {
+                                                                <label class="form-control ng-pristine ng-untouched ng-valid ng-not-empty disabled-dropdown">@Model.PhoneType2</label>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <div class="col-lg-12">
+                                                            <div href="#" class="dropdown-toggle ng-binding">Phone Number 2</div>
+                                                            @Html.TextBoxFor(model => model.PhoneNumber2, new { autocomplete = "new-password", tabindex = "43", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty phone" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <div class="col-lg-12">
+                                                            <div href="#" class="dropdown-toggle ng-binding">Fax Number</div>
+                                                            @Html.TextBoxFor(model => model.FaxNumber, new { autocomplete = "new-password", tabindex = "44", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty phone" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div id="MainTabs-Details">
+                                    <div class="details-form">
+
+                                        <div class="col-lg-6">
+
+                                            <div class="row">
+                                                <div class="col-lg-12">
+                                                    <div class="form-group">
+                                                        <label class="col-lg-6 control-label">Company Type</label>
+                                                        <div class="col-lg-12">
+
+
+                                                            @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "UserContactInfo"))
+                                                            {
+                                                                @Html.DropDownListFor(model => model.CompanyType, (SelectList)Model.CompanyTypes, new { @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                            }
+                                                            else
+                                                            {
+                                                                <label class="form-control ng-pristine ng-untouched ng-valid ng-not-empty disabled-dropdown">@Model.CompanyType</label>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-12">
+                                                    <div class="form-group">
+                                                        <label class="col-lg-6 control-label">Federal Tax ID</label>
+                                                        <div class="col-lg-12">
+                                                            @Html.TextBoxFor(model => model.FederalTaxID, new { autocomplete = "new-password", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-12">
+                                                    <div class="form-group">
+                                                        <label class="col-lg-6 control-label">License Number</label>
+                                                        <div class="col-lg-12">
+                                                            @Html.TextBoxFor(model => model.LicenseNumber, new { autocomplete = "new-password", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-12">
+                                                    <div class="form-group">
+                                                        <label class="col-lg-6 control-label">Bar Number</label>
+                                                        <div class="col-lg-12">
+                                                            @Html.TextBoxFor(model => model.BarNumber, new { autocomplete = "new-password", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-12">
+                                                    <div class="form-group">
+                                                        <label class="col-lg-6 control-label">Registration Number</label>
+                                                        <div class="col-lg-12">
+                                                            @Html.TextBoxFor(model => model.RegistrationNumber, new { autocomplete = "new-password", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-12">
+                                                    <div class="form-group">
+                                                        <label class="col-lg-6 control-label">Last Estimate Number</label>
+                                                        <div class="col-lg-12">
+                                                            @Html.TextBoxFor(model => model.LastEstimateNumber, new { autocomplete = "new-password", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-12">
+                                                    <div class="form-group">
+                                                        <label class="col-lg-6 control-label">Last Repair Order Number</label>
+                                                        <div class="col-lg-12">
+                                                            @Html.TextBoxFor(model => model.LastWorkOrderNumber, new { autocomplete = "new-password", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-6" style="padding-top: 30px;">
+                                            <label>@Html.CheckBoxFor(model => model.ShowRepairShopProfiles) Show Repair Facility Profiles</label>
+                                            <br /><label>@Html.CheckBoxFor(model => model.AllowAlternateIdentities) Allow Alternate Identities</label>
+                                            <br /><label>@Html.CheckBoxFor(model => model.ProfileLocked) Profile Locked</label>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div id="MainTabs-Users">
+                                    <div class="details-form users-form">
+
+                                        <div class="col-lg-12" style="padding-bottom: 20px;">
+                                            <label class="deleted-label"><input id="chkIncludeDeletedUsers" type="checkbox"> include deleted</label>
+
+                                            @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "CreateNewUsers"))
+                                            {
+                                                <input id="btnClearUserForm" type="button" class="btn btn-default" value="New User" style="margin-left: 20px; margin-bottom: 10px;">
+                                            }
+
+                                            <div id="user-grid-container" class="datagrid">
+                                                @(Html.Kendo().Grid<SiteUserVM>()
+                                                    .Name("users-grid")
+                                                    .Columns(columns =>
+                                                    {
+                                                        columns.Bound(item => item.ID).Title("ID").Hidden();
+                                                        columns.Bound(item => item.Name).Title("Name");
+                                                        columns.Bound(item => item.EmailAddress).Title("Email");
+                                                        columns.Bound(item => item.Password).Title("Password");
+                                                    })
+                                                    .Selectable()
+                                                    .Events(events => events
+                                                        .DataBound("GetUsersDataChanged")
+                                                        .Change("GetUsersSelectionChanged")
+                                                    )
+                                                    .DataSource(dataSource => dataSource
+                                                        .Ajax()
+                                                        .ServerOperation(false)
+                                                        .Read(read => read.Action("GetUsers", "Logins").Data("GetUsersParams"))
+                                                    )
+                                                    )
+                                            </div>
+
+                                            <div id="UserGridNoData" style="text-align: center;">
+                                                <p>No Users.  Use the form below to add a first user.</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-12">
+
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label class="col-lg-6 control-label">Email Address</label>
+                                                        <div class="col-lg-12">
+                                                            <input id="Users_EmailAddress" type="text" class="form-control ng-pristine ng-untouched ng-valid ng-not-empty email-address" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "CreateNewUsers"))
+                                                {
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label class="col-lg-6 control-label">Password</label>
+                                                            <div class="col-lg-12">
+                                                                <input id="Users_Password" type="text" class="form-control ng-pristine ng-untouched ng-valid ng-not-empty" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label class="col-lg-6 control-label">Permissions</label>
+                                                            <div id="PermissionsContainer" class="col-lg-12">
+                                                                @for (int i = 0; i < Model.SitePermissions.Count; i++)
+                                                                {
+                                                                    <div class="option-wrapper">
+                                                                        <div class="col-xs-1"><input type="checkbox" class="@Model.SitePermissions[i].Tag" onclick="CheckboxClick(this);" /></div>
+                                                                        <div class="col-xs-11">
+                                                                            @Model.SitePermissions[i].Name (@Model.SitePermissions[i].Description)
+                                                                        </div>
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group">
+                                                        <label class="col-lg-6 control-label">Name</label>
+                                                        <div class="col-lg-12">
+                                                            <input id="Users_Name" type="text" class="form-control ng-pristine ng-untouched ng-valid ng-not-empty" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "CreateNewUsers"))
+                                                {
+                                                    <div class="col-lg-6">
+                                                        <div class="form-group">
+                                                            <label class="col-lg-6 control-label">Permissions</label>
+                                                            <div id="PermissionsContainer" class="col-lg-12">
+                                                                @for (int i = 0; i < Model.SitePermissions.Count; i++)
+                                                                {
+                                                                    <div class="option-wrapper">
+                                                                        <div class="col-xs-1"><input type="checkbox" class="@Model.SitePermissions[i].Tag" onclick="CheckboxClick(this);" /></div>
+                                                                        <div class="col-xs-11">
+                                                                            @Model.SitePermissions[i].Name (@Model.SitePermissions[i].Description)
+                                                                        </div>
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+
+                                            @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "CreateNewUsers"))
+                                            {
+                                                <div class="row" style="text-align: right; padding-right: 30px; padding-top: 25px;">
+                                                    <input id="btnDeleteUser" type="button" class="btn btn-default" value="Delete User">
+                                                    <input id="btnSaveUser" type="button" class="btn btn-default" value="Save User">
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="col-lg-12">
+                                            <div id="UserActivityGridRow" style="display: none;padding-top: 20px;">
+                                                <div id="useractivity-grid-container" class="datagrid">
+                                                    @(Html.Kendo().Grid<ProEstimatorData.DataModel.ActiveLogin>()
+                                            .Name("useractivity-grid")
+                                            .Columns(columns =>
+                                            {
+                                                columns.Bound(item => item.ID).Hidden();
+                                                columns.Bound(item => item.StartTime).Title("Start Time").Format("{0:MM/dd/yyyy h:mm tt}");
+                                                columns.Bound(item => item.LastActivity).Title("Last Activity").Format("{0:MM/dd/yyyy h:mm tt}");
+                                                columns.Bound(item => item.ComputerKey).Title("Computer Key");
+                                                columns.Bound(item => item.DeleteKey).Title("Delete Reason");
+                                            })
+                                            .DataSource(dataSource => dataSource
+                                                .Ajax()
+                                                .ServerOperation(false)
+                                                .Read(read => read.Action("GetUserActivity", "Logins").Data("GetUserActivityParams"))
+                                                .PageSize(10)
+                                            )
+                                            .Pageable(pageable => pageable
+                                                .Refresh(false)
+                                                .ButtonCount(10)
+                                            )
+                                                        )
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="usersErrorWrapper" class="details-form" style="display: none; text-align: center; color: red; padding: 0px; background-color: pink; border-bottom: 1px solid black; border-top: 1px solid black; margin-bottom: 20px;">
+                                        <h1 style="margin-top: 0px; font-size: 32px;">Save Errors</h1>
+                                        <p><label id="usersErrorMessage" /></p>
+                                    </div>
+
+                                    @*
+            <div class="panel panel-default" style="margin-left: 20px; margin-right: 20px;">
+                <div class="panel-heading">
+                    <h4>Permissions</h4>
+                </div>
+
+                <div id="PermissionsContainer">
+                    @for (int i = 0; i < Model.SitePermissions.Count; i++)
+                    {
+                        @Html.HiddenFor(model => model.SitePermissions[i].Tag)
+
+                        <div class="option-wrapper">
+                            <div class="option-left">
+                                <label>
+                                    <input type="checkbox" class="@Model.SitePermissions[i].Tag" />
+                                    @Model.SitePermissions[i].Name
+                                </label>
+                            </div>
+                            <div class="option-right">
+                                @Model.SitePermissions[i].Description
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>*@
+
+                                </div>
+
+                                @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "CarFax"))
+                                {
+                                    <div id="MainTabs-Carfax">
+                                        <div class="details-form">
+                                            <div class="col-lg-12">
+                                                <div class="col-lg-6">
+                                                    <div class="checkbox-row">
+                                                        @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "CarFaxEdit"))
+                                                        {
+                                                            <label>@Html.CheckBoxFor(model => model.CarfaxExclude) Removed from Carfax reporting</label>
+                                                        }
+                                                        else if (Model.CarfaxExclude)
+                                                        {
+                                                            <label>Removed from Carfax reporting</label>
+                                                        }
+                                                        else
+                                                        {
+                                                            <label>Not removed from Carfax reporting</label>
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6 datagrid">
+                                                    @(Html.Kendo().Grid<ProEstimator.Admin.Controllers.LoginsController.CarFaxDetail>()
+                                                .Name("carfax-grid")
+                                                .Columns(columns =>
+                                                {
+                                                    columns.Bound(item => item.TimeStamp).Title("Timestamp").Format("{0:MM/dd/yyyy h:mm tt}");
+                                                    columns.Bound(item => item.UserName).Title("User Name");
+                                                    columns.Bound(item => item.FullName).Title("Full Name");
+                                                    columns.Bound(item => item.Action).Title("Action");
+                                                })
+                                                .DataSource(dataSource => dataSource
+                                                    .Ajax()
+                                                    .ServerOperation(false)
+                                                    .Read(read => read.Action("GetCarFaxHistory", "Logins").Data("GetFeatureLogParams"))
+                                                    .PageSize(5)
+                                                )
+                                                .Pageable(pageable => pageable
+                                                    .Refresh(false)
+                                                    .ButtonCount(6)
+                                                )
+                                                    )
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+
+                                <div id="MainTabs-SavedPaymentInfo">
+                                    <div class="details-form">
+                                        <div class="checkbox-row">
+                                            <label class="deleted-label"><input id="chkIncludeDeletedPaymentInfo" type="checkbox" /> include deleted</label>
+
+                                            <div id="customer-grid-container" class="datagrid">
+                                                @(Html.Kendo().Grid<PaymentInfoHistoryVM>()
+                                                        .Name("savedpaymentinfo-grid")
+                                                        .Columns(columns =>
+                                                        {
+                                                            columns.Bound(item => item.StripeInfoID).Title("StripeInfoID").Hidden();
+                                                            columns.Bound(item => item.CardLast4).Title("CardLast4");
+                                                            columns.Bound(item => item.CardExpiration).Title("Card Expiration").Format("{0:MM/dd/yyyy}");
+                                                        })
+                                                        .Selectable()
+                                                        .Events(events => events
+                                                            .DataBound("PaymentInfoGridDataChanged")
+                                                            .Change("PaymentInfoGridLineSelectionChanged")
+                                                        )
+                                                        .DataSource(dataSource => dataSource
+                                                            .Ajax()
+                                                            .ServerOperation(false)
+                                                            .Read(read => read.Action("GetSavedPaymentInfoHistory", "Logins").Data("GetSavedPaymentInfoParams"))
+                                                        )
+                                                    )
+                                            </div>
+                                        </div>
+
+                                        <div id="SavedPaymentInfoDetails" style="display: none; margin-left: 25px;">
+
+                                            <div id="SavedPaymentInfoTabs-Details">
+                                                <table id="SavedPaymentInfoDetailsTable" style="padding-top: 10px;" class="details-form">
+                                                    <tr>
+                                                        <td width="150">Stripe Customer ID</td>
+                                                        <td width="500"><label id="lblStripeCustomerID"></label></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Stripe Card ID</td>
+                                                        <td><label id="lblStripeCardID"></label></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Card Error</td>
+                                                        <td><input id="chkCardError" type="checkbox" disabled /></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Error Message</td>
+                                                        <td><textarea id="txtErrorMessage" type="text" rows="4" cols="50" disabled></textarea></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>AutoPay</td>
+                                                        <td><input id="chkAutoPay" type="checkbox" disabled /></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Delete Flag</td>
+                                                        <td>
+                                                            <label>
+                                                                @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "DeleteCCInfo"))
+                                                                {
+                                                                    @Html.CheckBoxFor(model => model.CcInfoDeleteFlag, new { id = "chkDeleteFlag" })
+                                                                }
+                                                                else
+                                                                {
+                                                                    @Html.CheckBoxFor(model => model.CcInfoDeleteFlag, new { id = "chkDeleteFlag", disabled = "disabled" })
+                                                                }
+                                                            </label>
+                                                        </td>
+                                                    </tr>
+                                                    <tr><td></td><td><table id="DeleteHistory"></table></td></tr>
+                                                </table>
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="datagrid">
+                                            @(Html.Kendo().Grid<AutoPayChangeVM>()
+                                                        .Name("autopay-grid")
+                                                        .Columns(columns =>
+                                                        {
+                                                            columns.Bound(item => item.OnOrOff).Title("Setting");
+                                                            columns.Bound(item => item.Reason).Title("Reason");
+                                                            columns.Bound(item => item.TimeStamp).Title("Time Stamp").Format("{0:MM/dd/yyyy H:mm tt}");
+                                                        })
+                                                        .Selectable()
+                                                        .Events(events => events
+                                                            .DataBound("AutoPayGridDataChanged")
+                                                        )
+                                                        .DataSource(dataSource => dataSource
+                                                            .Ajax()
+                                                            .ServerOperation(false)
+                                                            .Read(read => read.Action("GetAutoPayHistory", "Logins").Data("GetAutoPayParams"))
+                                                        )
+                                                    )
+                                        </div>
+
+                                        @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "InvoiceFailureLog"))
+                                        {
+                                            <div class="datagrid">
+                                                @(Html.Kendo().Grid<InvoiceFailureSummary>()
+                                                        .Name("invoice-failure-grid")
+                                                        .Columns(columns =>
+                                                        {
+                                                            columns.Bound(item => item.InvoiceID).Title("Invoice");
+                                                            columns.Bound(item => item.InvoiceTotal).Title("Total");
+                                                            columns.Bound(item => item.DueDate).Format("{0:MM/dd/yyyy h:mm tt}");
+                                                            columns.Bound(item => item.InvoiceNotes).Title("Notes");
+                                                            columns.Bound(item => item.InvoiceSummary);
+                                                            columns.Bound(item => item.LastFailStamp).Format("{0:MM/dd/yyyy h:mm tt}").Title("Time Stamp");
+                                                            columns.Bound(item => item.FailNote);
+                                                            columns.Bound(item => item.LastFour).Title("Last4");
+                                                            columns.Bound(item => item.Expiration);
+                                                            columns.Bound(item => item.StripeCardID);
+                                                        })
+                                                        .Pageable(pageable => pageable
+                                                            .Refresh(false)
+                                                        )
+                                                        .Reorderable(reorder => reorder.Columns(true))
+                                                        .DataSource(dataSource => dataSource
+                                                            .Ajax()
+                                                            .ServerOperation(false)
+                                                            .Read(read => read.Action("GetInvoiceFails", "Logins").Data("GetAutoPayParams"))
+                                                            .PageSize(25)
+                                                        )
+                                                    )
+                                            </div>
+                                        }
+                                    </div>
+
+                                </div>
+
+                                <div id="MainTabs-ActivityHistory">
+                                    <div class="details-form">
+                                        <div class="col-lg-12">
+                                            <label class="deleted-label"><input id="chkInclude" type="checkbox"> include impersonated</label>
+                                        </div>
+                                        <div class="col-lg-12" style="padding-bottom: 20px;">
+                                            <div class="col-lg-5">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon">Range Start</span>
+                                                    <input type="text" class="input-group-addon" placeholder="Range Start" aria-describedby="RangeStart" id="RangeStart" readonly="true" />
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-5">
+                                                <div class="input-group">
+                                                    <span class="input-group-addon">RangeEnd</span>
+                                                    <input type="text" class="input-group-addon" placeholder="Range End" aria-describedby="RangeEnd" id="RangeEnd" readonly="true" />
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2">
+                                                <a class="btn btn-primary" href="javascript:void(0);" style="width:95% !important" id="btnFeatureCount" role="button">Search</a>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12">
+                                            <div id="FeatureGroupGridRow" class="col-lg-6">
+                                                <div id="featuregroup-grid-container" class="datagrid">
+                                                    @(Html.Kendo().Grid<ProEstimatorData.DataModel.FeatureGroup>()
+                                                            .Name("featuregroup-grid")
+                                                            .Columns(columns =>
+                                                            {
+                                                                columns.Bound(item => item.FeatureTag).Title("Feature Tag");
+                                                                columns.Bound(item => item.Count).Title("Count");
+                                                            })
+                                                            .Selectable()
+                                                            .Events(events => events
+                                                                .DataBound("FeatureCountGridDataChanged")
+                                                                .Change("FeatureCountGridLineSelectionChanged")
+                                                            )
+                                                            .DataSource(dataSource => dataSource
+                                                                .Ajax()
+                                                                .ServerOperation(false)
+                                                                .Read(read => read.Action("GetSuccessBoxFeatureCount", "Logins").Data("GetFeatureGroupParams"))
+                                                            )
+                                                            )
+                                                </div>
+                                            </div>
+
+                                            <div id="FeatureLogGridRow" class="col-lg-6">
+                                                <div id="featurelog-grid-container" class="datagrid">
+                                                    @(Html.Kendo().Grid<ProEstimatorData.DataModel.SuccessBoxFeatureLog>()
+                                                            .Name("featurelog-grid")
+                                                            .Columns(columns =>
+                                                            {
+                                                                columns.Bound(item => item.ID).Hidden();
+                                                                columns.Bound(item => item.TimeStamp).Title("When Occurred").Format("{0:MM/dd/yyyy h:mm tt}");
+                                                                columns.Bound(item => item.Feature).Title("Feature Tag");
+                                                                columns.Template(@<text></text>).ClientTemplate("# if (IsImpersonated) { #" + "<img src='/images/checkmark.png' />" + "# } #").Title("Impersonated").Width(90);
+                                                            })
+                                                            .DataSource(dataSource => dataSource
+                                                                .Ajax()
+                                                                .ServerOperation(false)
+                                                                .Read(read => read.Action("GetSuccessBoxFeatureLogs", "Logins").Data("GetFeatureLogParams"))
+                                                                .PageSize(20)
+                                                            )
+                                                            .Pageable(pageable => pageable
+                                                                .Refresh(false)
+                                                                .ButtonCount(6)
+                                                            )
+                                                            )
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="MainTabs-CreditCardPaymentInfo">
+                                    <div class="details-form">
+
+                                        <div class="col-lg-6">
+
+                                            <div class="row">
+                                                <div class="col-lg-12">
+                                                    <div class="form-group">
+                                                        <label class="col-lg-6 control-label">Merchant Key</label>
+                                                        <div class="col-lg-12">
+                                                            @Html.TextBoxFor(model => model.IntelliPayMerchantKey, new { autocomplete = "new-password", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-12">
+                                                    <div class="form-group">
+                                                        <label class="col-lg-6 control-label">API Key</label>
+                                                        <div class="col-lg-12">
+                                                            @Html.TextBoxFor(model => model.IntelliPayAPIKey, new { autocomplete = "new-password", @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-6" style="padding-top: 30px;">
+                                            <label>@Html.CheckBoxFor(model => model.IntelliPayUseCardReader) Use Card Reader</label>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+        }
+    }
+    else
+    {
+        <p>You do not have access to this page.</p>
+    }
+
+</div>

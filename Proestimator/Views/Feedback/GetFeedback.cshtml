@@ -1,0 +1,51 @@
+﻿@model Proestimator.ViewModel.UserFeedbackVM
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_GetFeedback;
+}
+<div id="workDesk" class="page-container">
+    <h2 style="margin-left: 3px;">@Proestimator.Resources.ProStrings.Feedback</h2>
+    @using (Html.BeginForm("SubmitFeedback", "Feedback", FormMethod.Post, new { @class = "container", enctype = "multipart/form-data" }))
+    {
+
+    @Html.HiddenFor(o => o.UserID)
+
+    <div class="half-container">
+        <div style="color:black; font-size:14px; margin-bottom: 20px;">
+            <p>@Proestimator.Resources.ProStrings.FeedbackWelcomeMessage</p>
+            <p><strong>@Proestimator.Resources.ProStrings.FeedbackWelcomeMessage2</strong></p>
+        </div>
+        <div id="lgRow1" class="container">
+            <div id="userFeedbackrField" class="col-md-12">
+                <fieldset id="userFeedbackFieldSet">
+                    <div class="field-wrapper">
+                        <label for="FeedbackText">@Proestimator.Resources.ProStrings.FeedbackTextLabel</label>
+                        <div class="field-control" style="width:100%;">
+                            @Html.TextArea("FeedbackText", null, new { @class = "form-control" })<span>@Html.ValidationMessageFor(model => model.FeedbackText, "", new { @style = "color:red" })</span>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div>
+                <fieldset>
+                    <div class="col-md-12" style="width:100%;">
+                        <label for="ImagesPath">@Proestimator.Resources.ProStrings.FeedbackImagesLabel</label>
+                        <div class="col-md-12">
+                            @Html.TextBoxFor(model => model.ImagesPath, "", new { @type = "file", @multiple = "multiple", @accept = " image/bmp, image/jpeg, image/x-png, image/png, image/gif" })
+                            @Html.ValidationMessageFor(model => model.ImagesPath, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        <div style="width: 100%; text-align: center;">
+            <input type="submit" class="button nav-btn" value="@Proestimator.Resources.ProStrings.Submit" id="commit" />
+            @if (@TempData["FeedbackSubmitted"] != null)
+                {
+            <div class="green" style="color:green; margin-top: 25px;">
+                <p><strong>@Proestimator.Resources.ProStrings.FeedbackSubmittedMessage</strong>
+            </div>
+                }
+        </div>
+    </div>
+    }
+</div>

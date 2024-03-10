@@ -1,0 +1,214 @@
+﻿@model ProEstimator.Admin.ViewModel.PdrReportVM
+
+@using ProEstimator.Admin.ViewModel;
+
+@{
+    ViewBag.Title = "Administration - PDR Report";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<style>
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .padd-top {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    .k-grid td {
+        white-space: normal;
+    }
+
+    .stackem {
+        margin-bottom: 5px;
+    }
+</style>
+
+<script>
+
+    function GetSearchParameters() {
+        return {
+            startDateFilter: $("#startDate").val(), endDateFilter: $("#endDate").val()
+        };
+    }
+
+    $(document).ready(function () {
+
+        // Set up calendar controls
+        $("#startDate").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date",
+            beforeShowDay: $.datepicker.noWeekends
+        });
+
+        // Set up calendar controls
+        $("#endDate").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date",
+            beforeShowDay: $.datepicker.noWeekends
+        });
+
+        // Do the acount id search
+        $("#btnSearchPdr").click(function () {
+            // Refresh the history grid
+            var grid = $("#pdr-report-grid").data("kendoGrid");
+
+            if (grid) {
+                grid.dataSource.read();
+            }
+        });
+
+        $("#filter").on("input", function (e) {
+
+            var grid = $("#pdr-report-grid").data("kendoGrid");
+            var valuetoFilter = e.target.value;
+
+            var filter = KendogridSearchFilter(grid, valuetoFilter);
+
+            grid.dataSource.filter(filter);
+        });
+
+        // startDate
+        var dateChange = new Date();
+        var startDate = GetDayMonthYear(dateChange,true);
+        $("#startDate").val(startDate);
+
+        // endDate
+        dateChange = new Date();
+        var endDate = GetDayMonthYear(dateChange,false);
+        $("#endDate").val(endDate);
+
+        function GetDayMonthYear(dateChange, isFirstDate) {
+            var d = dateChange.getDate();
+
+            var day = '';
+            if (isFirstDate == true)
+            {
+                day = '01'; 
+            }
+            else
+            {
+                day = (d < 10) ? '0' + d : d;
+            }
+
+            var m = dateChange.getMonth() + 1;
+            var month = (m < 10) ? '0' + m : m;
+            var yy = dateChange.getYear();
+            var year = (yy < 1000) ? yy + 1900 : yy;
+
+            var dateRange = month + "/" + day + "/" + year;
+
+            return dateRange;
+        }
+
+        $("#btnExcelExport").click(function () {
+
+            var startDateFilter = $("#startDate").val();
+            var endDateFilter = $("#endDate").val()
+
+            var win = window.open("/PdrReport/DownloadData/?startDateFilter=" + startDateFilter + "&endDateFilter=" + endDateFilter, "_blank");
+
+            if (win) {
+                //Browser has allowed it to be opened
+                win.focus();
+            } else {
+                //Browser has blocked it
+                alert("Your browser blocked the site from opening a new tab, please allow popups for this site.");
+            }
+        });
+    });
+
+</script>
+
+<div class="row padd-top">
+    <div class="col-lg-8 col-md-7 col-sm-6">
+        <h3>
+            PDR Estimates by Sales Rep
+        </h3>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>Search Criteria</h4>
+                </div>
+                <div class="panel-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="input-group">
+                                    <span class="input-group-addon">Start Date</span>
+                                    <input type="text" class="input-group-addon" placeholder="Start Date" aria-describedby="startDate" id="startDate" readonly="true" />
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="input-group">
+                                    <span class="input-group-addon">End Date</span>
+                                    <input type="text" class="input-group-addon" placeholder="End Date" aria-describedby="endDate" id="endDate" readonly="true" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <div class="col-lg-10 pull-left">
+
+                    </div>
+                    <div class="col-lg-2 pull-left">
+                        <a class="btn btn-default pull-right" href="javascript:void(0);" style="width:95% !important" id="btnSearchPdr" role="button">Search</a>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4>PDR Report</h4>
+        </div>
+        <div class="col-lg-8 col-md-7 col-sm-6" style="margin-top:5px;">
+            <div class="dt-buttons ui basic buttons"><button id="btnExcelExport" name="btnExcelExport" class="ui button buttons-excel buttons-html5" tabindex="0" aria-controls="cc-wei-table"><span class="ui-button-text">Excel</span></button></div>
+        </div>
+        <div style="text-align: right;margin-top:5px;">
+            Search: <input type="text" id="filter" />
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div id="pdr-report-grid-container" class="datagrid">
+                    @(Html.Kendo().Grid<PdrReportVM>()
+                                .Name("pdr-report-grid")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(item => item.LoginId).Title("Login ID");
+                                    columns.Bound(item => item.CompanyName).Title("Company Name");
+                                    columns.Bound(item => item.SalesRep).Title("Sales Rep");
+                                    columns.Bound(item => item.NumberOfEstimates).Title("Number Of Estimates");
+                                    columns.Bound(item => item.Date).Title("Date");
+                                })
+                                .Sortable()
+                                .Pageable(pageable => pageable
+                                    .Refresh(false)
+                                )
+                                .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .ServerOperation(false)
+                                    .Read(read => read.Action("GetPdrReport", "PdrReport").Data("GetSearchParameters"))
+                                    .PageSize(50)
+                                ))
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+

@@ -1,0 +1,3316 @@
+﻿@model ProEstimator.Admin.ViewModel.Contracts.ContractPageVM
+
+@using ProEstimator.Admin.ViewModel.Contracts;
+
+@{
+    ViewBag.Title = "Administration - Contracts";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<script>
+
+    var _contractID = 0;
+    var _invoiceID = 0;
+    var _priceLevelID = 0;
+    var _addOnPriceLevelID = 0;
+    var _addonID = 0;
+    var _addonTrialID = 0;
+    var _trialID = 0;
+    var _qty = 1;
+    var _tempQty = 1;
+
+    var _invoiceCount = 0;
+
+    var _isWorking = false; // only allow one ajax call at a time, this gets set to true when calling and false when returned
+
+    var _dueInvoiceLoginID = @Model.LoginID;
+    var _dueInvoiceContractID = @Model.ContractID;
+    var _dueInvoiceInvoiceID = @Model.InvoiceID;
+    var contractMatched = false;
+    var invoiceMatched = false;
+    var _loadedKendoGridOnUlLiClick = '';
+    var _includeDeleteCheckboxClick = '';
+
+    $(document).ready(function () {
+
+        // ----------------------------------------------------------------------------------------------------------------------------------
+        // Trials
+        // ----------------------------------------------------------------------------------------------------------------------------------
+        $("#btnNewTrial").click(function() {
+            $("#NewTrialForm").toggle();
+
+            if ($("#NewTrialForm").is(":visible"))
+            {
+                $("#NewTrialEMS").prop("checked", true);
+                $("#NewTrialFrameData").prop("checked", true);
+                $("#NewTrialProAdvisor").prop("checked", true);
+                $("#NewTrialImages").prop("checked", true);
+                $("#NewTrialCustomReports").prop("checked", true);
+                $("#NewTrialBundle").prop("checked", false);
+                $("#NewTrialMultiUser").prop("checked", false);
+                $("#NewTrialStartDate").val("@DateTime.Now.ToShortDateString()");
+                $("#NewTrialEndDate").val("@DateTime.Now.AddDays(14).ToShortDateString()");
+            }
+        });
+
+        $("#btnCreateNewTrial").click(function() {
+            CreateNewTrial();
+        });
+
+        $("#btnCancelNewTrial").click(function() {
+            $("#NewTrialForm").hide();
+        })
+
+        $("#btnTrialSave").click(function(){
+            SaveTrialDetails();
+        });
+
+        $("#chkIncludeDeletedTrials").change(function() {
+            RefreshTrialsGrid();
+        });
+
+        // ----------------------------------------------------------------------------------------------------------------------------------
+        // Contracts
+        // ----------------------------------------------------------------------------------------------------------------------------------
+        $("#btnNewContract").click(function() {
+            $("#NewContractForm").css("Opacity", "1");
+            $("#NewContractForm").toggle();
+        });
+
+        $("#btnCreateNewContract").click(function() {
+            CreateNewContract();
+        });
+
+        $("#btnCancelNewContract").click(function() {
+            $("#NewContractForm").hide();
+        })
+
+        $("#btnContractSave").click(function() {
+            SaveContractDetails();
+        });
+
+        $("#SelectedContractPriceLevel").change(function () {
+            RefreshContractTermsGrid()
+        });
+
+        $("#chkIncludeDeletedContracts").change(function() {
+            RefreshContractsGrid();
+        });
+
+        $("#btnRemovePromo").click(function() {
+            RemovePromo();
+        });
+
+        $("#btnApplyPromo").click(function() {
+            ApplyPromo();
+        });
+
+        // ----------------------------------------------------------------------------------------------------------------------------------
+        // Invoices
+        // ----------------------------------------------------------------------------------------------------------------------------------
+        $("#chkIncludeDeletedInvoices").change(function() {
+            RefreshContractGrids(false, false, true);
+        });
+
+        $("#btnInvoiceSave").click(function() {
+            SaveInvoiceDetails();
+        })
+
+        $("#btnCalculateTax").click(function(){
+            CalculateInvoiceTax();
+        });
+
+        _loadedKendoGridOnUlLiClick = "invoice-main-grid";
+        $(".invoice-tab-link").click(function() {
+            _invoiceID = 0;
+            LoadInvoiceDetails(0);
+
+            $("#InvoiceTabs").find(".k-state-selected").removeClass("k-state-selected");
+
+            //_loadedKendoGridOnUlLiClick
+            var clickedUlLiTab = $(this).attr("id");
+
+            _loadedKendoGridOnUlLiClick = "invoice-main-grid";
+            if(clickedUlLiTab == "tabTitleInvoicesMain") {
+                _loadedKendoGridOnUlLiClick = "invoice-main-grid";
+            }
+            else if(clickedUlLiTab == "tabTitleInvoicesFrame") {
+                _loadedKendoGridOnUlLiClick = "invoice-frame-grid";
+            }
+            else if(clickedUlLiTab == "tabTitleInvoicesEMS") {
+                _loadedKendoGridOnUlLiClick = "invoice-ems-grid";
+            }
+            else if(clickedUlLiTab == "tabTitleInvoicesMulti") {
+                _loadedKendoGridOnUlLiClick = "invoice-multi-grid";
+            }
+            else if(clickedUlLiTab == "tabTitleInvoicesBundle") {
+                _loadedKendoGridOnUlLiClick = "invoice-bundle-grid";
+            }
+            else if(clickedUlLiTab == "tabTitleInvoicesQB") {
+                _loadedKendoGridOnUlLiClick = "invoice-qb-grid";
+            }
+            else if(clickedUlLiTab == "tabTitleInvoicesAddOns") {
+                _loadedKendoGridOnUlLiClick = "invoice-addons-grid";
+            }
+            else if(clickedUlLiTab == "tabTitleInvoicesImages") {
+                _loadedKendoGridOnUlLiClick = "invoice-images-grid";
+            }
+            else if(clickedUlLiTab == "tabTitleInvoicesCustom") {
+                _loadedKendoGridOnUlLiClick = "invoice-custom-grid";
+            }
+            else if(clickedUlLiTab == "tabTitleInvoicesCustomReports") {
+                _loadedKendoGridOnUlLiClick = "invoice-custom-grid";
+            }
+
+            RefreshMultiActionButtons();
+
+            $("#lblCalculateTaxInvoiceLineStatus").hide();
+        });
+
+        $(document).on("change", ".invoice-checkbox", function() {
+            RefreshMultiActionButtons();
+        });
+
+        $("#btnInvoicesPaid").click(function(){
+            $("#invoice-calculate-tax").hide();
+            $("#all-invoice-unpaid-confirm").hide();
+            $("#invoice-selected-unpaid-confirm").hide();
+            $("#invoice-selected-paid-confirm").show();
+            $("#invoice-selected-delete-confirm").hide();
+        });
+
+        $("#btnInvoicesPaidYes").click(function(){
+            SelectedInvoicesPaid();
+
+        });
+
+        $("#btnInvoicesPaidNo").click(function(){
+            $("#invoice-selected-paid-confirm").hide();
+        });
+
+        $("#btnUnPaySelectedInvoices").click(function(){
+            $("#invoice-calculate-tax").hide();
+            $("#all-invoice-unpaid-confirm").hide();
+            $("#invoice-selected-unpaid-confirm").show();
+            $("#invoice-selected-paid-confirm").hide();
+            $("#invoice-selected-delete-confirm").hide();
+        });
+
+        $("#btnUnPaySelectedInvoicesYes").click(function(){
+            SelectedInvoicesUnPaid();
+
+        });
+
+        $("#btnUnPaySelectedInvoicesNo").click(function(){
+            $("#invoice-selected-unpaid-confirm").hide();
+        });
+
+        $("#btnInvoicesDelete").click(function(){
+            $("#invoice-calculate-tax").hide();
+            $("#all-invoice-unpaid-confirm").hide();
+            $("#invoice-selected-unpaid-confirm").hide();
+            $("#invoice-selected-paid-confirm").hide();
+            $("#invoice-selected-delete-confirm").show();
+        });
+
+        $("#btnInvoicesDeleteYes").click(function(){
+            SelectedInvoicesDelete();
+
+        });
+
+        $("#btnInvoicesDeleteNo").click(function(){
+            $("#invoice-selected-delete-confirm").hide();
+        });
+
+        $("#btnCalculateTaxSelected").click(function(){
+            $("#invoice-calculate-tax").show();
+            $("#invoice-selected-calculate-tax-confirm").show();
+            $("#lblCalculateTaxInvoiceLineStatus").hide();
+            $("#all-invoice-unpaid-confirm").hide();
+            $("#invoice-selected-unpaid-confirm").hide();
+            $("#invoice-selected-paid-confirm").hide();
+            $("#invoice-selected-delete-confirm").hide();
+        });
+
+        $("#btnCalculateTaxYes").click(function(){
+            GridLineCalculateInvoiceTax();
+
+        });
+
+        $("#btnCalculateTaxNo").click(function(){
+            $("#invoice-calculate-tax").hide();
+        });
+
+        // ----------------------------------------------------------------------------------------------------------------------------------
+        // Add Ons
+        // ----------------------------------------------------------------------------------------------------------------------------------
+        $("#btnNewAddOn").click(function() {
+            $("#NewAddOnForm").css("Opacity", "1");
+            $("#NewAddOnForm").toggle();
+        })
+
+        $("#SelectedAddOnType").change(function() {
+            RefreshAddOnTermsGrid();
+            RefreshAddOnButton();
+        })
+
+        $("#SelectedAddOnPriceLevel").change(function() {
+            RefreshAddOnTermsGrid();
+        })
+
+        $("#SelectedAddOnQty").change(function () {
+            RefreshAddOnTermsGrid();
+        })
+
+        $("#chkIncludeDeletedAddOns").change(function () {
+            RefreshContractGrids(true, false, true);
+        });
+
+        $("#btnCreateNewAddOn").click(function() {
+            CreateNewAddOn();
+        });
+
+        $("#btnCancelNewAddOn").click(function() {
+            $("#NewAddOnForm").hide();
+        })
+
+        $("#btnAddOnSave").click(function() {
+            SaveAddOnDetails();
+        });
+
+        $("#numQuantity").change(function () {
+            if (_tempQty < $("#numQuantity").val() && _qty < $("#numQuantity").val()) {
+                var num = $("#numQuantity").val() - _qty;
+                if (!confirm("You chose to add " + num + " AddOn. Do you still want to continue?")) {
+                    $("#numQuantity").val(_qty);
+                }
+            }
+            else if (_tempQty > $("#numQuantity").val() && _qty > $("#numQuantity").val()) {
+                var num = _qty - $("#numQuantity").val();
+                if (!confirm("You chose to remove " + num + " AddOn. Do you still want to continue?")) {
+                    $("#numQuantity").val(_qty);
+                }
+            }
+            _tempQty = $("#numQuantity").val();
+        });
+
+        // ----------------------------------------------------------------------------------------------------------------------------------
+        // Add On Trials
+        // ----------------------------------------------------------------------------------------------------------------------------------
+        $("#btnNewAddOnTrial").click(function() {
+            $("#NewAddOnTrialForm").css("Opacity", "1");
+            $("#NewAddOnTrialForm").toggle();
+        })
+
+        $("#chkIncludeDeletedAddOnTrials").change(function() {
+            RefreshContractGrids(false, true, false);
+        });
+
+        $("#btnCreateNewAddOnTrial").click(function() {
+            CreateNewAddOnTrial();
+        });
+
+        $("#btnCancelNewAddOnTrial").click(function() {
+            $("#NewAddOnTrialForm").hide();
+        })
+
+        $("#btnAddOnTrialSave").click(function() {
+            SaveAddOnTrialDetails();
+        });
+
+        // ----------------------------------------------------------------------------------------------------------------------------------
+        // Create Custom Invoices
+        // ----------------------------------------------------------------------------------------------------------------------------------
+        $("#btnNewInvoices").click(function() {
+            $("#NewInvoiceForm").toggle();
+
+            if ($("#NewInvoiceForm").is(":visible"))
+            {
+                ClearCreateCustomInvoicesForm();
+            }
+        })
+
+        $("#btnNewInvoiceSave").click(function() {
+            CreateCustomInvoices();
+        });
+
+        $("#MainTabs").tabs();
+        $("#ContractTabs").tabs();
+        $("#InvoiceTabs").tabs();
+
+        $("#InvoiceTabs").on( "tabsactivate", function( event, ui )
+        {
+            RefreshMultiActionButtons();
+        });
+
+        // Set up calendar controls
+        $(".date-picker").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        $(".search-input-enter-key-press").keypress(function(e){
+            var key = e.which;
+
+            if(key == 13)  // the enter key code
+            {
+                $("#btnLoginSearch").click();
+                return false;
+            }
+        });
+
+        $("#txtLoginSearch").keyup(function (e) {
+            var key = e.which;
+
+            if (key != 9)  // the tab key code
+            {
+                $("#txtContractSearch").val('');
+                $("#txtInvoiceSearch").val('');
+            }
+        });
+
+        $("#txtContractSearch").keyup(function (e) {
+            var key = e.which;
+
+            if (key != 9)  // the tab key code
+            {
+                $("#txtLoginSearch").val('');
+                $("#txtInvoiceSearch").val('');
+            }
+        });
+
+        $("#txtInvoiceSearch").keyup(function (e) {
+            var key = e.which;
+
+            if (key != 9)  // the tab key code
+            {
+                $("#txtLoginSearch").val('');
+                $("#txtContractSearch").val('');
+            }
+        });
+
+        // Do the acount id search
+        $("#btnLoginSearch").click(function() {
+
+            $("#lblLoginSearch").text("");
+
+            $.getJSON("/Contract/Search", { searchLoginID: $("#txtLoginSearch").val(), searchContractID: $("#txtContractSearch").val(),
+                                                searchInvoiceID: $("#txtInvoiceSearch").val()
+            }, function (data) {
+                if (data == "")
+                {
+                    $("#lblLoginSearch").text("No Results Found.");
+                }
+                else
+                {
+                    var loginID = data;
+
+                    // contractID
+                    var contractID = $.trim($("#txtContractSearch").val());
+                    if (contractID == '') {
+                        contractID = '0';
+                    }
+
+                    // invoiceID
+                    var invoiceID = $.trim($("#txtInvoiceSearch").val());
+                    if (invoiceID == '') {
+                        invoiceID = '0';
+                    }
+
+                    window.location.href = "/Contract/List/Allsearch/" + loginID + "/" + contractID + "/" + invoiceID;
+                }
+            });
+        });
+
+        $("#ContentWrapper").show();
+    });
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+    // Trials
+    // ----------------------------------------------------------------------------------------------------------------------------------
+    function CreateNewTrial()
+    {
+        if (_isWorking === false)
+        {
+            _isWorking = true;
+
+            $.getJSON("/Contract/CreateNewTrial", { loginID: @Model.LoginID, startDate: $("#NewTrialStartDate").val(), endDate: $("#NewTrialEndDate").val(), ems: $("#NewTrialEMS").is(":checked"), frameData: $("#NewTrialFrameData").is(":checked"), qbExporter: $("#NewTrialQBExporter").is(":checked"), proAdvisor: $("#NewTrialProAdvisor").is(":checked"), images: $("#NewTrialImages").is(":checked"), customReports: $("#NewTrialCustomReports").is(":checked"), bundle: $("#NewTrialBundle").is(":checked"), multiUser: $("#NewTrialMultiUser").is(":checked") }, function (data) {
+                _isWorking = false;
+
+                if (data != "")
+                {
+                    alert(data);
+                }
+                else
+                {
+                    $("#NewTrialForm").hide();
+                    RefreshTrialsGrid();
+                }
+            });
+        }
+    }
+
+    function RefreshTrialsGrid () {
+        var grid = $("#trials-grid").data("kendoGrid");
+        grid.dataSource.read();
+    }
+
+    function GetTrialsSearchParameters() {
+        return { loginID: @Model.LoginID, showDeleted: $("#chkIncludeDeletedTrials").is(":checked") };
+    }
+
+    function TrialGridDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#trials-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+
+        var grid = $("#trials-grid").data("kendoGrid");
+        var models = grid.dataSource.data();
+
+        var selectedFound = false;
+
+        for(i = 0; i < models.length; i++)
+        {
+            var row = grid.table.find("[data-uid=" + models[i].uid + "]");
+
+            if (_trialID > 0)
+            {
+                if (models[i].ID == _trialID)
+                {
+                    grid.select(row);
+                    selectedFound = true;
+                }
+            }
+
+            if (models[i].IsDeleted === true)
+            {
+                row.addClass("deleted-row");
+            }
+        }
+
+        if (selectedFound === false)
+        {
+            _trialID = 0;
+            LoadTrialDetails();
+        }
+
+        $("#tabTitleTrials").text("Trials (" + models.length + ")");
+    }
+
+    function TrialGridLineSelectionChanged(arg) {
+
+        // Get the selected item and call the ClickedItem event
+        var row = $("#trials-grid").find(".k-state-selected").first();
+        var trialID = row.find("td").first().html();
+        if (trialID != _trialID)
+        {
+            _trialID = trialID;
+
+            $("#TrialDetails").show();
+
+            LoadTrialDetails();
+        }
+    }
+
+    function LoadTrialDetails()
+    {
+        if (_trialID > 0)
+        {
+            $("#TrialDetailsTable").css("Opacity", "0.2");
+
+            $.getJSON("/Contract/GetTrialDetails", { trialID: _trialID }, function (data) {
+                LoadTrialIntoForm(data);
+            });
+        }
+        else
+        {
+            $("#TrialDetails").hide();
+        }
+    }
+
+    function LoadTrialIntoForm(trial)
+    {
+        $("#TrialDetailsTable").css("Opacity", "1.0");
+
+        if (trial)
+        {
+            $("#TrialDetails").show();
+
+            $("#lblTrialDateCreate").text(trial.DateCreated);
+            $("#txtTrialStartDate").val(trial.StartDate);
+            $("#txtTrialEndDate").val(trial.EndDate);
+            $("#chkTrialActive").prop("checked", trial.IsActive);
+            $("#chkTrialDeleted").prop("checked", trial.IsDeleted);
+            $("#chkTrialEMS").prop("checked", trial.HasEMS);
+            $("#chkTrialFrameData").prop("checked", trial.HasFrameData);
+            $("#chkTrialQBExporter").prop("checked", trial.HasQBExporter);
+            $("#chkTrialProAdvisor").prop("checked", trial.HasProAdvisor);
+            $("#chkTrialImages").prop("checked", trial.HasImages);
+            $("#chkTrialCustomReports").prop("checked", trial.HasCustomReports);
+            $("#chkTrialBundle").prop("checked", trial.HasBundle);
+            $("#chkTrialMultiUser").prop("checked", trial.HasMultiUser);
+
+            $("#lblTrialErrorMessage").text(trial.ErrorMessage);
+        }
+        else
+        {
+            $("#TrialDetails").hide();
+        }
+    }
+
+    function SaveTrialDetails()
+    {
+        if (_isWorking === false)
+        {
+            _isWorking = true;
+            $("#TrialDetailsTable").css("Opacity", "0.2");
+
+            $.getJSON("/Contract/SaveTrialDetails", {
+                trialID: _trialID
+                , startDate: $("#txtTrialStartDate").val()
+                , endDate: $("#txtTrialEndDate").val()
+                , isActive: $("#chkTrialActive").is(":checked")
+                , isDeleted: $("#chkTrialDeleted").is(":checked")
+                , hasEMS: $("#chkTrialEMS").is(":checked")
+                , hasFrameData: $("#chkTrialFrameData").is(":checked")
+                , hasQBExporter: $("#chkTrialQBExporter").is(":checked")
+                , hasProAdvisor: $("#chkTrialProAdvisor").is(":checked")
+                , hasImages: $("#chkTrialImages").is(":checked")
+                , hasCustomReports: $("#chkTrialCustomReports").is(":checked")
+                , hasBundle: $("#chkTrialBundle").is(":checked")
+                , hasMultiUser: $("#chkTrialMultiUser").is(":checked")
+            }, function (data) {
+                _isWorking = false;
+                LoadTrialIntoForm(data);
+                RefreshTrialsGrid();
+            });
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+    // New Contract form
+    // ----------------------------------------------------------------------------------------------------------------------------------
+    function CreateNewContract()
+    {
+        if (_isWorking === false)
+        {
+            _isWorking = true;
+            $("#NewContractForm").css("Opacity", "0.2");
+
+            $.getJSON("/Contract/CreateNewContract", { loginID: @Model.LoginID, contractPriceLevelID: _priceLevelID, startDate: $("#NewContractStartDate").val() }, function (data) {
+                _isWorking = false;
+
+                if (data != "")
+                {
+                    $("#NewContractForm").css("Opacity", "1");
+                    alert(data);
+                }
+                else
+                {
+                    $("#NewContractForm").hide();
+                    RefreshContractsGrid();
+                }
+            });
+        }
+
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+    // Contract Terms grid
+    // ----------------------------------------------------------------------------------------------------------------------------------
+    function RefreshContractTermsGrid() {
+        var grid = $("#contract-terms-grid").data("kendoGrid");
+        grid.dataSource.read();
+    }
+
+    function GetContractTermsListParameters() {
+        return { contractID: _contractID, contractType: 1, priceLevel: $("#SelectedContractPriceLevel").val(), qty: 1 };
+    }
+
+    function ContractTermsDataChanged(arg) {
+        // Wire up hilighting the row when hovering.
+        $("#contract-terms-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+    }
+
+    function ContractTermsLineSelectionChanged(arg) {
+        var row = $("#contract-terms-grid").find(".k-state-selected").first();
+        _priceLevelID = row.find("td").first().html();
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+    // Contracts grid
+    // ----------------------------------------------------------------------------------------------------------------------------------
+    function GetContractsSearchParameters() {
+        return { loginID: @Model.LoginID, contractID: @Model.ContractID, invoiceID: @Model.InvoiceID, showDeleted: $("#chkIncludeDeletedContracts").is(":checked") };
+    }
+
+    function RefreshContractsGrid() {
+        var grid = $("#contract-grid").data("kendoGrid");
+        grid.dataSource.read();
+    }
+
+    function ContractGridDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#contract-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+
+        var grid = $("#contract-grid").data("kendoGrid");
+        var models = grid.dataSource.data();
+
+        var selectedFound = false;
+
+        for(i = 0; i < models.length; i++)
+        {
+            var row = grid.table.find("[data-uid=" + models[i].uid + "]");
+
+            if (_contractID > 0)
+            {
+                if (models[i].ContractID == _contractID)
+                {
+                    grid.select(row);
+                    selectedFound = true;
+                }
+            }
+
+            if (models[i].IsDeleted === true)
+            {
+                row.addClass("deleted-row");
+            }
+        }
+
+        if (selectedFound === false)
+        {
+            _contractID = 0;
+            LoadContractDetails();
+        }
+
+        $("#tabTitleContracts").text("Contracts (" + models.length + ")");
+
+        if(@Model.LoginID > 0 && @Model.ContractID  > 0 && @Model.InvoiceID > 0)
+        {
+            _dueInvoiceLoginID = @Model.LoginID;
+            _dueInvoiceContractID = @Model.ContractID;
+            _dueInvoiceInvoiceID = @Model.InvoiceID;
+            contractMatched = false;
+
+            var grid = $("#contract-grid").data("kendoGrid");
+            var models = grid.dataSource.data();
+
+            for(i = 0; i < models.length; i++)
+            {
+                var row = grid.table.find("[data-uid=" + models[i].uid + "]");
+
+                if(models[i].ContractID == _dueInvoiceContractID)
+                {
+                    // contractID Matched
+                    grid.select(row);
+                    contractMatched = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    function IsInvoiceMatchedInGrid(invoiceGrid, dueInvoiceInvoiceID) {
+
+        var grid = '';
+        var Models = '';
+        var row = '';
+
+        grid = $("#" + invoiceGrid).data("kendoGrid");
+        models = grid.dataSource.data();
+
+        for(i = 0; i < models.length; i++)
+        {
+            row = grid.table.find("[data-uid=" + models[i].uid + "]");
+
+            if(models[i].InvoiceID == dueInvoiceInvoiceID)
+            {
+                grid.select(row);
+                return true;
+            }
+        }
+    }
+
+    function ContractGridLineSelectionChanged(arg) {
+
+        // Get the selected item and call the ClickedItem event
+        var row = $("#contract-grid").find(".k-state-selected").first();
+        var contractID = row.find("td").first().html();
+        if (contractID != _contractID)
+        {
+            _contractID = contractID;
+
+            var showAddOnButton = row.find("td:nth-child(2)").html();
+            if (showAddOnButton === "true") {
+                $("#PickAddOnButton").show();
+                $("#PickAddOnButton").attr("href", "/@Model.LoginID/invoice/pick-addon/" + _contractID);
+            }
+            else {
+                $("#PickAddOnButton").hide();
+            }
+
+            $("#ContractDetails").show();
+
+            LoadContractDetails();
+            RefreshContractGrids(true, true, true);
+            RefreshAddOnButton();
+        }
+    }
+
+    function RefreshContractGrids(addon, addonTrial, invoice) {
+        $.getJSON("/Contract/GetContractGridsList", { contractID: _contractID, showDeleted: $("#chkIncludeDeletedInvoices").is(":checked"), showAddOnDeleted: $("#chkIncludeDeletedAddOns").is(":checked"), showAddOnTrialDeleted: $("#chkIncludeDeletedAddOnTrials").is(":checked"), addon: addon, addonTrial: addonTrial, invoice: invoice }, function (data) {
+            if (data != "") {
+                if (addon) {
+                    $("#addon-grid").data("kendoGrid").dataSource.data(data.AddOns);
+                }
+                if (addonTrial) {
+                    $("#addon-trial-grid").data("kendoGrid").dataSource.data(data.AddOnTrials);
+                }
+                if (invoice) {
+                    _invoiceCount = 0;
+                    $("#ContractDetails").find(".past-due").removeClass("past-due");
+
+                    $("#invoice-main-grid").data("kendoGrid").dataSource.data(data.MainInvoices);
+                    $("#invoice-frame-grid").data("kendoGrid").dataSource.data(data.FrameInvoices);
+                    $("#invoice-ems-grid").data("kendoGrid").dataSource.data(data.EmsInvoices);
+                    $("#invoice-multi-grid").data("kendoGrid").dataSource.data(data.MultiUserInvoices);
+                    $("#invoice-qb-grid").data("kendoGrid").dataSource.data(data.QbInvoices);
+                    $("#invoice-addons-grid").data("kendoGrid").dataSource.data(data.AdvisorInvoices);
+                    $("#invoice-images-grid").data("kendoGrid").dataSource.data(data.ImageInvoices);
+                    $("#invoice-custom-reports-grid").data("kendoGrid").dataSource.data(data.ReportsInvoices);
+                    $("#invoice-bundle-grid").data("kendoGrid").dataSource.data(data.BundleInvoices);
+                    $("#invoice-custom-grid").data("kendoGrid").dataSource.data(data.CustomInvoices);
+
+                    if (_includeDeleteCheckboxClick == true) {
+                        RefreshMultiActionButtons();
+                    }
+                }
+            }
+        });
+    }
+
+    function LoadContractDetails()
+    {
+        if (_contractID > 0)
+        {
+            $("#ContractDetailsTable").css("Opacity", "0.2");
+
+            $("#InvoiceDetails").hide();
+            $("#NewAddOnForm").hide();
+
+            $.getJSON("/Contract/GetContractDetails", { contractID: _contractID }, function (data) {
+                LoadContractIntoForm(data);
+            });
+        }
+        else
+        {
+            $("#ContractDetails").hide();
+        }
+    }
+
+    function LoadContractIntoForm(contract)
+    {
+        $("#ContractDetailsTable").css("Opacity", "1.0");
+
+        if (contract)
+        {
+            $("#ContractDetails").show();
+
+            $("#lblContractDateCreate").text(contract.CreatedDate);
+            $("#lblContractID").text(contract.ContractID);
+            $("#lblContractTerms").text(contract.ContractPriceLevel + " - " + contract.TermDescription);
+            $("#txtNotes").val(contract.Notes);
+            $("#lblContractPromo").text(contract.PromoCode);
+            $("#btnRemovePromo").toggle(contract.PromoCode != "");
+            $("#rowApplyPromo").toggle(contract.PromoCode == "");
+            $("#txtContractStartDate").val(contract.EffectiveDate);
+            $("#txtContractEndDate").val(contract.ExpirationDate);
+            $("#chkContractIsSigned").prop("checked", contract.IsSigned);
+            $("#chkIgnoreAutoPay").prop("checked", contract.IgnoreAutoPay);
+            $("#chkEarlyRenewal").prop("checked", contract.EarlyRenewal);
+            $("#chkContractActive").prop("checked", contract.IsActive);
+            $("#chkContractDeleted").prop("checked", contract.IsDeleted);
+
+            var promoCodeDropDown = $("#ddlPromoCodes");
+            promoCodeDropDown.empty();
+
+            if(contract.AvailablePromoCodes != null) {
+                for(var i = 0; i < contract.AvailablePromoCodes.length; i++)
+                {
+                    promoCodeDropDown.append("<option value='" + contract.AvailablePromoCodes[i].PromoCode + "'>" + contract.AvailablePromoCodes[i].Description + "</option>");
+                }
+
+                if (contract.AvailablePromoCodes.length == 0)
+                {
+                    $("#rowApplyPromo").hide();
+                }
+            }
+
+            if (contract.IsSigned === true && contract.DigitalSignatureID > 0)
+            {
+                $("#btnViewDigitalSignature").show();
+                $("#btnViewDigitalSignature").attr("href", "/Contract/ViewContract/" + contract.DigitalSignatureID);
+            }
+            else
+            {
+                $("#btnViewDigitalSignature").hide();
+            }
+
+            $("#lblContractErrorMessage").text(contract.ErrorMessage);
+        }
+        else
+        {
+            $("#ContractDetails").hide();
+        }
+    }
+
+    function SaveContractDetails()
+    {
+        if (_isWorking === false)
+        {
+            _isWorking = true;
+            $("#ContractDetailsTable").css("Opacity", "0.2");
+
+            $.getJSON("/Contract/SaveContractDetails", {
+                contractID: _contractID
+                , notes: $("#txtNotes").val()
+                , startDate: $("#txtContractStartDate").val()
+                , endDate: $("#txtContractEndDate").val()
+                , isSigned: $("#chkContractIsSigned").is(":checked")
+                , ignoreAutoPay: $("#chkIgnoreAutoPay").is(":checked")
+                , earlyRenewal: $("#chkEarlyRenewal").is(":checked")
+                , isActive: $("#chkContractActive").is(":checked")
+                , isDeleted: $("#chkContractDeleted").is(":checked")
+            }, function (data) {
+                _isWorking = false;
+                LoadContractIntoForm(data);
+                RefreshContractsGrid();
+            });
+        }
+    }
+
+    function RemovePromo()
+    {
+        $.getJSON("/Contract/RemovePromo", {
+            contractID: _contractID
+        }, function (data) {
+            if (data != "")
+            {
+                alert(data);
+            }
+            else
+            {
+                $("#lblContractPromo").text("");
+                $("#btnRemovePromo").hide();
+                $("#rowApplyPromo").show();
+                RefreshContractGrids(false, false, true);
+
+                if (_invoiceID > 0)
+                {
+                    LoadInvoiceDetails(_invoiceID);
+                }
+            }
+        });
+    }
+
+    function ApplyPromo()
+    {
+        var promoCode = $("#ddlPromoCodes").val();
+
+        $.getJSON("/Contract/ApplyPromoCode", {
+            contractID: _contractID
+            , promoCode: promoCode
+        }, function (data) {
+            if (data != "")
+            {
+                alert(data);
+            }
+            else
+            {
+                $("#lblContractPromo").text(promoCode);
+                $("#btnRemovePromo").show();
+                $("#rowApplyPromo").hide();
+
+                RefreshContractGrids(false, false, true);
+
+                if (_invoiceID > 0)
+                {
+                    LoadInvoiceDetails(_invoiceID);
+                }
+            }
+        });
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+    // Add On Terms
+    // ----------------------------------------------------------------------------------------------------------------------------------
+    function RefreshAddOnTermsGrid() {
+        var grid = $("#addon-terms-grid").data("kendoGrid");
+        grid.dataSource.read();
+    }
+
+    function GetAddOnTermsListParameters() {
+        var qty = 1;
+        if ($("#QtyRow").is(":visible")) {
+            qty = $("#SelectedAddOnQty").val();
+        }
+        return { contractID: _contractID, contractType: $("#SelectedAddOnType").val(), priceLevel: $("#SelectedAddOnPriceLevel").val(), showDeleted: $("#chkIncludeDeletedAddOns").is(":checked"), qty: qty };
+    }
+
+    function AddOnTermsDataChanged(arg) {
+        // Wire up hilighting the row when hovering.
+        $("#addon-terms-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+    }
+
+    function AddOnTermsLineSelectionChanged(arg) {
+        var row = $("#addon-terms-grid").find(".k-state-selected").first();
+        _addOnPriceLevelID = row.find("td").first().html();
+    }
+
+    function RefreshAddOnButton() {
+        var addOnTypeId = $("#SelectedAddOnType").val();
+        if (addOnTypeId == 8) {
+            $("#btnCreateNewAddOn").removeAttr("disabled");
+            $("#QtyRow").show();
+        }
+        else {
+            $("#QtyRow").hide();
+            $.getJSON("/Contract/HasAddOn", { contractID: _contractID, addOnType: addOnTypeId }, function (data) {
+                if (data.ErrorMessage != "") {
+                    alert(data.ErrorMessage);
+                }
+                else {
+                    if (data.Success) {
+                        $("#btnCreateNewAddOn").attr("disabled", "disabled");
+                    }
+                    else {
+                        $("#btnCreateNewAddOn").removeAttr("disabled");
+                    }
+                }
+            });
+        }
+    }
+
+    function CreateNewAddOn()
+    {
+        if (_isWorking === false)
+        {
+            _isWorking = true;
+            $("#NewAddOnForm").css("Opacity", "0.2");
+
+            var qty = 1;
+            if ($("#QtyRow").is(":visible")) { qty = $("#SelectedAddOnQty").val(); }
+            $.getJSON("/Contract/CreateNewAddOn", { contractID: _contractID, addOnType: $("#SelectedAddOnType").val(), contractPriceLevelID: _addOnPriceLevelID, startDate: $("#NewAddOnStartDate").val(), qty: qty }, function (data) {
+                _isWorking = false;
+
+                if (data != "")
+                {
+                    $("#NewAddOnForm").css("Opacity", "1");
+                    alert(data);
+                }
+                else
+                {
+                    $("#NewAddOnForm").hide();
+                    RefreshContractsGrid();
+                    RefreshContractGrids(true, false, true);
+                    RefreshAddOnButton();
+                }
+            });
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+    // AddOns grid
+    // ----------------------------------------------------------------------------------------------------------------------------------
+    function AddOnGridDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#addon-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+
+        var grid = $("#addon-grid").data("kendoGrid");
+        var models = grid.dataSource.data();
+
+        var selectedFound = false;
+
+        for(i = 0; i < models.length; i++)
+        {
+            var row = grid.table.find("[data-uid=" + models[i].uid + "]");
+
+            if (_addonID > 0 && models[i].ID == _addonID)
+            {
+                grid.select(row);
+                selectedFound = true;
+            }
+
+            if (models[i].IsDeleted === true)
+            {
+                row.addClass("deleted-row");
+            }
+        }
+
+        if (selectedFound === false)
+        {
+            _addonID = 0;
+            LoadAddOnDetails(0);
+        }
+
+        $("#tabTitleAddOns").text("AddOns (" + models.length + ")");
+    }
+
+    function AddOnGridLineSelectionChanged() {
+        var row = $("#addon-grid").find(".k-state-selected").first();
+        var addonID = row.find("td").first().html();
+
+        if (addonID != _addonID)
+        {
+            _addonID = addonID;
+            LoadAddOnDetails(_addonID);
+        }
+    }
+
+    function GetAddOnsSearchParameters() {
+        var result =
+        {
+            contractID: _contractID
+            , showDeleted: $("#chkIncludeDeletedAddOns").is(":checked")
+        };
+        return result;
+    }
+
+    function RefreshAddOnGrid() {
+        var grid = $("#addon-grid").data("kendoGrid");
+        grid.dataSource.read();
+    }
+
+    function LoadAddOnDetails(addonID)
+    {
+        if (addonID > 0)
+        {
+            $("#AddOnDetails").show();
+            $("#AddOnDetails").css("Opacity", "0.2");
+
+            $.getJSON("/Contract/GetAddOnDetails", { addonID: addonID }, function (data) {
+                LoadAddOnIntoForm(data);
+            });
+        }
+        else
+        {
+            $("#AddOnDetails").hide();
+        }
+    }
+
+    function LoadAddOnIntoForm(addon)
+    {
+        $("#AddOnDetails").css("Opacity", "1.0");
+        $("#AddOnDetails").show();
+
+        $("#lblAddOnContractType").text(addon.ContractType);
+        $("#lblAddOnDescription").text(addon.Description);
+        $("#txtAddOnStartDate").val(addon.StartDate);
+        _qty = addon.Quantity;
+        _tempQty = _qty;
+        $("#numQuantity").val(addon.Quantity);
+        if (addon.ContractType == "Multi User") {
+            $("#QtyAddOn").show();
+        }
+        else {
+            $("#QtyAddOn").hide();
+        }
+        $("#chkAddOnActive").prop("checked", addon.IsActive);
+        $("#chkAddOnDeleted").prop("checked", addon.IsDeleted);
+
+        $("#lblAddOnErrorMessage").text(addon.ErrorMessage);
+    }
+
+    function SaveAddOnDetails()
+    {
+        if (_isWorking === false)
+        {
+            _isWorking = true;
+
+            $("#AddOnDetails").css("Opacity", "0.2");
+
+            $.getJSON("/Contract/SaveAddOnDetails", {
+                addonID: _addonID
+                , active: $("#chkAddOnActive").is(":checked")
+                , isDeleted: $("#chkAddOnDeleted").is(":checked")
+                , startDate: $("#txtAddOnStartDate").val()
+                , qty: $("#numQuantity").val()
+            }, function (data) {
+                _isWorking = false;
+                LoadAddOnIntoForm(data);
+                RefreshContractGrids(true, false, true);
+                RefreshAddOnButton();
+            });
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+    // AddOnTrials grid
+    // ----------------------------------------------------------------------------------------------------------------------------------
+    function AddOnTrialGridDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#addon-trial-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+
+        var grid = $("#addon-trial-grid").data("kendoGrid");
+        var models = grid.dataSource.data();
+
+        var selectedFound = false;
+
+        for(i = 0; i < models.length; i++)
+        {
+            var row = grid.table.find("[data-uid=" + models[i].uid + "]");
+
+            if (_addonTrialID > 0 && models[i].ID == _addonTrialID)
+            {
+                grid.select(row);
+                selectedFound = true;
+            }
+
+            if (models[i].IsDeleted === true)
+            {
+                row.addClass("deleted-row");
+            }
+        }
+
+        if (selectedFound === false)
+        {
+            _addonTrialID = 0;
+            LoadAddOnTrialDetails(0);
+        }
+
+        $("#tabTitleAddOnTrials").text("AddOn Trials (" + models.length + ")");
+    }
+
+    function AddOnTrialGridLineSelectionChanged() {
+        var row = $("#addon-trial-grid").find(".k-state-selected").first();
+        var addonTrialID = row.find("td").first().html();
+
+        if (addonTrialID != _addonTrialID)
+        {
+            _addonTrialID = addonTrialID;
+            LoadAddOnTrialDetails(_addonTrialID);
+        }
+    }
+
+    function GetAddOnTrialsSearchParameters() {
+        var result =
+        {
+            contractID: _contractID
+            , showDeleted: $("#chkIncludeDeletedAddOnTrials").is(":checked")
+        };
+        return result;
+    }
+
+    function RefreshAddOnTrialGrid() {
+        var grid = $("#addon-trial-grid").data("kendoGrid");
+        grid.dataSource.read();
+    }
+
+    function CreateNewAddOnTrial()
+    {
+        if (_isWorking === false)
+        {
+            _isWorking = true;
+            $("#NewAddOnTrialForm").css("Opacity", "0.2");
+
+            $.getJSON("/Contract/CreateNewAddOnTrial", { contractID: _contractID, addOnType: $("#SelectedAddOnTrialType").val(), startDate: $("#NewAddOnTrialStartDate").val(), endDate: $("#NewAddOnTrialEndDate").val() }, function (data) {
+                _isWorking = false;
+
+                if (data != "")
+                {
+                    $("#NewAddOnTrialForm").css("Opacity", "1");
+                    alert(data);
+                }
+                else
+                {
+                    $("#NewAddOnTrialForm").hide();
+                    RefreshContractGrids(false, true, false);
+                }
+            });
+        }
+    }
+
+    function LoadAddOnTrialDetails(addonTrialID)
+    {
+        if (addonTrialID > 0)
+        {
+            $("#AddOnTrialDetails").show();
+            $("#AddOnTrialDetails").css("Opacity", "0.2");
+
+            $.getJSON("/Contract/GetAddOnTrialDetails", { addonTrialID: addonTrialID }, function (data) {
+                LoadAddOnTrialIntoForm(data);
+            });
+        }
+        else
+        {
+            $("#AddOnTrialDetails").hide();
+        }
+    }
+
+    function LoadAddOnTrialIntoForm(addonTrial)
+    {
+        $("#AddOnTrialDetails").css("Opacity", "1.0");
+        $("#AddOnTrialDetails").show();
+
+        $("#lblAddOnTrialContractType").text(addonTrial.ContractType);
+        $("#txtAddOnTrialStartDate").val(addonTrial.StartDate);
+        $("#txtAddOnTrialEndDate").val(addonTrial.EndDate);
+        $("#chkAddOnTrialDeleted").prop("checked", addonTrial.IsDeleted);
+
+        $("#lblAddOnTrialErrorMessage").text(addonTrial.ErrorMessage);
+    }
+
+    function SaveAddOnTrialDetails()
+    {
+        if (_isWorking === false)
+        {
+            _isWorking = true;
+
+            $("#AddOnTrialDetails").css("Opacity", "0.2");
+
+            $.getJSON("/Contract/SaveAddOnTrialDetails", {
+                addonTrialID: _addonTrialID
+                , isDeleted: $("#chkAddOnTrialDeleted").is(":checked")
+                , startDate: $("#txtAddOnTrialStartDate").val()
+                , endDate: $("#txtAddOnTrialEndDate").val()
+            }, function (data) {
+                _isWorking = false;
+                LoadAddOnTrialIntoForm(data);
+                RefreshContractGrids(false, true, false);
+            });
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+    // Invoices grid
+    // ----------------------------------------------------------------------------------------------------------------------------------
+    function InvoiceMainDataChanged(arg) {
+        InvoiceGridBaseDataChanged('Base', 'invoice-main-grid', 'tabTitleInvoicesMain');
+    }
+
+    function InvoiceFrameDataChanged(arg) {
+        InvoiceGridBaseDataChanged('Frame', 'invoice-frame-grid', 'tabTitleInvoicesFrame');
+    }
+
+    function InvoiceEMSDataChanged(arg) {
+        InvoiceGridBaseDataChanged('EMS', 'invoice-ems-grid', 'tabTitleInvoicesEMS');
+    }
+
+    function InvoiceMultiDataChanged(arg) {
+        InvoiceGridBaseDataChanged('Multi', 'invoice-multi-grid', 'tabTitleInvoicesMulti');
+    }
+
+    function InvoiceQBDataChanged(arg) {
+        InvoiceGridBaseDataChanged('QB', 'invoice-qb-grid', 'tabTitleInvoicesQB');
+    }
+
+    function InvoiceAddOnsDataChanged(arg) {
+        InvoiceGridBaseDataChanged('Pro Advisor', 'invoice-addons-grid', 'tabTitleInvoicesAddOns');
+    }
+
+    function InvoiceImagesDataChanged(arg) {
+        InvoiceGridBaseDataChanged('Images', 'invoice-images-grid', 'tabTitleInvoicesImages');
+    }
+
+    function InvoiceCustomReportsDataChanged(arg) {
+        InvoiceGridBaseDataChanged('Custom Reports', 'invoice-custom-reports-grid', 'tabTitleInvoicesCustomReports');
+    }
+    function InvoiceBundleDataChanged(arg) {
+        InvoiceGridBaseDataChanged('Bundle', 'invoice-bundle-grid', 'tabTitleInvoicesBundle');
+    }
+
+    function InvoiceCustomDataChanged(arg) {
+        InvoiceGridBaseDataChanged('Custom', 'invoice-custom-grid', 'tabTitleInvoicesCustom');
+    }
+
+    function gridCheckboxOnchange(checkboxObj) {
+        _loadedKendoGridOnUlLiClick = $('#' + checkboxObj).closest('div').attr('id');
+
+        var selectedInvoiceIDs = GetSelectedInvoiceIDs();
+        if(selectedInvoiceIDs.length > 0) {
+            $("#invoice-multi-action").show();
+        }
+        else {
+            $("#invoice-multi-action").hide();
+        }
+    }
+
+    function InvoiceGridBaseDataChanged(displayName, gridName, tabID) {
+
+        // $("#tabTitleInvoices").removeClass("past-due");
+        // $("#" + tabID).removeClass("past-due");
+
+        if(gridName == "invoice-custom-grid") {
+            $("#" + gridName + " thead [data-index=7] .k-link").html("<input type='checkbox' class='invoice-checkbox' id='" + gridName + "-checkbox' />")
+        }
+        else {
+            $("#" + gridName + " thead [data-index=9] .k-link").html("<input type='checkbox' class='invoice-checkbox' id='" + gridName + "-checkbox' />")
+        }
+
+        $("#" + gridName + "-checkbox").click(function() {
+            var isChecked = $(this).prop("checked");
+            $('#' + gridName + ' tr:has(td)').find('input[type="checkbox"]').prop('checked', isChecked);
+        });
+
+        $('#' + gridName + ' tbody tr:has(td)').find('input[type="checkbox"]').click(function() {
+            var isChecked = $(this).prop("checked");
+            var isHeaderChecked = $("#" + gridName + "-checkbox").prop("checked");
+            if (isChecked == false && isHeaderChecked)
+                $("#" + gridName + "-checkbox").prop('checked', isChecked);
+            else {
+                $('#' + gridName + ' tbody tr:has(td)').find('input[type="checkbox"]').each(function() {
+                    if ($(this).prop("checked") == false)
+                        isChecked = false;
+                });
+                $("#" + gridName + "-checkbox").prop('checked', isChecked);
+            }
+        });
+
+        // Wire up hilighting the row when hovering.
+        $("#" + gridName + " tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+
+        var grid = $("#" + gridName).data("kendoGrid");
+        var models = grid.dataSource.data();
+
+        var selectedFound = false;
+        var hasPastDue = false;
+
+        for(i = 0; i < models.length; i++)
+        {
+            var row = grid.table.find("[data-uid=" + models[i].uid + "]");
+
+            if (_invoiceID > 0 && models[i].InvoiceID == _invoiceID)
+            {
+                grid.select(row);
+                selectedFound = true;
+            }
+
+            if (models[i].IsDeleted === true)
+            {
+                row.addClass("deleted-row");
+            }
+
+            if (models[i].IsPastDue === true)
+            {
+                row.find(".due-date-column").addClass("past-due");
+                hasPastDue = true;
+            }
+        }
+
+        if (selectedFound === false)
+        {
+            _invoiceID = 0;
+            LoadInvoiceDetails(0);
+        }
+
+        $("#" + tabID).text(displayName + " (" + models.length + ")");
+
+        if (hasPastDue === true)
+        {
+            $("#tabTitleInvoices").addClass("past-due");
+            $("#" + tabID).addClass("past-due");
+        }
+
+        _invoiceCount += models.length;
+        $("#tabTitleInvoices").text("Invoices (" + _invoiceCount + ")");
+
+        //if(_includeDeleteCheckboxClick != true) {
+        //    if(_loadedKendoGridOnUlLiClick == gridName) {
+        //        RefreshMultiActionButtons(gridName);
+        //    }
+        //}
+
+        if(contractMatched)
+        {
+            $('#ContractTabs').tabs();
+            $('#ContractTabs ul').tabs();
+            $("#ContractTabs").tabs("option", "active", 3);
+
+            invoiceMatched = IsInvoiceMatchedInGrid('invoice-main-grid',_dueInvoiceInvoiceID);
+
+            if(invoiceMatched==false)
+            {
+                invoiceMatched = IsInvoiceMatchedInGrid('invoice-frame-grid',_dueInvoiceInvoiceID);
+            }
+
+            if(invoiceMatched==false)
+            {
+                invoiceMatched = IsInvoiceMatchedInGrid('invoice-ems-grid',_dueInvoiceInvoiceID);
+            }
+
+            if(invoiceMatched==false)
+            {
+                invoiceMatched = IsInvoiceMatchedInGrid('invoice-multi-grid',_dueInvoiceInvoiceID);
+            }
+
+            if(invoiceMatched==false)
+            {
+                invoiceMatched = IsInvoiceMatchedInGrid('invoice-qb-grid',_dueInvoiceInvoiceID);
+            }
+
+            if(invoiceMatched==false)
+            {
+                invoiceMatched = IsInvoiceMatchedInGrid('invoice-custom-grid',_dueInvoiceInvoiceID);
+            }
+
+            if (invoiceMatched == false) {
+                invoiceMatched = IsInvoiceMatchedInGrid('invoice-custom-reports-grid', _dueInvoiceInvoiceID);
+            }
+        }
+    }
+
+    function InvoiceMainSelectionChanged() {
+        InvoiceGridBaseSelectionChanged('invoice-main-grid');
+    }
+
+    function InvoiceFrameSelectionChanged() {
+        InvoiceGridBaseSelectionChanged('invoice-frame-grid');
+    }
+
+    function InvoiceEMSSelectionChanged() {
+        InvoiceGridBaseSelectionChanged('invoice-ems-grid');
+    }
+
+    function InvoiceMultiSelectionChanged() {
+        InvoiceGridBaseSelectionChanged('invoice-multi-grid');
+    }
+
+    function InvoiceQBSelectionChanged() {
+        InvoiceGridBaseSelectionChanged('invoice-qb-grid');
+    }
+
+    function InvoiceAddOnsSelectionChanged() {
+        InvoiceGridBaseSelectionChanged('invoice-addons-grid');
+    }
+
+    function InvoiceImagesSelectionChanged() {
+        InvoiceGridBaseSelectionChanged('invoice-images-grid');
+    }
+
+    function InvoiceCustomReportsSelectionChanged() {
+        InvoiceGridBaseSelectionChanged('invoice-custom-reports-grid');
+    }
+    function InvoiceBundleSelectionChanged() {
+        InvoiceGridBaseSelectionChanged('invoice-bundle-grid');
+    }
+
+    function InvoiceCustomSelectionChanged() {
+        InvoiceGridBaseSelectionChanged('invoice-custom-grid');
+    }
+
+    function InvoiceGridBaseSelectionChanged(gridName) {
+        var row = $("#" + gridName).find(".k-state-selected").first();
+        var invoiceID = row.find("td").first().html();
+
+        if (invoiceID != _invoiceID)
+        {
+            _invoiceID = invoiceID;
+            LoadInvoiceDetails(_invoiceID);
+        }
+    }
+
+    function GetInvoicesSearchParameters() {
+        var result =
+        {
+            contractID: _contractID
+            , showDeleted: $("#chkIncludeDeletedInvoices").is(":checked")
+            , showAddOnDeleted: $("#chkIncludeDeletedAddOns").is(":checked")
+        };
+        return result;
+    }
+
+    function GetInvoiceFailLogParameters() {
+        var result =
+        {
+            invoiceID: _invoiceID
+        };
+        return result;
+    }
+
+    function RefreshInvoiceFailLogGrid() {
+        var grid = $("#invoice-fail-log-grid").data("kendoGrid");
+        if (grid && grid.dataSource) {
+            grid.dataSource.read();
+        }
+    }
+
+    function InvoiceFailLogDataChanged(arg) {
+        var grid = $("#invoice-fail-log-grid").data("kendoGrid");
+        var models = grid.dataSource.data();
+        var lineCount = models.length;
+
+        if (lineCount > 0) {
+            $("#invoiceFailureGrid").show();
+        }
+        else {
+            $("#invoiceFailureGrid").hide();
+        }
+    }
+
+    function RefreshInvoiceHistoryGrid() {
+        var grid = $("#invoice-history-grid").data("kendoGrid");
+        grid.dataSource.read();
+    }
+
+    function InvoiceHistoryDataChanged(arg) {
+        var grid = $("#invoice-history-grid").data("kendoGrid");
+        var models = grid.dataSource.data();
+        var lineCount = models.length;
+
+        if (lineCount > 0) {
+            $("#invoiceHistoryGrid").show();
+        }
+        else {
+            $("#invoiceHistoryGrid").hide();
+        }
+    }
+
+    function RefreshInvoiceGrids() {
+        _invoiceCount = 0;
+
+        RefreshGrid('invoice-main-grid');
+        RefreshGrid('invoice-frame-grid');
+        RefreshGrid('invoice-ems-grid');
+        RefreshGrid('invoice-multi-grid');
+        RefreshGrid('invoice-qb-grid');
+        RefreshGrid('invoice-addons-grid');
+        RefreshGrid('invoice-images-grid');
+        RefreshGrid('invoice-custom-reports-grid');
+        RefreshGrid('invoice-bundle-grid');
+        RefreshGrid('invoice-custom-grid');
+
+        $("#ContractDetails").find(".past-due").removeClass("past-due");
+
+        if(_includeDeleteCheckboxClick == true) {
+            RefreshMultiActionButtons();
+        }
+    }
+
+    function RefreshGrid(gridID)
+    {
+        var grid = $("#" + gridID).data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+    }
+
+    function LoadInvoiceDetails(invoiceID)
+    {
+        if (invoiceID > 0)
+        {
+            $("#InvoiceDetails").show();
+            $("#InvoiceDetails").css("Opacity", "0.2");
+
+            $.getJSON("/Contract/GetInvoiceDetails", { invoiceID: invoiceID }, function (data) {
+                LoadInvoiceIntoForm(data);
+            });
+        }
+        else
+        {
+            $("#InvoiceDetails").hide();
+        }
+    }
+
+    function LoadInvoiceIntoForm(invoice)
+    {
+        $("#InvoiceDetails").css("Opacity", "1.0");
+        $("#InvoiceDetails").show();
+
+        $("#lblCalculateTaxStatus").text("");
+
+        if (invoice)
+        {
+            $("#lblInvoiceID").text(invoice.InvoiceID);
+            $("#lblInvoicePaymentNumber").text(invoice.PaymentNumber);
+            $("#lblInvoiceType").text(invoice.InvoiceType);
+            $("#txtInvoiceAmount").val(invoice.InvoiceAmount);
+            $("#txtInvoiceTax").val(invoice.SalesTax);
+            $("#txtInvoiceDueDate").val(invoice.DueDate);
+            $("#txtInvoiceNotes").val(invoice.Notes);
+            $("#txtInvoiceSummary").val(invoice.Summary);
+            $("#chkInvoicePaid").prop("checked", invoice.Paid);
+            $("#txtInvoicePaidDate").val(invoice.DatePaid);
+            $("#chkInvoiceDeleted").prop("checked", invoice.IsDeleted);
+
+            var invoiceLinks = $("#ddlInvoiceLinks");
+            invoiceLinks.empty();
+
+            for(var i = 0; i < invoice.Links.length; i++)
+            {
+                invoiceLinks.append("<option value='" + invoice.Links[i].ID + "'>" + invoice.Links[i].Name + "</option>");
+            }
+
+            invoiceLinks.val(invoice.InvoiceLinkID);
+
+            $("#lblInvoiceErrorMessage").text(invoice.ErrorMessage);
+
+            RefreshInvoiceFailLogGrid();
+            RefreshInvoiceHistoryGrid();
+        }
+    }
+
+    function SaveInvoiceDetails()
+    {
+        if (_isWorking === false)
+        {
+            _isWorking = true;
+            $("#InvoiceDetails").css("Opacity", "0.2");
+
+            $.getJSON("/Contract/SaveInvoiceDetails", {
+                invoiceID: _invoiceID
+                , amount: $("#txtInvoiceAmount").val()
+                , linkID: $("#ddlInvoiceLinks").val()
+                , tax: $("#txtInvoiceTax").val()
+                , dueDate: $("#txtInvoiceDueDate").val()
+                , notes: $("#txtInvoiceNotes").val()
+                , summary: $("#txtInvoiceSummary").val()
+                , isPaid: $("#chkInvoicePaid").is(":checked")
+                , paidDate: $("#txtInvoicePaidDate").val()
+                , isDeleted: $("#chkInvoiceDeleted").is(":checked")
+            }, function (data) {
+                _isWorking = false;
+
+                LoadInvoiceIntoForm(data);
+
+                RefreshContractsGrid();
+                RefreshContractGrids(true, false, true);
+            });
+        }
+    }
+
+    function GridLineSaveInvoiceDetails()
+    {
+        if (_isWorking === false)
+        {
+            _isWorking = true;
+            //$("#InvoiceDetails").css("Opacity", "0.2");
+
+            var promises = [];
+
+            $("#" + _loadedKendoGridOnUlLiClick + " tbody tr").each(
+                function () {
+                    // Get the hovered row and its LineItemPreview data
+                    var row = $(this).closest("tr");
+
+                    var invoiceID = row.find("td:nth-child(1)").html();
+                    var salesTax  = row.find("td:nth-child(5)").html();
+                    var invoiceLinkID  = row.find("td:nth-child(11)").html();
+
+                    promises.push($.getJSON("/Contract/GridLineSaveInvoiceDetails", {
+                        invoiceID: invoiceID,
+                        salesTax: salesTax,
+                        linkID: invoiceLinkID
+                    }));
+                }
+            );
+
+            // Combine all promises
+            // and run a callback
+            $.when.apply($, promises).then(function(){
+                RefreshContractsGrid();
+                RefreshContractGrids(true, false, true);
+            });
+        }
+    }
+
+    function CalculateInvoiceTax()
+    {
+        $("#lblCalculateTaxStatus").text("Calculating Tax...");
+
+        $.getJSON("/Contract/CalculateInvoiceTax", { invoiceID: _invoiceID, loginID: @Model.LoginID, amount: $("#txtInvoiceAmount").val() }, function (data) {
+            if (data.Success === true)
+            {
+                $("#lblCalculateTaxStatus").text("Tax calculated.  Don't forget to save with the new tax amount.");
+                $("#txtInvoiceAmount").val(data.Amount);
+                $("#txtInvoiceTax").val(data.Tax);
+            }
+            else
+            {
+                $("#lblCalculateTaxStatus").text(data.ErrorMessage);
+            }
+        });
+    }
+
+    function GridLineCalculateInvoiceTax()
+    {
+        $("#invoice-calculate-tax").show();
+        $("#invoice-selected-calculate-tax-confirm").hide();
+        $("#lblCalculateTaxInvoiceLineStatus").show();
+        $("#lblCalculateTaxInvoiceLineStatus").text("Calculating Tax...");
+
+        var selectedInvoiceIDs = GetSelectedInvoiceIDs();
+
+        $.getJSON("/Contract/GridLineCalculateInvoiceTax", { invoiceIDs: selectedInvoiceIDs, loginID: @Model.LoginID }, function (data) {
+            if (data.Success === true)
+            {
+                $("#lblCalculateTaxInvoiceLineStatus").css("color", "blue");
+                $("#lblCalculateTaxInvoiceLineStatus").text("Tax calculated and invoices saved.");
+                RefreshContractGrids(false, false, true);
+            }
+            else
+            {
+                $("#lblCalculateTaxInvoiceLineStatus").css("color", "red");
+                $("#lblCalculateTaxInvoiceLineStatus").text(data.ErrorMessage);
+            }
+        }).done(function() {
+            $("#invoice-multi-action").hide();
+        });
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+    // Create custom invoices
+    // ----------------------------------------------------------------------------------------------------------------------------------
+    function ClearCreateCustomInvoicesForm() {
+        $("#txtNewInvoiceStartDate").val("@DateTime.Now.ToShortDateString()");
+        $("#txtNewInvoiceAmount").val("0");
+        $("#txtNewInvoiceCount").val("1");
+        $("#txtNewInvoiceNotes").val("");
+
+        RefreshCustomInvoiceLinkedToDDL();
+    }
+
+    function CreateCustomInvoices()
+    {
+        if (_isWorking === false)
+        {
+            _isWorking = true;
+
+            $("#NewInvoiceForm").css("Opacity", "0.2");
+            $("#lblNewInvoiceErrorMessage").text("");
+
+            var addOnID = 0;
+
+            if ($("#trNewInvoiceLink").is(":visible"))
+            {
+                addOnID = $("#ddlNewInvoiceLink").val();
+            }
+
+            $.getJSON("/Contract/CreateCustomInvoices", {
+                loginID: @Model.LoginID
+              , contractID: _contractID
+                , addOnID: addOnID
+                , startDate: $("#txtNewInvoiceStartDate").val()
+                , monthSkip: $("#txtNewInvoiceMonthSkip").val()
+                , invoiceAmount: $("#txtNewInvoiceAmount").val()
+                , numberOfInvoices: $("#txtNewInvoiceCount").val()
+                , notes: $("#txtNewInvoiceNotes").val()
+            }, function (data) {
+                _isWorking = false;
+                $("#NewInvoiceForm").css("Opacity", "1");
+
+                if (data == "")
+                {
+                    ClearCreateCustomInvoicesForm();
+                    RefreshContractGrids(false, false, true);
+                }
+                else
+                {
+                    $("#lblNewInvoiceErrorMessage").text(data);
+                }
+
+            });
+        }
+    }
+
+    function RefreshCustomInvoiceLinkedToDDL()
+    {
+        $("#trNewInvoiceLink").hide();
+
+        $.getJSON("/Contract/FillCustomInvoiceLinkedToDLL", {
+            contractID: _contractID
+        }, function (data) {
+
+            if (data.length > 0)
+            {
+                $("#trNewInvoiceLink").show();
+
+                var ddl = $("#ddlNewInvoiceLink");
+                ddl.empty();
+
+                for(i = 0; i < data.length; i++)
+                {
+                    ddl.append("<option value='" + data[i].ID + "'>" + data[i].Name + "</option>");
+                }
+            }
+        });
+    }
+
+    function RefreshMultiActionButtons()
+    {
+        var selectedInvoiceIDs = GetSelectedInvoiceIDs();
+
+        if(selectedInvoiceIDs.length > 0) {
+            $("#invoice-multi-action").show();
+        }
+        else {
+            $("#invoice-multi-action").hide();
+        }
+    }
+
+    function GetSelectedInvoiceIDs()
+    {
+        var list = "";
+        var seperator = "";
+
+        if(_loadedKendoGridOnUlLiClick != '') {
+
+            $('#' + _loadedKendoGridOnUlLiClick + ' table tbody tr:has(td)').find('input[type="checkbox"]').each(function() {
+
+                if ($(this).is(":visible") && $(this).is(":checked"))
+                {
+                    var invoiceID = $(this).attr("id");
+                    list += seperator + invoiceID;
+                    seperator = ", ";
+                }
+            });
+        }
+
+        return list;
+    }
+
+    function GetAllInvoiceIDs()
+    {
+        var list = "";
+        var seperator = "";
+
+        if(_loadedKendoGridOnUlLiClick != '') {
+
+            $('#' + _loadedKendoGridOnUlLiClick + ' tbody tr:has(td)').find('input[type="checkbox"]').each(function() {
+
+                var invoiceID = $(this).attr("id");
+                list += seperator + invoiceID;
+                seperator = ", ";
+            });
+        }
+
+        return list;
+    }
+
+    function AllInvoicesUnPaid()
+    {
+        var selectedInvoiceIDs = GetAllInvoiceIDs();
+
+        $.getJSON("/Contract/BatchInvoicesPaid", {
+            ids: selectedInvoiceIDs,
+            paid:false
+        }, function (data) {
+            RefreshContractGrids(false, false, true);
+            $("#all-invoice-unpaid-confirm").hide();
+        }).done(function() {
+            $("#invoice-multi-action").hide();
+        });
+    }
+
+    function SelectedInvoicesUnPaid()
+    {
+        var selectedInvoiceIDs = GetSelectedInvoiceIDs();
+
+        $.getJSON("/Contract/BatchInvoicesPaid", {
+            ids: selectedInvoiceIDs,
+            paid:false
+        }, function (data) {
+            RefreshContractGrids(false, false, true);
+            $("#invoice-selected-unpaid-confirm").hide();
+        }).done(function() {
+            $("#invoice-multi-action").hide();
+        });
+    }
+
+    function SelectedInvoicesPaid()
+    {
+        var selectedInvoiceIDs = GetSelectedInvoiceIDs();
+
+        $.getJSON("/Contract/BatchInvoicesPaid", {
+            ids: selectedInvoiceIDs,
+            paid: true
+        }, function (data) {
+            RefreshContractGrids(false, false, true);
+            $("#invoice-selected-paid-confirm").hide();
+        }).done(function() {
+            $("#invoice-multi-action").hide();
+        });
+    }
+
+    function SelectedInvoicesDelete()
+    {
+        var selectedInvoiceIDs = GetSelectedInvoiceIDs();
+
+        $.getJSON("/Contract/BatchInvoicesDelete", {
+            ids: selectedInvoiceIDs
+        }, function (data) {
+            RefreshContractGrids(false, false, true);
+            $("#invoice-selected-delete-confirm").hide();
+        }).done(function() {
+            $("#invoice-multi-action").hide();
+        });
+    }
+
+
+
+
+</script>
+
+<div id="ContentWrapper" style="display: none;">
+
+    <div>
+        <div style="float: left; width: 49%">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>Contract Search</h4>
+                </div>
+                <div class="panel-body">
+                    <div class="col-lg-6">
+                        <div class="input-group">
+                            <span class="input-group-addon">Login ID</span>
+                            <input type="text" autocomplete="new-password" id="txtLoginSearch" name="txtLoginSearch" class="search-input form-control ng-pristine ng-untouched ng-valid ng-empty auto_remove_space search-input-enter-key-press" placeholder="Login ID">
+                        </div>
+                        <br>
+                        <div class="input-group">
+                            <span class="input-group-addon">Contract ID</span>
+                            <input type="text" autocomplete="new-password" id="txtContractSearch" name="txtContractSearch" class="search-input form-control ng-pristine ng-untouched ng-valid ng-empty auto_remove_space search-input-enter-key-press" placeholder="Contract ID">
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="input-group">
+                            <span class="input-group-addon">Invoice ID</span>
+                            <input type="text" autocomplete="new-password" id="txtInvoiceSearch" name="txtInvoiceSearch" class="search-input form-control ng-pristine ng-untouched ng-valid ng-empty auto_remove_space search-input-enter-key-press" placeholder="Invoice ID">
+                        </div>
+                        <br>
+                        <div class="input-group">
+                            <input type="button" id="btnLoginSearch" class="btn btn-default" value="Search" />
+                            <span id="lblLoginSearch" style="color: red;" />
+                        </div>
+                        <br>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.GoodData)
+        {
+            <div style="float: right; padding-bottom: 5px;width:49%">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>Search Result</h4>
+                    </div>
+                    <div class="panel-body">
+                        <table class="details-form" style="font-size:15px">
+                            <tr>
+                                <td width="150">ID</td>
+                                <td><a href="/Logins/List/@Model.LoginID">@Model.LoginID</a></td>
+                            </tr>
+                            <tr>
+                                <td>Organization</td>
+                                <td>@Model.Organizationname</td>
+                            </tr>
+                            <tr>
+                                <td>Customer</td>
+                                <td>@Model.CustomerName</td>
+                            </tr>
+
+                            <tr>
+                                <td>Auto Pay</td>
+                                <td>@Model.AutoPay</td>
+                            </tr>
+
+                            @if (!string.IsNullOrEmpty(Model.SalesRep))
+                            {
+                                <tr>
+                                    <td>Sales Rep</td>
+                                    <td>@Model.SalesRep</td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (Model.GoodData)
+    {
+        <div id="MainTabs" style="margin-top: 20px; clear: both;">
+            <ul>
+                <li><a href="#MainTabs-Contracts" id="tabTitleContracts">Contracts</a></li>
+                <li><a href="#MainTabs-Trials" id="tabTitleTrials">Trials</a></li>
+            </ul>
+
+            <div id="MainTabs-Contracts">
+                @*-------------------------------------------------------------------------------------------------------------------------------------------------------
+                    ----- Contracts
+                    -------------------------------------------------------------------------------------------------------------------------------------------------------*@
+                <label class="deleted-label"><input id="chkIncludeDeletedContracts" type="checkbox" /> include deleted</label>
+
+                <div id="customer-grid-container" class="datagrid">
+                    @(Html.Kendo().Grid<ContractVM>()
+                        .Name("contract-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.ContractID).Title("Contract ID");
+                            columns.Bound(item => item.ShowPickAddonButton).Hidden();
+                            columns.Bound(item => item.TermDescription);
+                            columns.Bound(item => item.EffectiveDate).Format("{0:MM/dd/yyyy}");
+                            columns.Bound(item => item.ExpirationDate).Format("{0:MM/dd/yyyy}");
+                            columns.Bound(item => item.HasEMSString).Title("EMS");
+                            columns.Bound(item => item.HasFrameDataString).Title("Frame");
+                            columns.Bound(item => item.HasMUString).Title("Multi");
+                            columns.Bound(item => item.HasQBString).Title("QB");
+                            columns.Bound(item => item.HasProAdvisorString).Title("ProAdvisor");
+                            columns.Bound(item => item.HasImagesString).Title("Images");
+                            columns.Bound(item => item.HasCustomReportsString).Title("Reports");
+                            columns.Bound(item => item.HasBundleString).Title("Bundle");
+                            columns.Template(@<text></text>).ClientTemplate("# if (HasPayment) { #" + "<img src='/images/checkmark.png' />" + "# } #").Title("Payment").Width(90);
+                        })
+                        .Selectable()
+                        .Events(events => events
+                            .DataBound("ContractGridDataChanged")
+                            .Change("ContractGridLineSelectionChanged")
+                        )
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Read(read => read.Action("GetContractsForLogin", "Contract").Data("GetContractsSearchParameters"))
+                        )
+                    )
+                </div>
+
+                <div style="padding-top: 20px;">
+                    <input id="btnNewContract" type="button" value="New Contract">
+                </div>
+
+                <div id="NewContractForm" style="display: none; border: 1px solid black; padding-left: 20px; margin-top: 10px; padding-bottom: 10px;">
+
+                    <h2>Create New Contract</h2>
+
+                    <table class="details-form">
+                        <tr>
+                            <td width="150">
+                                Price Level:
+                            </td>
+                            <td>
+                                @Html.DropDownListFor(model => model.SelectedContractPriceLevel, Model.ContractPriceLevels)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Start Date:
+                            </td>
+                            <td>
+                                <input id="NewContractStartDate" type="text" class="date-picker" />
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="datagrid" style="margin-bottom: 10px; margin-top: 10px;">
+                        @(Html.Kendo().Grid<ContractTermsVM>()
+                            .Name("contract-terms-grid")
+                            .Columns(columns =>
+                            {
+                                columns.Bound(item => item.ContractPriceLevelID).Hidden();
+                                columns.Bound(item => item.TermDescription);
+                                columns.Bound(item => item.TermTotal).Format("{0:c}");
+                                columns.Bound(item => item.DepositAmount).Format("{0:c}").HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" });
+                                columns.Bound(item => item.NumberOfPayments).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" });
+                                columns.Bound(item => item.PaymentAmount).Format("{0:c}").HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" });
+                                columns.Template(@<text></text>).ClientTemplate("# if (ForceAutoPay) { #" + "<img src='/images/checkmark.png' />" + "# } #").Title("Force Auto Pay");
+                                columns.Bound(item => item.Summary).HeaderHtmlAttributes(new { @class = "hide-large" }).HtmlAttributes(new { @class = "hide-large" });
+                            })
+                            .Selectable()
+                            .Events(events => events
+                                .DataBound("ContractTermsDataChanged")
+                                .Change("ContractTermsLineSelectionChanged")
+                            )
+                            .DataSource(dataSource => dataSource
+                                .Ajax()
+                                .ServerOperation(false)
+                                .Sort(sort => sort.Add("TermTotal"))
+                                .Read(read => read.Action("GetContractTermsOptions", "Contract").Data("GetContractTermsListParameters"))
+                                .PageSize(20)
+                            )
+                        )
+                    </div>
+
+                    <input id="btnCreateNewContract" type="button" value="Create New Contract">
+                    <input id="btnCancelNewContract" type="button" value="Cancel">
+                </div>
+
+                <div id="ContractDetails" style="display: none; margin-top: 20px;">
+
+                    <div id="ContractTabs">
+                        <ul>
+                            <li><a href="#ContractTabs-Details">Contract Details</a></li>
+                            <li><a href="#ContractTabs-AddOns" id="tabTitleAddOns">AddOns</a></li>
+                            <li><a href="#ContractTabs-AddOnTrials" id="tabTitleAddOnTrials">AddOn Trials</a></li>
+                            <li><a href="#ContractTabs-Invoices" id="tabTitleInvoices">Invoices</a></li>
+                        </ul>
+
+                        <div id="ContractTabs-Details">
+                            <table id="ContractDetailsTable" style="padding-top: 10px;" class="details-form">
+                                <tr>
+                                    <td width="150">Contract ID</td>
+                                    <td width="500"><label id="lblContractID"></label></td>
+                                </tr>
+                                <tr>
+                                    <td>Contract Terms</td>
+                                    <td><label id="lblContractTerms"></label></td>
+                                </tr>
+                                <tr>
+                                    <td>Date Created</td>
+                                    <td><label id="lblContractDateCreate"></label></td>
+                                </tr>
+                                <tr>
+                                    <td>Notes</td>
+                                    <td><input id="txtNotes" type="text" /></td>
+                                </tr>
+                                <tr>
+                                    <td>Promo Code</td>
+                                    <td>
+                                        <label id="lblContractPromo"></label>
+                                        <a id="btnRemovePromo" style="display: none; color: black; cursor: pointer;"> - Remove Promo</a>
+                                    </td>
+                                </tr>
+                                <tr id="rowApplyPromo" style="display: none;">
+                                    <td></td>
+                                    <td><select id="ddlPromoCodes"></select> <a id="btnApplyPromo" style="color: black; cursor: pointer;">Apply Promo</a></td>
+                                </tr>
+                                <tr>
+                                    <td>Start Date</td>
+                                    <td><input id="txtContractStartDate" class="date-picker" type="text" /></td>
+                                </tr>
+                                <tr>
+                                    <td>End Date</td>
+                                    <td><input id="txtContractEndDate" class="date-picker" type="text" /></td>
+                                </tr>
+                                <tr>
+                                    <td>Is Signed</td>
+                                    <td>
+                                        <input id="chkContractIsSigned" type="checkbox" />
+                                        <a id="btnViewDigitalSignature" href="" target="_blank" style="display: none; text-decoration: underline;">View</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Ignore Auto Pay</td>
+                                    <td>
+                                        <input id="chkIgnoreAutoPay" type="checkbox" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Early Renewal</td>
+                                    <td>
+                                        <input id="chkEarlyRenewal" type="checkbox" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Active</td>
+                                    <td><input id="chkContractActive" type="checkbox" /></td>
+                                </tr>
+                                <tr>
+                                    <td>Is Deleted</td>
+                                    <td><input id="chkContractDeleted" type="checkbox" /></td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                        <input id="btnContractSave" type="button" value="Save" />
+                                        <br /><label id="lblContractErrorMessage" style="color: red;"></label>
+                                    </td>
+                                </tr>
+
+                            </table>
+                        </div>
+
+                        <div id="ContractTabs-AddOns">
+                            @*-------------------------------------------------------------------------------------------------------------------------------------------------------
+                                ----- Add Ons
+                                -------------------------------------------------------------------------------------------------------------------------------------------------------*@
+                            <label class="deleted-label"><input id="chkIncludeDeletedAddOns" type="checkbox" /> include deleted</label>
+
+                            <div style="padding-bottom: 20px;">
+                                <input id="btnNewAddOn" type="button" value="New Add On">
+                            </div>
+
+                            <div id="NewAddOnForm" style="display: none; border: 1px solid black; padding-left: 20px; padding-bottom: 20px; margin-bottom: 20px;">
+
+                                <h2>Create New AddOn</h2>
+
+                                <table class="details-form">
+                                    <tr>
+                                        <td width="150">
+                                            Type:
+                                        </td>
+                                        <td>
+                                            @Html.DropDownListFor(model => model.SelectedAddOnType, Model.AddOnTypes)
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            Price Level:
+                                        </td>
+                                        <td>
+                                            @Html.DropDownListFor(model => model.SelectedAddOnPriceLevel, Model.ContractPriceLevels)
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            Start Date:
+                                        </td>
+                                        <td>
+                                            <input id="NewAddOnStartDate" class="date-picker" type="text" value="@DateTime.Now.ToShortDateString()" />
+                                        </td>
+                                    </tr>
+                                    <tr id="QtyRow" style="display: none;">
+                                        <td>
+                                            Quantity:
+                                        </td>
+                                        <td>
+                                            @Html.DropDownListFor(model => model.SelectedAddOnQty, Model.AddOnQtys)
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <div class="datagrid" style="margin-bottom: 10px; margin-top: 10px;">
+                                    @(Html.Kendo().Grid<ContractTermsVM>()
+                                    .Name("addon-terms-grid")
+                                    .Columns(columns =>
+                                    {
+                                        columns.Bound(item => item.ContractPriceLevelID).Hidden();
+                                        columns.Bound(item => item.TermDescription);
+                                        columns.Bound(item => item.TermTotal).Format("{0:c}");
+                                        columns.Bound(item => item.DepositAmount).Format("{0:c}").HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" });
+                                        columns.Bound(item => item.NumberOfPayments).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" });
+                                        columns.Bound(item => item.Summary).HeaderHtmlAttributes(new { @class = "hide-large" }).HtmlAttributes(new { @class = "hide-large" });
+                                    })
+                                    .Selectable()
+                                    .Events(events => events
+                                        .DataBound("AddOnTermsDataChanged")
+                                        .Change("AddOnTermsLineSelectionChanged")
+                                    )
+                                    .DataSource(dataSource => dataSource
+                                        .Ajax()
+                                        .ServerOperation(false)
+                                        .Sort(sort => sort.Add("NumberOfPayments"))
+                                        .Read(read => read.Action("GetContractTermsOptions", "Contract").Data("GetAddOnTermsListParameters"))
+                                        .PageSize(20)
+                                    )
+                                    )
+                                </div>
+
+                                <input id="btnCreateNewAddOn" type="button" value="Create New Add On">
+                                <input id="btnCancelNewAddOn" type="button" value="Cancel">
+                            </div>
+
+                            <div class="datagrid">
+                                @(Html.Kendo().Grid<AddOnVM>()
+                                    .Name("addon-grid")
+                                    .Columns(columns =>
+                                    {
+                                        columns.Bound(item => item.ID).Hidden();
+                                        columns.Bound(item => item.ContractType);
+                                        columns.Bound(item => item.Description);
+                                        columns.Bound(item => item.TermDescription);
+                                        columns.Bound(item => item.StartDate).Format("{0:MM/dd/yyyy}");
+                                        columns.Bound(item => item.Quantity);
+                                        columns.Template(@<text></text>).ClientTemplate("# if (HasPayment) { #" + "<img src='/images/checkmark.png' />" + "# } #").Title("Has Payment").Width(90);
+                                    })
+                                    .Selectable()
+                                    .Events(events => events
+                                        .DataBound("AddOnGridDataChanged")
+                                        .Change("AddOnGridLineSelectionChanged")
+                                    )
+                                    .AutoBind(false)
+                                    .DataSource(dataSource => dataSource
+                                        .Ajax()
+                                        .ServerOperation(false)
+                                    )
+                                )
+                            </div>
+
+                            <div id="AddOnDetails" style="display: none; padding-top: 10px;">
+                                <table class="details-form">
+                                    <tr>
+                                        <td width="150">Contract Type</td>
+                                        <td><label id="lblAddOnContractType"></label></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Description</td>
+                                        <td><label id="lblAddOnDescription"></label></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Start Date</td>
+                                        <td><input id="txtAddOnStartDate" class="date-picker" type="text" /></td>
+                                    </tr>
+                                    <tr id="QtyAddOn" style="display: none;">
+                                        <td>Quantity</td>
+                                        <td><input id="numQuantity" type="number" min="0" max="10" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Active</td>
+                                        <td><input id="chkAddOnActive" type="checkbox" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Deleted</td>
+                                        <td><input id="chkAddOnDeleted" type="checkbox" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td>
+                                            <input id="btnAddOnSave" type="button" value="Save" />
+                                            <br /><label id="lblAddOnErrorMessage" style="color: red;"></label>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="ContractTabs-AddOnTrials">
+                            @*-------------------------------------------------------------------------------------------------------------------------------------------------------
+                                ----- Add On Trials
+                                -------------------------------------------------------------------------------------------------------------------------------------------------------*@
+                            <label class="deleted-label"><input id="chkIncludeDeletedAddOnTrials" type="checkbox" /> include deleted</label>
+
+                            <div style="padding-bottom: 20px;">
+                                <input id="btnNewAddOnTrial" type="button" value="New Add On Trial">
+                            </div>
+
+                            <div id="NewAddOnTrialForm" style="display: none; border: 1px solid black; padding-left: 20px; padding-bottom: 20px; margin-bottom: 20px;">
+
+                                <h2>Create New AddOn</h2>
+
+                                <table class="details-form">
+                                    <tr>
+                                        <td width="150">
+                                            Type:
+                                        </td>
+                                        <td>
+                                            @Html.DropDownListFor(model => model.SelectedAddOnTrialType, Model.AddOnTypes)
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            Start Date:
+                                        </td>
+                                        <td>
+                                            <input id="NewAddOnTrialStartDate" class="date-picker" type="text" value="@DateTime.Now.ToShortDateString()" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            End Date:
+                                        </td>
+                                        <td>
+                                            <input id="NewAddOnTrialEndDate" class="date-picker" type="text" value="@DateTime.Now.ToShortDateString()" />
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <input id="btnCreateNewAddOnTrial" type="button" value="Create New Add On Trial">
+                                <input id="btnCancelNewAddOnTrial" type="button" value="Cancel">
+                            </div>
+
+                            <div class="datagrid">
+                                @(Html.Kendo().Grid<AddOnTrialVM>()
+                                    .Name("addon-trial-grid")
+                                    .Columns(columns =>
+                                    {
+                                        columns.Bound(item => item.ID).Hidden();
+                                        columns.Bound(item => item.ContractType);
+                                        columns.Bound(item => item.StartDate).Format("{0:MM/dd/yyyy}");
+                                        columns.Bound(item => item.EndDate).Format("{0:MM/dd/yyyy}");
+                                    })
+                                    .Selectable()
+                                    .Events(events => events
+                                        .DataBound("AddOnTrialGridDataChanged")
+                                        .Change("AddOnTrialGridLineSelectionChanged")
+                                    )
+                                    .AutoBind(false)
+                                    .DataSource(dataSource => dataSource
+                                        .Ajax()
+                                        .ServerOperation(false)
+                                    )
+                                )
+                            </div>
+
+                            <div id="AddOnTrialDetails" style="display: none; padding-top: 10px;">
+                                <table class="details-form">
+                                    <tr>
+                                        <td width="150">Contract Type</td>
+                                        <td><label id="lblAddOnTrialContractType"></label></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Start Date</td>
+                                        <td><input id="txtAddOnTrialStartDate" class="date-picker" type="text" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td>End Date</td>
+                                        <td><input id="txtAddOnTrialEndDate" class="date-picker" type="text" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Deleted</td>
+                                        <td><input id="chkAddOnTrialDeleted" type="checkbox" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td>
+                                            <input id="btnAddOnTrialSave" type="button" value="Save" />
+                                            <br /><label id="lblAddOnTrialErrorMessage" style="color: red;"></label>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+
+                        <div id="ContractTabs-Invoices">
+                            @*-------------------------------------------------------------------------------------------------------------------------------------------------------
+                                ----- Invoices
+                                -------------------------------------------------------------------------------------------------------------------------------------------------------*@
+                            <label class="deleted-label"><input id="chkIncludeDeletedInvoices" type="checkbox" /> include deleted</label>
+
+                            <div style="padding-bottom: 20px;">
+                                <input id="btnNewInvoices" type="button" value="Create Custom Invoices">
+                            </div>
+
+                            <div id="NewInvoiceForm" style="display: none; border: 1px solid black; padding: 20px;">
+
+                                <h2>Create Custom Invoices</h2>
+
+                                <table class="details-form">
+                                    <tr>
+                                        <td>
+                                            Start Date:
+                                        </td>
+                                        <td>
+                                            <input id="txtNewInvoiceStartDate" class="date-picker" type="text" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            Month Skip:
+                                        </td>
+                                        <td>
+                                            <input id="txtNewInvoiceMonthSkip" type="text" value="1" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            Invoice Amount:
+                                        </td>
+                                        <td>
+                                            <input id="txtNewInvoiceAmount" type="text" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            # of invoices:
+                                        </td>
+                                        <td>
+                                            <input id="txtNewInvoiceCount" type="text" />
+                                        </td>
+                                    </tr>
+                                    <tr id="trNewInvoiceLink">
+                                        <td>
+                                            Link To:
+                                        </td>
+                                        <td>
+                                            <select id="ddlNewInvoiceLink"></select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            Notes:
+                                        </td>
+                                        <td>
+                                            <textarea id="txtNewInvoiceNotes" rows="3" cols="100"></textarea>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td>
+                                            <input id="btnNewInvoiceSave" type="button" value="Create Custom Invoice(s)" />
+                                            <br /><label id="lblNewInvoiceErrorMessage" style="color: red;"></label>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <div id="InvoiceTabs">
+                                <ul>
+                                    <li><a href="#InvoiceTabs-Main" id="tabTitleInvoicesMain" class="invoice-tab-link">Base</a></li>
+                                    <li><a href="#InvoiceTabs-Frame" id="tabTitleInvoicesFrame" class="invoice-tab-link">Frame Data</a></li>
+                                    <li><a href="#InvoiceTabs-EMS" id="tabTitleInvoicesEMS" class="invoice-tab-link">EMS</a></li>
+                                    <li><a href="#InvoiceTabs-Multi" id="tabTitleInvoicesMulti" class="invoice-tab-link">Multi User</a></li>
+                                    <li><a href="#InvoiceTabs-QB" id="tabTitleInvoicesQB" class="invoice-tab-link">QB Export</a></li>
+                                    <li><a href="#InvoiceTabs-AddOns" id="tabTitleInvoicesAddOns" class="invoice-tab-link">Pro Advisor</a></li>
+                                    <li><a href="#InvoiceTabs-Images" id="tabTitleInvoicesImages" class="invoice-tab-link">Images</a></li>
+                                    <li><a href="#InvoiceTabs-CustomReports" id="tabTitleInvoicesCustomReports" class="invoice-tab-link">Custom Reports</a></li>
+                                    <li><a href="#InvoiceTabs-Bundle" id="tabTitleInvoicesBundle" class="invoice-tab-link">Bundle</a></li>
+                                    <li><a href="#InvoiceTabs-Custom" id="tabTitleInvoicesCustom" class="invoice-tab-link">Custom</a></li>
+                                </ul>
+
+                                <div id="InvoiceTabs-Main">
+                                    <div class="datagrid">
+                                        @(Html.Kendo().Grid<InvoiceGridVM>()
+                                            .Name("invoice-main-grid")
+                                            .Columns(columns =>
+                                            {
+                                                columns.Bound(item => item.InvoiceID).Title("Invoice ID");
+                                                columns.Bound(item => item.InvoiceType).Title("Type");
+                                                columns.Bound(item => item.Summary);
+                                                columns.Bound(item => item.InvoiceAmount).Format("{0:c}");
+                                                columns.Bound(item => item.SalesTax).Format("{0:c}");
+                                                columns.Bound(item => item.InvoiceTotal).Format("{0:c}");
+                                                columns.Bound(item => item.Notes);
+                                                columns.Bound(item => item.DueDate).Format("{0:MM/dd/yyyy}").HtmlAttributes(new { @class = "due-date-column" });
+                                                columns.Bound(item => item.DatePaid).Format("{0:MM/dd/yyyy}");
+                                                columns.Template(@<text></text>).ClientTemplate("<input type='checkbox' onchange='gridCheckboxOnchange(#= InvoiceID#)' class='invoice-checkbox' id='#= InvoiceID#' />").Width(20);
+                                                columns.Bound(item => item.InvoiceLinkID).Hidden();
+                                            })
+                                            .Selectable()
+                                            .Events(events => events
+                                                .DataBound("InvoiceMainDataChanged")
+                                                .Change("InvoiceMainSelectionChanged")
+                                            )
+                                            .AutoBind(false)
+                                            .DataSource(dataSource => dataSource
+                                                .Ajax()
+                                                .ServerOperation(false)
+                                            )
+                                        )
+                                    </div>
+                                </div>
+
+                                <div id="InvoiceTabs-Frame">
+                                    <div class="datagrid">
+                                        @(Html.Kendo().Grid<InvoiceGridVM>()
+                                            .Name("invoice-frame-grid")
+                                            .Columns(columns =>
+                                            {
+                                                columns.Bound(item => item.InvoiceID).Title("Invoice ID");
+                                                columns.Bound(item => item.InvoiceType).Title("Type");
+                                                columns.Bound(item => item.Summary);
+                                                columns.Bound(item => item.InvoiceAmount).Format("{0:c}");
+                                                columns.Bound(item => item.SalesTax).Format("{0:c}");
+                                                columns.Bound(item => item.InvoiceTotal).Format("{0:c}");
+                                                columns.Bound(item => item.Notes);
+                                                columns.Bound(item => item.DueDate).Format("{0:MM/dd/yyyy}").HtmlAttributes(new { @class = "due-date-column" });
+                                                columns.Bound(item => item.DatePaid).Format("{0:MM/dd/yyyy}");
+                                                columns.Template(@<text></text>).ClientTemplate("<input type='checkbox' onchange='gridCheckboxOnchange(#= InvoiceID#)' class='invoice-checkbox' id='#= InvoiceID#' />").Width(20);
+                                                columns.Bound(item => item.InvoiceLinkID).Hidden();
+                                            })
+                                            .Selectable()
+                                            .Events(events => events
+                                                .DataBound("InvoiceFrameDataChanged")
+                                                .Change("InvoiceFrameSelectionChanged")
+                                            )
+                                            .AutoBind(false)
+                                            .DataSource(dataSource => dataSource
+                                                .Ajax()
+                                                .ServerOperation(false)
+                                            )
+                                        )
+                                    </div>
+                                </div>
+
+                                <div id="InvoiceTabs-EMS">
+                                    <div class="datagrid">
+                                        @(Html.Kendo().Grid<InvoiceGridVM>()
+                                            .Name("invoice-ems-grid")
+                                            .Columns(columns =>
+                                            {
+                                                columns.Bound(item => item.InvoiceID).Title("Invoice ID");
+                                                columns.Bound(item => item.InvoiceType).Title("Type");
+                                                columns.Bound(item => item.Summary);
+                                                columns.Bound(item => item.InvoiceAmount).Format("{0:c}");
+                                                columns.Bound(item => item.SalesTax).Format("{0:c}");
+                                                columns.Bound(item => item.InvoiceTotal).Format("{0:c}");
+                                                columns.Bound(item => item.Notes);
+                                                columns.Bound(item => item.DueDate).Format("{0:MM/dd/yyyy}").HtmlAttributes(new { @class = "due-date-column" });
+                                                columns.Bound(item => item.DatePaid).Format("{0:MM/dd/yyyy}");
+                                                columns.Template(@<text></text>).ClientTemplate("<input type='checkbox' onchange='gridCheckboxOnchange(#= InvoiceID#)' class='invoice-checkbox' id='#= InvoiceID#' />").Width(20);
+                                                columns.Bound(item => item.InvoiceLinkID).Hidden();
+                                            })
+                                            .Selectable()
+                                            .Events(events => events
+                                                .DataBound("InvoiceEMSDataChanged")
+                                                .Change("InvoiceEMSSelectionChanged")
+                                            )
+                                            .AutoBind(false)
+                                            .DataSource(dataSource => dataSource
+                                                .Ajax()
+                                                .ServerOperation(false)
+                                            )
+                                        )
+                                    </div>
+                                </div>
+
+                                <div id="InvoiceTabs-Multi">
+                                    <div class="datagrid">
+                                        @(Html.Kendo().Grid<InvoiceGridVM>()
+                                            .Name("invoice-multi-grid")
+                                            .Columns(columns =>
+                                            {
+                                                columns.Bound(item => item.InvoiceID).Title("Invoice ID");
+                                                columns.Bound(item => item.InvoiceType).Title("Type");
+                                                columns.Bound(item => item.Summary);
+                                                columns.Bound(item => item.InvoiceAmount).Format("{0:c}");
+                                                columns.Bound(item => item.SalesTax).Format("{0:c}");
+                                                columns.Bound(item => item.InvoiceTotal).Format("{0:c}");
+                                                columns.Bound(item => item.Notes);
+                                                columns.Bound(item => item.DueDate).Format("{0:MM/dd/yyyy}").HtmlAttributes(new { @class = "due-date-column" });
+                                                columns.Bound(item => item.DatePaid).Format("{0:MM/dd/yyyy}");
+                                                columns.Template(@<text></text>).ClientTemplate("<input type='checkbox' onchange='gridCheckboxOnchange(#= InvoiceID#)' class='invoice-checkbox' id='#= InvoiceID#' />").Width(20);
+                                                columns.Bound(item => item.InvoiceLinkID).Hidden();
+                                            })
+                                            .Selectable()
+                                            .Events(events => events
+                                                .DataBound("InvoiceMultiDataChanged")
+                                                .Change("InvoiceMultiSelectionChanged")
+                                            )
+                                            .AutoBind(false)
+                                            .DataSource(dataSource => dataSource
+                                                .Ajax()
+                                                .ServerOperation(false)
+                                            )
+                                        )
+                                    </div>
+                                </div>
+
+                                <div id="InvoiceTabs-QB">
+                                    <div class="datagrid">
+                                        @(Html.Kendo().Grid<InvoiceGridVM>()
+                                            .Name("invoice-qb-grid")
+                                            .Columns(columns =>
+                                            {
+                                                columns.Bound(item => item.InvoiceID).Title("Invoice ID");
+                                                columns.Bound(item => item.InvoiceType).Title("Type");
+                                                columns.Bound(item => item.Summary);
+                                                columns.Bound(item => item.InvoiceAmount).Format("{0:c}");
+                                                columns.Bound(item => item.SalesTax).Format("{0:c}");
+                                                columns.Bound(item => item.InvoiceTotal).Format("{0:c}");
+                                                columns.Bound(item => item.Notes);
+                                                columns.Bound(item => item.DueDate).Format("{0:MM/dd/yyyy}").HtmlAttributes(new { @class = "due-date-column" });
+                                                columns.Bound(item => item.DatePaid).Format("{0:MM/dd/yyyy}");
+                                                columns.Template(@<text></text>).ClientTemplate("<input type='checkbox' onchange='gridCheckboxOnchange(#= InvoiceID#)' class='invoice-checkbox' id='#= InvoiceID#' />").Width(20);
+                                                columns.Bound(item => item.InvoiceLinkID).Hidden();
+                                            })
+                                            .Selectable()
+                                            .Events(events => events
+                                                .DataBound("InvoiceQBDataChanged")
+                                                .Change("InvoiceQBSelectionChanged")
+                                            )
+                                            .AutoBind(false)
+                                            .DataSource(dataSource => dataSource
+                                                .Ajax()
+                                                .ServerOperation(false)
+                                            )
+                                        )
+                                    </div>
+                                </div>
+
+                                <div id="InvoiceTabs-AddOns">
+                                    <div class="datagrid">
+                                        @(Html.Kendo().Grid<InvoiceGridVM>()
+                                            .Name("invoice-addons-grid")
+                                            .Columns(columns =>
+                                            {
+                                                columns.Bound(item => item.InvoiceID).Title("Invoice ID");
+                                                columns.Bound(item => item.InvoiceType).Title("Type");
+                                                columns.Bound(item => item.Summary);
+                                                columns.Bound(item => item.InvoiceAmount).Format("{0:c}");
+                                                columns.Bound(item => item.SalesTax).Format("{0:c}");
+                                                columns.Bound(item => item.InvoiceTotal).Format("{0:c}");
+                                                columns.Bound(item => item.Notes);
+                                                columns.Bound(item => item.DueDate).Format("{0:MM/dd/yyyy}").HtmlAttributes(new { @class = "due-date-column" });
+                                                columns.Bound(item => item.DatePaid).Format("{0:MM/dd/yyyy}");
+                                                columns.Template(@<text></text>).ClientTemplate("<input type='checkbox' onchange='gridCheckboxOnchange(#= InvoiceID#)' class='invoice-checkbox' id='#= InvoiceID#' />").Width(20);
+                                                columns.Bound(item => item.InvoiceLinkID).Hidden();
+                                            })
+                                            .Selectable()
+                                            .Events(events => events
+                                                .DataBound("InvoiceAddOnsDataChanged")
+                                                .Change("InvoiceAddOnsSelectionChanged")
+                                            )
+                                            .AutoBind(false)
+                                            .DataSource(dataSource => dataSource
+                                                .Ajax()
+                                                .ServerOperation(false)
+                                            )
+                                        )
+                                    </div>
+                                </div>
+
+                                <div id="InvoiceTabs-Images">
+                                    <div class="datagrid">
+                                        @(Html.Kendo().Grid<InvoiceGridVM>()
+                                            .Name("invoice-images-grid")
+                                            .Columns(columns =>
+                                            {
+                                                columns.Bound(item => item.InvoiceID).Title("Invoice ID");
+                                                columns.Bound(item => item.InvoiceType).Title("Type");
+                                                columns.Bound(item => item.Summary);
+                                                columns.Bound(item => item.InvoiceAmount).Format("{0:c}");
+                                                columns.Bound(item => item.SalesTax).Format("{0:c}");
+                                                columns.Bound(item => item.InvoiceTotal).Format("{0:c}");
+                                                columns.Bound(item => item.Notes);
+                                                columns.Bound(item => item.DueDate).Format("{0:MM/dd/yyyy}").HtmlAttributes(new { @class = "due-date-column" });
+                                                columns.Bound(item => item.DatePaid).Format("{0:MM/dd/yyyy}");
+                                                columns.Template(@<text></text>).ClientTemplate("<input type='checkbox' onchange='gridCheckboxOnchange(#= InvoiceID#)' class='invoice-checkbox' id='#= InvoiceID#' />").Width(20);
+                                                columns.Bound(item => item.InvoiceLinkID).Hidden();
+                                            })
+                                            .Selectable()
+                                            .Events(events => events
+                                                .DataBound("InvoiceImagesDataChanged")
+                                                .Change("InvoiceImagesSelectionChanged")
+                                            )
+                                            .AutoBind(false)
+                                            .DataSource(dataSource => dataSource
+                                                .Ajax()
+                                                .ServerOperation(false)
+                                            )
+                                        )
+                                    </div>
+                                </div>
+
+                                <div id="InvoiceTabs-CustomReports">
+                                    <div class="datagrid">
+                                        @(Html.Kendo().Grid<InvoiceGridVM>()
+                                            .Name("invoice-custom-reports-grid")
+                                            .Columns(columns =>
+                                            {
+                                                columns.Bound(item => item.InvoiceID).Title("Invoice ID");
+                                                columns.Bound(item => item.InvoiceType).Title("Type");
+                                                columns.Bound(item => item.Summary);
+                                                columns.Bound(item => item.InvoiceAmount).Format("{0:c}");
+                                                columns.Bound(item => item.SalesTax).Format("{0:c}");
+                                                columns.Bound(item => item.InvoiceTotal).Format("{0:c}");
+                                                columns.Bound(item => item.Notes);
+                                                columns.Bound(item => item.DueDate).Format("{0:MM/dd/yyyy}").HtmlAttributes(new { @class = "due-date-column" });
+                                                columns.Bound(item => item.DatePaid).Format("{0:MM/dd/yyyy}");
+                                                columns.Template(@<text></text>).ClientTemplate("<input type='checkbox' onchange='gridCheckboxOnchange(#= InvoiceID#)' class='invoice-checkbox' id='#= InvoiceID#' />").Width(20);
+                                            })
+                                            .Selectable()
+                                            .Events(events => events
+                                                .DataBound("InvoiceCustomReportsDataChanged")
+                                                .Change("InvoiceCustomReportsSelectionChanged")
+                                            )
+                                            .AutoBind(false)
+                                            .DataSource(dataSource => dataSource
+                                                .Ajax()
+                                                .ServerOperation(false)
+                                            )
+                                        )
+                                    </div>
+                                </div>
+
+                                <div id="InvoiceTabs-Bundle">
+                                    <div class="datagrid">
+                                        @(Html.Kendo().Grid<InvoiceGridVM>()
+                                            .Name("invoice-bundle-grid")
+                                            .Columns(columns =>
+                                            {
+                                                columns.Bound(item => item.InvoiceID).Title("Invoice ID");
+                                                columns.Bound(item => item.InvoiceType).Title("Type");
+                                                columns.Bound(item => item.Summary);
+                                                columns.Bound(item => item.InvoiceAmount).Format("{0:c}");
+                                                columns.Bound(item => item.SalesTax).Format("{0:c}");
+                                                columns.Bound(item => item.InvoiceTotal).Format("{0:c}");
+                                                columns.Bound(item => item.Notes);
+                                                columns.Bound(item => item.DueDate).Format("{0:MM/dd/yyyy}").HtmlAttributes(new { @class = "due-date-column" });
+                                                columns.Bound(item => item.DatePaid).Format("{0:MM/dd/yyyy}");
+                                                columns.Template(@<text></text>).ClientTemplate("<input type='checkbox' onchange='gridCheckboxOnchange(#= InvoiceID#)' class='invoice-checkbox' id='#= InvoiceID#' />").Width(20);
+                                            })
+                                            .Selectable()
+                                            .Events(events => events
+                                                .DataBound("InvoiceBundleDataChanged")
+                                                .Change("InvoiceBundleSelectionChanged")
+                                            )
+                                            .AutoBind(false)
+                                            .DataSource(dataSource => dataSource
+                                                .Ajax()
+                                                .ServerOperation(false)
+                                            )
+                                        )
+                                    </div>
+                                </div>
+
+                                <div id="InvoiceTabs-Custom">
+                                    <div class="datagrid">
+                                        @(Html.Kendo().Grid<InvoiceGridVM>()
+                                            .Name("invoice-custom-grid")
+                                            .Columns(columns =>
+                                            {
+                                                columns.Bound(item => item.InvoiceID).Title("Invoice ID");
+                                                columns.Bound(item => item.InvoiceAmount).Format("{0:c}");
+                                                columns.Bound(item => item.SalesTax).Format("{0:c}");
+                                                columns.Bound(item => item.InvoiceTotal).Format("{0:c}");
+                                                columns.Bound(item => item.Notes);
+                                                columns.Bound(item => item.DueDate).Format("{0:MM/dd/yyyy}").HtmlAttributes(new { @class = "due-date-column" });
+                                                columns.Bound(item => item.DatePaid).Format("{0:MM/dd/yyyy}");
+                                                columns.Template(@<text></text>).ClientTemplate("<input type='checkbox' onchange='gridCheckboxOnchange(#= InvoiceID#)' class='invoice-checkbox' id='#= InvoiceID#' />").Width(20);
+                                                columns.Bound(item => item.InvoiceLinkID).Hidden();
+                                            })
+                                            .Selectable()
+                                            .Events(events => events
+                                                .DataBound("InvoiceCustomDataChanged")
+                                                .Change("InvoiceCustomSelectionChanged")
+                                            )
+                                            .AutoBind(false)
+                                            .DataSource(dataSource => dataSource
+                                                .Ajax()
+                                                .ServerOperation(false)
+                                            )
+                                        )
+                                    </div>
+                                </div>
+
+                                <div id="invoice-multi-action" style="text-align: right; cursor: pointer; padding-right: 21px; padding-bottom: 20px; display: none;">
+                                    <input id="btnUnPaySelectedInvoices" type="button" value="UnPay Selected Invoices" />
+                                    <input id="btnCalculateTaxSelected" type="button" value="Calculate Tax Selected" />
+                                    <input id="btnInvoicesPaid" type="button" value="Mark Selected Paid" />
+                                    <input id="btnInvoicesDelete" type="button" value="Delete Selected Invoices" />
+
+                                    <div id="invoice-calculate-tax" style="text-align: left; padding-top: 10px; display: none;">
+                                        <label id="lblCalculateTaxInvoiceLineStatus" style="padding-left: 25px;display: none;"></label>
+
+                                        <div id="invoice-selected-calculate-tax-confirm" style="text-align: right; display: none;">
+                                            <p>Are you sure you want to calculate tax on selected invoices?</p>
+                                            <input type="button" value="Yes" id="btnCalculateTaxYes" />
+                                            <input type="button" value="No" id="btnCalculateTaxNo" />
+                                        </div>
+                                    </div>
+
+                                    <div id="invoice-selected-unpaid-confirm" style="padding-top: 10px; display: none;">
+                                        <p>Are you sure you want to mark all selected invoices as unpaid?</p>
+                                        <input type="button" value="Yes" id="btnUnPaySelectedInvoicesYes" />
+                                        <input type="button" value="No" id="btnUnPaySelectedInvoicesNo" />
+                                    </div>
+
+                                    <div id="invoice-selected-paid-confirm" style="padding-top: 10px; display: none;">
+                                        <p>Are you sure you want to mark all selected invoices as paid?</p>
+                                        <input type="button" value="Yes" id="btnInvoicesPaidYes" />
+                                        <input type="button" value="No" id="btnInvoicesPaidNo" />
+                                    </div>
+
+                                    <div id="invoice-selected-delete-confirm" style="padding-top: 10px; display: none;">
+                                        <p>Are you sure you want to delete the selected invoices?</p>
+                                        <input type="button" value="Yes" id="btnInvoicesDeleteYes" />
+                                        <input type="button" value="No" id="btnInvoicesDeleteNo" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="InvoiceDetails" style="display: none; padding-top: 10px;">
+                                <table class="details-form">
+                                    <tr>
+                                        <td width="150">Invoice ID</td>
+                                        <td><label id="lblInvoiceID"></label></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Payment Number</td>
+                                        <td><label id="lblInvoicePaymentNumber"></label></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Invoice Type</td>
+                                        <td><label id="lblInvoiceType"></label></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Linked To</td>
+                                        <td><select id="ddlInvoiceLinks"></select></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Amount</td>
+                                        <td><input id="txtInvoiceAmount" type="text" /></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tax</td>
+                                        <td><input id="txtInvoiceTax" type="text" /></td>
+                                        <td><input id="btnCalculateTax" type="button" value="Calculate Tax" /></td>
+                                        <td><label id="lblCalculateTaxStatus"></label></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Due Date</td>
+                                        <td><input id="txtInvoiceDueDate" class="date-picker" type="text" /></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="vertical-align: top;">Notes</td>
+                                        <td colspan="2"><textarea id="txtInvoiceNotes" rows="3" cols="100"></textarea></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Summary</td>
+                                        <td colspan="2"><input id="txtInvoiceSummary" type="text" style="width: 100%;" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Paid</td>
+                                        <td><input id="chkInvoicePaid" type="checkbox" /></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Paid Date</td>
+                                        <td><input id="txtInvoicePaidDate" class="date-picker" type="text" /></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Deleted</td>
+                                        <td><input id="chkInvoiceDeleted" type="checkbox" /></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td>
+                                            <input id="btnInvoiceSave" type="button" value="Save" />
+                                            <br /><label id="lblInvoiceErrorMessage" style="color: red;"></label>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "InvoiceFailureLog"))
+                                    {
+                                        <tr id="invoiceFailureGrid">
+                                            <td style="vertical-align: top;">Stripe Fails</td>
+                                            <td>
+                                                <div class="datagrid">
+                                                    @(Html.Kendo().Grid<InvoiceFailureLogGridVM>()
+                                            .Name("invoice-fail-log-grid")
+                                            .Columns(columns =>
+                                            {
+                                                columns.Bound(item => item.TimeStamp).Format("{0:MM/dd/yyyy}").HtmlAttributes(new { @class = "due-date-column" });
+                                                columns.Bound(item => item.Note);
+                                                columns.Bound(item => item.LastFour);
+                                                columns.Bound(item => item.Expiration);
+                                                columns.Bound(item => item.StripeCardID);
+                                            })
+                                            .Selectable()
+                                            .Events(events => events
+                                                .DataBound("InvoiceFailLogDataChanged")
+                                            //    .Change("InvoiceCustomSelectionChanged")
+                                            )
+                                            .DataSource(dataSource => dataSource
+                                                .Ajax()
+                                                .ServerOperation(false)
+                                                .Read(read => read.Action("GetInvoiceFailureLog", "Contract").Data("GetInvoiceFailLogParameters"))
+                                            )
+                                                )
+                                                </div>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    }
+                                    <tr id="invoiceHistoryGrid">
+                                        <td style="vertical-align: top;">History</td>
+                                        <td>
+                                            <div class="datagrid">
+                                                @(Html.Kendo().Grid<InvoiceHistoryVM>()
+                                                    .Name("invoice-history-grid")
+                                                    .Columns(columns =>
+                                                    {
+                                                        columns.Bound(item => item.ID).Hidden();
+                                                        columns.Bound(item => item.TimeStamp).Format("{0:MM/dd/yyyy HH:mm:ss tt}").HtmlAttributes(new { @class = "due-date-column" });
+                                                        columns.Bound(item => item.Action);
+                                                        columns.Bound(item => item.Quantity);
+                                                        columns.Bound(item => item.Amount).Format("{0:c}");
+                                                        columns.Bound(item => item.SalesTax).Format("{0:c}");
+                                                    })
+                                                    .Selectable()
+                                                    .Events(events => events
+                                                        .DataBound("InvoiceHistoryDataChanged")
+                                                    )
+                                                    .DataSource(dataSource => dataSource
+                                                        .Ajax()
+                                                        .ServerOperation(false)
+                                                        .Read(read => read.Action("GetInvoiceHistory", "Contract").Data("GetInvoiceFailLogParameters"))
+                                                    )
+                                                )
+                                            </div>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                    <tr id="invoiceHistoryGrid">
+                                        <td style="vertical-align: top;">History</td>
+                                        <td>
+                                            <div class="datagrid">
+                                                @(Html.Kendo().Grid<InvoiceHistoryVM>()
+                                                    .Name("invoice-history-grid")
+                                                    .Columns(columns =>
+                                                    {
+                                                        columns.Bound(item => item.ID).Hidden();
+                                                        columns.Bound(item => item.TimeStamp).Format("{0:MM/dd/yyyy HH:mm:ss tt}").HtmlAttributes(new { @class = "due-date-column" });           
+                                                        columns.Bound(item => item.Action);
+                                                        columns.Bound(item => item.Quantity);
+                                                        columns.Bound(item => item.Amount).Format("{0:c}");
+                                                        columns.Bound(item => item.SalesTax).Format("{0:c}");
+                                                    })
+                                                    .Selectable()
+                                                    .Events(events => events
+                                                        .DataBound("InvoiceHistoryDataChanged")
+                                                    )
+                                                    .DataSource(dataSource => dataSource
+                                                        .Ajax()
+                                                        .ServerOperation(false)
+                                                        .Read(read => read.Action("GetInvoiceHistory", "Contract").Data("GetInvoiceFailLogParameters"))
+                                                    )
+                                                )
+                                            </div>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="MainTabs-Trials">
+                @*-------------------------------------------------------------------------------------------------------------------------------------------------------
+                    ----- Trials
+                    -------------------------------------------------------------------------------------------------------------------------------------------------------*@
+                <label class="deleted-label"><input id="chkIncludeDeletedTrials" type="checkbox" /> include deleted</label>
+
+                <div id="trial-grid-container" class="datagrid">
+                    @(Html.Kendo().Grid<TrialVM>()
+                        .Name("trials-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.ID).Hidden();
+                            columns.Bound(item => item.StartDate).Format("{0:MM/dd/yyyy}");
+                            columns.Bound(item => item.EndDate).Format("{0:MM/dd/yyyy}");
+                            columns.Template(@<text></text>).ClientTemplate("# if (IsActive) { #" + "<img src='/images/checkmark.png' />" + "# } #").Title("Active").Width(90);
+                            columns.Template(@<text></text>).ClientTemplate("# if (HasEMS) { #" + "<img src='/images/checkmark.png' />" + "# } #").Title("EMS").Width(90);
+                            columns.Template(@<text></text>).ClientTemplate("# if (HasFrameData) { #" + "<img src='/images/checkmark.png' />" + "# } #").Title("Frame").Width(90);
+                            columns.Template(@<text></text>).ClientTemplate("# if (HasQBExporter) { #" + "<img src='/images/checkmark.png' />" + "# } #").Title("QB").Width(90);
+                            columns.Template(@<text></text>).ClientTemplate("# if (HasProAdvisor) { #" + "<img src='/images/checkmark.png' />" + "# } #").Title("ProAdvisor").Width(90);
+                            columns.Template(@<text></text>).ClientTemplate("# if (HasImages) { #" + "<img src='/images/checkmark.png' />" + "# } #").Title("Images").Width(90);
+                            columns.Template(@<text></text>).ClientTemplate("# if (HasCustomReports) { #" + "<img src='/images/checkmark.png' />" + "# } #").Title("Custom Reports").Width(90);
+                            columns.Template(@<text></text>).ClientTemplate("# if (HasBundle) { #" + "<img src='/images/checkmark.png' />" + "# } #").Title("Bundle").Width(90);
+                            columns.Template(@<text></text>).ClientTemplate("# if (HasMultiUser) { #" + "<img src='/images/checkmark.png' />" + "# } #").Title("Multi User").Width(90);
+                        })
+                        .Selectable()
+                        .Events(events => events
+                            .DataBound("TrialGridDataChanged")
+                            .Change("TrialGridLineSelectionChanged")
+                        )
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Read(read => read.Action("GetTrialsForLogin", "Contract").Data("GetTrialsSearchParameters"))
+                        )
+                    )
+                </div>
+
+                <div id="TrialDetails" style="display: none; padding-top: 10px;">
+
+                    <table id="TrialDetailsTable" style="padding-top: 10px;" class="details-form">
+                        <tr>
+                            <td width="150">Date Created</td>
+                            <td><label id="lblTrialDateCreate"></label></td>
+                        </tr>
+                        <tr>
+                            <td>Start Date</td>
+                            <td><input id="txtTrialStartDate" class="date-picker" type="text" /></td>
+                        </tr>
+                        <tr>
+                            <td>End Date</td>
+                            <td><input id="txtTrialEndDate" class="date-picker" type="text" /></td>
+                        </tr>
+                        <tr>
+                            <td>EMS</td>
+                            <td><input id="chkTrialEMS" type="checkbox" /></td>
+                        </tr>
+                        <tr>
+                            <td>Frame Data</td>
+                            <td><input id="chkTrialFrameData" type="checkbox" /></td>
+                        </tr>
+                        <tr>
+                            <td>QB Exporter</td>
+                            <td><input id="chkTrialQBExporter" type="checkbox" /></td>
+                        </tr>
+                        <tr>
+                            <td>Pro Advisor</td>
+                            <td><input id="chkTrialProAdvisor" type="checkbox" /></td>
+                        </tr>
+                        <tr>
+                            <td>Images</td>
+                            <td><input id="chkTrialImages" type="checkbox" /></td>
+                        </tr>
+                        <tr>
+                            <td>Custom Reports</td>
+                            <td><input id="chkTrialCustomReports" type="checkbox" /></td>
+                        </tr>
+                        <tr>
+                            <td>Bundle</td>
+                            <td><input id="chkTrialBundle" type="checkbox" /></td>
+                        </tr>
+                        <tr>
+                            <td>Multi User</td>
+                            <td><input id="chkTrialMultiUser" type="checkbox" /></td>
+                        </tr>
+                        <tr>
+                            <td>Active</td>
+                            <td><input id="chkTrialActive" type="checkbox" /></td>
+                        </tr>
+                        <tr>
+                            <td>Is Deleted</td>
+                            <td><input id="chkTrialDeleted" type="checkbox" /></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>
+                                <input id="btnTrialSave" type="button" value="Save" />
+                                <br /><label id="lblTrialErrorMessage" style="color: red;"></label>
+                            </td>
+                        </tr>
+
+                    </table>
+                </div>
+
+                <div style="padding-top: 20px;">
+                    <input id="btnNewTrial" type="button" value="New Trial">
+                </div>
+
+                <div id="NewTrialForm" style="display: none; border: 1px solid black; padding: 20px; margin-bottom: 10px;">
+
+                    <h2>Create New Trial</h2>
+
+                    <table class="details-form">
+                        <tr>
+                            <td>
+                                Start Date:
+                            </td>
+                            <td>
+                                <input id="NewTrialStartDate" class="date-picker" type="text" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                End Date:
+                            </td>
+                            <td>
+                                <input id="NewTrialEndDate" class="date-picker" type="text" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                EMS:
+                            </td>
+                            <td>
+                                <input id="NewTrialEMS" type="checkbox" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Frame Data:
+                            </td>
+                            <td>
+                                <input id="NewTrialFrameData" type="checkbox" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                QB Exporter:
+                            </td>
+                            <td>
+                                <input id="NewTrialQBExporter" type="checkbox" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Pro Advisor
+                            </td>
+                            <td>
+                                <input id="NewTrialProAdvisor" type="checkbox" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Images
+                            </td>
+                            <td>
+                                <input id="NewTrialImages" type="checkbox" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Custom Reports
+                            </td>
+                            <td>
+                                <input id="NewTrialCustomReports" type="checkbox" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Bundle
+                            </td>
+                            <td>
+                                <input id="NewTrialBundle" type="checkbox" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Multi User
+                            </td>
+                            <td>
+                                <input id="NewTrialMultiUser" type="checkbox" />
+                            </td>
+                        </tr>
+                    </table>
+
+                    <input id="btnCreateNewTrial" type="button" value="Create New Trial">
+                    <input id="btnCancelNewTrial" type="button" value="Cancel">
+                </div>
+            </div>
+        </div>
+    }
+</div>

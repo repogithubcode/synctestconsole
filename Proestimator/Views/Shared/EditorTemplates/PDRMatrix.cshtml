@@ -1,0 +1,942 @@
+﻿@model Proestimator.ViewModel.PDR.PDRMatrix
+
+@using System.Linq;
+@using Proestimator.ViewModel.PDR;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PDR;
+}
+
+<link href="@Url.Content("~/Content/css/PDR_Matrix.css?id=15")" rel="stylesheet" type="text/css" />
+
+<script src="~/Scripts/PDRAdditionalOperations.js"></script>
+
+<style>
+
+    .popup-panel-container {
+        display: none;
+        position: fixed;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        background-color: transparent;
+        z-index: 100000;
+        overflow-y: scroll;
+    }
+
+    .pdr-popup-panel {
+        display: block !important;
+        padding: 0px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        margin-top: 40px !important;
+    }
+
+    .popup-header {
+        height: 50px;
+        border: 1px solid #349ad8;
+        background-color: #f5f9fb;
+    }
+
+    .popup-header h2 {
+        margin: 11px;
+        float: left;
+    }
+
+    .popup-loading {
+        background-color: white;
+        position: relative;
+        opacity: .5;
+        display: none;
+    }
+
+    .close-x {
+        width: 30px;
+        height: 30px;
+        background-color: #1d69a6;
+        float: right;
+        margin: 10px;
+        cursor: pointer;
+    }
+
+    #PDRAdditionalOperations {
+        padding: 10px;
+        background-color: white;
+    }
+
+    #PDRAdditionalOperationsType {
+        width: 200px;
+        margin: 10px;
+        background-color: white;
+        border: 1px solid black;
+        color: black;
+    }
+</style>
+
+<script>
+
+    _pdrUserID = @ViewBag.UserID;
+    _pdrEstimateID = @ViewBag.EstimateID;
+
+    var _saving = false;
+    var _popupRowID;
+    var _popupSelectedID;
+    var _popupPanelID = 0;
+    var _scrollPosition = 0;
+
+    var _loadedMatrix = "";     // A string of the entire matrix when loaded, used to check for changes
+
+    function GetFirstClass(element) {
+        if (element.attr("class"))
+        {
+            return element.attr("class").split(" ")[0];
+        }
+
+        return "";
+    }
+
+    function GetPDRMatrixData() {
+        var PDRLines = [];
+
+        var matrixRows = $(".matrix-wrapper").find(".main-table").find(".matrix-row");
+
+        matrixRows.each(function (i, obj) {
+            var rowID = GetFirstClass($(this).find(".pdr-matrix-panel"));
+            rowID = rowID.substring(5, rowID.length);
+
+            var rowData = {
+                ID: rowID,
+                SelectedID: $(this).find(".selected-id").val(),
+                SelectedMultiplier: $(this).find(".multiplier-select").val(),
+                SelectedOversizedDentQuantity: $(this).find(".oversized-select").val(),
+                Description: $(this).next().find(".description").val(),
+                CustomCharge: $(this).next().find(".custom-charge").val(),
+                IsExpanded: $(this).next().find(".IsExpanded").val(),
+                SaveDetails: true
+            };
+
+            PDRLines.push(rowData);
+        });
+
+        return PDRLines;
+    }
+
+    function HasPDRChanges() {
+        var currentMatrix = JSON.stringify(GetPDRMatrixData());
+        var hasChanges = currentMatrix != _loadedMatrix;
+        return hasChanges;
+    }
+
+    function SavePDR(refreshAfter) {
+        if (_saving == false) {
+
+            _saving = true;
+            ShowPDRMessage("@Proestimator.Resources.ProStrings.Saving...");
+
+            var PDRLines = GetPDRMatrixData();
+
+            $.ajax({
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                url: "/PDR/SavePDRList",
+                type: "POST",
+                processData: false,
+                data: JSON.stringify({ "userID": @ViewBag.UserID, "loginID": @Model.LoginID, "estimateID": @Model.EstimateID, "data": PDRLines }),
+                success: function (response) {
+                    _saving = false;
+                    _loadedMatrix = JSON.stringify(GetPDRMatrixData());     // Save the new matrix for comparing to check for changes
+
+                    RefreshHeaderInfo(@ViewBag.EstimateID);
+                    RefreshMobilePDRGrid();
+
+                    if (refreshAfter == true) {
+                        ShowPDRMessage(response);
+                        LoadEstimateLineItemList();
+                    }
+                },
+                error: function (er) {
+                    _saving = false;
+                    ShowPDRMessage(er);
+                    console.debug("Error: " + er);
+                }
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        // set up hilighting the hovered row
+        $(".matrix-wrapper").find(".matrix-row").hover(function () {
+            if ($(this).find("P").text() != "") {
+                $(this).addClass("size-selector-hover");
+            }
+
+            $(this.closest(".matrix-row")).addClass("row-hover");
+        }, function () {
+            $(this).removeClass("size-selector-hover");
+            $(".matrix-wrapper").find(".matrix-row").removeClass("row-hover");
+        });
+
+        // Set up clicking on the selectors
+        $(".pdr-matrix-dent").each(function (i, obj) {
+            if ($(this).find("P").text() != "") {
+                $(this).css("cursor", "pointer");
+
+                $(this).click(function () {
+                    // Check the parent container div, if it is disabled don't do the click
+                    var parentDiv = $(this).closest(".pdr-matrix-dent-container, .pdr-matrix-dent-container-small");
+                    if (parentDiv.hasClass("disabled-row"))
+                    {
+                        TogglePDRExtraVisibility(parentDiv.parent());
+                        return;
+                    }
+
+                    var selectedID = GetFirstClass($(this));
+                    var alreadySelected = $(this).hasClass("size-selector-selected");
+
+                    // The parent is different for full screen and mobile.
+                    var parentContainer = $(this.closest(".matrix-row"));
+                    var parentContainerID = GetFirstClass(parentContainer);
+
+                    $("." + parentContainerID).find(".pdr-matrix-dent").removeClass("size-selector-selected");
+
+                    if (!alreadySelected) {
+                        $(this).addClass("size-selector-selected");
+                        $("." + parentContainerID).find(".selected-id").val(selectedID);
+                    }
+                    else {
+                        $("." + parentContainerID).find(".selected-id").val("");
+                    }
+
+                    RefreshMobilePDRGrid();
+                });
+            }
+        });
+
+        $(".oversized-select").each(function (i, obj) {
+            RefreshMobilePDRGrid();
+        });
+
+        $(".custom-charge").each(function (i, obj) {
+
+            UpdatePDRContainerRow($(this));
+
+            $(this).change(function (){
+                UpdatePDRContainerRow($(this));
+
+                RefreshMobilePDRGrid();
+            });
+        });
+
+        RefreshOversizeExpand();
+
+        $("#btnPDRMatrixClose").click(function () {
+            if (HasPDRChanges()) {
+                GetUserConfirmation("There are unsaved changes, are you sure you want to close without saving changes?", ConfirmCloseWithoutSaving);
+            }
+            else {
+                HidePDR();
+            }
+        });
+
+        $("#btnSubmit").click(function () {
+            SavePDR(true);
+        });
+
+        // Set up the expander toggle button
+        $(".row-expander").click(function () {
+            var parentDiv = $(this).parent();
+
+            TogglePDRExtraVisibility(parentDiv);
+        });
+
+        $(".pdr-popup-panel").click(function (event) {
+            event.stopPropagation();
+        });
+
+        $("#detailsPopupClose").click(function () {
+            if (_saving == false) {
+                var rowData = {
+                    ID: _popupRowID,
+                    SelectedID: $("#CustomChargeSmall").val() == "" ? _popupSelectedID : "",
+                    SelectedMultiplier: $("#PDRMatrix_Popup_MultipliersList").val(),
+                    SelectedOversizedDentQuantity: $("#PDRMatrix_Popup_OversizedDentQuantityList").val(),
+                    Description: $("#DescriptionSmall").val(),
+                    CustomCharge: $("#CustomChargeSmall").val(),
+                    IsExpanded: false,
+                    SaveDetails: true
+                };
+
+                $.ajax({
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    url: "/PDR/SavePDR",
+                    type: "POST",
+                    processData: false,
+                    data: JSON.stringify({ "userID": @ViewBag.UserID, "loginID": @Model.LoginID, "estimateID": @Model.EstimateID, "data": rowData }),
+                    success: function (response) {
+                        _saving = false;
+                        RefreshHeaderInfo(@ViewBag.EstimateID);
+
+                        //ShowPDRMessage(response);
+                        LoadEstimateLineItemList();
+
+                        UpdatePDRContainerRow($("#CustomChargeSmall"), _popupPanelID);
+                    },
+                    error: function (er) {
+                        _saving = false;
+                        ShowPDRMessage(er);
+                        console.debug("Error: " + er);
+                    }
+                });
+
+                $(".pdr-mobile-details-container").hide();
+                $(".form-container").show();
+                $(".graphical-footer").show();
+
+                $(window).scrollTop(_scrollPosition);
+            }
+
+        });
+
+        // Set up a handler for adding oversized dents
+        $(".add-overized").click(function () {
+            var panelID = GetFirstClass($(this)).replace("add-", "");
+            var selectedSize = $(this).parent().parent().find(".OversizedSize").val();
+            var selectedDepth = $(this).parent().parent().find(".OversizedDepth").val();
+
+            $.getJSON('@Url.Action("AddOversized", "PDR")', { userID: @ViewBag.UserID, estimateID: @Model.EstimateID, panelID: panelID, size: selectedSize, depth: selectedDepth }, function (data) {
+                if (data.Success == true) {
+                    var newhtml =
+                        "<div class='oversize_" + data.ID + " oversized-dent'>" +
+                            "<div class='oversized-left'>" +
+                                "<p>" + data.Description + "</p>" +
+                                "<p style='text-align: right\; float: right\;'>" + data.Amount + "</p>" +
+                            "</div>" +
+                            "<div class='oversized-right'>" +
+                                "<input type='button' title='Delete' value='X' class='delete_" + data.ID + " btnDelete'>" +
+                            "</div>" +
+                        "</div>";
+
+                    var oversizedList = $(".panel" + data.PanelID).next().find(".oversized-list");
+                    $(newhtml).hide().appendTo(oversizedList).fadeIn(500);
+
+                    var expandable = oversizedList.parent().parent();
+
+                    expandable.animate({
+                        height: (expandable.height() + 23) + "px"
+                    }, {
+                        duration: 500
+                    });
+
+                    $(".delete_" + data.ID).click(function () {
+                        DeleteOversizedDent(data.ID);
+                    });
+
+                    RefreshOversizeExpand();
+
+                } else {
+                    ShowPDRMessage(data.ErrorMessage);
+                }
+            });
+        });
+
+        // Set up the delete oversized dent handler
+        $(".btnDelete").click(function () {
+            var id = GetFirstClass($(this)).replace("delete_", "");
+            DeleteOversizedDent(id);
+        });
+
+        // Check all hidden IsExpanded text boxes, if any are true, expand their container
+        $(".IsExpanded").each(function (i, obj) {
+            if ($(this).val() == "True")
+            {
+                var expandContainer = $(this).parent().parent();
+                var oversizedCount = expandContainer.find(".oversized-dent").length;
+                var targetHeight = 23 + (oversizedCount * 23);
+
+                expandContainer.show();
+                expandContainer.css("height", targetHeight + "px");
+            }
+        });
+
+        // When the description presets is changed, copy the selected preset to the description and reselect the first item
+        $(".presets").change(function () {
+            var parentRow = $(this).parent().parent();
+            var selectedValue = $(this).children("option").filter(":selected").text();
+            var descriptionTextBox = parentRow.find(".description");
+            descriptionTextBox.val(selectedValue);
+            $(this).prop("selectedIndex", 0);
+        });
+
+        $("#PDRMatrixContainer").scroll(pdr_sticky_relocate);
+
+        @for (int i = 0; i < Model.Panels.Count; i++)
+        {
+            if (Model.Panels[i].SelectedID != "")
+            {
+                <text>
+                $(".@Model.Panels[i].SelectedID").addClass("size-selector-selected");
+                </text>
+            }
+        }
+
+        // Save the Matrix as loaded so we can check for changes
+        _loadedMatrix = JSON.stringify(GetPDRMatrixData());
+    });
+
+    function ConfirmCloseWithoutSaving(yes) {
+        if (yes === true) {
+            location.reload();
+        }
+    }
+
+    function RefreshBigPDRGrid()
+    {
+        $.getJSON('@Url.Action("GetPDRSummaryList", "PDR")', { estimateID: @ViewBag.EstimateID }, function(data) {
+            $(".size-selector-selected").removeClass("size-selector-selected");
+
+            if (data) {
+                for (var i = 0; i < data.length; i++)
+                {
+                    if (data[i].SelectedID != "") {
+                        $("." + data[i].SelectedID).addClass("size-selector-selected");
+                    }
+
+                    var panelWrapper = $("." + data[i].PanelWrapperName);
+
+                    bottomWrapper = panelWrapper.next();
+                    bottomWrapper.find(".oversized-select").val(data[i].SelectedOversizedDentQuantity);
+                    bottomWrapper.find(".description").val(data[i].Description);
+                    bottomWrapper.find(".custom-charge").val(data[i].CustomCharge);
+                }
+            }
+            else {
+                ShowPDRMessage(data.ErrorMessage);
+            }
+        });
+    }
+
+    // The parentDiv has class like "panel1 pdr-panel matrix-row"
+    function TogglePDRExtraVisibility(parentDiv)
+    {
+        var expandDiv = parentDiv.next("div");
+        var hiddenIsExpanded = expandDiv.find(".IsExpanded");
+        var isExpanded = expandDiv.css("display") != "none";
+
+        // The expander is either called "main-id" or "extr-id".  Get the ID part
+        var rowID = GetFirstClass($(this));
+        rowID = rowID.substring(5, rowID.length);
+
+        if (isExpanded) {
+            hiddenIsExpanded.val("False");
+
+            parentDiv.find(".row-expander-p").text("+");
+
+            expandDiv.animate({
+                height: "0px"
+            }, {
+                duration: 500,
+                complete: function () {
+                    expandDiv.hide();
+                }
+            });
+        }
+        else {
+            hiddenIsExpanded.val("True");
+            expandDiv.show();
+
+            parentDiv.find(".row-expander-p").text("-");
+
+            var oversizedCount = expandDiv.find(".oversized-dent").length;
+            var targetHeight = 23 + (oversizedCount * 23);
+
+            expandDiv.animate({
+                height: targetHeight + "px"
+            }, {
+                duration: 500
+            });
+        }
+    }
+
+    function RefreshPDRAutoExpanded()
+    {
+        $(".custom-charge").each(function (i, obj) {
+            var customChargeValue = $(this).val();
+            if (customChargeValue != "" && customChargeValue != "0")
+            {
+                var expandable = $(this).parent().parent().parent();
+                expandable.show();
+
+                var mainRow = expandable.prev();
+
+                var rowID = GetFirstClass(mainRow);
+                rowID = rowID.substring(5, rowID.length);
+
+                expandable.find(".IsExpanded").val("True");
+
+                mainRow.find(".row-expander-p").text("-");
+
+                var oversizedCount = expandable.find(".oversized-dent").length;
+                var targetHeight = 23 + (oversizedCount * 23);
+
+                expandable.css("height", targetHeight + "px");
+            }
+
+        });
+    }
+
+    function UpdatePDRContainerRow(customChargeTextBox, panelID)
+    {
+        var customCharge = customChargeTextBox.val();
+
+        if (!panelID || panelID == "")
+        {
+            panelID = customChargeTextBox.attr("data-panelid");
+        }
+
+        var dentContainer = $(".panel" + panelID).find(".pdr-matrix-dent-container");
+
+        if (customCharge === "" || customCharge === "0")
+        {
+            dentContainer.removeClass("disabled-row");
+        }
+        else
+        {
+            dentContainer.addClass("disabled-row");
+            dentContainer.find(".size-selector-selected").removeClass("size-selector-selected");
+        }
+    }
+
+    function WireUpOversizePopupDeletes()
+    {
+        $(".small-oversize-delete").off("click");
+
+        $(".small-oversize-delete").click(function () {
+            var id = $(this).attr("name");
+            DeleteOversizedDent(id);
+        });
+    }
+
+    function DeleteOversizedDent(id) {
+        $.getJSON('@Url.Action("DeleteOversized", "PDR")', { userID: @ViewBag.UserID, loginID: @Model.LoginID, id: id }, function (data) {
+            if (data.Success == true) {
+                // For full size
+                var expander = $(".oversize_" + id).parent().parent().parent();
+                expander.animate({
+                    height: (expander.height() - 23) + "px"
+                }, {
+                    duration: 500
+                });
+
+                $(".oversize_" + id).fadeOut(500, function () {
+                    $(".oversize_" + id).remove();
+                });
+
+                RefreshOversizeExpand();
+
+                // For mobile
+                $(".oversized-" + id).fadeOut(500, function () { $(".oversized-" + id).remove(); });
+            } else {
+                ShowPDRMessage(data.ErrorMessage);
+            }
+        });
+    }
+
+    function GetMobileOversizedDentHTML(dataID, description, amount)
+    {
+        return "<div class='small-oversized-row oversized-" + dataID + "'>" +
+                "<div class='small-oversized-description'>" +
+                    "<p>" + description + "</p>" +
+                "</div>" +
+                "<div class='small-oversized-cost'>" +
+                    "<p>" + amount + "</p>" +
+                "</div>" +
+                "<div class='small-oversized-right'>" +
+                    "<input type='button' value='X' class='small-oversize-delete button nav-btn' name='" + dataID  + "' />" +
+                "</div>" +
+            "</div>";
+    }
+
+    function ShowPDRMessage(message) {
+
+        $(".message-container").empty();
+
+        var newP = $(document.createElement('p'));
+        newP.text(message);
+
+        $(".message-container").append(newP);
+
+        window.setTimeout(function () {
+            $(".message-container").empty();
+        }, 4000);
+    }
+
+    function RefreshOversizeExpand() {
+        $(".matrix-wrapper").find(".matrix-row").each(function (i, obj) {
+            var oversizeCount = $(this).next().find(".oversized-dent").length;
+            if (oversizeCount > 0) {
+                $(this).find(".pdr-matrix-oversized-mark").show();
+            }
+            else {
+                $(this).find(".pdr-matrix-oversized-mark").hide();
+            }
+        });
+    }
+
+    function pdr_sticky_relocate() {
+        var bottomY = $("#matrix-bottom-position").offset().top;
+
+        if (bottomY < 189)
+        {
+            $("#matrix-large-top-header").hide();
+            $("#matrix-large-bottom").addClass("matrix-large-bottom-stick");
+            $("#matrix-large-container").css("padding-top", "49px");
+        }
+        else
+        {
+            $("#matrix-large-top-header").show();
+            $("#matrix-large-bottom").removeClass("matrix-large-bottom-stick");
+            $("#matrix-large-container").css("padding-top", "0px");
+        }
+    }
+
+</script>
+
+<div id="PDRAdditionalOperations_Container" class="popup-panel-container">
+
+    <div class="pdr-popup-panel popup-panel">
+        <div class="container">
+            <div class="popup-header">
+                <h2><span id="additionalOperationsSection"></span> - Additional Operations</h2>
+
+                <select id="PDRAdditionalOperationsType">
+                </select>
+
+                <div class="close-x">
+                    <h1>X</h1>
+                </div>
+            </div>
+
+            <div id="PDRAdditionalOperations">
+                <label>@Proestimator.Resources.ProStrings.PartListNote</label>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div id="estimateFormHeader" class="pdrHeader sm_hide lg_display">
+
+    <div id="formHeader-center">
+        <input type="button" class="button nav-btn" value="@Proestimator.Resources.ProStrings.EditPDRRateProfile" onclick="SubmitAndRedirect('/@ViewBag.UserID/pdr-rates/@Model.ProfileID')" />
+        <input type="button" class="button nav-btn do-not-disable" id="btnSubmit" value="@Proestimator.Resources.ProStrings.Save" />
+        <input type="button" class="button nav-btn do-not-disable" id="btnPDRMatrixClose" value="@Proestimator.Resources.ProStrings.Close" />
+
+        <div class="message-container">
+        </div>
+    </div>
+
+</div>
+
+<div class="form-container sm_hide lg_display">
+
+    <div class="matrix-wrapper">
+        @* The first main section of panel costs *@
+        <div class="pdr-matrix-table main-table">
+
+            <div id="matrix-large-top-header">
+                <div id="large-header-1" class="pdr-matrix-table-header">
+                    <div class="pdr-matrix-panel"></div>
+                    <div class="pdr-matrix-dent-container">
+                        <div class="pdr-matrix-dent-section-header">
+                            <p>1 - 5 @Proestimator.Resources.ProStrings.Dents</p>
+                        </div>
+                        <div class="pdr-matrix-dent-section-header">
+                            <p>6 - 15 @Proestimator.Resources.ProStrings.Dents</p>
+                        </div>
+                        <div class="pdr-matrix-dent-section-header">
+                            <p>16 - 30 @Proestimator.Resources.ProStrings.Dents</p>
+                        </div>
+                        <div class="pdr-matrix-dent-section-header" style="border-right: 2px solid black;">
+                            <p>31 - 50 @Proestimator.Resources.ProStrings.Dents</p>
+                        </div>
+                    </div>
+                    <div class="pdr-matrix-end">
+
+                    </div>
+                </div>
+
+                <div class="pdr-matrix-table-sub-header">
+                    <div class="pdr-matrix-panel"></div>
+                    <div class="pdr-matrix-dent-container">
+                        <div class="pdr-matrix-dent-section">
+                            <div class="pdr-matrix-dent-size"><p>DIME</p></div>
+                            <div class="pdr-matrix-dent-size"><p>NKL</p></div>
+                            <div class="pdr-matrix-dent-size"><p>QTR</p></div>
+                            <div class="pdr-matrix-dent-size"><p>HALF</p></div>
+                        </div>
+                        <div class="pdr-matrix-dent-section">
+                            <div class="pdr-matrix-dent-size"><p>DIME</p></div>
+                            <div class="pdr-matrix-dent-size"><p>NKL</p></div>
+                            <div class="pdr-matrix-dent-size"><p>QTR</p></div>
+                            <div class="pdr-matrix-dent-size"><p>HALF</p></div>
+                        </div>
+                        <div class="pdr-matrix-dent-section">
+                            <div class="pdr-matrix-dent-size"><p>DIME</p></div>
+                            <div class="pdr-matrix-dent-size"><p>NKL</p></div>
+                            <div class="pdr-matrix-dent-size"><p>QTR</p></div>
+                            <div class="pdr-matrix-dent-size"><p>HALF</p></div>
+                        </div>
+                        <div class="pdr-matrix-dent-section pdr-matrix-dent-section-last">
+                            <div class="pdr-matrix-dent-size"><p>DIME</p></div>
+                            <div class="pdr-matrix-dent-size"><p>NKL</p></div>
+                            <div class="pdr-matrix-dent-size"><p>QTR</p></div>
+                            <div class="pdr-matrix-dent-size"><p>HALF</p></div>
+                        </div>
+                    </div>
+                    <div class="pdr-matrix-end">
+                        <div class="pdr-matrix-oversized"><p>Oversized</p></div>
+                        @if (Model.MultipliersList.Count > 1)
+                        {
+                            <div class="pdr-matrix-multiplier"><p>@Proestimator.Resources.ProStrings.Multiplier</p></div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                @for (int i = 0; i < Model.Panels.Count; i++)
+                {
+                    if (Model.Panels[i].HasAnyPrice(1))
+                    {
+                        <div class="@Model.Panels[i].PanelWrapperName pdr-panel matrix-row">
+                            <div class="main-@Model.Panels[i].ID pdr-matrix-panel row-expander">
+                                @Html.TextBoxFor(model => model.Panels[i].SelectedID, new { autocomplete = "off", @class = "selected-id" })
+                                @Html.HiddenFor(model => model.Panels[i].PanelName)
+                                @Html.HiddenFor(model => model.Panels[i].PanelID)
+
+                                <p class="row-title">@Model.Panels[i].PanelName</p>
+                                <p class="row-expander-p">+</p>
+                            </div>
+
+                            <div class="pdr-matrix-dent-container">
+                                @for (int quantityID = 1; quantityID <= 4; quantityID++)
+                                {
+
+                                    DentSizeSelector dentSizeSelector = Model.Panels[i].DentSizeSelectors.FirstOrDefault(o => o.QuantityID == quantityID);
+                                    if (dentSizeSelector == null)
+                                    {
+                                        <div class="pdr-matrix-dent-section">
+                                            <div class="pdr-matrix-dent"><p></p></div>
+                                            <div class="pdr-matrix-dent"><p></p></div>
+                                            <div class="pdr-matrix-dent"><p></p></div>
+                                            <div class="pdr-matrix-dent"><p></p></div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        string classes = "pdr-matrix-dent-section";
+                                        if (quantityID == 4)
+                                        {
+                                            classes += " pdr-matrix-dent-section-last";
+                                        }
+                                        <div class="@classes">
+                                            <div class="@Model.Panels[i].PanelID-@dentSizeSelector.QuantityID-Dime pdr-matrix-dent"><p>@dentSizeSelector.DimePrice</p></div>
+                                            <div class="@Model.Panels[i].PanelID-@dentSizeSelector.QuantityID-Nickel pdr-matrix-dent"><p>@dentSizeSelector.NickelPrice</p></div>
+                                            <div class="@Model.Panels[i].PanelID-@dentSizeSelector.QuantityID-Quarter pdr-matrix-dent"><p>@dentSizeSelector.QuarterPrice</p></div>
+                                            <div class="@Model.Panels[i].PanelID-@dentSizeSelector.QuantityID-Half pdr-matrix-dent"><p>@dentSizeSelector.HalfDollarPrice</p></div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+
+                            <div class="pdr-matrix-end">
+                                <div class="pdr-matrix-oversized">@Html.DropDownListFor(o => o.Panels[i].SelectedOversizedDentQuantity, new SelectList(Model.OversizedDentQuantityList, "Value", "Text", Model.Panels[i].SelectedOversizedDentQuantity), new { @style = "width: 50px;", @class = "oversized-select" })</div>
+                                @if (Model.MultipliersList.Count > 1)
+                                {
+                                    <div class="pdr-matrix-multiplier">@Html.DropDownListFor(o => o.Panels[i].SelectedMultiplier, new SelectList(Model.MultipliersList, "Value", "Text", Model.Panels[i].SelectedMultiplier), new { @class = "multiplier-select" })</div>
+                                }
+
+                                @if (Model.Panels[i].HasAddOnLink)
+                                {
+                                    <div style="float: left; margin-left: 5px;">
+                                        <input type="button" value="R&I" onclick="OpenAdditionalOperations(@Model.Panels[i].PanelID)" />
+                                    </div>
+                                }
+
+                            </div>
+
+                            <div class="extr-@Model.Panels[i].ID pdr-matrix-oversized-mark row-expander">
+                                <p class="row-expander-p">+</p>
+                            </div>
+                        </div>
+
+                        <div class="expandable">
+                            <div class="pdr-matrix-panel" style="margin-left: 1px;">@Html.HiddenFor(o => o.Panels[i].IsExpanded, new { @class = "IsExpanded" })</div>
+
+                            <div class="pdr-extra-row">
+                                <div style="float: left; margin: 2px;">
+                                    <p>@Proestimator.Resources.ProStrings.Description:</p>
+                                </div>
+                                <div style="float: left; margin: 2px;">
+                                    @Html.DropDownList("DescriptionPresets", new SelectList(Model.DescriptionPresets, "Value", "Text"), new { @class = "presets", style = "width: 115px;" })
+                                </div>
+                                <div style="float: left; margin: 2px;">
+                                    @Html.TextBoxFor(o => o.Panels[i].Description, new { autocomplete = "off", @class = "description" })
+                                </div>
+                                <div style="float: left; margin: 2px; padding-left: 30px;">
+                                    <p>@Proestimator.Resources.ProStrings.CustomCharge:</p>
+                                </div>
+                                <div style="float: left; margin: 2px;">
+                                    @Html.TextBoxFor(o => o.Panels[i].CustomCharge, new { autocomplete = "off", @class = "custom-charge", @data_panelid = Model.Panels[i].PanelID, @style = "height: 16px; width: 75px; margin-bottom: 0px;" })
+                                </div>
+                            </div>
+
+                            <div class="pdr-matrix-end">
+                                <div class="oversized-creators">
+                                    <div class="oversized-left">
+                                        @Html.DropDownList("OversizedSize", new SelectList(Model.OversizedSizeList, "Value", "Text"), new { @class = "OversizedSize", style = "width: 60px; float: left;" })
+                                        @Html.DropDownList("OversizedDepth", new SelectList(Model.OversizedDepthList, "Value", "Text"), new { @class = "OversizedDepth", style = "width: 90px; float: left;" })
+                                    </div>
+                                    <div class="oversized-right">
+                                        <input type="button" value="+" style="float: right;" class="add-@Model.Panels[i].ID add-overized" />
+                                    </div>
+                                </div>
+
+                                <div class="oversized-list">
+                                    @for (int dentIndex = 0; dentIndex < Model.Panels[i].OversizedDents.Count; dentIndex++)
+                                    {
+                                        <div class="oversize_@Model.Panels[i].OversizedDents[dentIndex].ID oversized-dent">
+                                            <div class="oversized-left">
+                                                <p>@Model.Panels[i].OversizedDents[dentIndex].Display</p>
+                                                <p style="text-align: right; float: right;">@Model.Panels[i].OversizedDents[dentIndex].Amount</p>
+                                            </div>
+                                            <div class="oversized-right">
+                                                <input type="button" title="@Proestimator.Resources.ProStrings.Delete" value="X" class="delete_@Model.Panels[i].OversizedDents[dentIndex].ID btnDelete">
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <div id="pdr-sticky-footer-large-1" class="pdr-sticky-anchor"></div>
+        @*A second table for panels that have data for the second level of size values *@
+        @if (Model.HasDataForLayer(2))
+        {
+            <div class="pdr-matrix-table" style="padding-top: 20px; padding-bottom: 10px; min-height: 400px; z-index: 10;">
+                <div id="matrix-bottom-position" style="height: 1px; width: 100%;"></div>
+                <div id="matrix-large-bottom">
+                    <div class="pdr-matrix-table-header">
+                        <div class="pdr-matrix-panel"></div>
+                        <div class="pdr-matrix-dent-container-wide">
+                            <div class="pdr-matrix-dent-section-header-wide">
+                                <p>51 - 75 @Proestimator.Resources.ProStrings.Dents</p>
+                            </div>
+                            <div class="pdr-matrix-dent-section-header-wide">
+                                <p>76 - 100 @Proestimator.Resources.ProStrings.Dents</p>
+                            </div>
+                            <div class="pdr-matrix-dent-section-header-wide">
+                                <p>101 - 150 @Proestimator.Resources.ProStrings.Dents</p>
+                            </div>
+                            <div class="pdr-matrix-dent-section-header-wide">
+                                <p>151 - 200 @Proestimator.Resources.ProStrings.Dents</p>
+                            </div>
+                            <div class="pdr-matrix-dent-section-header-wide">
+                                <p>201 - 300 @Proestimator.Resources.ProStrings.Dents</p>
+                            </div>
+                        </div>
+                        <div class="pdr-matrix-end">
+
+                        </div>
+                    </div>
+
+                    <div class="pdr-matrix-table-sub-header">
+                        <div class="pdr-matrix-panel"></div>
+                        <div class="pdr-matrix-dent-container-wide">
+                            <div class="pdr-matrix-dent-section-wide">
+                                <div class="pdr-matrix-dent-size"><p>DIME</p></div>
+                                <div class="pdr-matrix-dent-size"><p>NKL</p></div>
+                                <div class="pdr-matrix-dent-size"><p>QTR</p></div>
+                                <div class="pdr-matrix-dent-size"><p>HALF</p></div>
+                            </div>
+                            <div class="pdr-matrix-dent-section-wide">
+                                <div class="pdr-matrix-dent-size"><p>DIME</p></div>
+                                <div class="pdr-matrix-dent-size"><p>NKL</p></div>
+                                <div class="pdr-matrix-dent-size"><p>QTR</p></div>
+                                <div class="pdr-matrix-dent-size"><p>HALF</p></div>
+                            </div>
+                            <div class="pdr-matrix-dent-section-wide">
+                                <div class="pdr-matrix-dent-size"><p>DIME</p></div>
+                                <div class="pdr-matrix-dent-size"><p>NKL</p></div>
+                                <div class="pdr-matrix-dent-size"><p>QTR</p></div>
+                                <div class="pdr-matrix-dent-size"><p>HALF</p></div>
+                            </div>
+                            <div class="pdr-matrix-dent-section-wide">
+                                <div class="pdr-matrix-dent-size"><p>DIME</p></div>
+                                <div class="pdr-matrix-dent-size"><p>NKL</p></div>
+                                <div class="pdr-matrix-dent-size"><p>QTR</p></div>
+                                <div class="pdr-matrix-dent-size"><p>HALF</p></div>
+                            </div>
+                            <div class="pdr-matrix-dent-section-wide">
+                                <div class="pdr-matrix-dent-size"><p>DIME</p></div>
+                                <div class="pdr-matrix-dent-size"><p>NKL</p></div>
+                                <div class="pdr-matrix-dent-size"><p>QTR</p></div>
+                                <div class="pdr-matrix-dent-size"><p>HALF</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="matrix-large-container">
+                    @for (int i = 0; i < Model.Panels.Count; i++)
+                    {
+                        if (Model.Panels[i].HasAnyPrice(2))
+                        {
+                            <div class="@Model.Panels[i].PanelWrapperName pdr-panel matrix-row">
+                                <div class="main-@Model.Panels[i].ID pdr-matrix-panel">
+                                    <p class="row-title">@Model.Panels[i].PanelName</p>
+                                </div>
+
+                                <div class="pdr-matrix-dent-container-wide">
+                                    @for (int quantityID = 5; quantityID <= 9; quantityID++)
+                                    {
+
+                                        DentSizeSelector dentSizeSelector = Model.Panels[i].DentSizeSelectors.FirstOrDefault(o => o.QuantityID == quantityID);
+                                        if (dentSizeSelector == null)
+                                        {
+                                            <div class="pdr-matrix-dent-section-wide">
+                                                <div class="pdr-matrix-dent"><p></p></div>
+                                                <div class="pdr-matrix-dent"><p></p></div>
+                                                <div class="pdr-matrix-dent"><p></p></div>
+                                                <div class="pdr-matrix-dent"><p></p></div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="pdr-matrix-dent-section-wide">
+                                                <div class="@Model.Panels[i].PanelID-@dentSizeSelector.QuantityID-Dime pdr-matrix-dent"><p>@dentSizeSelector.DimePrice</p></div>
+                                                <div class="@Model.Panels[i].PanelID-@dentSizeSelector.QuantityID-Nickel pdr-matrix-dent"><p>@dentSizeSelector.NickelPrice</p></div>
+                                                <div class="@Model.Panels[i].PanelID-@dentSizeSelector.QuantityID-Quarter pdr-matrix-dent"><p>@dentSizeSelector.QuarterPrice</p></div>
+                                                <div class="@Model.Panels[i].PanelID-@dentSizeSelector.QuantityID-Half pdr-matrix-dent"><p>@dentSizeSelector.HalfDollarPrice</p></div>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        }
+
+    </div>
+
+</div>

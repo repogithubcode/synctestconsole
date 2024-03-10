@@ -1,0 +1,55 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+
+    <script src="../../Scripts/jquery-1.10.2.min.js"></script>
+    <script src="../../Content/jQuery-TE_v.1.4.0/jquery-te-1.4.0.min.js"></script>
+    <link href="../../Content/jQuery-TE_v.1.4.0/jquery-te-1.4.0.css" rel="stylesheet" />
+
+    <script language="javascript">
+    $(document).ready(function () {
+        parent.IFrameLoaded();
+    });
+
+    window.SetupEditor = function (templateText) {
+        SetEditorText(templateText);
+        $("#Template").jqte({ "status": true });
+    }
+
+    window.SetEditorText = function (templateText)
+    {
+        $("#Template").text(templateText);
+    }
+
+    window.GetTemplate = function () {
+        var html = $(".jqte_editor").html();
+        return html;
+    }
+
+    window.SetEditorText = function (text) {
+        $(".jqte_editor").html(text);
+    }
+
+    </script>
+
+    <style>
+        .jqte_editor {
+            height: 485px;
+        }
+
+        .jqte {
+            border: black 1px solid;
+            border-radius: 0px !important; -webkit-border-radius: 0px !important; -moz-border-radius: 0px !important;
+	        box-shadow: 0 0 0 #999; -webkit-box-shadow:0 0 0 #999; -moz-box-shadow:0 0 0 #999;
+        }
+    </style>
+</head>
+
+<body>
+    <textarea id="Template"></textarea>
+</body>
+
+
+</html>
+

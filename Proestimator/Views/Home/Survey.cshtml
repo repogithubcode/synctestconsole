@@ -1,0 +1,47 @@
+﻿@model Proestimator.ViewModel.SurveyVM
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.Survey;
+}
+
+<div id="workDesk" class="page-container">
+    @using (Html.BeginForm("Survey", "Home", FormMethod.Post, new { @class = "container" }))
+    {
+        @Html.HiddenFor(o => o.LoginID)
+
+        <div id="lgRow1" class="container">
+            <div id="customerField" class="col">
+                <fieldset id="customerFieldSet">
+                    <legend class="field-control lg_10_12">
+                        @Proestimator.Resources.ProStrings.Survey
+                    </legend>
+
+                    <div id="otherEmailContainer" class="col">
+                        <label>@Html.RadioButtonFor(model => Model.SelectedValue, "WillRenew", new { @checked = "checked" })&nbsp;@Proestimator.Resources.ProStrings.Survey_WillRenew</label>
+                        <label>@Html.RadioButtonFor(model => Model.SelectedValue, "WillNotRenew")&nbsp;@Proestimator.Resources.ProStrings.Survey_WillNotRenew</label>
+                        <label>@Html.RadioButtonFor(model => Model.SelectedValue, "DontLike")&nbsp;@Proestimator.Resources.ProStrings.Survey_DontLike</label>
+                        <label>@Html.RadioButtonFor(model => Model.SelectedValue, "DRP")&nbsp;@Proestimator.Resources.ProStrings.Survey_DRP</label>
+                        <label>@Html.RadioButtonFor(model => Model.SelectedValue, "Slow")&nbsp;@Proestimator.Resources.ProStrings.Survey_Slow</label>
+                        <label>@Html.RadioButtonFor(model => Model.SelectedValue, "Undecided")&nbsp;@Proestimator.Resources.ProStrings.Survey_Undecided</label>
+                        <label>@Html.RadioButtonFor(model => Model.SelectedValue, "Other")&nbsp;@Proestimator.Resources.ProStrings.Survey_Other</label>
+
+                        <p>@(Proestimator.Resources.ProStrings.Survey_Comments):</p>
+                        @Html.TextAreaFor(model => model.Comments, new { @style = "height: 130px;", @rows = 10 })
+                    </div>
+                </fieldset>
+
+                <fieldset id="customerFieldSet">
+                    <div id="otherEmailContainer" class="col">
+                        <a class="button nav-btn" href="/@ViewBag.UserID">@Proestimator.Resources.ProStrings.Survey_Skip</a>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="submit" class="button nav-btn" value="@Proestimator.Resources.ProStrings.Submit" />
+
+                        <p class="error-message">
+                            @Model.ErrorMessage
+                        </p>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    }
+</div> 

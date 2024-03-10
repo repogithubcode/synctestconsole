@@ -1,0 +1,56 @@
+﻿@model ProEstimator.Admin.ViewModel.Logins.LoginsPageVM
+
+@using ProEstimator.Admin.ViewModel.Logins;
+
+@{
+    ViewBag.Title = "Administration - Login";
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+}
+
+<style>
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .padd-top {
+        padding-top: 30px;
+        padding-bottom: 30px;
+        text-align: center;
+    }
+</style>
+
+
+<div class="row padd-top">
+    <div class="col-md-4 col-md-offset-4">
+        <h1>
+            Please Sign In
+        </h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4 col-md-offset-4">
+        @using (Html.BeginForm("Login", "Logins", FormMethod.Post, new { @class = "container" }))
+        {
+            <div class="form-group has-success has-feedback">
+                <label for="username" class="sr-only">User name</label>
+                @Html.TextBoxFor(model => model.LoginName, new { autocomplete = "off", @class = "form-control" })
+            </div>
+            <div class="form-group has-success has-feedback">
+                <label for="password" class="sr-only">Password</label>
+                @Html.TextBoxFor(model => model.Password, new { autocomplete = "off", type = "password", @class = "form-control" })
+            </div>
+            <div class="checkbox">
+                <label>
+                    @Html.CheckBoxFor(model => model.RememberMe) Remember me
+                </label>
+            </div>
+            <input type="submit" value="Signin" class="btn btn-lg btn-primary btn-block" />
+            <br />
+            <div class="alert alert-dismissible alert-danger">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <strong>Invalid Credentials</strong>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,152 @@
+﻿@model Proestimator.ViewModel.Contracts.SubscriptionConfirmVM
+
+@using Proestimator.ViewModel.Contracts;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_SubscriptionConfirm;
+}
+
+<script>
+    function RemoveAddOn(addOnID)
+    {
+        $.getJSON("@Url.Action("RemoveAddOn", "Invoice")", { addOnID: addOnID, userID: @ViewBag.UserID },
+            function (data) {
+                if (data == "")
+                {
+                    $("#add-on-" + addOnID).remove();
+                }
+                else
+                {
+                    ShowUserMessage(data, true, 5000);
+                }
+            });
+    }
+</script>
+
+<style>
+    .invoice-table {
+        padding: 5px;
+        margin: 0px; 
+        padding-left: 10px; 
+        max-width: 600px;
+    }
+
+    .invoice-table th {
+        text-align: center;
+    }
+
+    .invoice-table td {
+        text-align: center;
+    }
+</style>
+
+<div class="page-container" style="padding-top: 20px;">
+    @using (Html.BeginForm())
+    {
+        @Html.HiddenFor(model => model.LoginID)
+        @Html.HiddenFor(model => model.UserID)
+        @Html.HiddenFor(model => model.ContractID)
+        
+        <h1>@Proestimator.Resources.ProStrings.SubscriptionConfirmation</h1>
+        
+        if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <p class="error-message">@Model.ErrorMessage</p>
+        }
+
+        <div class="container">
+            @if (Model.HasMainContract)
+            {
+                <div class="half-container">
+               
+                    <p><b>@Proestimator.Resources.ProStrings.SelectedContract:</b> @Model.TermDescription</p>
+                    <p><b>@Proestimator.Resources.ProStrings.DateRange:</b> @Model.StartDate.ToShortDateString() - @Model.ExpirationDate.ToShortDateString()</p>
+
+                    <table class="invoice-table">
+                        <tr class="header">
+                            <th><b>@Proestimator.Resources.ProStrings.InvoiceType</b></th>
+                            <th><b>@Proestimator.Resources.ProStrings.Amount</b></th>
+                            <th><b>@Proestimator.Resources.ProStrings.SalesTax</b></th>
+                            <th><b>@Proestimator.Resources.ProStrings.Total</b></th>
+                            <th><b>@Proestimator.Resources.ProStrings.Invoice_DueDate</b></th>
+                        </tr>
+
+                        @foreach (var item in Model.EstimaticsInvoices)
+                        {
+                            <tr>
+                                <td>@item.InvoiceType</td>
+                                <td>@item.InvoiceAmount.ToString("C")</td>
+                                <td>@item.SalesTax.ToString("C")</td>
+                                <td>@item.InvoiceTotal.ToString("C")</td>
+                                <td>@item.DueDate</td>
+                            </tr>
+                        }
+                    </table>
+
+                    <div id="container" style="padding-bottom: 20px; padding-top: 20px;">
+                        <a class="button nav-btn" href="/@ViewBag.UserID/invoice/pick-contract">@Proestimator.Resources.ProStrings.ChangeContract</a>
+                        <input type="submit" value="Delete Contract" class="button nav-btn" data-form-action="/@ViewBag.UserID/invoice/delete-contract" />
+                    </div>
+                
+                </div>
+
+                <div class="half-container">
+                    @if (Model.HasPromo)
+                    {
+                        <p><b>@Proestimator.Resources.ProStrings.PromoCode:</b> @Model.CurrentPromoCode</p>
+                        <p><b>@Proestimator.Resources.ProStrings.PromoAmount:</b> @Model.CurrentPromoAmount.ToString("C")</p>
+                        if (Model.IsEarlyRenewalPromoCodeApplied == false)
+                        {
+                            <p><input type="submit" value="Remove Promo" class="button nav-btn" data-form-action="/@ViewBag.UserID/invoice/remove-promo" /></p>
+                        }
+                    }
+                    else
+                    {
+                        <b>@Proestimator.Resources.ProStrings.PromoCode:</b>
+                        @Html.TextBoxFor(o => o.PromoCode, new { @style = "width: 150px;" })
+                        <input type="submit" value="@Proestimator.Resources.ProStrings.Apply" class="button nav-btn" data-form-action="/@ViewBag.UserID/invoice/add-promo" />
+                    }
+                </div>
+            }
+
+            @if (Model.AddOns.Count > 0)
+            {
+                <div class="container">
+                    <hr />
+                    <h1>@Proestimator.Resources.ProStrings.AddOnContracts</h1>
+
+                    @foreach (AddOnConfirmVM confirmVM in Model.AddOns)
+                    {
+                <div id="add-on-@confirmVM.AddOnID">
+                    <p><b>@confirmVM.ContractType</b> - <a onclick="RemoveAddOn(@confirmVM.AddOnID)" href="#" style="color: black;">@Proestimator.Resources.ProStrings.Remove</a></p>
+                    
+                    <table class="invoice-table">
+                        <tr class="header">
+                            <th><b>@Proestimator.Resources.ProStrings.Amount</b></th>
+                            <th><b>@Proestimator.Resources.ProStrings.SalesTax</b></th>
+                            <th><b>@Proestimator.Resources.ProStrings.Total</b></th>
+                            <th><b>@Proestimator.Resources.ProStrings.Invoice_DueDate</b></th>
+                        </tr>
+
+                        @foreach (var item in confirmVM.Invoices)
+                        {
+                            <tr>
+                                <td>@item.InvoiceAmount.ToString("C")</td>
+                                <td>@item.SalesTax.ToString("C")</td>
+                                <td>@item.InvoiceTotal.ToString("C")</td>
+                                <td>@item.DueDate</td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="container" style="padding-bottom: 20px; padding-top: 20px;">
+            <a class="button nav-btn" href="/@ViewBag.UserID/invoice/pick-addon/@Model.ContractID">@Proestimator.Resources.ProStrings.SelectAddOnContracts</a>
+            <a class="button nav-btn" href="/@ViewBag.UserID/invoice/customer-invoice" style="float: right;">  @Proestimator.Resources.ProStrings.Confirm  </a>
+        </div>
+    }
+</div>

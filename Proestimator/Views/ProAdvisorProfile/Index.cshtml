@@ -1,0 +1,357 @@
+﻿@model Proestimator.ViewModel.Profiles.AddOnsPageVM
+
+@using System.Linq;
+@using Proestimator.Resources;
+@using Proestimator.ViewModel;
+@using Proestimator.ViewModel.Profiles;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.AddOnRateProfile;
+}
+
+<script>
+
+    $(document).ready(function () {
+        $("#SaveButton").click(function () {
+            SaveData(false);
+        });
+
+        $("#GridSection").find("select, input").change(function () {
+            LoadPresetsGrid();
+        });
+
+        $('#btnSubmit').attr('action', "/@Model.UserID/pro-advisor/@Model.ProfileID");
+    });
+
+    function SaveData(autosave)
+    {
+        @if (Model.CanBeEdited)
+        {
+            <text>
+            var lines = [];
+
+            $("#add-ons-grid").find("tbody").find("tr").each(function (i, obj) {
+                var presetID = $(obj).find("td:first").html();
+                var shellID = $(obj).find("td:nth-child(2)").text();
+                var labor = $(obj).find(".input-labor").val();
+                var refinish = $(obj).find(".input-refinish").val();
+                var charge = $(obj).find(".input-charge").val();
+                var otherCharge = $(obj).find(".input-other-charge").val();
+                var active = $(obj).find(".checkbox-active").is(":checked");
+                var autoSelect = $(obj).find(".checkbox-auto").is(":checked");
+                var otherTypeOverride = $(obj).find(".other-type-dll").val();
+
+                lines.push({ PresetID: presetID, ShellID: shellID, Labor: labor, Refinish: refinish, Charge: charge, OtherCharge: otherCharge, Active: active, AutoSelect: autoSelect, OtherTypeOverride: otherTypeOverride });
+            });
+
+            $.ajax({
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                type: 'POST',
+                url: '/ProAdvisorProfile/SavePresets',
+                data: JSON.stringify({ 'userID': @Model.UserID, 'profileID': @Model.ProfileID, 'profileName': $("#txtProfileName").val(), 'presets': lines }),
+                success: function (response) {
+                    if (response.Success == true) {
+                        if (autosave == false)
+                        {
+                            ShowUserMessage("Data Saved", false, 4000);
+                            LoadPresetsGrid();
+                        }
+                    }
+                    else {
+                        ShowUserMessage(response.ErrorMessage, true, 5000);
+                    }
+                },
+                failure: function (response) {
+                    ShowUserMessage(response, true, 5000);
+                }
+            });
+            </text>
+        }
+
+    }
+
+    function GetAddOnsListParameters() {
+        var result =
+        {
+            siteUserID: @Model.UserID
+            , profileID: $("#ProfileID").val()
+            , name: $(".filter-name").val()
+            , operationType: $(".filter-operation-type").val()
+            , laborType: $(".filter-labor-type").val()
+        };
+        return result;
+    }
+
+    // This is called by NavigationButtons.js before redirecting
+    function BeforeRedirect() {
+        SaveData(true);
+    }
+
+    function LoadPresetsGrid() {
+        var grid = $("#add-ons-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+    }
+
+    function ActiveCheckboxChange(element) {
+
+        var checkbox = $(element);
+        console.log(checkbox);
+        if (!checkbox.is(":checked")) {
+            checkbox.closest("tr").css("opacity", .4);
+        }
+        else {
+            checkbox.closest("tr").css("opacity", 1);
+        }
+    }
+
+    function GridDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#add-ons-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+
+        $(".checkbox-active").each(function (i, obj) {
+            var checkbox = $(this);
+            if (!checkbox.is(":checked")) {
+                checkbox.closest("tr").css("opacity", .4);
+            }
+        });
+
+        var ddl = $("#OtherTypeDDL");
+
+        $(".OtherTypeContainer").each(function (i, obj) {
+            var pieces = $(obj).text().split(":");
+
+            var otherType = pieces[0];
+            if (otherType == "NA") {
+                otherType = "N/A";
+            }
+
+            var otherTypeOverride = pieces[1];
+
+            // Make a copy of the drop down and set the first option to the shell default
+            var ddlClone = ddl.clone();
+            ddlClone.find("option:first").text(otherType);
+
+            $(obj).empty();
+            $(obj).append(ddlClone);
+
+            if (otherTypeOverride == "") {
+                ddlClone.val("Shell");
+            }
+            else {
+                ddlClone.val(otherTypeOverride);
+            }
+
+            // Get a reference to the other charge text box and set it up to hide when NA is selected
+            var otherChargeTextBox = ddlClone.parent().parent().next().find("label");
+
+            if (ddlClone.val() == "NA" || (ddlClone.val() == "Shell" && otherType == "N/A")) {
+                otherChargeTextBox.hide();
+            }
+            else {
+                otherChargeTextBox.show();
+            }
+
+            ddlClone.change(function () {
+                if (ddlClone.val() == "NA" || (ddlClone.val() == "Shell" && otherType == "N/A")) {
+                    otherChargeTextBox.hide();
+                }
+                else {
+                    otherChargeTextBox.show();
+                }
+            });
+        });
+
+        SetFilterWidths();
+    }
+
+    function SetFilterWidths() {
+        var section = $("#GridSection");
+
+        var nameWidth = section.find('[data-field=Name]').width();
+        var operationWidth = section.find('[data-field=OperationType]').width();
+        var laborWidth = section.find('[data-field=LaborType]').width();
+
+        section.find(".name-container").css("width", nameWidth + 15);
+        section.find(".operation-type-container").css("width", operationWidth + 15);
+        section.find(".labor-type-container").css("width", laborWidth + 15);
+
+        $(".grid-filters-end").css("width", "calc(100% - " + ((nameWidth + operationWidth + laborWidth) + 45) + "px)");
+    }
+</script>
+
+<style>
+    #add-ons-grid input[type=text] {
+        width: 50px;
+        margin: 5px;
+    }
+
+    .datagrid {
+        margin-top: 30px;
+        margin-left: 20px;
+        cursor: pointer;
+    }
+
+    #GridSection {
+        clear: both;
+        margin-top: 80px;
+    }
+
+    .grid-filters-wrapper {
+        height: 49px;
+        width: 100%;
+    }
+
+    .grid-filters-section {
+        padding: 5px;
+        float: left;
+        width: 20%;
+    }
+
+    .grid-filters-section input, select {
+        height: 39px;
+        width: 100%;
+    }
+
+    .grid-filters-end {
+        float: left;
+    }
+
+    .other-type-dll {
+        height: 30px;
+        width: auto;
+        margin: 2px 10px 2px 10px;
+    }
+
+    #formHeader-back {
+        height: 75px; 
+    }
+</style>
+
+<div style="display: none;">
+    <select id="OtherTypeDDL" class="other-type-dll">
+        <option value="Shell">Shell</option>
+        <option disabled="disabled">---------------------------</option>
+        <option value="NA">N/A</option>
+        <option value="Nontaxed">Nontaxed</option>
+        <option value="Taxed">Taxed</option>
+        <option value="Sublet">Sublet</option>
+        <option value="Towing">Towing</option>
+        <option value="Storage">Storage</option>
+    </select>
+</div>
+
+<div id="workDesk" class="page-container">
+
+    @if (!Model.ProfileIsValid)
+    {
+        <h2>@Proestimator.Resources.ProStrings.InvalidProfile</h2>
+    }
+    else
+    {
+        using (Html.BeginForm("AddOns", "RateProfile", FormMethod.Post, new { @class = "container" }))
+        {
+            @Html.HiddenFor(model => model.UserID)
+            @Html.HiddenFor(model => model.LoginID)
+            @Html.HiddenFor(model => model.ProfileID)
+            @Html.HiddenFor(model => model.EstimateID)
+
+            Html.EnableClientValidation(false);
+
+            <input type="hidden" id="redirectData" name="redirectDataField" />
+
+            <div id="formHeader">
+                <div id="formHeader-back">
+                    <a class="button nav-btn" href="javascript:SubmitAndRedirect('/@Model.UserID/rates/rateProfileSelect/@ViewBag.RateProfileSelectedTab');">@Proestimator.Resources.ProStrings.Back </a>
+                </div>
+                <div id="formHeader-center">
+                    <div id="profileName" class="container rate-ProfileName">
+                        <label>
+                            <b>@Proestimator.Resources.ProStrings.RateProfile_ProfileName: <input id="txtProfileName" type="text" value="@Model.ProfileName" style="width: 300px;" /></b>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+                <div id="GridSection" class="datagrid">
+                    <div class="grid-filters-wrapper">
+                        <div class="grid-filters-section operation-type-container">
+                            <select class="filter-operation-type form-control">
+                                <option value="All">--All--</option>
+                                <option value="Align">Align</option>
+                                <option value="RI">R&I</option>
+                                <option value="Refinish">Refinish</option>
+                                <option value="Repair">Repair</option>
+                                <option value="Replace">Replace</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="grid-filters-section name-container">
+                            <input type="text" class="filter-name" />
+                        </div>
+                        <div class="grid-filters-section labor-type-container">
+                            <select class="filter-labor-type form-control">
+                                <option value="All">--All--</option>
+                                <option value="Body">Body</option>
+                                <option value="Frame">Frame</option>
+                                <option value="Mechanical">Mechanical</option>
+                                <option value="Refinish">Refinish</option>
+                                <option value="NA">N/A</option>
+                            </select>
+                        </div>
+                        <div class="grid-filters-end">
+                            @if (Model.CanBeEdited)
+                            {
+                                <input class="button nav-btn do-not-disable" type="button" name="Save" id="SaveButton" value="Save" style="margin-top: 14px; float: right;">
+                            }
+                            else
+                            {
+                                <p>The System Default cannot be edited.  To make changes, first make a copy of the system default.</p>
+                            }
+                        </div>
+                    </div>
+
+                    @(Html.Kendo().Grid<AddOnPresetVM>()
+                    .Name("add-ons-grid")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(item => item.PresetID).Hidden();
+                        columns.Bound(item => item.ShellID).Hidden();
+                        columns.Bound(item => item.OperationType);
+                        columns.Bound(item => item.Name);
+                        columns.Bound(item => item.LaborType);
+                        columns.Bound(item => item.Notes);
+                        columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<input type='text' class='input-labor' value='#= Labor#'></input>hrs").Title("Labor").Width(100);
+                        columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<input type='text' class='input-refinish' value='#= Refinish#'></input>hrs").Title("Refinish").Width(100);
+                        columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("$<input type='text' class='input-charge' value='#= Charge#'></input>").Title("Charge").Width(100);
+                        columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<div class='OtherTypeContainer'>#= OtherType #:#= OtherTypeOverride #</div>").Title("Other Type").Width(100);
+                        columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<label style='margin: 0px;'>$<input type='text' class='input-other-charge' value='#= OtherCharge#'></input></label>").Title("Other Charge").Width(100);
+                        columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<input type='checkbox' class='checkbox-active' onchange='ActiveCheckboxChange(this)' # if (Active) { #" + "checked" + "# } # />").Title("Active").Width(50);
+                        columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<input type='checkbox' class='checkbox-auto' # if (AutoSelect) { #" + "checked" + "# } # />").Title("AutoSelect").Width(50);
+                    })
+                    .Sortable()
+                    .Events(events => events
+                        .DataBound("GridDataChanged")
+                    )
+                    .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .ServerOperation(false)
+                        //.Sort(sort => sort.Add("LastView").Descending())
+                        .Read(read => read.Action("GetProfileGrid", "ProAdvisorProfile").Data("GetAddOnsListParameters"))
+                    )
+                    )
+                </div>
+        }
+    }
+
+</div>

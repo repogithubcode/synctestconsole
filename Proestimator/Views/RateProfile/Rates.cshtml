@@ -1,0 +1,646 @@
+﻿@model Proestimator.ViewModel.Profiles.RateVM
+
+@using ProEstimatorData.Models.SubModel
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.RateProfile_ProfileRates;
+}
+
+<script type="text/javascript">
+
+    var RatesArray = []; // initialise an empty array
+
+    $(document).ready(function () {
+        $(".labor-drop-down").change(function () {
+            var dropdown = $(this);
+            refreshLaborRow(dropdown);
+        });
+
+        $(".rates-radiobuttons").change(function () {
+            refreshLaborRowDisplays();
+        });
+
+        $(".supplies-radiobuttons").change(function () {
+            refreshLaborRowDisplays();
+        });
+
+        refreshLaborRowDisplays();
+
+        $("#submitButton").click(function () {
+
+            if (RatesArray.length > 0) {
+                $('#modal-window-cap-selection').dialog('open');
+            }
+            else {
+                $("#estimateForm").submit();
+                $("#submitButton").removeAttr("disabled");
+            }
+
+        });
+
+        $("#modal-window-cap-selection").dialog({
+            autoOpen: false,
+            modal: true,
+            title: "Cap Selection Changed",
+            //width: 950,
+            width: $(window).width() * 0.30,
+            modal: true,
+            close: function () {
+                $("#submitButton").removeAttr("disabled");
+            },
+            buttons: [
+                {
+                    id: "Yes",
+                    text: "OK",
+                    click: function () {
+                        $("#estimateForm").submit();
+                        $(this).dialog('close');
+                    }
+                },
+                {
+                    id: "No",
+                    text: "Cancel",
+                    click: function () {
+
+                        if (RatesArray.length > 0) {
+                            $("#RateCapSelectionCancelled").val(true);
+                        }
+
+                        $("#estimateForm").submit();
+                        $(this).dialog('close');
+                    }
+                }
+            ]
+        });
+
+    });
+
+    function refreshLaborRowDisplays() {
+        console.debug("Refresh");
+        $(".labor-drop-down").each(function (i, obj) {
+            refreshLaborRow($(obj));
+        });
+    }
+
+    function refreshLaborRow(dropdown)
+    {
+        var parentRow = dropdown.parent().parent();
+
+        var capAfter = $('input[name=CapRatesAfterInclude]:checked').val();
+
+        if (parentRow.hasClass('supplies-row'))
+        {
+            capAfter = $('input[name=CapSuppliesAfterInclude]:checked').val();
+        }
+
+        if (dropdown.val() == "0")
+        {
+            parentRow.find(".row-details").show();
+        }
+        else
+        {
+            parentRow.find(".row-details").hide();
+
+            if (capAfter == 'False')
+            {
+                parentRow.find(".cap-stuff").show();
+            }
+        }
+    }
+
+    function LaborSuppliesRatesOnChange(rateID, capTypeSelected, capTypeOnload) {
+
+        if (capTypeOnload == '99') {
+            if (capTypeSelected != capTypeOnload) {
+                var isRateIDExist = false;
+                for (var i = 0; i < RatesArray.length; i++) {
+                    if (RatesArray[i] == rateID) {
+                        isRateIDExist = true;
+                    }
+                }
+                if (isRateIDExist == false) {
+                    RatesArray.push(rateID);
+                }
+            }
+            else {
+                for (var i = 0; i < RatesArray.length; i++) {
+                    if (RatesArray[i] == rateID) {
+                        RatesArray.pop(rateID);
+                    }
+                }
+            }
+        }
+    }
+
+    function PartsOtherRatesOnChange(rateID, changedIndex, capTypeOnload, rateType) {
+
+        if (capTypeOnload == 'False') {
+            var capTypeSelected = '';
+
+            if (rateType == 'P') {
+                capTypeSelected = $("#PartsRates_" + changedIndex + "__Cap").val();
+            }
+            else if (rateType == 'O') {
+                capTypeSelected = $("#OtherRates_" + changedIndex + "__Cap").val();
+            }
+
+            if (capTypeSelected == 'true') {
+                var isRateIDExist = false;
+                for (var i = 0; i < RatesArray.length; i++) {
+                    if (RatesArray[i] == rateID) {
+                        isRateIDExist = true;
+                    }
+                }
+                if (isRateIDExist == false) {
+                    RatesArray.push(rateID);
+                }
+            }
+            else {
+                for (var i = 0; i < RatesArray.length; i++) {
+                    if (RatesArray[i] == rateID) {
+                        RatesArray.pop(rateID);
+                    }
+                }
+            }
+        }
+    }
+
+</script>
+
+<style>
+    table {
+        margin-top: 0;
+    }
+
+    @@media screen and (max-width:700px) {
+        #smEstimateNavRow {
+            border: 1px solid #349ad8;
+            background-color: #f5f9fb;
+            max-width: 100%;
+            padding-right: 30px;
+        }
+
+        #estimateNavigation {
+            margin-top: 15px;
+        }
+    }
+
+</style>
+
+
+<div id="workDesk" class="page-container">
+
+    <div id="modal-window-cap-selection" style="display:none;" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    @Proestimator.Resources.ProStrings.RateProfileCapSelection <br />
+                    @Proestimator.Resources.ProStrings.RateProfileCapSelectionButtonOK <br />
+                    @Proestimator.Resources.ProStrings.RateProfileCapSelectionButtonCancel
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.ProfileIsValid)
+    {
+        <h2>@Proestimator.Resources.ProStrings.InvalidProfile</h2>
+    }
+    else
+    {
+        using (Html.BeginForm("Rates", "RateProfile", FormMethod.Post, new { @id = "estimateForm", @class = "container" }))
+        {
+            @Html.Partial("RateProfileTopMenu", Model.ProfileID)
+
+            @Html.HiddenFor(model => model.LoginID)
+            @Html.HiddenFor(model => model.ProfileID)
+            @Html.HiddenFor(model => model.EstimateID)
+            @Html.HiddenFor(o => o.RateCapSelectionCancelled);
+
+            Html.EnableClientValidation(false);
+
+            <input type="hidden" id="redirectData" name="redirectDataField" />
+
+            <div class="tabcontent container">
+
+                <div id="formHeader">
+
+                    <div id="profileName" class="container rate-ProfileName">
+                        <label>
+                            <b>@Proestimator.Resources.ProStrings.RateProfile_ProfileName: @Model.ProfileName</b> - <a href="/@ViewBag.UserID/support#rate-profile" style="color: black; text-decoration: underline; font-size: 0.8em;">@Proestimator.Resources.ProStrings.ViewHelpVideo</a>
+
+                            <p class="profile-message">
+                                @if (Model.IsGlobalProfile)
+                                {
+                                    @Proestimator.Resources.ProStrings.ProfileMessage_Global
+                                }
+                                else
+                                {
+                                    @Proestimator.Resources.ProStrings.ProfileMessage_Estimate
+                                }
+                            </p>
+                        </label>
+                    </div>
+
+                    @* The previous and next buttons *@
+                    <div id="container">
+                        <div class="half-container">
+                            <a class="button nav-btn" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/rates');">&lt;&lt; @Proestimator.Resources.ProStrings.RateProfile_AllRates</a>
+                        </div>
+
+                        <div class="half-container">
+                            <a class="button nav-btn" href="@("javascript:SubmitAndRedirect('/" + ViewBag.UserID + "/paint-finish/" + Model.ProfileID + "');")">@Proestimator.Resources.ProStrings.PageTitle_PaintFinish >></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="lgRow1" class="container">
+                    @* The Save button above the forms *@
+                    @if (Model.EstimateID > 0 && Model.EstimateIsLocked)
+                    {
+                        <p class="error-message">@Proestimator.Resources.ProStrings.RateProfile_LockedEstimate</p>
+                    }
+
+                    <div class="container center" style="padding-bottom: 20px;">
+                        @if (!Model.EstimateIsLocked)
+                        {
+                            <input id="submitButton" class="button nav-btn" type="button" value="@Proestimator.Resources.ProStrings.Save" />
+                        }
+
+                        <p class="error-message">@Model.ErrorMessage</p>
+                    </div>
+
+                    @* Part 1. Customer fields  *@
+                    <div class="half-container">
+
+                        <fieldset id="customerFieldSet">
+
+                            <div class="field-wrapper">
+                                <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.RateProfile_ProfileName</label>
+                                <div class="field-control">
+                                    @Html.TextBoxFor(model => model.ProfileName, new { autocomplete = "off" })
+                                </div>
+                            </div>
+
+                            <div class="field-wrapper">
+                                <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Description</label>
+                                <div class="field-control">
+                                    @Html.TextBoxFor(model => model.Description, new { autocomplete = "off" })
+                                </div>
+                            </div>
+
+                            <div class="field-wrapper">
+                                <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.CreditCardFeePercentage</label>
+                                <div class="field-control">
+                                    @Html.TextBoxFor(model => model.CreditCardFeePercentage, new { autocomplete = "off" })
+                                </div>
+                            </div>
+
+                            <div class="field-wrapper">
+                                <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.ApplyCreditCardFee</label>
+                                <div class="field-control">
+                                    @Html.CheckBoxFor(model => model.ApplyCreditCardFee)
+                                </div>
+                            </div>
+
+                            <div class="field-wrapper">
+                                <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Taxed</label>
+                                <div class="field-control">
+                                    @Html.CheckBoxFor(model => model.TaxedCreditCardFee)
+                                </div>
+                            </div>
+
+                        </fieldset>
+                    </div>
+                </div>
+
+                <div id="lgRow1" class="container" style="margin-left:250px; display: none;">
+                    <label class="inputLabel field-label" style="margin-top:10px;font-weight:bold">@Proestimator.Resources.ProStrings.FullEstimateDiscountMarkup</label>
+                    @Html.CheckBoxFor(model => Model.IsFullEstimateDiscountMarkup) &nbsp;
+                    @Html.TextBoxFor(model => model.FullEstimateDiscountMarkupValue, new { autocomplete = "off", @class = "row-details cap-stuff", style = "width:10%; height:30px;  background-color: #e1e1e1;border: 0;padding-left:5px;border-radius:5px;" })&nbsp;%
+                </div>
+
+                <div id="ratesHeader" class="container">
+                    <div class="col md_2_8 lg_4_12 xl_4_14">
+                        <div><span class="number">1</span> @Proestimator.Resources.ProStrings.Labor</div>
+                    </div>
+                </div>
+
+                <div id="lgRow1" class="container">
+
+                    <div id="customerField" class="container">
+
+                        <div id="customerFieldSet">
+                            <div id="rateProfileTableContainer" class="container ">
+                                <table class="lgRateProfileTable" style="margin-bottom:0;">
+
+                                    <caption>
+                                        <span class="inlineNote">
+                                            @Proestimator.Resources.ProStrings.RateProfile_CapNote
+                                            @Html.RadioButtonFor(model => Model.CapRatesAfterInclude, false, new { @class = "rates-radiobuttons" }) @Proestimator.Resources.ProStrings.RateProfile_Before
+                                            @Html.RadioButtonFor(model => Model.CapRatesAfterInclude, true, new { @class = "rates-radiobuttons" }) @Proestimator.Resources.ProStrings.RateProfile_After
+                                            @Proestimator.Resources.ProStrings.RateProfile_CapNote_End
+
+                                            <br />@Proestimator.Resources.ProStrings.RateProfile_MarkupNote
+                                        </span>
+                                    </caption>
+
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" class="tableFirst">@Proestimator.Resources.ProStrings.Type</th>
+                                            <th scope="col">
+                                                @Proestimator.Resources.ProStrings.RateProfile_RateTableNote
+                                            </th>
+                                            <th scope="col">@Proestimator.Resources.ProStrings.RateProfile_Rate</th>
+                                            <th scope="col">@Proestimator.Resources.ProStrings.RateProfile_CapType</th>
+                                            <th scope="col">@Proestimator.Resources.ProStrings.RateProfile_CapAmount</th>
+                                            <th scope="col" class="taxCol">@Proestimator.Resources.ProStrings.Tax</th>
+                                            <th scope="col">@Proestimator.Resources.ProStrings.DiscountOrMarkup</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+
+                                        @for (int i = 0; i < Model.LaborRates.Count; i++)
+                                        {
+                                            <tr style="margin-top:10px;" class="labor-row">
+                                                <td class="tableFirst">
+                                                    @Html.DisplayTextFor(model => Model.LaborRates[i].Name)
+                                                    @Html.HiddenFor(model => Model.LaborRates[i].Name)
+                                                    @Html.HiddenFor(model => Model.LaborRates[i].ID)
+                                                    @Html.HiddenFor(model => Model.LaborRates[i].RateType)
+                                                </td>
+                                                <td>
+                                                    @if (Model.LaborRates[i].DropDownList != null)
+                                                    {
+                                                        <text>
+                                                            @Html.DropDownListFor(model => Model.LaborRates[i].IncludeLabor, new SelectList(Model.LaborRates[i].DropDownList, "Value", "Text", Model.LaborRates[i].IncludeLabor), new { @class = "labor-drop-down" })
+                                                        </text>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <div class="row-details">
+                                                        @Html.TextBoxFor(model => Model.LaborRates[i].Rate, new { autocomplete = "off", style = "width:50%; height:30px;  background-color: #e1e1e1;border: 0;padding-left:5px;border-radius:5px;" })&nbsp;/ @Proestimator.Resources.ProStrings.HoursAbreviation
+                                                    </div>
+                                                </td>
+                                                <td nowrap>
+                                                    <div class="row-details cap-stuff">
+                                                        @Html.RadioButtonFor(model => Model.LaborRates[i].CapType, 0, new { onchange = "LaborSuppliesRatesOnChange('" + Model.LaborRates[i].ID + "','0','" + Model.LaborRates[i].CapType + "');" })&nbsp;$
+                                                        @Html.RadioButtonFor(model => Model.LaborRates[i].CapType, 1, new { onchange = "LaborSuppliesRatesOnChange('" + Model.LaborRates[i].ID + "','1','" + Model.LaborRates[i].CapType + "');" })&nbsp; @Proestimator.Resources.ProStrings.HoursAbreviation
+                                                        @Html.RadioButtonFor(model => Model.LaborRates[i].CapType, 99, new { onchange = "LaborSuppliesRatesOnChange('" + Model.LaborRates[i].ID + "','99','" + Model.LaborRates[i].CapType + "');" })&nbsp; @Proestimator.Resources.ProStrings.None
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    @Html.TextBoxFor(model => Model.LaborRates[i].CapAmount, new { autocomplete = "off", @class = "row-details cap-stuff", style = "width:50%; height:30px;  background-color: #e1e1e1;border: 0;padding-left:5px;border-radius:5px;" })
+                                                </td>
+                                                <td class="taxCol">
+                                                    @Html.CheckBoxFor(model => Model.LaborRates[i].Taxable, new { @class = "row-details" })
+                                                </td>
+                                                <td>
+                                                    <div class="row-details">
+                                                        @Html.TextBoxFor(model => Model.LaborRates[i].Discount, new { autocomplete = "off", style = "width:50%; height:30px;  background-color: #e1e1e1;border: 0;padding-left:5px;border-radius:5px;" })&nbsp;%
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <div id="lgRow1" class="container">
+
+                    <div id="customerField" class="container">
+
+                        <fieldset id="customerFieldSet">
+
+                            <div id="ratesHeader" class="container">
+                                <div class="col md_2_8 lg_4_12 xl_4_14">
+                                    <legend><span class="number">2</span> @Proestimator.Resources.ProStrings.Supplies </legend>
+
+                                </div>
+                            </div>
+
+                            <div id="rateProfileTableContainer" class="container">
+                                <table class="lgRateProfileTable" style="margin-bottom:0;">
+
+                                    <caption>
+                                        <span class="inlineNote">
+                                            @Proestimator.Resources.ProStrings.RateProfile_CapNote
+                                            @Html.RadioButtonFor(model => Model.CapSuppliesAfterInclude, false, new { @class = "supplies-radiobuttons" }) @Proestimator.Resources.ProStrings.RateProfile_Before
+                                            @Html.RadioButtonFor(model => Model.CapSuppliesAfterInclude, true, new { @class = "supplies-radiobuttons" }) @Proestimator.Resources.ProStrings.RateProfile_After
+                                            @Proestimator.Resources.ProStrings.RateProfile_CapNote_End
+
+                                            <br />@Proestimator.Resources.ProStrings.RateProfile_MarkupNote
+                                        </span>
+                                    </caption>
+
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th scope="col" class="tableFirst">@Proestimator.Resources.ProStrings.Type</th>
+                                            <th scope="col">@Proestimator.Resources.ProStrings.RateProfile_Rate</th>
+                                            <th scope="col">@Proestimator.Resources.ProStrings.RateProfile_CapType</th>
+                                            <th scope="col">@Proestimator.Resources.ProStrings.RateProfile_CapAmount</th>
+                                            <th scope="col" class="taxCol">@Proestimator.Resources.ProStrings.Tax</th>
+                                            <th scope="col">@Proestimator.Resources.ProStrings.DiscountOrMarkup</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        @for (int i = 0; i < Model.SuppliesRates.Count; i++)
+                                        {
+                                            <tr class="supplies-row">
+                                                <td class="tableFirst">
+                                                    @Html.DisplayTextFor(model => Model.SuppliesRates[i].Name)
+                                                    @Html.HiddenFor(model => Model.SuppliesRates[i].Name)
+                                                    @Html.HiddenFor(model => Model.SuppliesRates[i].ID)
+                                                </td>
+                                                <td>
+                                                    @if (Model.SuppliesRates[i].DropDownList != null)
+                                                    {
+                                                        <text>
+                                                            @Html.DropDownListFor(model => Model.SuppliesRates[i].IncludeLabor, new SelectList(Model.SuppliesRates[i].DropDownList, "Value", "Text", Model.SuppliesRates[i].IncludeLabor), new { @class = "labor-drop-down" })
+                                                        </text>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <div class="row-details">
+                                                        @Html.TextBoxFor(model => Model.SuppliesRates[i].Rate, new { autocomplete = "off", style = "width:50%; height:30px;  background-color: #e1e1e1;border: 0;padding-left:5px;border-radius:5px;" })&nbsp;/hr.
+                                                    </div>
+
+                                                </td>
+                                                <td nowrap>
+                                                    <div class="row-details cap-stuff">
+                                                        @Html.RadioButtonFor(model => Model.SuppliesRates[i].CapType, 0, new { onchange = "LaborSuppliesRatesOnChange('" + Model.LaborRates[i].ID + "','0','" + Model.SuppliesRates[i].CapType + "');" }) &nbsp;$
+                                                        @Html.RadioButtonFor(model => Model.SuppliesRates[i].CapType, 1, new { onchange = "LaborSuppliesRatesOnChange('" + Model.LaborRates[i].ID + "','1','" + Model.SuppliesRates[i].CapType + "');" }) &nbsp;@Proestimator.Resources.ProStrings.HoursAbreviation
+                                                        @Html.RadioButtonFor(model => Model.SuppliesRates[i].CapType, 99, new { onchange = "LaborSuppliesRatesOnChange('" + Model.LaborRates[i].ID + "','99','" + Model.SuppliesRates[i].CapType + "');" }) &nbsp;@Proestimator.Resources.ProStrings.None
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    @Html.TextBoxFor(model => Model.SuppliesRates[i].CapAmount, new { autocomplete = "off", @class = "row-details cap-stuff", style = "width:50%; height:30px;  background-color: #e1e1e1;border: 0;padding-left:5px;border-radius:5px;" })
+                                                </td>
+                                                <td class="taxCol">
+                                                    @Html.CheckBoxFor(model => Model.SuppliesRates[i].Taxable, new { @class = "row-details" })
+                                                </td>
+                                                <td>
+                                                    @Html.TextBoxFor(model => Model.SuppliesRates[i].Discount, new { autocomplete = "off", @class = "row-details", style = "width:50%; height:30px;  background-color: #e1e1e1;border: 0;padding-left:5px;border-radius:5px;" })&nbsp;%
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </fieldset>
+
+                    </div>
+                </div>
+
+                <div id="lgRow1" class="col lg_12_12 xl_7_14">
+
+                    <div id="customerField" class="container">
+
+                        <fieldset id="customerFieldSet">
+
+                            <div id="ratesHeader" class="container">
+                                <div class="col md_2_8 lg_4_12 xl_4_14">
+                                    <legend><span class="number">3</span> @Proestimator.Resources.ProStrings.Parts</legend>
+                                </div>
+                            </div>
+
+                            <div id="rateProfileTableContainer" class="container">
+                                <table class="lgRateProfileTable" style="margin-bottom:0;">
+
+                                    <caption>
+                                        <span class="inlineNote">
+
+                                        </span>
+                                    </caption>
+
+
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" class="tableFirst">@Proestimator.Resources.ProStrings.Type</th>
+                                            <th scope="col">@Proestimator.Resources.ProStrings.RateProfile_Cap</th>
+                                            <th scope="col">@Proestimator.Resources.ProStrings.RateProfile_CapAmount</th>
+                                            <th scope="col" class="taxCol">@Proestimator.Resources.ProStrings.Tax</th>
+                                            <th scope="col">@Proestimator.Resources.ProStrings.DiscountOrMarkup</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+
+                                        @for (int i = 0; i < Model.PartsRates.Count; i++)
+                                        {
+                                            <tr>
+                                                <td class="tableFirst">
+                                                    @Html.DisplayTextFor(model => Model.PartsRates[i].Name)
+                                                    @Html.HiddenFor(model => Model.PartsRates[i].Name)
+                                                    @Html.HiddenFor(model => Model.PartsRates[i].ID)
+                                                </td>
+                                                <td class="capColumn">
+                                                    @Html.CheckBoxFor(model => Model.PartsRates[i].Cap, new { onchange = "PartsOtherRatesOnChange('" + Model.PartsRates[i].ID + "','" + i + "','" + Model.PartsRates[i].Cap + "','P');" })
+                                                </td>
+                                                <td>
+                                                    @Html.TextBoxFor(model => Model.PartsRates[i].Amount, new { autocomplete = "off", style = "height:30px;  background-color: #e1e1e1;border: 0;padding-left:5px;border-radius:5px;" })
+                                                </td>
+                                                <td class="taxCol">
+                                                    @Html.CheckBoxFor(model => Model.PartsRates[i].Taxable)&nbsp; @Proestimator.Resources.ProStrings.Taxable
+                                                </td>
+                                                <td>
+                                                    @Html.TextBoxFor(model => Model.PartsRates[i].Discount, new { autocomplete = "off", style = "width:50%; height:30px;  background-color: #e1e1e1;border: 0;padding-left:5px;border-radius:5px;" })&nbsp;%
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </fieldset>
+
+                    </div>
+                </div>
+
+                <div id="lgRow1" class="col lg_12_12 xl_push_1_14 xl_6_14">
+
+                    <div id="customerField" class="container">
+
+                        <fieldset id="customerFieldSet">
+
+                            <div id="ratesHeader" class="container">
+                                <div class="col md_push_4_8 md_2_8 lg_push_1_12 lg_3_12 xl_push_7_14 xl_3_14">
+                                    <legend><span class="number">4</span> @Proestimator.Resources.ProStrings.Other </legend>
+                                </div>
+                            </div>
+
+                            <div id="rateProfileTableContainer" class="container">
+                                <table class="lgRateProfileTable">
+
+                                    <caption>
+                                        <span class="inlineNote">
+
+                                        </span>
+                                    </caption>
+
+
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" class="tableFirst">@Proestimator.Resources.ProStrings.Type</th>
+                                            <th scope="col">@Proestimator.Resources.ProStrings.RateProfile_Cap</th>
+                                            <th scope="col">@Proestimator.Resources.ProStrings.RateProfile_CapAmount</th>
+                                            <th scope="col" class="taxCol">@Proestimator.Resources.ProStrings.Tax</th>
+                                            <th scope="col">@Proestimator.Resources.ProStrings.DiscountOrMarkup</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (int i = 0; i < Model.OtherRates.Count; i++)
+                                        {
+                                            <tr>
+                                                <td class="tableFirst">
+                                                    @Html.DisplayTextFor(model => Model.OtherRates[i].Name)
+                                                    @Html.HiddenFor(model => Model.OtherRates[i].Name)
+                                                    @Html.HiddenFor(model => Model.OtherRates[i].ID)
+                                                </td>
+                                                <td class="capColumn">
+                                                    @Html.CheckBoxFor(model => Model.OtherRates[i].Cap, new { onchange = "PartsOtherRatesOnChange('" + Model.OtherRates[i].ID + "','" + i + "','" + Model.OtherRates[i].Cap + "','O');" })
+                                                </td>
+                                                <td>
+                                                    @Html.TextBoxFor(model => Model.OtherRates[i].Amount, new { autocomplete = "off", style = "height:30px;  background-color: #e1e1e1;border: 0;padding-left:5px;border-radius:5px;" })
+                                                </td>
+                                                <td class="taxCol">
+                                                    @Html.CheckBoxFor(model => Model.OtherRates[i].Taxable)&nbsp; @Proestimator.Resources.ProStrings.Taxable
+                                                </td>
+                                                <td>
+                                                    @Html.TextBoxFor(model => Model.OtherRates[i].Discount, new { autocomplete = "off", style = "width:50%; height:30px;  background-color: #e1e1e1;border: 0;padding-left:5px;border-radius:5px;" })&nbsp;%
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </fieldset>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="bottomBtns" class="container">
+                <div id="prvBtn" class="col sm_1_4 md_push_1_8 md_1_8 lg_1_12 xl_1_14">
+                    <a class="button nav-btn" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/rates');">@Proestimator.Resources.ProStrings.PreviousButton</a>
+                </div>
+
+                <div id="nxtBtnVehicle" class="col sm_push_2_4 sm_1_4 md_push_4_8 md_1_8 lg_push_8_12 lg_1_12 xl_push_11_14 xl_1_14">
+                    <a class="button nav-btn" href="@("javascript:SubmitAndRedirect('/" + ViewBag.UserID + "/paint-finish/" + Model.ProfileID + "');")">@Proestimator.Resources.ProStrings.NextButton</a>
+                </div>
+            </div>
+        }
+    }
+</div>

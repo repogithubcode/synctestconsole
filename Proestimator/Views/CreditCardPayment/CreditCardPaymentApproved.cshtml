@@ -1,0 +1,266 @@
+﻿@model ProEstimator.Business.Model.CreditCardPayment.CreditCardPaymentApprovedVM
+@using ProEstimator.Business.Model.CreditCardPayment
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.CreditCardPaymentApprovedPageTitle;
+}
+<style>
+        .finTopSection {
+            border: 1px solid #d3d3d3;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .finTitle {
+            float: left;
+            font-size: 32px;
+            font-weight: bold;
+            margin-top: 5px;
+            margin-right: 100px;
+        }
+
+        .finTitleRight {
+            padding-top: 14px;
+            float: inline-end;
+        }
+
+        .finBottomSection {
+        }
+
+        .finParagraph {
+            /*        text-align: right;
+    */ font-weight: bold;
+        }
+
+            .finParagraph a:link, a:hover, a:visited, a:active {
+                color: #349ad8;
+                text-decoration: underline;
+            }
+
+        .finBottomSectionInfo a:link, a:hover, a:visited, a:active {
+            color: #349ad8;
+            text-decoration: underline;
+        }
+
+        .customer-details-wrapper {
+            display: none;
+            height: 1px;
+        }
+
+        .hide-column {
+            display: none;
+        }
+
+        .imported-true {
+            display: none !important;
+        }
+
+        .estimate-id-label {
+            display: none;
+        }
+
+        @@media (max-width: 1400px) {
+            .hide-med {
+                display: none;
+            }
+        }
+
+        @@media (max-width: 700px) {
+            .save-buttons {
+                width: 100%;
+            }
+
+            .hide-small {
+                display: none;
+            }
+        }
+
+        .ToggleGridColumn {
+            cursor: pointer;
+            background-color: #1d69a6;
+            color: #FFF;
+            padding: 2px;
+            border-radius: 3px;
+            width: 150px;
+        }
+
+        #GridPopupOptions {
+            padding: 7px;
+            width: 100px;
+            border-radius: 7px;
+            position: absolute;
+            background-color: #349ad8;
+            left: 0;
+            top: 0;
+            z-index: 2000;
+            display: none;
+        }
+
+            #GridPopupOptions a {
+                display: block;
+                width: 100%;
+            }
+
+        colgroup {
+            display: none;
+        }
+
+        .k-grid .k-alt td {
+            background-color: #dfdfdf;
+        }
+
+        .finBottomSectionInfo {
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+
+        @@media (min-width: 701px) {
+            .datagrid-fit-content {
+                width: fit-content;
+            }
+        }
+
+        @@media (max-width: 700px) {
+            .datagrid-fit-content {
+            }
+        }
+
+        .finOptions li {
+            margin-bottom: 6px;
+        }
+
+        .loanAppListFilterSearchContainer {
+            padding: 3px;
+            overflow: hidden;
+        }
+
+        .loanAppListFilterSearchCol1 {
+            float: left;
+            font-size: 12px;
+            margin-right: 100px;
+            white-space: nowrap;
+            margin-top: 11px;
+        }
+
+        .loanAppListFilterSearchCol2 {
+            float: right;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+</style>
+<script>
+    function GetSearchParameters() {
+        return {
+            userID: @Model.UserID
+        };
+    }
+
+    function RefreshGrid() {
+        var grid = $("#loan-apps-grid").data("kendoGrid");
+        if (grid) {
+            grid.dataSource.read();
+            grid.refresh();
+            grid.dataSource.page(1);
+        }
+    }
+
+    $(document).ready(function () {
+        $("#loanAppFilter").on("input", function (e) {
+            var grid = $("#loan-apps-grid").data("kendoGrid");
+            var valuetoFilter = e.target.value;
+            var filter = KendogridSearchFilter(grid, valuetoFilter);
+            grid.dataSource.filter(filter);
+        });
+    });
+</script>
+<div id="workDesk" class="col dt1 sm_4_4 md_8_8 lg_10_12 xl_12_14">
+    <div id="lgRow1" class="container" style="margin-top: 20px;">
+        <div id="wisetackSignupDiv" title="Wisetack Financing"></div>
+        <div class="finTopSection">
+            <div class="finTitle">@Proestimator.Resources.ProStrings.CreditCardPaymentNotApprovedPageTitle</div>
+            <div class="finTitleRight">
+                <div class="finParagraph">Questions? Contact the IntelliPay support team at 1-855-872-6632 (Mon-Fri 9am-8pm ET), email <a href="mailto:support@intellipay.com">support@intellipay.com</a>.</div>
+            </div>
+        </div>
+        <div class="finBottomSection">
+            <br />
+
+            <div class="finBottomSectionInfo">
+                @if (Model.IsDeclinedButWasPreviouslyApproved)
+                {
+                    <p style="font-size: 24px; color: red;">
+                        <br />
+                        <b>Your account has been disabled. Please contact IntelliPay for assistance at 1-555-555-5555 (Mon-Fri 9am-8pm ET, Sat 9am-6pm ET).</b>
+                        <br /><br /><br />
+                    </p>
+                }
+                else
+                {
+                    @*<b><a href="~/Files/Instructions/IntelliPayInstructions.pdf" target="_blank">IntelliPay Instructions</a></b>
+                        <br /><br />
+
+                        <b>How to get started using IntelliPay in Web-Est!</b>
+                        <br />
+                        <p>
+                            Vestibulum id justo sed urna convallis efficitur nec nec turpis. Vestibulum id justo sed urna convallis efficitur nec nec turpis. Vestibulum id justo sed urna convallis efficitur nec nec turpis.
+                        </p>
+                        <div class="finOptions">
+                            <ul>
+                                <li><b>Option 1:</b> On the Estimate - Payment Info page, click 'Pay with IntelliPay'.</li>
+                                <li><b>Option 2:</b> On the Estimate - Send Estimate page, click 'Insert IntelliPay Link in Email' to insert the link into the body of the email.</li>
+                                <li><b>Option 3:</b> On the Estimate - Send Estimate page, under the 'Add Report Attachments' section, select the option for 'Include IntelliPay Link' and the link will be included on the Estimate PDF.</li>
+                            </ul>
+                        </div>
+                        <p>Click here to see how to get started: <a href="https://www.intellipay.com/getting-started/webest" target="_blank">LEARN MORE</a></p>
+                        <b><a href="creditCardPayment">View IntelliPay Overview</a></b><br />*@
+                    <p>The list below shows the credit card payments associated with your customers and their estimates.</p>
+                }
+            </div>
+
+            <div>
+                <div class="datagrid datagrid-fit-content">
+                    <div class="loanAppListFilterSearchContainer">
+                        @*<div class="loanAppListFilterSearchCol1">
+                                <label><input type="checkbox" id="chkShowAllLoanApps" />Include all loan appliations</label>
+                            </div>*@
+
+                        <div class="loanAppListFilterSearchCol2">
+                            Search: <input type="text" id="loanAppFilter" name="loanAppFilter" style="min-width: 250px; max-width: 350px;" />
+                        </div>
+                    </div>
+
+
+                    @(Html.Kendo().Grid<CreditCardPaymentInfoVM>()
+                        .Name("loan-apps-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.CreditCardPaymentID).Hidden();
+                            columns.Bound(item => item.EstimateID).Hidden();
+                            columns.Bound("").Template(@<text></text>).ClientTemplate("<a class='button open-button' style='color:white; text-decoration: none;' href='/" + ViewBag.UserID + "/estimate/#= EstimateID#/payment-info'>#=EstimateID#</a>").Title(@Proestimator.Resources.ProStrings.CreditCardPaymentEstimateLink);
+                            columns.Bound(item => item.CustomerName).MinScreenWidth(200).HeaderHtmlAttributes(new { @class = "customer-column" }).HtmlAttributes(new { @class = "customer-column" }).Width(200).Title(@Proestimator.Resources.ProStrings.CreditCardPaymentCustomerName);
+                            columns.Bound(item => item.AuthCode).MinScreenWidth(200).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(100).Title(@Proestimator.Resources.ProStrings.CreditCardPaymentAuthCode);
+                            columns.Bound(item => item.Response).MinScreenWidth(200).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(80).Title(@Proestimator.Resources.ProStrings.CreditCardPaymentResponse);
+                            columns.Bound(item => item.Amount).Format("{0:c}").MinScreenWidth(200).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(80).Title(@Proestimator.Resources.ProStrings.CreditCardPaymentAmount);
+                            columns.Bound(item => item.Fee).Format("{0:c}").MinScreenWidth(200).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(80).Title(@Proestimator.Resources.ProStrings.CreditCardPaymentFee);
+                            columns.Bound(item => item.Total).Format("{0:c}").MinScreenWidth(200).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(100).Title(@Proestimator.Resources.ProStrings.CreditCardPaymentTotal);
+                            columns.Bound(item => item.NameOnCard).MinScreenWidth(200).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(200).Title(@Proestimator.Resources.ProStrings.CreditCardPaymentNameOnCard);
+                            columns.Bound(item => item.MethodHint).MinScreenWidth(200).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(100).Title(@Proestimator.Resources.ProStrings.CreditCardPaymentCardNum);
+                            columns.Bound(item => item.CreatedDate).Format("{0:M/d/yyyy}").MinScreenWidth(200).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(100).Title(@Proestimator.Resources.ProStrings.CreditCardPaymentCreatedDate);
+                        })
+                        .Pageable(pageable => pageable
+                            .Refresh(true)
+                            .ButtonCount(8)
+                        )
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Sort(sort => sort.Add("CreatedDate").Descending())
+                            .Read(read => read.Action("GetCreditCardPaymentInfoData", "CreditCardPayment").Data("GetSearchParameters"))
+                            .PageSize(20)
+                        )
+                        )
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

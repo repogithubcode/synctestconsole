@@ -1,0 +1,205 @@
+﻿@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.Support;
+}
+
+<style>
+    #formHeadline ul {
+        text-align: left;
+        font-size: 1.2em;
+    }
+
+    #formHeadline a {
+        font-weight: bold;
+        color: black;
+        text-decoration: underline;
+    }
+
+        #formHeadline a:hover {
+            font-weight: bold;
+            color: black;
+            text-decoration: underline;
+        }
+
+    h1 {
+        text-align: left;
+        padding-left: 20px;
+        padding-top: 20px;
+        margin-bottom: 0px;
+        font-size: 20px;
+    }
+</style>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        if (@ViewBag.GotoID > -1) {
+            $('html, body').animate({
+                scrollTop: $('#customerField').find("fieldset:eq(@ViewBag.GotoID)").offset().top - ($("#formHeader").offset().top < $("#lgRow1").offset().top ? 0 : $("#formHeader").offset().top)
+            }, 1000);
+            var element = $('#customerField').find("iframe:eq(@ViewBag.GotoID)");
+            var src = element.attr("src");
+            element.attr("src", src + "&autoplay=1");
+        }
+    });
+</script>
+
+<div id="workDesk" class="col dt1 sm_4_4 md_8_8 lg_10_12 xl_12_14">
+    <form id="partsLookupForm" method="post" action="http://web-est.com/proestimator/index.html" class="container">
+        <div id="formHeader" class="half-container">
+
+
+            <div id="formHeadline" class="container">
+                <div id="formHeaderContainer">
+
+                    <h1 style="text-align: left;"><a href="https://web-est9767.zendesk.com/hc/en-us" target="_blank">Self Help FAQ</a></h1>
+
+                    <h1>@Proestimator.Resources.ProStrings.RateProfileInstructions</h1>
+
+                    <ul>
+                        <li><a href="~/Files/Instructions/Rate Profile - Rates Page.pdf" target="_blank">Rates Page</a></li>
+                        <li><a href="~/Files/Instructions/Rate Profile - Paint Finish Tab.pdf" target="_blank">Paint Finish</a></li>
+                        <li><a href="~/Files/Instructions/Rate Profile - Print Options.pdf" target="_blank">Print Options</a></li>
+                        <li><a href="~/Files/Instructions/Rate Profile - Tax tab.pdf" target="_blank">Tax Tab</a></li>
+                        <li><a href="~/Files/Instructions/Rate Profile - Preset Charges.pdf" target="_blank">Preset Charges</a></li>
+                    </ul>
+
+                    <h1>@Proestimator.Resources.ProStrings.MoreInstructions</h1>
+
+                    <ul>
+                        <li><a href="~/Files/Instructions/Manage Estimates Page.pdf" target="_blank">Manage Estimates Page</a></li>
+                        <li><a href="~/Files/Instructions/Saved Customer List.pdf" target="_blank">Saved Customer List</a></li>
+                        <li><a href="~/Files/Instructions/Importing Web-Est Estimates into Pro-Estimator.pdf" target="_blank">Importing Web-Est Estimates into Pro-Estimator</a></li>
+                        <li><a href="~/Files/Instructions/PE Mobile Device Instructions.pdf" target="_blank">Mobile Device Instructions</a></li>
+                        <li><a href="~/Files/Instructions/Are You Paying Too Much for Parts.pdf" target="_blank">Are You Paying Too Much for Parts</a></li>
+                        <li><a href="~/Files/Instructions/Creating a Desktop Icon.pdf" target="_blank">Creating a Desktop Icon</a></li>
+                        <li><a href="~/Files/Instructions/FireFox Settings to Print Estimates.pdf" target="_blank">FireFox Settings to Print Estimates</a></li>
+                        <li><a href="~/Files/Instructions/Internet Explorer Settings.pdf" target="_blank">Internet Explorer Settings</a></li>
+                        <li><a href="~/Files/Instructions/Writing an estimate - graphical.pdf" target="_blank">Writing an estimate - Graphical</a></li>
+                        <li><a href="~/Files/Instructions/Writing Estimate - Manual.pdf" target="_blank">Writing Estimate - Manual</a></li>
+                        <li><a href="~/Files/Instructions/Creating a Supplement.pdf" target="_blank">Creating a Supplement</a></li>
+                        <li><a href="~/Files/Instructions/Pro-Estimator User Guide.pdf" target="_blank">Pro-Estimator User Guide</a></li>
+                        <li><a href="~/Files/Instructions/Send Estimate Tab.pdf" target="_blank">Send Estimate Tab</a></li>
+                        <li><a href="~/Files/Instructions/Accessing previous model year data on new vehicles not in database.pdf" target="_blank">Accessing previous model year data on new vehicles not in database</a></li>
+                        <li><a href="~/Files/Instructions/How Save and Select Insurance Companies.pdf" target="_blank">How to Save and Select Insurance Companies</a></li>
+                        <li><a href="~/Files/Instructions/How to Create and Save EMS files.pdf" target="_blank">How to Create and Save EMS files</a></li>
+                        <li><a href="~/Files/Instructions/How to select vehicle to access parts.pdf" target="_blank">How to select vehicle to access parts</a></li>
+                        <li><a href="~/Files/Instructions/How to use the Parts Search feature on the Add Parts page.pdf" target="_blank">How to use the Parts Search feature on the Add Parts page</a></li>
+                        <li><a href="~/Files/Instructions/Keystone Part Number Suffix Definitions.pdf" target="_blank">Keystone Part Number Suffix Definitions</a></li>
+                        <li><a href="~/Files/Instructions/Pro Advisor User Guide - Operation.pdf" target="_blank">Pro Advisor User Guide - Operation</a></li>
+                        <li><a href="~/Files/Instructions/Pro Adviser User Guide - Rate Profiles.pdf" target="_blank">Pro Adviser User Guide - Rate Profiles</a></li>
+                        <li><a href="~/Files/Instructions/Creating Additional Users in Pro-Estimator.pdf" target="_blank">Creating Additional Users in Pro-Estimator</a></li>
+                        <li><a href="~/Files/Instructions/ProAdvisor Financial Impact to a Typical Estimate.pdf" target="_blank">ProAdvisor Financial Impact to a Typical Estimate</a></li>
+                        <li><a href="~/Files/Instructions/Image Editor Operation Instructions.pdf" target="_blank">Image Editor Operation Instructions</a></li>
+
+                        <li><a href="~/Files/Instructions/Alternate Identities.pdf" target="_blank">Alternate Identities</a></li>
+                        <li><a href="~/Files/Instructions/Android - Photo Format Correction.pdf" target="_blank">Android - Photo Format Correction</a></li>
+                        <li><a href="~/Files/Instructions/How to Assign Technicians to Work Orders.pdf" target="_blank">How to Assign Technicians to Work Orders</a></li>
+                        <li><a href="~/Files/Instructions/How to change your Tax Rates.pdf" target="_blank">How to change your Tax Rates</a></li>
+                        <li><a href="~/Files/Instructions/How to make a PC Desktop Quicklink Icon - Google Chrome.pdf" target="_blank">How to make a PC Desktop Quicklink Icon - Google Chrome</a></li>
+                        <li><a href="~/Files/Instructions/How to purchase Pro Estimator Add Ons.pdf" target="_blank">How to purchase Pro Estimator Add Ons</a></li>
+                        <li><a href="~/Files/Instructions/How to Remove a Supplement Level.pdf" target="_blank">How to Remove a Supplement Level</a></li>
+                        <li><a href="~/Files/Instructions/How to upload images iphone.pdf" target="_blank">How to upload images iphone</a></li>
+                        <li><a href="~/Files/Instructions/How to Upload Images.pdf" target="_blank">How to Upload Images</a></li>
+                        <li><a href="~/Files/Instructions/How to upload pictures - Android.pdf" target="_blank">How to upload pictures - Android</a></li>
+                        <li><a href="~/Files/Instructions/ADAS Overview.pdf" target="_blank">ADAS Overview</a></li>
+
+                    </ul>
+
+                    <h1>@Proestimator.Resources.ProStrings.PDRInstructions</h1>
+                    <ul>
+                        <li><a href="~/Files/Instructions/PDR FAQ.pdf" target="_blank">PDR FAQ</a></li>
+                        <li><a href="~/Files/Instructions/PDR Setup.pdf" target="_blank">PDR Setup</a></li>
+                        <li><a href="~/Files/Instructions/How to Use PDR.pdf" target="_blank">How to use PDR</a></li>
+                    </ul>
+
+                    <h1>En Español</h1>
+
+                    <ul>
+                        <li><a href="~/Files/Instructions/Getting Started Spanish 04-19-2019.pdf" target="_blank">Al Comienzo</a></li>
+                        <li><a href="~/Files/Instructions/How to Create a Desktop Shortcut Spanish 04-19-2019.pdf" target="_blank">Cómo crear un icono en su monitor</a></li>
+                        <li><a href="~/Files/Instructions/Internet Explorer Settings Spanish 04-19-2019.pdf" target="_blank">Configuraciones de Internet Explorer</a></li>
+                        <li><a href="~/Files/Instructions/Manage Estimates Page Rev Spanish.pdf" target="_blank">Como Administrar la Pagina de estimaciones</a></li>
+                        <li><a href="~/Files/Instructions/Sending Estimates Spanish 04-19-2019.pdf" target="_blank">Como Enviar las Estimacion</a></li>
+                        <li><a href="~/Files/Instructions/FireFox Settings Spanish 04-19-2019.pdf" target="_blank">Configuraciones de FireFox</a></li>
+                        <li><a href="~/Files/Instructions/ProAdvisor Financial Impact to a Typical Estimate Spanish.pdf" target="_blank">Impacto financiero de ProAdvisor a una estimación típica</a></li>
+
+                        <li><a href="~/Files/Instructions/Como agregar Add on en Pro-Estimator.pdf" target="_blank">Como agregar Add on en Pro-Estimator</a></li>
+                        <li><a href="~/Files/Instructions/Como Agregar Imagenes desde su Computador.pdf" target="_blank">Como Agregar Imagenes desde su Computador</a></li>
+                        <li><a href="~/Files/Instructions/Como Asignar Tecnicos a las ordenes de trabajo.pdf" target="_blank">Como Asignar Tecnicos a las ordenes de trabajo</a></li>
+                        <li><a href="~/Files/Instructions/Como Crear un Acceso Rapido en tu Escritorio para PE con Google Chrome.pdf" target="_blank">Como Crear un Acceso Rapido en tu Escritorio para PE con Google Chrome</a></li>
+                        <li><a href="~/Files/Instructions/Como Crear Y Guardar EMS files.pdf" target="_blank">Como Crear Y Guardar EMS files</a></li>
+                        <li><a href="~/Files/Instructions/Como Editar o Cambiar Tax Rates.pdf" target="_blank">Como Editar o Cambiar Tax Rates</a></li>
+                        <li><a href="~/Files/Instructions/Como Guardar y Seleccionar Compañias de seguros (Insurance Companies).pdf" target="_blank">Como Guardar y Seleccionar Compañias de seguros (Insurance Companies)</a></li>
+                        <li><a href="~/Files/Instructions/Como Remover un Nivel de Supplement de un Estimado.pdf" target="_blank">Como Remover un Nivel de Supplement de un Estimado</a></li>
+                        <li><a href="~/Files/Instructions/Como Seleccionar un Vehiculo para acceder a la base de Datos de partes.pdf" target="_blank">Como Seleccionar un Vehiculo para acceder a la base de Datos de partes</a></li>
+                        <li><a href="~/Files/Instructions/Como subscribirse Pro-Estimator.pdf" target="_blank">Como subscribirse Pro-Estimator</a></li>
+                        <li><a href="~/Files/Instructions/Como usar Buscar partes en la pagina de Agregar partes.pdf" target="_blank">Como usar Buscar partes en la pagina de Agregar partes</a></li>
+                    </ul>
+
+                    <h1>@Proestimator.Resources.ProStrings.Support_ImportantLinks</h1>
+
+                    <ul>
+                        <li><a href="https://get.adobe.com/reader/" target="_blank">Adobe DC</a> - Used for viewing PDF reports.</li>
+                        <li><a href="https://static.mymitchell.com/static/Webhelp/ppages/ceg/1033/index.htm " target="_blank">Mitchell P Pages</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="lgRow1" class="half-container" style="padding-top: 15px;">
+            <h1>
+                @Proestimator.Resources.ProStrings.Support_Title
+            </h1>
+            <div id="customerField" class="container xl_7_14" style="margin-top: 20px;">
+                <fieldset id="customerFieldSet">
+                    <legend><span class="number">1</span>@Proestimator.Resources.ProStrings.BasicEstimateCreationOverview</legend>
+                    <iframe width="540" height="315" src="https://www.youtube.com/embed/weJ6oaEErow?rel=0" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                </fieldset>
+
+                <fieldset id="customerFieldSet">
+                    <legend><span class="number">2</span>@Proestimator.Resources.ProStrings.SendEstimate</legend>
+                    <iframe width="540" height="315" src="https://www.youtube.com/embed/Ovdz2QBfyIM?rel=0" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                </fieldset>
+
+                <a name="rate-profile"></a>
+                <fieldset id="customerFieldSet">
+                    <legend><span class="number">3</span>@Proestimator.Resources.ProStrings.EditYourRateProfile</legend>
+                    <iframe width="540" height="315" src="https://www.youtube.com/embed/EO1STwNsrVU?rel=0" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                </fieldset>
+
+                <fieldset id="customerFieldSet">
+                    <legend><span class="number">4</span>@Proestimator.Resources.ProStrings.RateProfileCreatePresetChanges</legend>
+                    <iframe width="540" height="315" src="https://www.youtube.com/embed/eTal767lnis?rel=0" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                </fieldset>
+
+                <fieldset id="customerFieldSet">
+                    <legend><span class="number">5</span>Pro Advisor - The Basics</legend>
+                    <iframe width="540" height="315" src="https://www.youtube.com/embed/2_X0MBInEsc?rel=0" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                </fieldset>
+
+                <fieldset id="customerFieldSet">
+                    <legend><span class="number">6</span>Pro Advisor - Rate Profiles</legend>
+                    <iframe width="540" height="315" src="https://www.youtube.com/embed/H0_eeIYCqzc?rel=0" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                </fieldset>
+
+                <fieldset id="customerFieldSet">
+                    <legend><span class="number">7</span>@Proestimator.Resources.ProStrings.DetailsSupplementsPage</legend>
+                    <iframe width="540" height="315" src="https://www.youtube.com/embed/SLvsWs8N5qY?rel=0" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                </fieldset>
+
+                <fieldset id="customerFieldSet">
+                    <legend><span class="number">8</span>@Proestimator.Resources.ProStrings.HowToCreateOrRemoveSupplements</legend>
+                    <iframe width="540" height="315" src="https://www.youtube.com/embed/DtAnPj3bG0g?rel=0" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                </fieldset>
+
+                <fieldset id="customerFieldSet">
+                    <legend><span class="number">9</span>@Proestimator.Resources.ProStrings.HowToOpenAndCloseRepairOrders</legend>
+                    <iframe width="540" height="315" src="https://www.youtube.com/embed/m6_ViKYeSmw?rel=0" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+                </fieldset>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>

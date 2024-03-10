@@ -1,0 +1,257 @@
+﻿@model ProEstimator.Admin.ViewModel.ChangeLogPageVM
+
+@using ProEstimator.Admin.ViewModel.Contracts;
+
+@{
+    ViewBag.Title = "Administration - Change Log";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<script>
+
+    var _changeLogID = 0;
+
+    $(document).ready(function () {
+        RefreshList();
+
+        // Set up calendar controls
+        $(".date-picker").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        $("#btnSave").click(function () {
+            //(int id, string date, string note, bool isActive)
+            $.getJSON("/ChangeLog/SaveChangeLog", {
+                id: _changeLogID
+                , date: $("#txtDate").val()
+                , note: $("#txtNote").val()
+                , isActive: $("#chkActive").is(":checked")
+            }, function (data) {
+                if (data.Success === true)
+                {
+                    RefreshList();
+                    _changeLogID = data.ChangeLogID;
+                    $("#lblMessage").text("Change Log Saved.");
+                }
+                else
+                {
+                    $("#lblMessage").text(data.ErrorMessage);
+                }
+            });
+        });
+
+        $("#btnDelete").click(function () {
+            if (_changeLogID > 0 && confirm("Delete this change log item?"))
+            {
+                //(int id, string date, string note, bool isActive)
+                $.getJSON("/ChangeLog/DeleteChangeLog", {
+                    id: _changeLogID
+                }, function (data) {
+                    _changeLogID = 0;
+                    $("#txtDate").val("@DateTime.Now.ToShortDateString()");
+                    $("#txtNote").val("");
+                    $("#chkActive").prop("checked", false);
+                    RefreshList();
+                });
+            }
+           
+        });
+
+        $("#btnNew").click(function () {
+            _changeLogID = 0;
+            $("#txtDate").val("@DateTime.Now.ToShortDateString()");
+            $("#txtNote").val("");
+            $("#chkActive").prop("checked", false);
+        });
+
+        $("#btnActivateChecked").click(function () {
+            $.getJSON("/ChangeLog/ActivateChecked", {
+                data: GetCheckedBoxes()
+            }, function (data) {
+                RefreshList();
+            });
+        });
+
+        $("#btnDeactivateChecked").click(function () {
+            $.getJSON("/ChangeLog/DeactivateChecked", {
+                data: GetCheckedBoxes()
+            }, function (data) {
+                RefreshList();
+            });
+        });
+
+        $("#btnClearSeen").click(function () {
+            if (confirm("Change log will hilight for all users")) {
+                $.getJSON("/ChangeLog/ClearSeenLog", {
+
+                }, function (data) {
+                    $("#lblMessage").text("All customers will be shown updates.");
+                });
+            }
+        });
+    });
+
+    function RefreshList() {
+        $.getJSON("/ChangeLog/GetDatesList", {
+
+        }, function (data) {
+            var dateSection = "";
+
+            for (i = 0; i < data.length; i++)
+            {
+                dateSection += "<div class='date-container'> \
+                    <h1 onclick='ToggleChecks(this);'>" + data[i].Date + "</h1> \
+                    <ul>";
+
+                for (j = 0; j < data[i].Items.length; j++)
+                {
+                    dateSection += "<li><p><input type='checkbox' data-id='" + data[i].Items[j].ID + "' class='active-check-box' /> <a href='#' class='" + (data[i].Items[j].IsActive === true ? 'link-active' : 'link-inactive') + "' onclick='LoadChangeLog(" + data[i].Items[j].ID + ");'>" + data[i].Items[j].ShortNote + "</a></p></li>";
+                }
+
+                dateSection += "</ul></div>";
+            }
+
+            $("#list-container").empty();
+            $("#list-container").append(dateSection);
+        });
+    }
+
+    function LoadChangeLog(id)
+    {
+        $.getJSON("/ChangeLog/GetChangeLog", {
+            id: id 
+        }, function (data) {
+            console.log(data);
+
+            if (data)
+            {
+                _changeLogID = data.ID;
+                $("#txtDate").val(data.Date);
+                $("#txtNote").val(data.ShortNote);
+                $("#chkActive").prop("checked", data.IsActive);
+            }
+        });
+    }
+
+    function ToggleChecks(clicked) {
+        var parentDiv = $(clicked).closest("div");
+        parentDiv.find(".active-check-box").prop("checked", true);
+    }
+
+    function GetCheckedBoxes() {
+        var result = "";
+        var seperator = "";
+
+        $(".active-check-box").each(function (index, obj) {
+            if ($(obj).is(":checked"))
+            {
+                result += seperator + $(obj).attr("data-id");
+                seperator = ",";
+            }
+        });
+
+        return result;
+    }
+
+</script>
+
+<style>
+    .left-side {
+        float: left;
+        width: 400px;
+    }
+
+    .right-side {
+        float: left;
+        width: calc(100% - 400px);
+        padding-top: 30px;
+        padding-left: 10px;
+    }
+
+    h1 {
+        font-size: 1.2em;
+        text-align: left;
+        margin-right: 10px;
+    }
+
+    .detail-side {
+        margin-left: 300px;
+    }
+
+    .detail-side p {
+        margin: 0px;
+        padding-bottom: 5px;
+    }
+
+    @@media (max-width: 700px) {
+        .date-side {
+            float: none;
+            width: 100%;
+        }
+
+        .date-side h1 {
+            text-align: left;
+        }
+
+        .detail-side {
+            margin-left: 0px;
+        }
+    }
+
+    .link-active {
+        color: black;
+    }
+
+    .link-inactive {
+        color: gray;
+        font-style: italic;
+    }
+
+</style>
+
+<div id="ContentWrapper">
+
+    <div style="margin-top: 20px;">
+        <div class="left-side">
+            <input type="button" id="btnActivateChecked" value="Active Checked" />
+            <input type="button" id="btnDeactivateChecked" value="Deactive Checked" />
+
+            <div id="list-container">
+
+            </div>
+
+            <input type="button" id="btnClearSeen" value="Show updates to all customers" />
+        </div>
+        <div class="right-side">
+            <p>
+                <input type="button" id="btnNew" value="New Change Log Item" />
+            </p>
+            <div id="ChangeLogDetails">
+                <p>
+                    Date:
+                    <br /><input type="text" id="txtDate" class="date-picker" />
+                </p>
+                <p>
+                    Note:
+                    <br /><input type="text" id="txtNote" style="width: 100%;" />
+                </p>
+                <p>
+                    <label>
+                        <input type="checkbox" id="chkActive" />
+                        Is Active
+                    </label>
+                </p>
+                <p>
+                    <input type="button" id="btnSave" value="Save" />
+                    <input type="button" id="btnDelete" value="Delete" />
+                </p>
+                <p style="color: red;" id="lblMessage"></p>
+            </div>
+            
+        </div>
+    </div>
+   
+</div>

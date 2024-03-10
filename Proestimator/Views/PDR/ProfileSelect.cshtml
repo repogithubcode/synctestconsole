@@ -1,0 +1,122 @@
+﻿@model Proestimator.ViewModel.PDR.ProfileSelectVM
+
+@using System.Linq;
+@using Proestimator.ViewModel.PDR;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.RateProfile_Select;
+}
+
+<script>
+    $(document).ready(function () {
+
+        if ('@Model.UseDefaultPDRRateProfile' == 'True') {
+            $('#chkToggleUseDefaultPdrProfile').prop('checked', true);
+        }
+        else {
+            $('#chkToggleUseDefaultPdrProfile').prop('checked', false);
+        }
+
+    });
+
+    $(window).load(function () {
+        ShowHideDefaultColumn('@Model.UseDefaultPDRRateProfile');
+    });
+
+    function GetSearchParameters()
+    {
+        var result = { userID: @ViewBag.UserID, estimateID: @Model.EstimateID };
+        return result
+    }
+
+    function ShowHideDefaultColumn(useDefaultPDRRateProfile) {
+        var grid = $("#pdr-profile-info-grid").data("kendoGrid");
+
+        var columns = grid.columns;
+
+        jQuery.each(columns, function (index) {
+
+            if (this.title == "Default") {
+                console.log(useDefaultPDRRateProfile);
+                if ('@Model.UseDefaultPDRRateProfile' == 'True' || useDefaultPDRRateProfile == true) {
+                    grid.showColumn(this);
+                }
+                else {
+                    grid.hideColumn(this);
+                }
+            }
+        });
+    }
+
+    function rdoDefaultProfileOnChange(isDefaultCheckBox,profileIDValue) {
+        $("#pdr-profile-info-grid").find(".rdoDefaultProfile").each(function (index, obj) {
+            this.checked = false;
+        });
+
+        $.getJSON("/PDRRateProfile/SetDefaultRateProfile", { userID: @ViewBag.UserID, profileID: profileIDValue }, function (data) {
+            isDefaultCheckBox.checked = true;
+            ShowUserMessage(data.ErrorMessage, !data.Success, 3000);
+        });
+    }
+
+    function ToggleUseDefaultPdrProfile(defaultPdrProfileCheckbox) {
+
+        $.getJSON("/PDRRateProfile/ToggleUseDefaultProfile", { userID: @ViewBag.UserID }, function (data) {
+            if (data.Success)
+            {
+                ShowHideDefaultColumn(defaultPdrProfileCheckbox.checked);
+            }
+            else
+            {
+                ShowUserMessage("@Proestimator.Resources.ProStrings.ContactSupportUseDefaultProfile.", true, 5000);
+            }
+        });
+
+    }
+
+</script>
+
+<div id="workDesk" class="page-container">
+
+    @using (Html.BeginForm("ProfileSelect", "PDR", FormMethod.Post, new { @class = "container" }))
+    {
+        @Html.HiddenFor(o => o.LoginID)
+        @Html.HiddenFor(o => o.EstimateID)
+
+        <div id="formHeader">
+
+            @* The title and header area *@
+            <div id="formHeadline" class="container">
+                <h2>@Proestimator.Resources.PDRStrings.RateProfile_Select</h2>
+                <div class="inlineNote container">
+                </div>
+            </div>
+
+        </div>
+
+        <div id="pdr-profile-info-grid-container" class="datagrid" style="width:50%;margin-left:25%">
+            <div>
+                <label class="switch">
+                    <input type="checkbox" id="chkToggleUseDefaultPdrProfile" onchange="ToggleUseDefaultPdrProfile(this);">
+                    <span class="slider round"></span>
+                </label>
+                <span style="margin-left: 10px;vertical-align: -webkit-baseline-middle;"><b>Toggle Default Profile</b></span>
+            </div>
+            @(Html.Kendo().Grid<ProfileVM>()
+                .Name("pdr-profile-info-grid")
+                    .Columns(columns =>
+                    {
+                        columns.Bound("").Template(@<text></text>).ClientTemplate("<input type='radio' class='rdoDefaultProfile' onchange='rdoDefaultProfileOnChange(this,#= ProfileID#)' # if (IsDefault) { #" + "checked" + "# } # />").Title("Default").Width("5%");
+                        columns.Bound(item => item.ProfileID).Title("ProfileID").Hidden();
+                        columns.Bound(item => item.ProfileName).Title("Profile Name").Width("77%");
+                        columns.Bound("").Template(@<text></text>).ClientTemplate("<a class='button open-button' href='/" + @ViewBag.UserID + "/estimate/" + @Model.EstimateID + "/select-pdr-profile/#= ProfileID#?PDR=true'>Select</a>").Title("").Width("13%");
+                    })
+                    .Selectable()
+                    .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .ServerOperation(false)
+                        .Read(read => read.Action("GetPDRProfileList", "PDR").Data("GetSearchParameters"))
+                    ))
+        </div>
+    }
+</div>

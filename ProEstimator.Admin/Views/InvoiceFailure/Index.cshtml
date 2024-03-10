@@ -1,0 +1,178 @@
+﻿@model ProEstimator.Admin.ViewModel.InvoiceFailure.InvoiceFailurePageVM
+
+@using ProEstimator.Admin.ViewModel.InvoiceFailure;
+@using ProEstimatorData.DataModel.Contracts;
+@{
+    ViewBag.Title = "Administration - Invoice Failures";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<script>
+
+    var _invoiceID = 0;
+
+    $(document).ready(function () {
+
+        // Do the acount id search
+        $("#btnSearch").click(function () {
+
+            // Refresh the history grid
+            var grid = $("#invoice-failure-grid").data("kendoGrid");
+
+            if (grid) {
+                grid.dataSource.read();
+            }
+        });
+    });
+
+    function GetSearchParameters() {
+        return {
+            dayRange: $("#DayRange").val()
+        };
+    }
+
+    function GetDetailsSearchParameters() {
+        return {
+            invoiceID: _invoiceID
+        };
+    }
+
+    function InvoicesDataChanged(arg) {
+        // Wire up hilighting the row when hovering.
+        $("#invoice-failure-grid tr").hover(
+            function () {
+                var row = $(this).closest("tr");
+                row.toggleClass("row-line-hovered");
+            }
+        );
+    }
+
+    function InvoicesSelectionChanged(arg) {
+        var row = $("#invoice-failure-grid").find(".k-state-selected").first();
+
+        var invoiceID = row.find("td").first().html();
+        RefreshDetails(invoiceID);
+    }
+
+    function RefreshDetails(invoiceID) {
+        _invoiceID = invoiceID;
+
+        var grid = $("#details-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+    }
+
+</script>
+
+<div class="page-container">
+    <div class="row padd-top">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>Stripe invoice errors</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="container">
+                            <div class="row stackem">
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Day Range</span>
+                                        <input type="text" class="form-control" placeholder="Day Range" aria-describedby="dayRange" id="DayRange" value="30" />
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-4">
+                                    <a class="btn btn-primary" href="javascript:void(0);" style="width:95% !important" id="btnSearch" role="button">Search</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading panel-height">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <h4>Invoices</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <div class="datagrid">
+                    @(Html.Kendo().Grid<InvoiceFailureSummary>()
+                        .Name("invoice-failure-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.InvoiceID);
+                            columns.Bound(item => item.LoginID);
+                            columns.Bound(item => item.InvoiceTotal);
+                            columns.Bound(item => item.DueDate).Format("{0:MM/dd/yyyy h:mm tt}");
+                            columns.Bound(item => item.InvoiceNotes);
+                            columns.Bound(item => item.InvoiceSummary);
+                            columns.Bound(item => item.LastFailStamp).Format("{0:MM/dd/yyyy h:mm tt}"); ;
+                            columns.Bound(item => item.FailNote);
+                        })
+                        .Selectable()
+                        .Pageable(pageable => pageable
+                            .Refresh(false)
+                        )
+                        .Events(events => events
+                            .DataBound("InvoicesDataChanged")
+                            .Change("InvoicesSelectionChanged")
+                        )
+                        .Reorderable(reorder => reorder.Columns(true))
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Read(read => read.Action("GetList", "InvoiceFailure").Data("GetSearchParameters"))
+                            .PageSize(25)
+                        )
+                    )
+                </div>
+            </div>
+        </div>
+
+        <div class="row" id="detailsPanel">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>Details</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="container">
+                            <div class="datagrid">
+                                @(Html.Kendo().Grid<InvoiceFailureLog>()
+                                    .Name("details-grid")
+                                    .Columns(columns =>
+                                    {
+                                        columns.Bound(item => item.TimeStamp).Format("{0:MM/dd/yyyy h:mm tt}").Width(150);
+                                        columns.Bound(item => item.Note);
+                                        columns.Bound(item => item.LastFour);
+                                        columns.Bound(item => item.Expiration);
+                                        columns.Bound(item => item.StripeCardID);
+                                    })
+                                    //.Events(events => events
+                                    //    .DataBound("InvoicesDataChanged")
+                                    //    .Change("InvoicesSelectionChanged")
+                                    //)
+                                    .DataSource(dataSource => dataSource
+                                        .Ajax()
+                                        .ServerOperation(false)
+                                        .Read(read => read.Action("GetDetails", "InvoiceFailure").Data("GetDetailsSearchParameters"))
+                                    )
+                                )
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,239 @@
+﻿@model Proestimator.ViewModel.LoginVM
+
+@using Proestimator.Resources
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_Login;
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+}
+
+<style>
+    #linkForgotPassword {
+        cursor: pointer;
+    }
+
+    #forgotPasswordWrapper {
+        display: none;
+    }
+
+    .loginLabel {
+        margin-top: 10px;
+    }
+</style>
+
+<script>
+    $(document).ready(function ()
+    {
+        $("#linkForgotPassword").click(function ()
+        {
+            $("#SentMessageWrapper").hide();
+            $("#ErrorMessage").fadeOut(300);
+
+            if ($("#forgotPasswordWrapper").is(":hidden"))
+            {
+                $("#forgotPasswordWrapper").fadeIn(300);
+
+                $("#EmailAddress").val($("#UserName").val());
+                ValidateUserNameEmailAddress("UserName", "lblInvalidUserName");
+                ValidateUserNameEmailAddress("EmailAddress", "lblInvalidEmailAddress");
+            }
+            else
+            {
+                $("#forgotPasswordWrapper").fadeOut(300);
+            }
+        });
+
+        $("#buttonForgotPasswordSubmit").click(function () {
+            $("#buttonForgotPasswordSubmit").prop("disabled", true);
+            $("#SentMessageWrapper").hide();
+            $("#ErrorMessage").fadeOut(300);
+
+            $.ajax({
+                url: '@Url.Action("SendForgotPassword", "Login")',
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ "emailAddress": $("#EmailAddress").val() }),
+                success: function (result) {
+                    $("#buttonForgotPasswordSubmit").prop("disabled", false);
+
+                    if (result.Success)
+                    {
+                        $("#forgotPasswordWrapper").fadeOut(300, function () {
+                            $("#SentMessageWrapper").fadeIn(300);
+                        });
+                    }
+                    else
+                    {
+                        $("#ErrorMessage").text(result.ErrorMessage);
+                        $("#ErrorMessage").fadeIn(300);
+                    }
+                }
+            });
+        });
+
+        var cleanText = function (e) {
+            e.preventDefault();
+            var pastedText = '';
+
+            if (e.clipboardData && e.clipboardData.getData) {
+                pastedText = e.clipboardData.getData('text/plain');
+            }
+            else if (window.clipboardData && window.clipboardData.getData) {// IE
+                pastedText = window.clipboardData.getData('Text');
+            }
+
+            this.value = $.trim(pastedText);
+        };
+
+        // when paste event happpens on password text box
+        document.getElementById("Password").onpaste = cleanText;
+
+        // when paste event happpens on username text box
+        document.getElementById("UserName").onpaste = cleanText;
+
+        $('#togglePassword').on('click', function (e) {
+
+            // toggle the type attribute
+            const type = $('#Password').attr('type') === 'password' ? 'text' : 'password';
+            $('#Password').attr('type', type);
+
+            // toggle the eye slash icon
+            $(this).toggleClass('fa-eye-slash');
+
+            // display message for assistance if password is shown
+            if (type === 'text') {
+                $('#LoginSupportHelpMessage').show();
+            } else {
+                $('#LoginSupportHelpMessage').hide();
+            }
+        });
+
+        $('#imgTechSupport').on('click', function () {
+            $('#launcher').contents().find('button').trigger('click');
+        });
+
+        // Text boxes with a class email-address to validate Email
+        $("input.email-address").bind("blur", function (e) {
+
+            ValidateUserNameEmailAddress("UserName","lblInvalidUserName");
+            ValidateUserNameEmailAddress("EmailAddress","lblInvalidEmailAddress");
+        });
+
+        function ValidateUserNameEmailAddress(txtControlName, lblControlName) {
+            // Username Email regex
+            if (IsEmailAddressValid(txtControlName) == false) {
+                $("#" + txtControlName).css("border", "1px solid #CD0A0A");
+                $("#" + lblControlName).css("display", "block");
+            }
+            else {
+                $("#" + txtControlName).css("border", "");
+                $("#" + lblControlName).css("display", "none");
+            }
+        }
+
+    });
+</script>
+
+<div class="container">
+    @using (Html.BeginForm("Index", "Login", FormMethod.Post, new { @class = "container" }))
+    {
+        @Html.ValidationSummary(true)
+
+        @Html.HiddenFor(o => o.Redirect)
+        @Html.HiddenFor(o => o.OtherLogins)
+        @Html.HiddenFor(o => o.NoOfLoginsExceeded)
+
+        <div id="loginFormContainer" class="container" style="max-width: 500px; margin: 0px auto; float: none;">
+            <div id="loginHeader" class="sm_4_4 md_push_2_8 md_4_8 lg_push_4_12 lg_6_12 xl_5_14 sm_hide md_display">
+                <h1>@Proestimator.Resources.ProStrings.Login_Title</h1>
+            </div>
+            <div class="field-wrapper">
+                <label class="loginLabel field-label">Email Address</label>
+                <div class="field-control">
+                    @Html.TextBoxFor(model => model.UserName, new { autocomplete = "off", @class = "textbox login-text email-address" })
+                </div>
+                <span id="lblInvalidUserName" style="display:none;color:red;margin-left:120px;margin-bottom:5px">Email address not valid.</span>
+            </div>
+            <div class="field-wrapper">
+                <label class="loginLabel field-label">@Proestimator.Resources.ProStrings.Login_Password</label>
+                <div class="field-control">
+                    @Html.TextBoxFor(model => model.Password, new { autocomplete = "off", type = "password", @class = "textbox login-text" })
+                </div>
+                <i class="far fa-eye" id="togglePassword" style="margin-left: -30px; margin-top:14px; cursor: pointer;"></i>
+            </div>
+
+            <div class="field-wrapper">
+                <label class="loginLabel field-label"></label>
+                <div class="field-control">
+                    <label class="loginLabel col sm_4_4">
+                        @Html.CheckBoxFor(model => model.RememberMe) Remember my Email Address
+                    </label>
+                    <div id="LoginSupportHelpMessage" style="display:none;margin-bottom:15px;">For login assistance, contact Tech Support at 888-932-3780 x203, or select the Live Chat bubble in the lower left corner of this screen</div>
+                </div>
+            </div>
+
+
+            @*<div class="field-wrapper">
+                    <label class="loginLabel field-label"></label>
+                    <div class="field-control" style="text-align: center; padding-top: 10px;">
+                        <a href="/old-login/update" style="color: black; text-decoration: underline;">Looking for the old login page?</a>
+                    </div>
+                </div>*@
+
+            <div class="field-wrapper">
+                <label class="loginLabel field-label"></label>
+                <div class="field-control" style="text-align: center; padding-top: 10px;">
+                    <input type="submit" value="@Proestimator.Resources.ProStrings.Login_Button" class="button" />
+                </div>
+            </div>
+
+
+            @* Forgot password section *@
+
+            <div class="field-wrapper">
+                <label class="loginLabel field-label"></label>
+                <div class="field-control" style="text-align: center; padding-top: 10px; padding-bottom: 10px;">
+                    <input id="linkForgotPassword" class="button" type="button" value="@Proestimator.Resources.ProStrings.ForgotPassword" />
+                </div>
+            </div>
+
+            <div id="forgotPasswordWrapper">
+                <div class="field-wrapper">
+                    <label class="loginLabel field-label" style="margin-top: 16px;">@Proestimator.Resources.ProStrings.AccountEmail</label>
+                    <div class="field-control">
+                        @Html.TextBoxFor(model => model.EmailAddress, new { autocomplete = "off", @class = "textbox login-text email-address", @style = "margin-top: 8px;" })
+                    </div>
+                    <span id="lblInvalidEmailAddress" style="display:none;color:red;margin-left:120px;margin-bottom:5px">Email address not valid.</span>
+                </div>
+
+                <div class="field-wrapper">
+                    <label class="loginLabel field-label"></label>
+                    <div class="field-control" style="text-align: center;">
+                        <input id="buttonForgotPasswordSubmit" type="button" value="@Proestimator.Resources.ProStrings.Submit" class="button" />
+                    </div>
+                </div>
+            </div>
+
+            <div id="SentMessageWrapper" style="display: none;">
+                <div class="field-wrapper">
+                    <label class="loginLabel field-label"></label>
+                    <div class="field-control" style="text-align: center;">
+                        <p>Check your e-mail for a link to reset your password.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field-wrapper">
+                <label class="loginLabel field-label"></label>
+                <div class="field-control">
+                    <label id="ErrorMessage" style="font-size:medium; color:red; text-align: center; padding-top: 10px;">@Model.ErrorMessage</label>
+                </div>
+            </div>
+
+        </div>
+        <div style="clear:both; height:50px;"></div>
+
+    }
+
+</div>

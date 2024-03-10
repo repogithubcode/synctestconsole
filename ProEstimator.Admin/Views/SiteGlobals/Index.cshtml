@@ -1,0 +1,37 @@
+﻿@model ProEstimator.Admin.ViewModel.SiteGlobalsPageVM
+
+@using ProEstimator.Admin.ViewModel.Contracts;
+
+@{
+    ViewBag.Title = "Administration - Site Globals";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<script>
+</script>
+
+<style>
+    textarea {
+        width: 600px;
+        min-height: 150px;
+    }
+</style>
+
+<div id="ContentWrapper">
+    
+@using (Html.BeginForm("Index", "SiteGlobals", FormMethod.Post, new { @class = "container" }))
+{
+    <p>Home Page Message:</p>
+    @Html.TextAreaFor(o => o.HomePageMessage)
+
+    <p>
+        <input type="submit" value="Save" />
+    </p>
+
+    <p>
+        @Model.ErrorMessage
+    </p>
+}
+    
+
+</div>

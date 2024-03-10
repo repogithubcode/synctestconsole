@@ -1,0 +1,179 @@
+﻿@model Proestimator.ViewModel.LoginInformationVM
+
+@*@using Resources;*@
+@using System.Linq;
+@using Proestimator.Resources;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_LoginInformation;
+}
+
+<head>
+    <title></title>
+
+</head>
+<style>
+    /*table a {
+        color: black;
+    }*/
+
+    #estimatorContent {
+        left: 50px;
+        /*position: relative;*/
+        /*transform: translate(50px);*/
+      margin-top: 35px;
+    }
+
+    #buttonsDiv {
+        position: relative;
+        /*left: 55px;*/
+    }
+
+    /*table {
+        border-collapse: collapse;
+    }
+
+        table tr td {
+            border: 1px solid red;
+            padding: 2px 15px 2px 15px;
+            width: 50px;
+        }
+
+    #tabs ul li.drophover {
+        color: green;
+    }*/
+</style>
+
+<div id="workDesk" class="page-container">
+    @Html.Partial("SettingTopMenu")
+
+    @using (Html.BeginForm("LoginInformation", "Settings", FormMethod.Post, new { @class = "container" }))
+    {
+        @Html.ValidationSummary(true)
+        @*<input type="hidden" id="redirectData" name="redirectDataField" />*@
+
+        <div id="lgRow1" class="container">
+
+            <div id="estimatorContent" class="half-container">
+
+                <div id="formHeadline" class="container">
+                    <h2>@*@Proestimator.Resources.ProStrings.Estimators*@</h2>
+                </div>
+
+                <div id="loginInfoFieldSet">
+
+                    @Html.HiddenFor(model => model.EstimatorID)
+
+                    <div class="field-wrapper">
+                        <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.FirstName</label>
+                        <div class="field-control">
+                            @Html.TextBoxFor(model => model.EstimatorFirstName, new { @class = "col", autocomplete = "off" })
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper">
+                        <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.LastName</label>
+                        <div class="field-control">
+                            @Html.TextBoxFor(model => model.EstimatorLastName, new { @class = "col", autocomplete = "off" })
+                        </div>
+                    </div>
+
+                        <div class="field-control">
+                            @Html.HiddenFor(model => model.orderNo, new { @class = "col", autocomplete = "off" })
+                        </div>
+
+                    <div class="container center" id="buttonsDiv" style="padding-bottom: 20px;">
+                        <input type="submit" class="button nav-btn" value="@Proestimator.Resources.ProStrings.Save" name="action:SaveEstimator" />
+                        <input type="submit" class="button nav-btn" value="@Proestimator.Resources.ProStrings.New" name="action:NewEstimator" />
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="estimatorContent" class="half-container">
+                <div class="datagrid">
+                    @(Html.Kendo().Grid<Proestimator.ViewModel.EstimatorVM>()
+                                .Name("grid")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(item => item.ID).Hidden();
+                                    columns.Bound(item => item.FirstName).MinScreenWidth(150).Title(@Proestimator.Resources.ProStrings.FirstName);
+                                    columns.Bound(item => item.LastName).MinScreenWidth(150).Title(@Proestimator.Resources.ProStrings.LastName);
+                                    columns.Bound("").Template(@<text></text>).ClientTemplate("<a class='button' href='/" + @ViewBag.UserID + "/estimate/#= AdminInfoID#/copy-estimate'>Copy</a>").Title("").Width(75);
+                                    columns.Bound("").Template(@<text></text>).ClientTemplate("<a class='button restore-button' onclick='RestoreEstimate(#= AdminInfoID#)'>" + @Proestimator.Resources.ProStrings.Restore + "</a><a class='button delete-button' onclick='DeleteEstimate(#= AdminInfoID#)'>" + @Proestimator.Resources.ProStrings.Delete + "</a>").Width(75).Title("");
+                                })
+                        .Sortable()
+                        .Pageable(pageable => pageable
+                            .Refresh(false)
+                            .ButtonCount(8)
+                        )
+                        .Events(events => events
+                            .DataBound("onChange")
+                        )
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Sort(sort => sort.Add("LastView").Descending())
+                            .Read(read => read.Action("GetEstimators", "Settings").Data("GetListParameters"))
+                            .PageSize(20)
+                        )
+                    )
+                </div>
+            </div>
+
+        </div>
+    }
+</div>
+<script>
+    function GetListParameters() {
+        var result =
+        {
+            loginID: $("#LoginID").val()
+        };
+        return result
+    }
+
+    function RefreshGrid() {
+        var grid = $("#grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+            grid.refresh();
+
+            grid.dataSource.page(1);
+        }
+    }
+
+    $(document).ready(function () {
+
+        $("tbody").sortable({
+            items: "> tr",
+            appendTo: "parent",
+            tolerance: "move",
+            helper: "clone",
+            out: function (event, ui) {
+                var data = [];
+                $("tbody tr").each(function (i, val) {
+                    data[i] = $(val).find('.estimatorId').html();
+                });
+
+                $("tbody tr").each(function (i, val) {
+                    $(val).find("td:last").html(i+1);
+                });
+
+                $.ajax({
+                    url: "/Settings/ReOrderEstimators",
+                    type: "POST",
+                    processData: true,
+                   // contentType: false,
+                    data: { data: data, loginID: @Model.LoginID, userID: @ViewBag.UserID },
+                    success: function (response) {
+                    }
+                });
+            }
+        }).disableSelection();
+
+        RefreshGrid();
+    });
+
+</script>

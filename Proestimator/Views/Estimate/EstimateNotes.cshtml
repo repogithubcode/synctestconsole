@@ -1,0 +1,267 @@
+﻿@model Proestimator.ViewModel.EstimateNotesVM
+
+@using Proestimator.ViewModel
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_Printing;
+}
+
+<script src="~/Content/jQuery-TE_v.1.4.0/jquery-te-1.4.0.min.js"></script>
+<link href="~/Content/jQuery-TE_v.1.4.0/jquery-te-1.4.0.css" rel="stylesheet" />
+
+<style>
+    #EditorFrame {
+        width: 100%;
+        height: 300px;
+        border: 0px;
+    }
+
+    @@media (max-width: 700px) {
+        #EditorFrame {
+            height: 175px;
+        }
+    }
+</style>
+
+<script>
+
+    var _ID = 0;
+
+    function IFrameLoaded()
+    {
+        document.getElementById("EditorFrame").contentWindow.SetupEditor("");
+    }
+
+    function DeleteEstimateNotes(id,restoreDeleteNotes)
+    {
+        var loadingImage = $.parseHTML("<img src='/Images/animatedCircle.gif' width='15' height='15' id='Loading" + id + "' />");
+        $("#DeleteLink" + id).replaceWith(loadingImage);
+
+        $.getJSON("/Estimate/DeleteEstimateNotes", { userID: @ViewBag.UserID, loginID: @ViewBag.LoginID, estimateNoteID: id, restoreDeleteNotes:restoreDeleteNotes }, function (data)
+        {
+            if (data != "")
+            {
+                ShowUserMessage(data, true, 5000);
+            }
+
+            clearFieldsOnly();
+            RefreshGrid();
+        });
+    }
+
+    function GetEstimateNotesParameters()
+    {
+        var result = { userID: @ViewBag.UserID, estimateID: @ViewBag.EstimateID, showDeletedNotes:$("#chkShowDeletedEstimateNotes").is(":checked") };
+        return result
+    }
+
+    function RefreshGrid() {
+        $("#estimatenotes-grid").data("kendoGrid").dataSource.read();
+        $("#estimatenotes-grid").data("kendoGrid").refresh();
+        _estimateNotesID = 0;
+    }
+
+    function NotesGridLineSelectionChanged(arg) {
+
+        // Remove the Hover state from all rows
+        $("#estimatenotes-grid").find(".k-state-hover").each(function (index) {
+            $(this).removeClass("k-state-hover");
+        });
+
+        // Get the selected item and call the ClickedItem event
+        var row = $("#estimatenotes-grid").find(".k-state-selected").first();
+        var _estimateNotesID = row.find("td").first().html();
+
+        $.getJSON("/Estimate/GetEstimateNote", { userID: @ViewBag.UserID, estimateNotesID: _estimateNotesID }, function (data) {
+            if (data.Success == true) {
+                $("#datepanel").show();
+                $(".btnAdd").val('@Proestimator.Resources.ProStrings.ButtonUpdate');
+
+                _ID = data.ID;
+                $("#ID").html(_ID);
+
+                $("#lblTimeStamp").text(data.TimeStamp);
+
+                document.getElementById("EditorFrame").contentWindow.SetEditorText(data.NotesText);
+            }
+        });
+    }
+
+    function addUpdateEstimateNotes() {
+
+        var ID = $("#ID").text();
+
+        var NotesText = document.getElementById("EditorFrame").contentWindow.GetTemplate();
+
+        $(".error-message").text("@Proestimator.Resources.ProStrings.SavingData...");
+
+        console.debug("Calling addUpdateEstimateNotes");
+
+        $.ajax({
+            url: '@Url.Action("SaveEstimateNotes", "Estimate")',
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ "ID":ID,"NotesText":NotesText,"UserID":@ViewBag.UserID,"LoginID":@ViewBag.LoginID, "EstimateID": @ViewBag.EstimateID }),
+            success: function (result) {
+                RefreshGrid();
+                clearFieldsOnly();
+            }
+        });
+    }
+
+    function clearFieldsOnly() {
+
+        $("#datepanel").hide();
+        $(".error-message").text("");
+
+        $(".btnAdd").val('@Proestimator.Resources.ProStrings.ButtonAdd');
+
+        $("#ID").html(0);
+
+        document.getElementById("EditorFrame").contentWindow.SetEditorText("");
+    }
+
+    $(document).ready(function () {
+
+        $("#datepanel").hide();
+
+        $("#MainForm").submit(function () {
+            var notesText = document.getElementById("EditorFrame").contentWindow.GetTemplate();
+            $("#NotesText").val(notesText);
+        });
+
+        $(".btnAdd").click(function () {
+            addUpdateEstimateNotes();
+        });
+
+        $(".btnClear").click(function () {
+            clearFieldsOnly();
+        });
+
+        $("#chkShowDeletedEstimateNotes").change(function() {
+
+            if($("#chkShowDeletedEstimateNotes").is(":checked")==true)
+            {
+                $("#estimatenotes-grid thead [data-index=3] .k-link").html("Restore")
+            }
+            else
+            {
+                $("#estimatenotes-grid thead [data-index=3] .k-link").html("Delete")
+            }
+
+            clearFieldsOnly();
+            RefreshGrid();
+
+        });
+    });
+
+</script>
+
+<style>
+    .report-list {
+        text-align: left;
+        font-weight: normal;
+        list-style: none;
+        padding-left: 0px;
+    }
+
+        .report-list li {
+            padding-top: 2px;
+            padding-bottom: 2px;
+        }
+
+        .report-list a {
+            color: black;
+            cursor: pointer;
+            margin: 3px;
+        }
+
+            .report-list a:hover {
+                background-color: #349ad8;
+            }
+</style>
+
+<div id="workDesk" class="page-container">
+
+    @using (Html.BeginForm("EstimateNotes", "Estimate", FormMethod.Post, new { @id = "MainForm", @class = "container" }))
+    {
+        <input type="hidden" id="redirectData" name="redirectDataField" />
+
+        @Html.HiddenFor(o => o.LoginID)
+        @Html.HiddenFor(o => o.EstimateID)
+
+        Html.EnableClientValidation(false);
+
+        <div id="estimateFormHeader">
+
+            <div id="formHeader-back">
+                <a class="button nav-btn" data-link-id="Details-Back" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/estimate/@Model.EstimateID/details');">@Proestimator.Resources.ProStrings.DetailsBackButton</a>
+            </div>
+
+            <div id="formHeader-center">
+                <h1>@Proestimator.Resources.ProStrings.EstimateNotesHeader</h1>
+
+                @*<a class="button nav-btn" href="/@ViewBag.UserID/estimate/@Model.EstimateID/estimatenotes/">&nbsp;&nbsp;@Proestimator.Resources.ProStrings.ClearForm&nbsp;&nbsp;</a>
+                    <input id="submitButton" class="button nav-btn" type="submit" value="@Proestimator.Resources.ProStrings.Save" />*@
+
+                <input type="button" class="button nav-btn btnAdd do-not-disable" value=@Proestimator.Resources.ProStrings.AddButton />
+                <input type="button" class="button nav-btn btnClear do-not-disable" value="@Proestimator.Resources.ProStrings.ClearForm">
+                <div>
+                    <p class="error-message"></p>
+                </div>
+            </div>
+
+            <div id="formHeader-next">
+                <a class="button nav-btn" data-link-id="PaymentInfo-Next" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/estimate/@Model.EstimateID/payment-info');">@Proestimator.Resources.ProStrings.PaymentInfoPageButton </a>
+            </div>
+
+        </div>
+
+        <div class="form-container">
+            <div id="lgRow1" class="container">
+
+                <div class="half-container">
+
+                    <h2 style="text-align: center;">@Proestimator.Resources.ProStrings.NotesHistory</h2>
+
+                    <div class="datagrid" style="cursor: pointer; margin-top: 28px;">
+                        @(Html.Kendo().Grid<EstimateNotesVM>()
+                            .Name("estimatenotes-grid")
+                            .Columns(columns =>
+                            {
+                            columns.Bound(item => item.ID).Hidden();
+                            columns.Bound(item => item.TimeStamp).ClientTemplate("#= TimeStampStr #").Title(@Proestimator.Resources.ProStrings.TimeStamp).Width(170);
+                            columns.Bound(item => item.NotesText40Chars).Encoded(false).Title(@Proestimator.Resources.ProStrings.NotesText);
+                            columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<a id=\"DeleteLink#=ID#\" onclick=\"DeleteEstimateNotes(#=ID#,#=IsDeleted#)\" style=\"cursor: pointer;\"><img src=\"/images/#=DeleteRestoreImgName#\" width=\"15\" height=\"15\" /></a>").Title(@Proestimator.Resources.ProStrings.Delete).Width(100);
+                            })
+                            .Sortable()
+                            .Selectable()
+                            .Events(events => events
+                                .Change("NotesGridLineSelectionChanged")
+                            )
+                            .DataSource(dataSource => dataSource
+                                .Ajax()
+                                .ServerOperation(false)
+                                .Read(read => read.Action("GetEstimateNotesList", "Estimate").Data("GetEstimateNotesParameters"))
+                            )
+                        )
+                    </div>
+
+                    <p>
+                        <label class="inputLabel"><input type="checkbox" id="chkShowDeletedEstimateNotes" />@Proestimator.Resources.ProStrings.ShowDeletedNotes</label>
+                    </p>
+                </div>
+
+                <div class="half-container">
+                    <h2 style="text-align: center;">@Proestimator.Resources.ProStrings.EstimateNotesHeader</h2>
+
+                    @Html.LabelFor(model => model.ID, new { @id = "ID", style = "display: none;" })
+                    @Html.TextBoxFor(model => model.NotesText, new { style = "display: none;" })
+                    <iframe id="EditorFrame" src="~/Files/TemplateEditor.html?r=3" style="width: 100%; height: 600px; border: 0px;"></iframe>
+                </div>
+            </div>
+
+        </div>
+    }
+</div>

@@ -1,0 +1,315 @@
+﻿@model ProEstimator.Admin.ViewModel.EmailReport.EmailErrorReportVM
+
+@using ProEstimator.Admin.ViewModel.EmailReport;
+
+@{
+    ViewBag.Title = "Administration - Email Error Report";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<style>
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .padd-top {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    .k-grid td {
+        white-space: normal;
+    }
+
+    .stackem {
+        margin-bottom: 5px;
+    }
+
+    .k-state-selected {
+        background-color: #f9f9f9 !important;
+        border: 2px solid black !important;
+        border-bottom: 2px solid black !important;
+        border-right: 2px solid black !important;
+    }
+
+    #email-report-grid {
+        cursor: pointer;
+    }
+
+    .legend span {
+        border: 1px solid #ccc;
+        float: left;
+        width: 12px;
+        height: 12px;
+        margin: 2px;
+    }
+
+    .row-line-hovered {
+        background-color: #dddddd !important;
+        border-color: gray;
+    }
+
+    .legend .pass {
+        background-color: #90EE90;
+    }
+
+    .legend .pending {
+        background-color: #FFFFFF;
+    }
+
+    .legend .fail {
+        background-color: #FF6961;
+    }
+
+    #email-report-grid .pass {
+        background-color: #90EE90;
+    }
+
+    #email-report-grid .pending {
+        background-color: #FFFFFF;
+    }
+
+    #email-report-grid .fail {
+        background-color: #FF6961;
+    }
+
+    .ui-datepicker {
+        z-index: 1000 !important;
+    }
+</style>
+
+<script>
+
+    function GetSearchParameters() {
+        return {
+            loginIDFilter: $("#LoginID").val(), rangeStartFilter: $("#RangeStart").val(), rangeEndFilter: $("#RangeEnd").val(),
+            emailAddressFilter: $("#EmailAddress").val(), eventFilter: $("#Event").val()
+        };
+    }
+
+    $(document).ready(function () {
+
+        $('#panelEmail').hide();
+
+        // Set up calendar controls
+        $("#RangeStart").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        // Set up calendar controls
+        $("#RangeEnd").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        // Do the acount id search
+        $("#btnSearchEmailReport").click(function () {
+            $('#panelEmail').hide();
+            // Refresh the history grid
+            var grid = $("#email-report-grid").data("kendoGrid");
+
+            if (grid) {
+                grid.dataSource.read();
+            }
+        });
+
+        var currentDate = new Date();
+        var dateChange = new Date();
+        dateChange.setDate(currentDate.getDate() - 7)
+
+        // RangeStart
+        var rangeStart = GetDayMonthYear(dateChange);
+        $("#RangeStart").val(rangeStart);
+
+        // RangeEnd
+        dateChange = new Date();
+        var rangeEnd = GetDayMonthYear(dateChange);
+        $("#RangeEnd").val(rangeEnd);
+
+        function GetDayMonthYear(dateChange) {
+            var d = dateChange.getDate();
+            var day = (d < 10) ? '0' + d : d;
+            var m = dateChange.getMonth() + 1;
+            var month = (m < 10) ? '0' + m : m;
+            var yy = dateChange.getYear();
+            var year = (yy < 1000) ? yy + 1900 : yy;
+
+            var dateRange = month + "/" + day + "/" + year;
+
+            return dateRange;
+        }
+
+    });
+
+    function DetailsDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#email-report-grid tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("row-line-hovered");
+            }
+        );
+    }
+
+    function DetailsLineSelectionChanged(arg) {
+        var row = $("#email-report-grid").find(".k-state-selected").first();
+
+        //console.log(row);
+        var messageID = row.find("td").first().html();
+        var loginID = row.find("td").eq(1).html();
+        var company = row.find("td").eq(2).html();
+        var toAddress = row.find("td").eq(3).html();
+        var replyto = row.find("td").eq(4).html();
+        var subject = row.find("td").eq(5).html();
+        var attachPaths = row.find("td").eq(6).html();
+        var timestamp = row.find("td").eq(7).html();
+        var event = row.find("td").eq(8).html();
+        var reason = row.find("td").eq(9).html();
+
+        $("#writeEmail").empty();
+        $("#writeEmail").append("<b>Message ID : </b>" + messageID);
+        $("#writeEmail").append("<br />");
+        $("#writeEmail").append("<b>TimeStamp : </b>" + timestamp);
+        $("#writeEmail").append("<br />");
+        $("#writeEmail").append("<b>Error Event : </b>" + event);
+        $("#writeEmail").append("<br />");
+        $("#writeEmail").append("<b>Error Reason : </b>" + reason);
+        $("#writeEmail").append("<br />");
+        $("#writeEmail").append("<br />");
+        $("#writeEmail").append("<b>Login ID : </b>" + loginID);
+        $("#writeEmail").append("<br />");
+        $("#writeEmail").append("<b>Company : </b>" + company);
+        $("#writeEmail").append("<br />");
+        $("#writeEmail").append("<b>To : </b>" + toAddress);
+        $("#writeEmail").append("<br />");
+        $("#writeEmail").append("<b>Reply To : </b>" + replyto);
+        $("#writeEmail").append("<br />");
+        $("#writeEmail").append("<b>Subject : </b>" + subject);
+        $("#writeEmail").append("<br />");
+        $("#writeEmail").append("<b>Attachment Path : </b>" + attachPaths);
+
+        $('#panelEmail').show();
+    }
+
+</script>
+
+<div class="page-container">
+    <div class="row padd-top">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>Email Error Report</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="container">
+                            <div class="row stackem">
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Login ID</span>
+                                        <input type="text" class="form-control" placeholder="Login ID" aria-describedby="loginId" id="LoginID" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Range Start</span>
+                                        <input type="text" class="input-group-addon" placeholder="Range Start" aria-describedby="RangeStart" id="RangeStart" readonly="true" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">RangeEnd</span>
+                                        <input type="text" class="input-group-addon" placeholder="Range End" aria-describedby="RangeEnd" id="RangeEnd" readonly="true" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row stackem">
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Email Address</span>
+                                        <input type="text" class="form-control" placeholder="Email Address" aria-describedby="emailAddress" id="EmailAddress" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Error Event</span>
+                                        <select id="Event">
+                                            <option value="" selected>All</option>
+                                            <option value="bounce">Bounced</option>
+                                            <option value="deferred">Deferred</option>
+                                            <option value="dropped">Dropped</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <a class="btn btn-primary" href="javascript:void(0);" style="width:95% !important" id="btnSearchEmailReport" role="button">Search</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="datagrid">
+                    @(Html.Kendo().Grid<EmailErrorReportVM>()
+                    .Name("email-report-grid")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(item => item.ID).Hidden();
+                        columns.Bound(item => item.LoginID).Title("Login");
+                        columns.Bound(item => item.LoginCompany).Title("Company");
+                        columns.Bound(item => item.ToAddress).Title("To");
+                        columns.Bound(item => item.ReplyTo);
+                        columns.Bound(item => item.Subject);
+                        columns.Bound(item => item.AttachmentPaths).Hidden();
+                        columns.Bound(item => item.TimeStamp).Format("{0:MM/dd/yyyy h:mm tt}");
+                        columns.Bound(item => item.Event);
+                        columns.Bound(item => item.Reason).Hidden();
+                    })
+                        .Selectable()
+                        .Pageable(pageable => pageable
+                            .Refresh(false)
+                        )
+                        .Events(events => events
+                            .DataBound("DetailsDataChanged")
+                            .Change("DetailsLineSelectionChanged")
+                        )
+                        .Reorderable(reorder => reorder.Columns(true))
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Read(read => read.Action("GetEmailErrorReport", "EmailReport").Data("GetSearchParameters"))
+                            .PageSize(25)
+                        )
+                    )
+                </div>
+            </div>
+        </div>
+
+        <div class="row" id="panelEmail">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>Email Error Details</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="container">
+                            <div id="writeEmail"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

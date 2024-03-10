@@ -1,0 +1,1839 @@
+﻿@model Proestimator.ViewModel.Customer.CustomerSearchVM
+
+@{
+    var culture = System.Threading.Thread.CurrentThread.CurrentUICulture.Name.ToLowerInvariant();
+}
+
+@using Proestimator.ViewModel
+@using Proestimator.ViewModel.Customer
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_CustomerSearch;
+}
+
+<style>
+    .hide-small{
+    }
+
+    .hide-med{
+    }
+
+    .save-buttons {
+        width: 200px;
+        margin-right: 10px;
+    }
+
+    .customer-details-wrapper {
+        display: none;
+        height: 1px;
+    }
+
+    .hide-column {
+        display: none;
+    }
+
+    .imported-true {
+        display:  none !important;
+    }
+
+    .estimate-id-label {
+        display: none;
+    }
+
+    @@media (max-width: 1400px) {
+        .hide-med {
+            display: none;
+        }
+    }
+
+    @@media (max-width: 700px) {
+        .save-buttons {
+            width: 100%;
+        }
+
+        .hide-small {
+            display: none;
+        }
+    }
+
+    .ToggleGridColumn {
+        cursor: pointer;background-color: #1d69a6;color: #FFF;padding: 2px; border-radius: 3px;width:150px;
+    }
+
+    #GridPopupOptions {
+        padding: 7px;
+        width: 100px;
+        border-radius: 7px;
+        position: absolute;
+        background-color: #349ad8;
+        left: 0;
+        top: 0;
+        z-index: 2000;
+        display: none;
+    }
+
+    #GridPopupOptions a {
+        display: block;
+        width: 100%;
+    }
+
+    colgroup {
+        display: none;
+    }
+</style>
+
+<script>
+
+    var _customerID = 0;
+    var _selectedCustomerSearch = "";
+    var _customerSearchShowEstimates = false;
+
+    // Implemented this page with the ability to edit customers without having to open an estimate.
+    // This is probably too complicated for most users to this turns it off but lets us turn it on easilly, maybe it should be an option somewhere
+    var _optionAllowCustomerEdit = true;
+
+    var _showDeletedCustomers = false;
+    var _selectedCustomers = [];
+
+    var _searchMode = "@(Model.ForCustomerSelection ? "Customers" : "Estimates")";
+
+    var _columnSelections;
+
+    function CustomerGridDataChanged(arg) {
+        CustomerGridWireUpCheckboxes();
+        UpdateCustomerDeletedButton();
+        RefreshMultiActionCustomerButtons();
+
+        // Wire up hilighting the row when hovering.
+        $("#customer-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                var customerID = row.find("td").first().html();
+
+                row.toggleClass("k-state-hover");
+            }
+        );
+
+        // Check if the selected customer is not in the list anymore
+        var kendoCustomerID = GetKendoIDForCustomer(_customerID);
+
+        if (kendoCustomerID === "")
+        {
+            LoadCustomerDetails(0);
+        }
+        else
+        {
+            $("#customer-grid tr[data-uid='" + kendoCustomerID + "']").addClass("k-state-selected");
+        }
+    }
+
+    function CustomerGridWireUpCheckboxes() {
+        $("#customer-grid-container").find(".checkbox").click(function () {
+
+            var checked = $(this).is(":checked");
+            var grid = $("#customer-grid").data("kendoGrid");
+            var dataItem = grid.dataItem($(this).closest("tr"));
+
+            if (checked == true) {
+                _selectedCustomers.push(dataItem.CustomerID);
+            }
+            else {
+                var index = _selectedCustomers.indexOf(dataItem.CustomerID);
+                _selectedCustomers.splice(index, 1);
+            }
+
+            RefreshMultiActionCustomerButtons();
+        });
+    }
+
+    function RefreshMultiActionCustomerButtons()
+    {
+        if (_selectedCustomers.length > 0) {
+            $("#customer-multi-action").show();
+        }
+        else {
+            $("#customer-multi-action").hide();
+        }
+    }
+
+    function GetKendoIDForCustomer(customerID) {
+        var returnID = "";
+
+        $("#customer-grid tr").each(function () {
+            if ($(this).context.cells[0].textContent == customerID) {
+                returnID = $(this).data("uid");
+            }
+        });
+
+        return returnID;
+    }
+
+    function CustomerGridLineSelectionChanged(arg) {
+
+        // Remove the Hover state from all rows
+        $(".k-state-hover").each(function (index) {
+            $(this).removeClass("k-state-hover");
+        });
+
+        // Get the selected item and call the ClickedItem event
+        var row = $("#customer-grid").find(".k-state-selected").first();
+        var customerID = row.find("td").first().html();
+
+        LoadCustomerDetails(customerID);
+    }
+
+    function EstimateGridLineSelectionChanged(arg) {
+
+        // Remove the Hover state from all rows
+        $(".k-state-hover").each(function (index) {
+            $(this).removeClass("k-state-hover");
+        });
+
+    }
+
+    function LoadCustomerDetails(customerID) {
+        _customerID = customerID;
+
+        if (customerID > 0)
+        {
+            _customerSearchShowEstimates = false;
+            
+            if (_optionAllowCustomerEdit === true)
+            {
+                $.getJSON("/Customer/GetCustomerDetails", { userID: @ViewBag.UserID, customerID: customerID }, function (data) {
+
+                    if (data.Success) {
+                        $(".CustomerDetails").show();
+
+                        _selectedCustomerSearch = data.FirstName + " " + data.LastName;
+
+                        $("#FirstName").val(data.FirstName);
+                        $("#LastName").val(data.LastName);
+                        $("#EmailAddress").val(data.Email);
+
+                        $("#Phone1").val(data.Phone1);
+                        $("#Extension1").val(data.Extension1);
+                        $("#PhoneType1").val(data.Phone1Type);
+
+                        $("#Phone2").val(data.Phone2);
+                        $("#Extension2").val(data.Extension2);
+                        $("#PhoneType2").val(data.Phone2Type);
+
+                        $("#Phone3").val(data.Phone3);
+                        $("#Extension3").val(data.Extension3);
+                        $("#PhoneType3").val(data.Phone3Type);
+
+                        $("#BusinessName").val(data.BusinessName);
+                        $("#Address1").val(data.Address1);
+                        $("#Address2").val(data.Address2);
+                        $("#City").val(data.City);
+                        $("#State").val(data.State);
+                        $("#ZipCode").val(data.Zip);
+                        $("#TimeZone").val(data.TimeZone);
+
+
+                        @if (Model.ForCustomerSelection == true)
+                        {
+                            <text>$("#SelectOrSaveButton").val("@Proestimator.Resources.ProStrings.Select");</text>
+                        }
+
+                        $(".CreateNewEstimateButton").attr("href", "/@ViewBag.UserID/new-estimate/" + customerID);
+
+                        UpdateFormattedText();
+                        RefreshEstimateGrid();
+                        $("#EstimatesContainer").show();
+                    }
+                    else {
+                        $(".CustomerDetails").hide();
+                    }
+                });
+            }
+        }
+        else {
+            $(".CustomerDetails").hide();
+
+            if (_searchMode === "Customers")
+            {
+                $("#EstimatesContainer").hide();
+            }
+        }
+    }
+
+    function ShowEmptyCustomerForm()
+    {
+        _customerID = 0;
+        $("#SelectOrSaveButton").val("@Proestimator.Resources.ProStrings.SaveAndSelect");
+
+        $(".CustomerDetails").show();
+        $("#EstimatesContainer").hide();
+
+        $("#FirstName").val("");
+        $("#LastName").val("");
+        $("#EmailAddress").val("");
+
+        $("#Phone1").val("");
+        $("#Extension1").val("");
+        $("#PhoneType1").val("");
+
+        $("#Phone2").val("");
+        $("#Extension2").val("");
+        $("#PhoneType2").val("");
+
+        $("#Phone3").val("");
+        $("#Extension3").val("");
+        $("#PhoneType3").val("");
+
+        $("#Address1").val("");
+        $("#Address2").val("");
+        $("#City").val("");
+        $("#State").val("");
+        $("#ZipCode").val("");
+        $("#TimeZone").val("Eastern");
+    }
+
+    function GetCustomerSearchParameters() {
+        var result =
+        {
+            userID: $("#UserID").val()
+           , searchText: $("#SearchText").val()
+           , showDeleted: _showDeletedCustomers
+        };
+        return result;
+    }
+
+    function RefreshCustomerGrid() {
+        var grid = $("#customer-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+            grid.dataSource.page(1);
+        }
+    }
+
+    $(document).ready(function () {
+
+        // Prevent the form from submitting when clicking enter
+        $(window).keydown(function(event){
+            if(event.keyCode == 13) {
+                event.preventDefault();
+                return false;
+            }
+        });
+
+        $(".customer-button-clear").click(function () {
+            ClearCustomerFilter();
+            RefreshCustomerGrid();
+        });
+
+        $(".customer-button-search").click(function () {
+            RefreshCustomerGrid();
+        });
+
+        $(".ViewEstimatesButton").click(function () {
+            if (_customerSearchShowEstimates === false)
+            {
+                $(".ViewEstimatesButton").text("@Proestimator.Resources.ProStrings.HideEstimates");
+                $("#EstimatesContainer").show();
+                RefreshEstimateGrid();
+            }
+            else
+            {
+                $(".ViewEstimatesButton").text("@Proestimator.Resources.ProStrings.ShowEstimates");
+                $("#EstimatesContainer").hide();
+            }
+
+            _customerSearchShowEstimates = !_customerSearchShowEstimates;
+        });
+
+        // Fires when the user manually saves the customer form
+        $("#userSubmitButton").click(function () {
+            SaveCustomerData(function (result) {
+                if (result.Success === true) {
+                    ShowUserMessage("@Proestimator.Resources.ProStrings.CustomerDataSaved", false, 3000)
+                    RefreshCustomerGrid();
+                }
+                else {
+                    ShowUserMessage(result.ErrorMessage, true, 5000)
+                }
+            });
+        });
+
+        // Fires when the user navigates away
+        $("#submitButton").click(function () {
+            var submitButtonVisible = $("#userSubmitButton").is(":visible");
+            SaveCustomerData(function (result) {
+            });
+        });
+
+        $("#ButtonCustomerDetails").click(function () {
+            var wrapperDiv = $(".customer-details-wrapper");
+
+            if (wrapperDiv.is(":visible"))
+            {
+                wrapperDiv.hide();
+                $("#ButtonCustomerDetails").val("@Proestimator.Resources.ProStrings.ViewDetails");
+            }
+            else {
+                wrapperDiv.show();
+                $("#ButtonCustomerDetails").val("@Proestimator.Resources.ProStrings.HideDetails");
+            }
+        });
+
+        $("#btnDeleteSelectedCustomers").click(function () {
+            if (_selectedCustomers.length > 0)
+            {
+                if (confirm("@Proestimator.Resources.ProStrings.CheckedCustomersDeleteMessage"))
+                {
+                    $.ajax({
+                        url: '@Url.Action("GridDeleteCustomers", "Customer")',
+                        type: "POST",
+                        dataType: "json",
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify({ "userID": $("#UserID").val(), "ids": _selectedCustomers.join(",") }),
+                        success: function (result) {
+                            if (result == "success") {
+                                RefreshCustomerGrid();
+                                _selectedCustomers = [];
+                            }
+                            else {
+                                alert(result);
+                            }
+                        }
+                    });
+                }
+            }
+        });
+
+        $("#btnRestoreSelectedCustomers").click(function () {
+            if (_selectedCustomers.length > 0)
+            {
+                $.ajax({
+                    url: '@Url.Action("GridRestoreCustomers", "Customer")',
+                    type: "POST",
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({ "userID": $("#UserID").val(), "ids": _selectedCustomers.join(",") }),
+                    success: function (result) {
+                        if (result == "success") {
+                            RefreshCustomerGrid();
+                            _selectedCustomers = [];
+                        }
+                        else {
+                            alert(result);
+                        }
+                    }
+                });
+            }
+        });
+
+        $(".CustomerRadioActiveOrDelete").change(function () {
+            _showDeletedCustomers = $("#customer-radio-deleted").is(":checked");
+            UpdateCustomerDeletedButton();
+            RefreshCustomerGrid();
+        });
+
+        $("#SearchText").keydown(function (event) {
+            if (event.which == 13) {
+                RefreshCustomerGrid();
+                return false;
+            }
+
+            if (event.which == 27) {
+                ClearCustomerFilter();
+                RefreshCustomerGrid();
+                return false;
+            }
+        });
+
+        @if (Model.ForCustomerSelection)
+        {
+            <text>
+            $("#SelectOrSaveButton").click(function() {
+                if (_customerID > 0)
+                {
+                    location.href = "/@ViewBag.UserID/estimate/@Model.EstimateID/select-customer/" + _customerID;
+                }
+                else
+                {
+                    SaveCustomerData(function (result) {
+                        console.log(result);
+                        if (result.Success === true) {
+                            location.href = "/@ViewBag.UserID/estimate/@Model.EstimateID/select-customer/" + result.CustomerID;
+                        }
+                        else {
+                            ShowUserMessage(result.ErrorMessage, true, 5000)
+                        }
+                    });
+                }
+            });
+
+            ShowCustomerSearch();
+            </text>
+        }
+        else
+        {
+            <text>ShowEstimateSearch();</text>
+        }
+
+        $("#btnDeleteSelectedEstimates").click(function () {
+            @if (ViewBag.EstDelPermit)
+            {
+                <text>
+                if (_selectedEstimates.length > 0)
+                {
+                    if (confirm("@Proestimator.Resources.ProStrings.CheckedEstimatesDeleteMessage"))
+                    {
+                        $.ajax({
+                            url: "/Home/GridDeleteEstimates",
+                            type: "POST",
+                            dataType: "json",
+                            contentType: "application/json; charset=utf-8",
+                            data: JSON.stringify({ "userID": $("#UserID").val(), "ids": _selectedEstimates.join(",") }),
+                            success: function (result) {
+                                if (result == "success") {
+                                    for (i = 0; i < _selectedEstimates.length; i++)
+                                    {
+                                        RemoveEstimateFromGrid(_selectedEstimates[i]);
+                                    }
+
+                                    _selectedEstimates = [];
+                                }
+                                else {
+                                    alert(result);
+                                }
+                            }
+                        });
+                    }
+                }
+                </text>
+            }
+            else
+            {
+                <text>
+                noPermission('Delete/Restore estimates');
+                </text>
+            }
+        });
+
+        $("#btnRestoreSelectedEstimates").click(function () {
+            @if (ViewBag.EstDelPermit)
+            {
+                <text>
+                if (_selectedEstimates.length > 0)
+                {
+                    $.ajax({
+                            url: "/Home/GridRestoreEstimates",
+                    type: "POST",
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({ "userID": $("#UserID").val(), "ids": _selectedEstimates.join(",") }),
+                    success: function(result) {
+                                if (result == "success") {
+                                for (i = 0; i < _selectedEstimates.length; i++) {
+                                    RemoveEstimateFromGrid(_selectedEstimates[i]);
+                                }
+
+                                _selectedEstimates = [];
+                            }
+                            else {
+                                alert(result);
+                            }
+                        }
+                    });
+                }
+                </text>
+            }
+            else
+            {
+                <text>
+                noPermission('Delete/Restore estimates');
+                </text>
+            }
+        });
+
+        $(".delete-radio").change(function() {
+            RefreshEstimateGrid();
+        });
+
+        $(".button-advanced").click(function () {
+            ToggleAdvanced();
+        });
+
+        $(".button-clear").click(function () {
+            ClearFilter();
+            RefreshEstimateGrid();
+        });
+
+        $(".button-search").click(function () {
+            RefreshEstimateGrid();
+        });
+
+        $(".RadioActiveOrDelete").change(function () {
+            _showDeletedEstimates = $("#radio-deleted").is(":checked");
+            UpdateDeleted();
+            RefreshEstimateGrid();
+
+            $("#ImportHelpLink").toggle($("#radio-webest").is(":checked"));
+        });
+
+        $("#EstimateSearchText").keydown(function (event) {
+            if (event.which == 13)
+            {
+                RefreshEstimateGrid();
+            }
+        });
+
+        searchFilter(5);
+
+        UpdateDeleted();
+
+        $("#GridPopupOptions").mouseleave(function() {
+            $("#GridPopupOptions").hide();
+        });
+
+        $("#GridPopupOptions").mousedown(function() {
+            return false;
+        });
+
+        $("#content-area").mousedown(function() {
+            $("#GridPopupOptions").hide();
+        });
+
+        LoadEstimateGridShowHideColumnInfo();
+
+        $(window).resize(function() {
+            SetEstimateGridShowHideColumn();
+        });
+
+        $('#ShowHideLink').click(function() {
+
+            $('#cblist').html('');
+
+            // loop the outer array
+            for (var i = 0; i < _columnSelections.length; i++) {
+
+                var name = _columnSelections[i]["Name"];
+                var text = _columnSelections[i]["HeaderText"];
+                var checked = _columnSelections[i]["Visible"];
+
+                if(name != '' &&  name != undefined)
+                {
+                    addCheckbox(name,text,checked);
+                }
+            }
+
+            $('#cblist').append('<input style="background-color: #1d69a6;color: #FFF; margin:10px; border-radius:5px"  id="SaveColumnDialog" name="SaveColumnDialog" type="button" value="@Proestimator.Resources.ProStrings.Save" />');
+            $('#cblist').append('<input style="background-color: #1d69a6;color: #FFF; margin:10px; border-radius:5px"  id="CancelColumnDialog" name="CancelColumnDialog" type="button" value="@Proestimator.Resources.ProStrings.Button_Cancel"/>');
+
+            $('.menu').toggle("slide");
+        });
+
+        $('#cblist').on('click', '#CancelColumnDialog', function(){
+            $('.menu').toggle("slide");
+        });
+
+        $('#cblist').on('click', '#SaveColumnDialog', function() {
+
+            SaveEstimateGridShowHideColumn(false);
+            $.ajax({
+                url: "/Estimate/SaveEstimateGridShowHideColumnInfo",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ "userID": @ViewBag.UserID, "gridControlID" : "estimate-grid", "gridMappingVMList": _columnSelections }),
+                success: function (data) {
+                    SetEstimateGridShowHideColumn();
+                    $('.menu').toggle("slide"); // toogle menu popup
+                }
+            });
+        });
+    });
+
+    // Grid column selection
+    function SetEstimateGridShowHideColumn() {
+        var grid = $("#estimate-grid").data("kendoGrid");
+
+        if ($("#ShowHideLink").is(":visible"))
+        {
+            if (_columnSelections) {
+                for (var i = 0; i < _columnSelections.length; i++) {
+
+                    if (_columnSelections[i].Visible == true) {
+                        grid.showColumn(_columnSelections[i].Name);
+                    }
+                    else {
+                        grid.hideColumn(_columnSelections[i].Name);
+                    }
+                }
+            }
+        }
+        else {
+            for (var i = 0; i < _columnSelections.length; i++) {
+                grid.hideColumn(_columnSelections[i]["Name"]);
+            }
+
+            grid.showColumn("Name");
+            grid.showColumn("Vehicle");
+        }
+
+    }
+
+    function LoadEstimateGridShowHideColumnInfo() {
+
+        $.getJSON("/Estimate/GetEstimateGridShowHideColumnInfo", { "userID": @ViewBag.UserID, "gridControlID" : "estimate-grid" }, function (data) {
+
+            if (data.Success) {
+                _columnSelections = data.ResultObject;
+                SetEstimateGridShowHideColumn();
+            }
+            else {
+                alert(data.ErrorMessage);
+            }
+        });
+    }
+
+    function addCheckbox(name,text,checked) {
+        var container = $('#cblist');
+        var inputs = container.find('input');
+        var id = 1;
+        if(inputs != undefined)
+            id = inputs.length+1;
+
+        if(checked == true)
+            $('#cblist').append('<input type="checkbox" checked style="margin: 5px;" id=cb'+ id + ' value = ' + name + ' /> ' + text + '<br />');
+        else
+            $('#cblist').append('<input type="checkbox" style="margin: 5px;" id=cb'+ id + ' value = ' + name + ' /> ' + text + '<br />');
+    }
+
+    function SaveEstimateGridShowHideColumn(toggleMenu) {
+        $('#cblist :checked').each(function () {
+            for (var i = 0; i < _columnSelections.length; i++) {
+
+                name = _columnSelections[i]["Name"];
+                if($(this).val() == name)
+                {
+                    _columnSelections[i]["Visible"] = true;
+                }
+            }
+        });
+
+        $('#cblist :not(:checked)').each(function () {
+            for (var i = 0; i < _columnSelections.length; i++) {
+
+                name = _columnSelections[i]["Name"];
+
+                console.log('$(this).val() = ' + $(this).val() + ' ; name = ' +name);
+                if($(this).val() == name)
+                {
+                    _columnSelections[i]["Visible"] = false;
+                }
+            }
+        });
+
+        if(toggleMenu)
+        {
+            for (var i = 0; i < _columnSelections.length; i++) {
+
+                var grid = $("#estimate-grid").data("kendoGrid");
+
+                if(_columnSelections[i]["Visible"]==true)
+                    grid.showColumn(_columnSelections[i]["Name"]);
+                else
+                    grid.hideColumn(_columnSelections[i]["Name"]);
+            }
+
+            $('.menu').toggle("slide");
+        }
+    }
+
+    function SaveCustomerData(successFunction)
+    {
+        $.ajax({
+            url: '@Url.Action("SaveCustomer", "Customer")',
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({
+                "userID": $("#UserID").val()
+                , "customerID": _customerID
+                , "firstName": $("#FirstName").val()
+                , "lastName": $("#LastName").val()
+                , "email": $("#EmailAddress").val()
+
+                , "phone1": $("#Phone1").val()
+                , "ext1": $("#Extension1").val()
+                , "phoneType1": $("#PhoneType1").val()
+
+                , "phone2": $("#Phone2").val()
+                , "ext2": $("#Extension2").val()
+                , "phoneType2": $("#PhoneType2").val()
+
+                , "phone3": $("#Phone3").val()
+                , "ext3": $("#Extension3").val()
+                , "phoneType3": $("#PhoneType3").val()
+
+                , "businessName": $("#BusinessName").val()
+                , "address1": $("#Address1").val()
+                , "address2": $("#Address2").val()
+                , "city": $("#City").val()
+                , "state": $("#State").val()
+                , "zip": $("#ZipCode").val()
+                , "timeZone": $("#TimeZone").val()
+            }),
+            success: successFunction
+        });
+    }
+
+    function UpdateCustomerDeletedButton() {
+        $(".restore-customer-button").toggle(_showDeletedCustomers);
+        $(".delete-customer-button").toggle(!_showDeletedCustomers);
+
+        $("#btnRestoreSelectedCustomers").toggle(_showDeletedCustomers);
+        $("#btnDeleteSelectedCustomers").toggle(!_showDeletedCustomers);
+    }
+
+    function DeleteCustomer(customerID)
+    {
+        if (confirm("@Proestimator.Resources.ProStrings.DeleteCustomerMessage"))
+        {
+            $.ajax({
+                url: '@Url.Action("DeleteCustomer", "Customer")',
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ "userID": @ViewBag.UserID, "customerID": customerID }),
+                success: function (result) {
+                    if (result == "success") {
+                        RefreshCustomerGrid();
+                    }
+                    else {
+                        ShowUserMessage(result, true, 5000);
+                    }
+                }
+            });
+        }
+    }
+
+    function RestoreCustomer(customerID)
+    {
+        $.ajax({
+            url: '@Url.Action("RestoreCustomer", "Customer")',
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ "userID": @ViewBag.UserID, "customerID": customerID }),
+            success: function (result) {
+                if (result == "success") {
+                    RefreshCustomerGrid();
+                }
+                else {
+                    ShowUserMessage(result, true, 5000);
+                }
+            }
+        });
+    }
+
+    function ClearCustomerFilter() {
+        $("#SearchText").val("");
+    }
+
+    function ShowEstimateSearch() {
+        _searchMode = "Estimates";
+
+        if ($("#radio-webest").is(":checked"))
+        {
+            $("#radio-active").prop("checked", true);
+        }
+
+        //$("#vehicleInfoLookup").show();
+        $("#CustomerSearchContainer").hide();
+
+        $("#tabButtonEstimates").addClass("active");
+        $("#tabButtonCustomers").removeClass("active");
+
+        _customerID = 0;
+
+        $("#EstimatesContainer").show();
+        $("#CustomerEstimateSearch").show();
+        RefreshEstimateGrid();
+
+        $(".customer-column").removeClass("hide-column");
+
+        $(".CreateNewEstimateButton").hide();
+        $("#EstimatesTitle").hide();
+    }
+
+    function ShowCustomerSearch() {
+        _searchMode = "@Proestimator.Resources.ProStrings.Customers";
+
+        //$("#vehicleInfoLookup").hide();
+        $("#CustomerSearchContainer").show();
+
+        $("#tabButtonEstimates").removeClass("active");
+        $("#tabButtonCustomers").addClass("active");
+
+        RefreshCustomerGrid();
+        $("#EstimatesContainer").hide();
+        $("#CustomerEstimateSearch").hide();
+
+        $(".CreateNewEstimateButton").show();
+        $("#EstimatesTitle").show();
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------
+    // Estimate grid stuff
+    // -----------------------------------------------------------------------------------------------------------------------
+
+    var _searchFilter = 5;
+    var _advancedSearch = false;
+    var _showDeletedEstimates = false;
+    var _selectedEstimates = [];
+
+    function searchFilter(filter) {
+        _searchFilter = filter;
+
+        $("#SearchText").val("");
+        RefreshEstimateGrid();
+
+        $(".filter-button").removeClass("selected");
+        $("#filter-" + _searchFilter).addClass("selected");
+    }
+
+    function RemoveEstimateFromGrid(estimateID)
+    {
+        var rowID = GetKendoIDForEstimate(estimateID);
+
+        var grid = $("#estimate-grid").data("kendoGrid");
+        grid.removeRow('tr[data-uid="' + rowID + '"]');
+    }
+
+    function DeleteEstimate(userID, estimateID)
+    {
+        _comfirmEstimate = estimateID;
+        GetUserConfirmation("@Proestimator.Resources.ProStrings.DeleteEstimateMessage", DeleteEstimateResult);
+    }
+
+    var _comfirmEstimate = 0;
+
+    function DeleteEstimateResult(confirmed)
+    {
+        if (confirmed === true)
+        {
+            $("#GridPopupOptions").hide();
+
+            $.ajax({
+                url: "/Home/GridDeleteEstimate",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ "userID": @ViewBag.UserID, "estimateID": _comfirmEstimate }),
+                success: function (result) {
+                    if (result == "success") {
+                        RemoveEstimateFromGrid(_comfirmEstimate);
+                    }
+                    else {
+                        ShowUserMessage(result, true, 5000)
+                    }
+
+                    _comfirmEstimate = 0;
+                }
+            });
+        }
+    }
+
+    function RestoreEstimate(userID, estimateID) {
+        $.ajax({
+            url: "/Home/GridRestoreEstimate",
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ "userID": userID, "estimateID": estimateID }),
+            success: function (result) {
+                if (result == "success") {
+                    RemoveEstimateFromGrid(estimateID);
+                }
+                else {
+                    alert(result);
+                }
+            }
+        });
+
+        $("#GridPopupOptions").hide();
+    }
+
+    function UpdateDeleted() {
+        $(".restore-button").toggle(_showDeletedEstimates);
+        $(".delete-button").toggle(!_showDeletedEstimates);
+
+        $("#btnRestoreSelectedEstimates").toggle(_showDeletedEstimates);
+        $("#btnDeleteSelectedEstimates").toggle(!_showDeletedEstimates);
+    }
+
+    function ToggleAdvanced() {
+        _advancedSearch = !_advancedSearch;
+
+        if (_advancedSearch == true) {
+            $(".advanced-search-area").show();
+
+            var searchArea = $(".advanced-search-area");
+            var fullHeight = searchArea.css("height", "auto").height();
+
+            searchArea.height(0);
+
+            $(".advanced-search-area").animate({
+                opacity: 1.0,
+                height: fullHeight
+            }, 300
+            , function () {
+                $(".advanced-search-area").height("auto");
+            });
+        }
+        else {
+            $(".advanced-search-area").animate({
+                opacity: 0.0,
+                height: 0
+            }, 300
+            , function () {
+                $(".advanced-search-area").hide();
+            });
+        }
+
+        RefreshEstimateGrid();
+    }
+
+    function ClearFilter() {
+        $("#EstimateSearchText").val("");
+
+        $("#AdvancedSearch_EstimateID").val("");
+        $("#AdvancedSearch_EstimateNumber").val("");
+        $("#AdvancedSearch_Description").val("");
+        $("#AdvancedSearch_Customer").val("");
+        $("#AdvancedSearch_Vehicle").val("");
+        $("#AdvancedSearch_ClaimNumber").val("");
+        $("#AdvancedSearch_WorkOrderNumber").val("");
+        $("#AdvancedSearch_License").val("");
+        $("#AdvancedSearch_Vin").val("");
+        $("#AdvancedSearch_StockNumber").val("");
+        $("#AdvancedSearch_PhoneNumber").val("");
+        $("#AdvancedSearch_InsuranceCompanyName").val("");
+    }
+
+    var previouskendoEstimateIDClicked = '';
+    function EstimateGridDataChanged(arg) {
+        $("#estimate-grid").find("table").css("opacity", 1);
+
+        EstimateGridWireUpCheckboxes();
+        UpdateDeleted();
+
+        var grid = $("#estimate-grid").data("kendoGrid");
+        var dataSource = grid.dataSource;
+        var estimateTotal = dataSource.total();
+
+        if (_searchMode === "Customers")
+        {
+            $(".customer-column").addClass("hide-column");
+
+            $("#estimateTableContainer").toggle(estimateTotal > 0);
+        }
+        else
+        {
+            $(".customer-column").removeClass("hide-column");
+        }
+
+        if ($("#radio-webest").is(":checked"))
+        {
+            $(".import-column").show();
+            $(".import-hide").hide();
+
+            $("#estimate-grid").find("tbody").find("tr").each(function (i, obj) {
+                if($(obj).find(".imported-false").is(":visible"))
+                {
+                    var estimateIDButton = $(obj).find(".open-button");
+                    var estimateIDLabel = $(obj).find(".estimate-id-label");
+                    var printButton = $(obj).find(".print-button");
+
+                    estimateIDButton.hide();
+                    estimateIDLabel.show();
+                    printButton.hide();
+                }
+            });
+        }
+        else
+        {
+            $(".import-column").hide();
+            $(".import-hide").show();
+        }
+
+        // Wire up hilighting the row when hovering.
+        var row  = '';
+        var estimateID = '';
+        $("#estimate-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                row = $(this).closest("tr");
+                estimateID = row.find("td").first().html();
+
+
+                row.toggleClass("k-state-hover");
+            }
+        );
+
+        $("#estimate-grid tbody tr").click(
+            function () {
+                // Get the selected item and call the ClickedItem event
+                //var row = $("#estimate-grid").find(".k-state-selected").first();
+                var estimateID = row.find("td").first().html();
+                var kendoEstimateID = GetKendoIDForEstimate(estimateID);
+
+                if(previouskendoEstimateIDClicked!='')
+                {
+                    $("#estimate-grid tr[data-uid='" + previouskendoEstimateIDClicked + "']").removeClass("k-state-selected");
+                }
+                previouskendoEstimateIDClicked = kendoEstimateID;
+
+                $("#estimate-grid tr[data-uid='" + kendoEstimateID + "']").addClass("k-state-selected");
+            }
+        );
+    }
+
+    function EstimateGridWireUpCheckboxes() {
+        $("#estimateTableContainer").find(".checkbox").click(function () {
+
+            var checked = $(this).is(":checked");
+            var grid = $("#estimate-grid").data("kendoGrid");
+            var dataItem = grid.dataItem($(this).closest("tr"));
+
+            if (checked == true) {
+                _selectedEstimates.push(dataItem.AdminInfoID);
+            }
+            else {
+                var index = _selectedEstimates.indexOf(dataItem.AdminInfoID);
+                _selectedEstimates.splice(index, 1);
+            }
+
+            if (_selectedEstimates.length > 0) {
+                $("#multi-action").show();
+            }
+            else {
+                $("#multi-action").hide();
+            }
+        });
+    }
+
+    function GetEstimateListParameters() {
+        var result =
+        {
+              userID: $("#UserID").val()
+            , customerID: _customerID
+            , searchFilter: _searchFilter
+            , searchText: $("#EstimateSearchText").val()
+            , showDeleted: _showDeletedEstimates
+            , advancedEnabled: _advancedSearch
+            , advancedEstimateID: $("#AdvancedSearch_EstimateID").val()
+            , advancedEstimateNumber: $("#AdvancedSearch_EstimateNumber").val()
+            , advancedEstimateDescription: $("#AdvancedSearch_Description").val()
+            , advancedWorkOrderNumber: $("#AdvancedSearch_WorkOrderNumber").val()
+            , advancedClaimNumber: $("#AdvancedSearch_ClaimNumber").val()
+            , advancedLicenseNumber: $("#AdvancedSearch_License").val()
+            , advancedVin: $("#AdvancedSearch_Vin").val()
+            , advancedCustomer: $("#AdvancedSearch_Customer").val()
+            , advancedVehicle: $("#AdvancedSearch_Vehicle").val()
+            , advancedStockNumber: $("#AdvancedSearch_StockNumber").val()
+            , showWebEstEstimates: $("#radio-webest").is(":checked")
+            , advancedPhoneNumber: $("#AdvancedSearch_PhoneNumber").val()
+            , advancedInsuranceCompanyName: $("#AdvancedSearch_InsuranceCompanyName").val()
+        };
+        return result;
+    }
+
+    function RefreshEstimateGrid() {
+        $("#estimate-grid").find("table").css("opacity", 0.4);
+
+        var grid = $("#estimate-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+            grid.dataSource.page(1);
+        }
+    }
+
+    function GetKendoIDForEstimate(estimateID) {
+        var returnID = "";
+
+        $("#estimate-grid tr").each(function () {
+            if ($(this).context.cells[0].textContent == estimateID) {
+                returnID = $(this).data("uid");
+            }
+        });
+
+        return returnID;
+    }
+
+    function ImportWebEst(estimateID)
+    {
+        // Replace the button with a spinner
+        var importButton = $("#import-button-" + estimateID);
+
+        var parentRow = importButton.closest("tr");
+
+        var loadingImage = $.parseHTML("<img id='loading-icon-" + estimateID + "' src='/Images/ImportProgress.gif' height='15' />");
+        importButton.replaceWith(loadingImage);
+
+        $.ajax({
+            url: "/Home/StartWebEstImport",
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ "userID": @ViewBag.UserID, "estimateID": estimateID }),
+            success: function (result) {
+                console.log(result);
+
+                var openButton = parentRow.find(".open-button");
+                var idLabel = parentRow.find(".estimate-id-label");
+
+                idLabel.hide();
+                openButton.removeClass("hide-column");
+                openButton.show();
+
+                var resultMessage = $.parseHTML("<p>" + result + "</p>");
+                $("#loading-icon-" + estimateID).replaceWith(resultMessage);
+            }
+        });
+    }
+
+    var _detailsPopupEstimateID = 0;
+
+    function ShowRowPopup(button, estimateID) {
+        _detailsPopupEstimateID = estimateID;
+
+        $("#GridPopupPrint").attr("href", "/@ViewBag.UserID/estimate/" + estimateID + "/make-and-view");
+        $("#GridPopupCopy").attr("href", "/@ViewBag.UserID/estimate/" + estimateID + "/copy-estimate");
+
+        var controlLeft = $(button).parent().offset().left;
+        var controlTop = $(button).parent().offset().top;
+
+        var pageContainer = $("#customerSearchForm");
+        var containerLeft = pageContainer.offset().left;
+        var containerTop = pageContainer.offset().top;
+
+        var optionsPopup = $("#GridPopupOptions");
+
+        optionsPopup.css("left", (controlLeft - containerLeft - (IsMobile() === true ? 30 : 0)) + "px");
+        optionsPopup.css("top", (controlTop - (IsMobile() === true ? 0 : containerTop)) + "px");
+        optionsPopup.show();
+    }
+
+</script>
+
+<div id="GridPopupOptions">
+    <a id="GridPopupPrint" class="button print-button actionbutton do-not-disable" href="" target="@ViewBag.QuickPrintTarget">@Proestimator.Resources.ProStrings.Print</a>
+    <a id="GridPopupCopy" class="button actionbutton do-not-disable" href="">@Proestimator.Resources.ProStrings.Copy</a>
+    <a class="button restore-button actionbutton do-not-disable" onclick="@if (ViewBag.EstDelPermit) {<text>RestoreEstimate(@ViewBag.UserID, _detailsPopupEstimateID)</text>} else {<text>noPermission('Delete/Restore estimates');</text>}">@Proestimator.Resources.ProStrings.Restore</a>
+    <a class="button delete-button do-not-disable" onclick="@if (ViewBag.EstDelPermit) {<text>DeleteEstimate(@ViewBag.UserID, _detailsPopupEstimateID)</text>} else {<text>noPermission('Delete/Restore estimates');</text>}">@Proestimator.Resources.ProStrings.Delete</a>
+</div>
+
+<div id="workDesk">
+    @using (Html.BeginForm("CustomerSearch", "Customer", FormMethod.Post, new { @id = "customerSearchForm", @class = "container" }))
+    {
+        @Html.HiddenFor(o => o.UserID)
+
+        <input type="hidden" id="redirectData" name="redirectDataField" />
+
+        @* Show contract reminders *@
+        if (!string.IsNullOrEmpty(Model.InvoiceReminder))
+        {
+            <div class="message-area">
+                <div class="message-wrapper">
+                    <p>@Model.InvoiceReminder</p>
+                    <a class="button nav-btn" href="/@ViewBag.UserID/invoice/customer-invoice">@Proestimator.Resources.ProStrings.MakePayment</a>
+                </div>
+            </div>
+        }
+
+        if (string.IsNullOrEmpty(Model.InvoiceReminder) && !string.IsNullOrEmpty(Model.ContractReminder) && !Model.ShowEarlyRenewal)
+        {
+            <div class="message-area">
+                <div class="message-wrapper">
+                    <p>@Model.ContractReminder</p>
+                    <a class="button nav-btn" href="/@ViewBag.UserID/invoice/pick-contract">@Proestimator.Resources.ProStrings.PickContract</a>
+                </div>
+            </div>
+        }
+
+        if (!Model.ForCustomerSelection)
+        {
+            <ul class="tab">
+                <li id="tabButtonEstimates"><a href="javascript:void(0)" class="button" onclick="ShowEstimateSearch()">@Proestimator.Resources.ProStrings.Estimates</a></li>
+                <li id="tabButtonCustomers"><a href="javascript:void(0)" class="button" onclick="ShowCustomerSearch()">@Proestimator.Resources.ProStrings.Customers</a></li>
+            </ul>
+        }
+
+        <div class="@(Model.ForCustomerSelection ? "" : "tabcontent") container">
+            <div id="CustomerSearchContainer" style="padding-top: 20px;">
+                <div class="half-or-whole-container">
+                    @* The search box*@
+                    <div class="field-wrapper">
+                        @if (Model.ForCustomerSelection)
+                        {
+                            <h1>@Proestimator.Resources.ProStrings.SearchForExistingCustomer</h1>
+                        }
+
+                        <input autocomplete="off" class="col" id="SearchText" name="SearchText" placeholder="@Proestimator.Resources.ProStrings.SearchCustomers" type="text" value="">                        
+                    </div>
+
+                    <div class="field-wrapper">
+                        <input class="button col estimate-search-button sm_4_4 md_push_05_8 md_2_8 customer-button-search do-not-disable" name="search" type="button" value="@Proestimator.Resources.ProStrings.Search" />
+                        <input class="button col estimate-search-button sm_4_4 md_push_05_8 md_2_8 customer-button-clear do-not-disable" type="button" name="search" value="@Proestimator.Resources.ProStrings.ClearSearch" />
+
+                        <div style="font-size: small; padding: 5px; float: left; margin-top: 3px;">
+                            <label style="float: left;">
+                                <input id="customer-radio-active" class="CustomerRadioActiveOrDelete" name="CustomerActiveOrDelete" type="radio" checked />
+                                @Proestimator.Resources.ProStrings.EstimateStatus_Active
+                            </label>
+
+                            <label style="float: left; margin-left: 10px;">
+                                <input id="customer-radio-deleted" class="CustomerRadioActiveOrDelete" name="CustomerActiveOrDelete" type="radio" />
+                                @Proestimator.Resources.ProStrings.EstimateStatus_Deleted
+                            </label>
+
+                            <label style="float: left; margin-left: 10px;">
+                                <a href="~/Files/Instructions/Saved Customer List.pdf" target="_blank" style="color: black; font-size: small;">
+                                    <img src="~/Images/help.png" width="20" height="20" style="margin-top: -2px;" />
+                                </a>
+                            </label>
+                        </div>
+                    </div>
+
+                    @if (Model.ForCustomerSelection)
+                    {
+                        <div class="field-wrapper CustomerDetails" style="display: none;">
+                            <div style="font-size: small; padding: 5px; float: left; margin-top: 3px;">
+                                <input id="SelectOrSaveButton" class="button col save-buttons" type="button" value="@Proestimator.Resources.ProStrings.Select" />
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="container" style="padding-top: 20px;">
+
+                    <div>
+                        <div id="customer-grid-container" class="datagrid">
+                            @(Html.Kendo().Grid<CustomerSearchResultVM>()
+                            .Name("customer-grid")
+                            .Columns(columns =>
+                            {
+                                columns.Bound(item => item.CustomerID).Hidden();
+
+                                columns.Bound(item => item.FirstName).Encoded(false).Title(@Proestimator.Resources.ProStrings.FirstName);
+                                columns.Bound(item => item.LastName).Encoded(false).Title(@Proestimator.Resources.ProStrings.LastName);
+                                columns.Bound(item => item.PhoneNumber).Encoded(false).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.PhoneNumber);
+                                columns.Bound(item => item.EmailAddress).Encoded(false).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.EmailAddress);
+                                columns.Bound(item => item.BusinessName).Encoded(false).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.BusinessName);
+                                columns.Bound(item => item.Address).Encoded(false).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.Address);
+                                columns.Bound(item => item.ZipCode).Encoded(false).Title(@Proestimator.Resources.ProStrings.ZipCode);
+
+                                columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<a class='button restore-customer-button' onclick='RestoreCustomer(#= CustomerID#)'>" + @Proestimator.Resources.ProStrings.Restore + "</a><a class='button delete-customer-button' onclick='DeleteCustomer(#= CustomerID#)'>" + @Proestimator.Resources.ProStrings.Delete + "</a>").Width(75).Title("");
+
+                                columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<input type='checkbox' class='checkbox' />").Width(30);
+                            })
+                            .Sortable()
+                            .Selectable()
+                            .Pageable(pageable => pageable
+                                .Refresh(false)
+                                .ButtonCount(8)
+                            )
+                            .Events(events => events
+                                .DataBound("CustomerGridDataChanged")
+                                .Change("CustomerGridLineSelectionChanged")
+                            )
+                            .DataSource(dataSource => dataSource
+                                .Ajax()
+                                .ServerOperation(false)
+                                .Sort(sort => sort.Add("LastView").Descending())
+                                .Read(read => read.Action("GetCustomerSearch", "Customer").Data("GetCustomerSearchParameters"))
+                                .PageSize(@Model.ForCustomerSelection ? 20 : 10)
+                            )
+                            )
+                        </div>
+
+                        <div id="customer-multi-action" style="text-align: right; padding-top: 15px; padding-bottom: 30px; display: none; cursor: pointer;">
+                            <a class="button" id="btnRestoreSelectedCustomers">@Proestimator.Resources.ProStrings.RestoreSelectedCustomers</a>
+                            <a class="button" id="btnDeleteSelectedCustomers">@Proestimator.Resources.ProStrings.DeleteSelectedCustomers</a>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="CustomerDetails" style="display: none;">
+
+                    @* The selected Customer summary*@
+                    <div class="container" style="padding-top: 40px;">
+
+                        <div id="customerField" class="half-container">
+
+                            <fieldset id="customerFieldSet">
+
+                                <div class="field-wrapper-half">
+                                    <label class="inputLabel field-label-half">* @Proestimator.Resources.ProStrings.FirstName</label>
+                                    <div class="field-control-half">
+                                        <input type="text" id="FirstName" />
+                                    </div>
+                                </div>
+
+                                <div class="field-wrapper-half">
+                                    <label class="inputLabel field-label-half">* @Proestimator.Resources.ProStrings.LastName</label>
+                                    <div class="field-control-half">
+                                        <input type="text" id="LastName" />
+                                    </div>
+                                </div>
+
+                                <div class="field-wrapper-half">
+                                    <label class="inputLabel field-label-half">* @Proestimator.Resources.ProStrings.Email</label>
+                                    <div class="field-control-half">
+                                        <input type="text" id="EmailAddress" />
+                                    </div>
+                                </div>
+
+                                <div class="customer-details-wrapper">
+
+                                    <div class="field-wrapper-half">
+                                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.SecondaryEmail</label>
+                                        <div class="field-control-half">
+                                            <input type="text" id="EmailAddress2" />
+                                        </div>
+                                    </div>
+
+                                    @* Phone 1 *@
+                                    <div class="field-wrapper-half">
+                                        <label class="inputLabel field-label-half">* @Proestimator.Resources.ProStrings.Phone 1</label>
+                                        <div class="field-control-half">
+                                            <input type="tel" class="phone" id="Phone1" />
+                                        </div>
+                                    </div>
+
+                                    <div class="field-wrapper-half">
+                                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Extension</label>
+                                        <div class="field-control-half">
+                                            <input type="text" id="Extension1" />
+                                        </div>
+                                    </div>
+
+                                    <div class="field-wrapper-half">
+                                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Phone 1 @Proestimator.Resources.ProStrings.Type</label>
+                                        <div class="field-control-half">
+                                            @Html.DropDownList("PhoneType1", Model.PhoneTypes)
+                                        </div>
+                                    </div>
+
+                                    <div class="field-wrapper-half">
+                                        <label class="inputLabel field-label-half"></label>
+                                        <div class="field-control-half">
+                                            <input type="text" style="opacity: 0;" />
+                                        </div>
+                                    </div>
+
+                                    @* Phone 2 *@
+                                    <div class="field-wrapper-half">
+                                        <label class="inputLabel field-label-half">* @Proestimator.Resources.ProStrings.Phone 2</label>
+                                        <div class="field-control-half">
+                                            <input type="tel" class="phone" id="Phone2" />
+                                        </div>
+                                    </div>
+
+                                    <div class="field-wrapper-half">
+                                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Extension</label>
+                                        <div class="field-control-half">
+                                            <input type="text" id="Extension2" />
+                                        </div>
+                                    </div>
+
+                                    <div class="field-wrapper-half">
+                                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Phone 2 @Proestimator.Resources.ProStrings.Type</label>
+                                        <div class="field-control-half">
+                                            @Html.DropDownList("PhoneType2", Model.PhoneTypes)
+                                        </div>
+                                    </div>
+
+                                    <div class="field-wrapper-half">
+                                        <label class="inputLabel field-label-half"></label>
+                                        <div class="field-control-half">
+                                            <input type="text" style="opacity: 0;" />
+                                        </div>
+                                    </div>
+
+                                    @* Phone 3 *@
+                                    <div class="field-wrapper-half">
+                                        <label class="inputLabel field-label-half">* @Proestimator.Resources.ProStrings.Phone 3</label>
+                                        <div class="field-control-half">
+                                            <input type="tel" class="phone" id="Phone3" />
+                                        </div>
+                                    </div>
+
+                                    <div class="field-wrapper-half">
+                                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Extension</label>
+                                        <div class="field-control-half">
+                                            <input type="text" id="Extension3" />
+                                        </div>
+                                    </div>
+
+                                    <div class="field-wrapper-half">
+                                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Phone 3 @Proestimator.Resources.ProStrings.Type</label>
+                                        <div class="field-control-half">
+                                            @Html.DropDownList("PhoneType3", Model.PhoneTypes)
+                                        </div>
+                                    </div>
+
+                                    <div class="field-wrapper-half">
+                                        <label class="inputLabel field-label-half"></label>
+                                        <div class="field-control-half">
+                                            <input type="text" style="opacity: 0;" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </fieldset>
+
+                        </div>
+
+                        @* Part 2. Address fields  *@
+                        <div id="customerField" class="half-container">
+
+                            <fieldset id="customerFieldSet">
+
+                                <div class="field-wrapper">
+                                    <label class="inputLabel field-label">* @Proestimator.Resources.ProStrings.BusinessName</label>
+                                    <div class="field-control">
+                                        <input type="text" id="BusinessName" />
+                                    </div>
+                                </div>
+
+                                <div class="field-wrapper-half">
+                                    <label class="inputLabel field-label-half">* @Proestimator.Resources.ProStrings.Address1</label>
+                                    <div class="field-control-half">
+                                        <input type="text" id="Address1" />
+                                    </div>
+                                </div>
+
+                                <div class="field-wrapper-half">
+                                    <label class="inputLabel field-label-half">* @Proestimator.Resources.ProStrings.Address2</label>
+                                    <div class="field-control-half">
+                                        <input type="text" id="Address2" />
+                                    </div>
+                                </div>
+
+                                <div class="field-wrapper-half">
+                                    <label class="inputLabel field-label-half">* @Proestimator.Resources.ProStrings.City</label>
+                                    <div class="field-control-half">
+                                        <input type="text" id="City" />
+                                    </div>
+                                </div>
+
+                                <div class="field-wrapper-half">
+                                    <label class="inputLabel field-label-half">* @Proestimator.Resources.ProStrings.State</label>
+                                    <div class="field-control-half">
+                                        @Html.DropDownListFor(model => model.State, Model.States)
+                                    </div>
+                                </div>
+
+                                <div class="field-wrapper-half">
+                                    <label class="inputLabel field-label-half">* @Proestimator.Resources.ProStrings.Zip</label>
+                                    <div class="field-control-half">
+                                        <input type="text" id="ZipCode" />
+                                    </div>
+                                </div>
+
+                                <div class="field-wrapper-half">
+                                    <label class="inputLabel field-label-half">* @Proestimator.Resources.ProStrings.TimeZone</label>
+                                    <div class="field-control-half">
+                                        <select id="TimeZone">
+                                            <option>Eastern</option>
+                                            <option>Central</option>
+                                            <option>Mountain</option>
+                                            <option>Pacific</option>
+                                            <option>Alaska</option>
+                                            <option>Hawaii</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                            </fieldset>
+
+                        </div>
+                    </div>
+
+                    <div class="container" style="padding-bottom: 20px;">
+                        <div>
+                            <div class="half-or-whole-container">
+                                <div class="field-wrapper">                                    
+                                    @if (!Model.ForCustomerSelection)
+                                    {
+                                        <input id="userSubmitButton" class="button col estimate-search-button sm_4_4 md_push_05_8 md_2_8 do-not-disable" type="button" value="@Proestimator.Resources.ProStrings.SaveCustomer" />
+                                        <input id="ButtonCustomerDetails" class="button col estimate-search-button sm_4_4 md_push_05_8 md_2_8 do-not-disable" type="button" value="@Proestimator.Resources.ProStrings.ViewDetails" />
+                                        <a class="button col estimate-search-button sm_4_4 md_push_05_8 md_2_8 CreateNewEstimateButton do-not-disable">@Proestimator.Resources.ProStrings.CreateNewEstimate</a>
+                                    }
+
+                                    @*The submitButton is clicked when the user navigates away from the page.*@
+                                    <input id="submitButton" type="submit" value="Save Customer" style="display: none;" />
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            @if (Model.ForCustomerSelection == false)
+            {
+                @* The Estimates for the selected customer *@
+                <div id="EstimatesContainer" class="container" style="padding-top: 20px;">
+
+                    <div>                       
+
+                        <div id="CustomerEstimateSearch" style="display: none;">
+                            <div class="half-or-whole-container">
+
+                                @* The search box*@
+                                <div class="field-wrapper">
+                                    <input autocomplete="off" class="col" id="EstimateSearchText" name="EstimateSearchText" placeholder="@Proestimator.Resources.ProStrings.SearchEstimates" type="text" value="">                                    
+                                </div>
+
+                                <div class="field-wrapper">
+                                    <input class="button col estimate-search-button sm_4_4 md_push_05_8 md_2_8 button-search do-not-disable" name="search" type="button" value="@Proestimator.Resources.ProStrings.Search" />
+                                    <input class="button col estimate-search-button sm_4_4 md_push_05_8 md_2_8 button-clear do-not-disable" type="button" name="search" value="@Proestimator.Resources.ProStrings.ClearSearch" />
+                                    <input class="button col estimate-search-button sm_4_4 md_push_05_8 md_2_8 button-advanced do-not-disable" type="button" name="search" value="@Proestimator.Resources.ProStrings.Advanced" />
+
+                                    @* Advanced Search Fields*@
+                                <div class="advanced-search-area" style="display: none;" )">
+
+                                    <div class="field-control">
+                                        <div class="field-wrapper">
+                                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.EstimateID</label>
+                                            <div class="field-control"><input id="AdvancedSearch_EstimateID" name="AdvancedSearch_EstimateID" type="text" value="" autocomplete="off"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="field-control">
+                                        <div class="field-wrapper">
+                                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.EstimateNum</label>
+                                            <div class="field-control"><input id="AdvancedSearch_EstimateNumber" name="AdvancedSearch_EstimateNumber" type="text" value="" autocomplete="off"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="field-control">
+                                        <div class="field-wrapper">
+                                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Description</label>
+                                            <div class="field-control"><input id="AdvancedSearch_Description" name="AdvancedSearch_Description" type="text" value="" autocomplete="off"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="field-control">
+                                        <div class="field-wrapper">
+                                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Customer</label>
+                                            <div class="field-control"><input id="AdvancedSearch_Customer" name="AdvancedSearch_Customer" type="text" value="" autocomplete="off"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="field-control">
+                                        <div class="field-wrapper">
+                                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Vehicle</label>
+                                            <div class="field-control"><input id="AdvancedSearch_Vehicle" name="AdvancedSearch_Vehicle" type="text" value="" autocomplete="off"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="field-control">
+                                        <div class="field-wrapper">
+                                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.ClaimNumber</label>
+                                            <div class="field-control"><input id="AdvancedSearch_ClaimNumber" name="AdvancedSearch_ClaimNumber" type="text" value="" autocomplete="off"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="field-control">
+                                        <div class="field-wrapper">
+                                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.RONumber</label>
+                                            <div class="field-control"><input id="AdvancedSearch_WorkOrderNumber" name="AdvancedSearch_WorkOrderNumber" type="text" value="" autocomplete="off"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="field-control">
+                                        <div class="field-wrapper">
+                                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.LicenseNo</label>
+                                            <div class="field-control"><input id="AdvancedSearch_License" name="AdvancedSearch_License" type="text" value="" autocomplete="off"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="field-control">
+                                        <div class="field-wrapper">
+                                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.VIN</label>
+                                            <div class="field-control"><input id="AdvancedSearch_Vin" name="AdvancedSearch_Vin" type="text" value="" autocomplete="off"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="field-control">
+                                        <div class="field-wrapper">
+                                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.StockNumber</label>
+                                            <div class="field-control"><input id="AdvancedSearch_StockNumber" name="AdvancedSearch_StockNumber" type="text" value="" autocomplete="off"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="field-control">
+                                        <div class="field-wrapper">
+                                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Phone #</label>
+                                            <div class="field-control"><input id="AdvancedSearch_PhoneNumber" name="AdvancedSearch_PhoneNumber" type="tel" autocomplete="off" class="phone"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="field-control">
+                                        <div class="field-wrapper">
+                                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.InsuranceCompanyName</label>
+                                            <div class="field-control"><input id="AdvancedSearch_InsuranceCompanyName" name="AdvancedSearch_InsuranceCompanyName" type="text" value="" autocomplete="off"></div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                    <div class="field-control">
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="half-or-whole-container">
+                                @* The search filters*@
+
+                                <div>
+                                    <div class="sm_hide md_display" style="margin: 0px auto;">
+                                        <a id="filter-0" class="openEstimate filter-button" onclick="searchFilter(0);" href="#">@Proestimator.Resources.ProStrings.OpenEstimate_Filter_All</a>
+                                        <a id="filter-5" class="openEstimate filter-button" onclick="searchFilter(5);" href="#">@Proestimator.Resources.ProStrings.OpenEstimate_Filter_Recent</a>
+                                        <a id="filter-1" class="openEstimate filter-button" onclick="searchFilter(1);" href="#">@Proestimator.Resources.ProStrings.OpenEstimate_Filter_Open</a>
+                                    </div>
+
+                                    <div class="sm_hide md_display" style="clear: both;">
+                                        <a id="filter-2" class="openEstimate filter-button" onclick="searchFilter(2);" href="#">@Proestimator.Resources.ProStrings.OpenEstimate_Filter_OpenRepairOrders</a>
+                                        <a id="filter-3" class="openEstimate filter-button" onclick="searchFilter(3);" href="#">@Proestimator.Resources.ProStrings.OpenEstimate_Filter_ClosedRepairOrders</a>
+                                        <a id="filter-4" class="openEstimate filter-button" onclick="searchFilter(4);" href="#">@Proestimator.Resources.ProStrings.OpenEstimate_Filter_Totaled</a>
+                                    </div>
+
+                                    <div style="clear: both; font-size: small; padding: 5px;">
+                                        <label style="float: left;">
+                                            <input id="radio-active" class="RadioActiveOrDelete" name="ActiveOrDelete" type="radio" checked />
+                                            @Proestimator.Resources.ProStrings.EstimateStatus_Active
+                                        </label>
+
+                                        <label style="float: left; margin-left: 10px;">
+                                            <input id="radio-deleted" class="RadioActiveOrDelete" name="ActiveOrDelete" type="radio" />
+                                            @Proestimator.Resources.ProStrings.EstimateStatus_Deleted
+                                        </label>
+
+                                        @if (Model.ConversionComplete)
+                                        {
+                                            <label style="float: left; margin-left: 10px;">
+                                                <input id="radio-webest" class="RadioActiveOrDelete" name="ActiveOrDelete" type="radio" />
+                                                <b class="button button-green nav-btn">  Estimates from  Web-Est </b>
+                                            </label>
+
+                                            <a id="ImportHelpLink" href="~/Files/Instructions/Importing Web-Est Estimates into Pro-Estimator.pdf" target="_blank" style="color: black; font-size: small; float: left; margin-left: 10px; display: none;">
+                                                <img src="~/Images/help.png" width="20" height="20" style="margin-top: -2px;" />
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="col md_hide" style="text-align: center; padding-top: 10px; margin-left: 0px; width: 100%;">
+                                    <select onchange="searchFilter(this.options[this.selectedIndex].value);" style="margin-bottom: 0px; margin-top: 5px; margin-bottom: 15px;">
+                                        <option value="0">@Proestimator.Resources.ProStrings.OpenEstimate_Filter_AllLong</option>
+                                        <option value="5">@Proestimator.Resources.ProStrings.OpenEstimate_Filter_Recent</option>
+                                        <option value="1">@Proestimator.Resources.ProStrings.OpenEstimate_Filter_Open</option>
+                                        <option value="2">@Proestimator.Resources.ProStrings.OpenEstimate_Filter_OpenRepairOrders</option>
+                                        <option value="3">@Proestimator.Resources.ProStrings.OpenEstimate_Filter_ClosedRepairOrders</option>
+                                        <option value="4">@Proestimator.Resources.ProStrings.OpenEstimate_Filter_Totaled</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                        
+                    </div>
+
+                    <div id="estimateTableContainer">
+                        <div class="container">
+                            <div style="padding-top: 10px; width: auto; text-align: center">
+                                <a href="#" style="display: inline-block; font-weight: bold;color: red; font-size:0.8em; text-decoration: underline;" onclick="SubmitAndRedirect('/@ViewBag.UserID/support/0');">
+                                    <img src="~/Images/help.png" width="20" height="20" style="margin: 2px auto;" />How to create an estimate
+                                </a>
+                            </div>
+                            <div class="hide-small">
+                                <a href="#" id="ShowHideLink" style="font-weight: bold;color: black; font-size:0.8em; text-decoration: underline;">@Proestimator.Resources.ProStrings.ShowHideGridColumn</a>
+                            </div>
+                            @{
+                                if (culture == "es")
+                                {
+                                    <div id="cblist" class="menu" style="display: none;position: absolute;z-index: 1000;background-color: #1d69a6;color: #FFF; width:210px;margin-top: 3px"></div>
+                                }
+                                else
+                                {
+                                    <div id="cblist" class="menu" style="display: none;position: absolute;z-index: 1000;background-color: #1d69a6;color: #FFF; width:150px;margin-top: 3px"></div>
+                                }
+                            }
+                            
+                            <div>
+
+                                <div class="datagrid">
+                                    @(Html.Kendo().Grid<EstimateInfoVM>()
+                                    .Name("estimate-grid")
+                                    .Columns(columns =>
+                                    {
+                                        columns.Bound(item => item.AdminInfoID).Hidden();
+
+                                        columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<a class='button open-button' href='/" + ViewBag.UserID + "/estimate/#= AdminInfoID#/customer'>#=AdminInfoID#</a><span class='estimate-id-label'>#= AdminInfoID#</a>").Title(@Proestimator.Resources.ProStrings.Open);
+                                        columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("  " + "# if (ImageCount>0) { #" + "<img src=\"/Images/camera.png\" style=\"max-width: 30px!important; \" />" + "# } #").HeaderHtmlAttributes(new { @class = "hide-med" }).HtmlAttributes(new { @class = "hide-med" });
+                                        columns.Bound(item => item.Name).MinScreenWidth(200).HeaderHtmlAttributes(new { @class = "customer-column" }).HtmlAttributes(new { @class = "customer-column" }).Title(@Proestimator.Resources.ProStrings.Name);
+                                        columns.Bound(item => item.Vehicle).MinScreenWidth(200).Title(@Proestimator.Resources.ProStrings.Vehicle);
+                                        columns.Bound(item => item.BusinessName).HeaderHtmlAttributes(new { @class = "hide-small customer-column" }).HtmlAttributes(new { @class = "hide-small customer-column" }).Title(@Proestimator.Resources.ProStrings.BusinessName);
+                                        columns.Bound(item => item.EstimateNumber).Width(50).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title("Estimate #");
+                                        columns.Bound(item => item.Description).MinScreenWidth(250).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.Description);
+                                        columns.Bound(item => item.TotalCost).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(50).Title(@Proestimator.Resources.ProStrings.TotalCost);
+                                        columns.Bound(item => item.Status).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(100).Title(@Proestimator.Resources.ProStrings.Status);
+                                        columns.Bound(item => item.RepairOrderNumber).HeaderHtmlAttributes(new { @class = "hide-small", style="white-space:normal" }).HtmlAttributes(new { @class = "hide-small" }).Width(70).Title(@Proestimator.Resources.ProStrings.RONumber);
+                                        columns.Bound(item => item.DateCreated).Format("{0:MM/dd/yyyy}").HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(50).Title(@Proestimator.Resources.ProStrings.InspectionDate);
+                                        columns.Bound(item => item.LastView).Format("{0:MM/dd/yyyy}").HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(50).Title(@Proestimator.Resources.ProStrings.LastView);
+                                        columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<a id='import-button-#= AdminInfoID#' class='button imported-#= Imported#' onclick='ImportWebEst(#= AdminInfoID#)'>Import</a>").Title("").Width(75).HeaderHtmlAttributes(new { @class = "import-column" }).HtmlAttributes(new { @class = "import-column" }).Title(@Proestimator.Resources.ProStrings.Import);
+                                        columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<a class='button import-hide' onclick='ShowRowPopup(this, #= AdminInfoID#)'>...</a>").Title("").Width(25);
+                                        columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<input type='checkbox' class='checkbox' />").Width(20);
+                                    })
+                                    .Sortable()
+                                    .Pageable(pageable => pageable
+                                        .Refresh(false)
+                                        .ButtonCount(8)
+                                    )
+                                    .Events(events => events
+                                        .DataBound("EstimateGridDataChanged")
+                        
+                                    )
+                                    .DataSource(dataSource => dataSource
+                                        .Ajax()
+                                        .ServerOperation(false)
+                                        .Sort(sort => sort.Add("LastView").Descending())
+                                        .Read(read => read.Action("GetEstimateSearch", "Home").Data("GetEstimateListParameters"))
+                                        .PageSize(20)
+                                    )
+                                )
+                                </div>
+
+                                <div id="multi-action" style="text-align: right; padding-top: 15px; padding-bottom: 30px; display: none; cursor: pointer;">
+                                    <a class="button" id="btnRestoreSelectedEstimates">@Proestimator.Resources.ProStrings.RestoreSelectedEstimates</a>
+                                    <a class="button" id="btnDeleteSelectedEstimates">@Proestimator.Resources.ProStrings.DeleteSelectedEstimates</a>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+       
+        </div>
+        }
+    </div>

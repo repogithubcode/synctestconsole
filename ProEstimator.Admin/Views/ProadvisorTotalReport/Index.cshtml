@@ -1,0 +1,263 @@
+﻿@model ProEstimator.Admin.ViewModel.ProadvisorTotalVM
+
+@using ProEstimator.Admin.ViewModel;
+
+@{
+    ViewBag.Title = "Administration - Pro-Advisor Total Report";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<style>
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .padd-top {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    .header {
+        padding-bottom: 15px;
+        border-bottom: 1px solid black;
+        width: 100%;
+    }
+
+    .page-header {
+        border-bottom: 0px;
+        padding-top: 0px;
+        margin-top: 0px;
+    }
+
+    .details-form {
+        padding-top: 15px;
+        padding-bottom: 15px;
+        width: 100%;
+    }
+
+        .details-form:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        .details-form td {
+            padding: 1px;
+        }
+
+    .details-column {
+        float: left;
+        width: 50%;
+    }
+
+    label {
+        font-weight: normal;
+    }
+
+    .save-container {
+        text-align: center;
+        padding: 10px;
+        border-top: 1px solid black;
+    }
+
+        .save-container input {
+            padding: 10px;
+            width: 150px;
+            font-size: 1.1em;
+        }
+
+    .new-confirm {
+        text-align: right;
+        display: none;
+    }
+
+    .checkbox-row {
+        padding-bottom: 20px;
+    }
+
+        .checkbox-row label {
+            padding-right: 20px;
+        }
+</style>
+
+<script>
+
+    function GetSearchParameters() {
+        return {
+            loginIDFilter: $("#loginID").val(), organizationFilter: $("#companyName").val(), salesrepFilter: $("#SalesRepDDL option:selected").val(),
+            rangeStartFilter: $("#RangeStart").val(), rangeEndFilter: $("#RangeEnd").val()
+        };
+    }
+
+    $(document).ready(function () {
+
+        // Set up calendar controls
+        $("#RangeStart").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        // Set up calendar controls
+        $("#RangeEnd").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        var currentDate = new Date();
+        var dateChange = new Date();
+        dateChange.setDate(currentDate.getDate() - 7)
+
+        // RangeStart
+        var rangeStart = GetDayMonthYear(dateChange);
+        $("#RangeStart").val(rangeStart);
+
+        // RangeEnd
+        dateChange = new Date();
+        var rangeEnd = GetDayMonthYear(dateChange);
+        $("#RangeEnd").val(rangeEnd);
+
+        // Do the acount id search
+        $("#btnProAdvisorEstimateTotalSearch").click(function () {
+
+            // Refresh the history grid
+            var grid = $("#pro-advisor-estimate-total-per-customer-grid").data("kendoGrid");
+
+            if (grid) {
+                grid.dataSource.read();
+            }
+        });
+
+        $("#filter").on("input", function (e) {
+
+            var grid = $("#pro-advisor-estimate-total-per-customer-grid").data("kendoGrid");
+            var valuetoFilter = e.target.value;
+
+            var filter = KendogridSearchFilter(grid, valuetoFilter);
+
+            grid.dataSource.filter(filter);
+        });
+
+        function GetDayMonthYear(dateChange) {
+            var d = dateChange.getDate();
+            var day = (d < 10) ? '0' + d : d;
+            var m = dateChange.getMonth() + 1;
+            var month = (m < 10) ? '0' + m : m;
+            var yy = dateChange.getYear();
+            var year = (yy < 1000) ? yy + 1900 : yy;
+
+            var dateRange = month + "/" + day + "/" + year;
+
+            return dateRange;
+        }
+
+    });
+
+</script>
+
+<div class="padd-top">
+    <div class="col-lg-8 col-md-7 col-sm-6">
+        <h3>
+            Pro-Advisor Estimate Total
+        </h3>
+    </div>
+
+
+    <form id="UserMaintenance" name="failureLogins">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>Search Criteria</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="container">
+                            <div class="row stackem">
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Login ID</span>
+                                        <input type="text" class="form-control" placeholder="Login ID" aria-describedby="loginID" id="loginID" />
+                                    </div>
+                                    <br />
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Company Name</span>
+                                        <input type="text" class="form-control" placeholder="Company Name" aria-describedby="companyName" id="companyName" />
+                                    </div>
+                                    <br />
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon"><span style="color:red">*</span>Sales Rep#</span>
+                                        @Html.DropDownListFor(model => model.SalesRep, Model.SalesRepDDL, new { @id = "SalesRepDDL", style = "width: 185px;height:32px" })
+                                    </div>
+                                    <br />
+                                </div>
+                            </div>
+                            <div class="row stackem">
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Range Start</span>
+                                        <input type="text" class="input-group-addon" placeholder="Range Start" aria-describedby="RangeStart" id="RangeStart" readonly="true" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">RangeEnd</span>
+                                        <input type="text" class="input-group-addon" placeholder="Range End" aria-describedby="RangeEnd" id="RangeEnd" readonly="true" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-footer">
+                        <p class="pull-left" style="display:none;">
+                            If more than one customer matches the search criteria
+                            you will be provided with a list from which to choose.
+                        </p>
+
+                        <a class="btn btn-default pull-right" href="javascript:void(0);" role="button" id="btnProAdvisorEstimateTotalSearch">Search</a>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="text-align: right;">
+            Search: <input type="text" id="filter" />
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div id="customer-grid-container" class="datagrid">
+                    @(Html.Kendo().Grid<ProadvisorTotalVM>()
+                        .Name("pro-advisor-estimate-total-per-customer-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.ID).Title("Id").Hidden();
+                            columns.Bound(item => item.LoginId).Title("LoginId");
+                            columns.Bound(item => item.CompanyName).Title("Company Name");
+                            columns.Bound(item => item.SalesRep).Title("Sales Rep");
+                            columns.Bound(item => item.ProAdvisorEstimateTotal).Format("{0:c2}").Title("Pro-Advisor Total");
+                            columns.Bound(item => item.EstimationDate).Title("Estimation Date");
+                        })
+                        .Sortable()
+                        .Selectable()
+                        .Pageable()
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Read(read => read.Action("GetProadvisorTotalReport", "ProadvisorTotalReport").Data("GetSearchParameters"))
+                            .PageSize(30)
+                        )
+                    )
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+

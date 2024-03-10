@@ -1,0 +1,196 @@
+﻿@model ProEstimator.Admin.ViewModel.Payment.StripePaymentReportVM
+
+@using ProEstimator.Admin.ViewModel.Payment;
+
+@{
+    ViewBag.Title = "Administration - Stripe Payment Report";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<style>
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .padd-top {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    .k-grid td {
+        white-space: normal;
+    }
+
+    .stackem {
+        margin-bottom: 5px;
+    }
+</style>
+
+<script>
+
+    function GetSearchParameters() {
+        return {
+            startDateFilter: $("#startDate").val(), endDateFilter: $("#endDate").val()
+        };
+    }
+
+    $(document).ready(function () {
+
+        // Set up calendar controls
+        $("#startDate").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        // Set up calendar controls
+        $("#endDate").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        // Do the acount id search
+        $("#btnSearchPayment").click(function () {
+
+            // Refresh the history grid
+            var grid = $("#paymentreport-grid").data("kendoGrid");
+
+            if (grid) {
+                grid.dataSource.read();
+            }
+        });
+
+        $("#filter").on("input", function (e) {
+
+            var grid = $("#paymentreport-grid").data("kendoGrid");
+
+            //var filter = KendogridSearchFilter(grid, e.target.value);
+            //console.log(filter);
+
+            var filter = { logic: "or", filters: [] };
+
+            filter.filters.push({
+                field: "LoginIDString",
+                operator: "contains",
+                value: e.target.value
+            })
+            console.log(filter);
+
+            var grid = $("#paymentreport-grid").data("kendoGrid");
+            console.log(grid);
+            grid.dataSource.filter(filter);
+        });
+
+        $("#btnExcelExport").click(function () {
+
+            var startDateFilter = $("#startDate").val();
+            var endDateFilter = $("#endDate").val()
+
+            var win = window.open("/StripePaymentReport/DownloadData/?startDateFilter=" + startDateFilter + "&endDateFilter=" + endDateFilter, "_blank");
+
+            if (win) {
+                //Browser has allowed it to be opened
+                win.focus();
+            } else {
+                //Browser has blocked it
+                alert("Your browser blocked the site from opening a new tab, please allow popups for this site.");
+            }
+        });
+    });
+
+</script>
+
+<div class="row padd-top">
+    <div class="col-lg-8 col-md-7 col-sm-6">
+        <h3>
+            Payment Report
+        </h3>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>Search Criteria</h4>
+                </div>
+                <div class="panel-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="input-group">
+                                    <span class="input-group-addon">Start Date</span>
+                                    <input type="text" class="input-group-addon" placeholder="Start Date" aria-describedby="startDate" id="startDate" readonly="true" value="@DateTime.Now.AddDays(-1).ToShortDateString()" />
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="input-group">
+                                    <span class="input-group-addon">End Date</span>
+                                    <input type="text" class="input-group-addon" placeholder="End Date" aria-describedby="endDate" id="endDate" readonly="true" value="@DateTime.Now.AddDays(-1).ToShortDateString()" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <div class="col-lg-10 pull-left">
+
+                    </div>
+                    <div class="col-lg-2 pull-left">
+                        <a class="btn btn-default pull-right" href="javascript:void(0);" style="width:95% !important" id="btnSearchPayment" role="button">Search</a>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4>Stripe Payments</h4>
+        </div>
+        <div class="col-lg-8 col-md-7 col-sm-6" style="margin-top:5px">
+            Login ID Search: <input type="text" id="filter" />
+        </div>
+        <div style="text-align: right;margin-top:5px; margin-right:10px;">
+            <div class="dt-buttons ui basic buttons"><button id="btnExcelExport" name="btnExcelExport" class="ui button buttons-excel buttons-html5" tabindex="0" aria-controls="cc-wei-table"><span class="ui-button-text">Download Excel</span></button></div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div id="paymentreport-grid-container" class="datagrid">
+                    @(Html.Kendo().Grid<StripePaymentReportVM>()
+                                .Name("paymentreport-grid")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(item => item.LoginIDString).Title("Login ID");
+                                    columns.Bound(item => item.Organization).Title("Organization");
+                                    columns.Bound(item => item.Address).Title("Address");
+                                    columns.Bound(item => item.City).Title("City");
+                                    columns.Bound(item => item.State).Title("State");
+                                    columns.Bound(item => item.Zip).Title("Zip");
+                                    columns.Bound(item => item.Date).Title("Date").Format("{0:dd/MM/yyyy hh:mm tt}");
+                                    columns.Bound(item => item.Amount).Title("Amount").Format("{0:c2}");
+                                    columns.Bound(item => item.PaymentNumber).Title("Payment Number");
+                                    columns.Bound(item => item.TermDescription).Title("Term Description");
+                                })
+                                .Sortable()
+                                .Pageable(pageable => pageable
+                                    .Refresh(false)
+                                )
+                                .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .ServerOperation(false)
+                                    .Read(read => read.Action("GetStripePaymentReport", "StripePaymentReport").Data("GetSearchParameters"))
+                                    .PageSize(50)
+                                ))
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+

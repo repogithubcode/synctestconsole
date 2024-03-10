@@ -1,0 +1,189 @@
+﻿@model Proestimator.ViewModel.Customer.CustomerSearchVM
+
+@{
+    var culture = System.Threading.Thread.CurrentThread.CurrentUICulture.Name.ToLowerInvariant();
+}
+
+@using Proestimator.ViewModel
+@using Proestimator.ViewModel.Customer
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_CustomerSearch;
+}
+
+<style>
+    .hide-small {
+    }
+
+    .hide-med {
+    }
+
+    .hide-column {
+        display: none;
+    }
+
+    @@media (max-width: 1400px) {
+        .hide-med {
+            display: none;
+        }
+    }
+
+    @@media (max-width: 700px) {
+        .hide-small {
+            display: none;
+        }
+        .width-small {
+           width:10%;
+        }
+    }
+</style>
+
+<script>
+
+    var _customerID = 0;
+    var _selectedCustomerSearch = "";
+
+    // This is probably too complicated for most users to this turns it off but lets us turn it on easilly, maybe it should be an option somewhere
+    var _optionAllowCustomerEdit = true;
+
+    var _showDeletedCustomers = false;
+    var _selectedCustomers = [];
+
+    var _columnSelections;
+
+    function CustomerGridDataChanged(arg) {
+        // Wire up hilighting the row when hovering.
+        $("#customer-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                var customerID = row.find("td").first().html();
+
+                row.toggleClass("k-state-hover");
+            }
+        );
+    }
+
+    function GetCustomerSearchParameters() {
+        var result =
+        {
+             userID: @ViewBag.UserID
+           , searchText: $("#SearchText").val()
+           , showDeleted: _showDeletedCustomers
+        };
+        return result;
+    }
+
+    function RefreshCustomerGrid() {
+        var grid = $("#customer-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+            grid.dataSource.page(1);
+        }
+    }
+
+    function ClearCustomerFilter() {
+        $("#SearchText").val("");
+    }
+
+    $(document).ready(function () {
+
+        // Prevent the form from submitting when clicking enter
+        $(window).keydown(function (event) {
+            if (event.keyCode == 13) {
+                event.preventDefault();
+                return false;
+            }
+        });
+
+        $(".customer-button-clear").click(function () {
+            ClearCustomerFilter();
+            RefreshCustomerGrid();
+        });
+
+        $(".customer-button-search").click(function () {
+            RefreshCustomerGrid();
+        });
+
+        $("#SearchText").keydown(function (event) {
+            if (event.which == 13) {
+                RefreshCustomerGrid();
+                return false;
+            }
+
+            if (event.which == 27) {
+                ClearCustomerFilter();
+                RefreshCustomerGrid();
+                return false;
+            }
+        });
+    });
+
+    function ShowCustomerSearch() {
+        _searchMode = "@Proestimator.Resources.ProStrings.Customers";
+
+        $("#CustomerSearchContainer").show();
+        $("#tabButtonCustomers").addClass("active");
+        RefreshCustomerGrid();
+    }
+
+    function SelectCustomer(selectedCustomerID) {
+        window.parent.$('#hdnReturnValue').val(selectedCustomerID);
+        window.parent.$("#modal-window").dialog('close');
+    }
+
+</script>
+
+<div id="CustomerSearchContainer">
+    <div class="container">
+        @* The search box*@
+        <div class="half-container">
+            <input autocomplete="off" class="col" id="SearchText" name="SearchText" placeholder="@Proestimator.Resources.ProStrings.SearchCustomers" type="text" value="">
+        </div>
+
+        <div class="half-container">
+            <input class="button col estimate-search-button sm_4_4 md_push_05_8 md_2_8 customer-button-search do-not-disable" name="search" type="button" value="@Proestimator.Resources.ProStrings.Search" />
+            <input class="button col estimate-search-button sm_4_4 md_push_05_8 md_2_8 customer-button-clear do-not-disable" type="button" name="search" value="@Proestimator.Resources.ProStrings.ClearSearch" />
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="customer-grid-container" class="datagrid">
+            @(Html.Kendo().Grid<CustomerSearchResultVM>()
+                            .Name("customer-grid")
+                            .Columns(columns =>
+                            {
+                                columns.Bound(item => item.CustomerID).Hidden();
+
+                                columns.Bound(item => item.FirstName).HeaderHtmlAttributes(new { @class = "width-small" }).HtmlAttributes(new { @class = "width-small" }).Encoded(false).Title(@Proestimator.Resources.ProStrings.FirstName);
+                                columns.Bound(item => item.LastName).HeaderHtmlAttributes(new { @class = "width-small" }).HtmlAttributes(new { @class = "width-small" }).Encoded(false).Title(@Proestimator.Resources.ProStrings.LastName);
+                                columns.Bound(item => item.PhoneNumber).Encoded(false).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.PhoneNumber);
+                                columns.Bound(item => item.EmailAddress).Encoded(false).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.EmailAddress);
+                                columns.Bound(item => item.BusinessName).Encoded(false).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.BusinessName);
+                                columns.Bound(item => item.Address).Encoded(false).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.Address);
+                                columns.Bound(item => item.ZipCode).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Encoded(false).Title(@Proestimator.Resources.ProStrings.ZipCode);
+                                columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<a class='button' onclick='SelectCustomer(#= CustomerID#)'>" + @Proestimator.Resources.ProStrings.Select + "</a>").Width(75).Title("");
+                            })
+                            .Sortable()
+                            .Selectable()
+                            .Pageable(pageable => pageable
+                                .Refresh(false)
+                                .ButtonCount(8)
+                            )
+                            .Events(events => events
+                                .DataBound("CustomerGridDataChanged")
+                            )
+                            .DataSource(dataSource => dataSource
+                                .Ajax()
+                                .ServerOperation(false)
+                                .Sort(sort => sort.Add("FirstName"))
+                                .Read(read => read.Action("GetCustomerSearch", "Customer").Data("GetCustomerSearchParameters"))
+                                .PageSize(20)
+                            )
+            )
+        </div>
+    </div>
+
+</div>
+

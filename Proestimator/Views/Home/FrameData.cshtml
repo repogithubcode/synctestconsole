@@ -1,0 +1,165 @@
+﻿@model Proestimator.ViewModel.FrameDataVM
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_FrameData;
+}
+
+<script type="text/javascript">
+
+    function LoadImage(name) {
+        $("#hiddenSelectedImage").val(name);
+        $("#submitButton").trigger("click");
+    }
+
+    $(document).ready(function () {
+        $("#makeID").change(function () {
+            $.getJSON('@Url.Action("FrameDataGetModels", "Home")', { userID: @ViewBag.UserID, makeID: $("#makeID").val() }, function (data) {
+                var items = "";
+                $.each(data, function (i, item) {
+                    items += "<option value='" + item.Value + "'>" + item.Text + "</option>";
+                });
+                $("#modelID").html(items);
+            });
+        });
+
+        $("#btnPrintImage").click(function () {
+            @if (string.IsNullOrEmpty(Model.ImagePath))
+            {
+                <text>
+                    ShowUserMessage("There is nothing to print. Please pick frame data/JPG again.", true, 4000);
+                </text>
+            }
+            else
+            {
+                <text>
+                    newWin = window.open("");
+                      newWin.document.write("<img src='@Model.ImagePath' style='width: 100%;' />");
+                    newWin.print();
+                    newWin.close();
+                </text>
+            }
+        });
+    });
+</script>
+
+<div id="workDesk" class="page-container">
+
+    @if (Model.ContractDeactivated)
+    {
+        <p>@Proestimator.Resources.ProStrings.FrameDataContractDeactivated</p>
+    }
+    else
+    {
+        using (Html.BeginForm("FrameData", "Home", FormMethod.Post, new { @class = "container" }))
+        {
+            @Html.HiddenFor(model => model.SelectedImage, new { @id = "hiddenSelectedImage" })
+
+            @Html.HiddenFor(model => model.LoginID)
+            @Html.HiddenFor(model => model.EstimateID)
+
+            <div id="formHeader">
+                <div id="formHeadline" class="container">
+                    <h1 id="addPartsHeader">@Proestimator.Resources.ProStrings.FrameDataHeader</h1>
+                    <div class="inlineNote">
+                        @*Please download <a href="http://usa.autodesk.com/design-review/download/">"Image Viewer"</a> to view image after download.  <br>*@
+                        @Proestimator.Resources.ProStrings.FrameDataNote <br>
+                        @Proestimator.Resources.ProStrings.PopUpNote
+
+                        @if (Model.IsTrial)
+                        {
+                            <p style="color: red; font-size: 1.5em;">@Proestimator.Resources.ProStrings.TrialNoteFrame</p>
+                        }
+                    </div>
+                    <br>
+                </div>
+            </div>
+
+            <div id="lgRow" class="container">
+                <div id="searchPartsContainer" class="container">
+                    <fieldset id="customerFieldSet">
+                        <div id="descriptionContainer" class="container">
+                            <div id="searchHeader">@Proestimator.Resources.ProStrings.YearMakeModel</div>
+                            <div id="yearStartContainer" class="col sm_4_4 md_2_8 lg_3_12">
+                                @Html.DropDownListFor(model => model.Year, Model.YearList)
+                            </div>
+                            <div id="yearEndContainer" class="col sm_4_4 md_push_1_8 md_2_8 lg_3_12">
+                                @Html.DropDownListFor(model => model.MakeID, Model.MakeList, new { @id = "makeID" })
+                            </div>
+                            <div id="vehMakeContainer" class="col sm_4_4 md_push_1_8 md_2_8 lg_3_12">
+                                @Html.DropDownListFor(model => model.ModelID, Model.ModelList, new { @id = "modelID" })
+                            </div>
+                            <div id="searchFrameBtnContainer" class="col sm_push_3_4 sm_1_4 lg_push_10_12 lg_2_12">
+                                <input class="button" type="submit" name="Save" id="submitButton" value="@Proestimator.Resources.ProStrings.Search" />
+                                @if (!string.IsNullOrEmpty(Model.ImagePath))
+                                {
+                                    <input class="button do-not-disable" type="button" name="Save" id="btnPrintImage" value="@Proestimator.Resources.ProStrings.Print" />
+                                }
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+
+            if (!string.IsNullOrEmpty(Model.ImagePath))
+            {
+                <div style="clear: both;">
+                    <img src="@Model.ImagePath" />
+                </div>
+            }
+
+            if (Model.Results.Count > 0)
+            {
+                <div id="rateProfileTableContainer" class="col sm_4_4 lg_12_12 xl_push_1_14">
+                    <div class="datagrid">
+                        <table id="smFrameTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col">@Proestimator.Resources.ProStrings.OpenFrame</th>
+                                    <th scope="col">@Proestimator.Resources.ProStrings.Type</th>
+                                    <th scope="col">@Proestimator.Resources.ProStrings.Make</th>
+                                    <th scope="col">@Proestimator.Resources.ProStrings.Model</th>
+                                    <th scope="col">@Proestimator.Resources.ProStrings.Year</th>
+                                    <th scope="col">@Proestimator.Resources.ProStrings.FrameDetails</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @{int rowcount = 0;}
+                                @foreach (var item in Model.Results)
+                                {
+                                    <tr>
+                                        <td class="firstColumn">
+                                            <input type="submit" onclick="LoadImage('@item.jpg')" value="JPG" />
+                                        </td>
+                                        <td>
+                                            @{
+                                    if (rowcount == 0 || rowcount % 2 == 0)
+                                    {
+                                        @:Frame :
+                                            }
+                                    else
+                                    {
+                                        @:BodyOpenings :
+                                            }
+                                    rowcount = rowcount + 1;
+                                            }
+                                        </td>
+                                        <td>@item.CarMakes</td>
+                                        <td>@item.CarModels</td>
+                                        <td>@item.Year</td>
+                                        <td>@item.CarFrameDetails</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <p>@Proestimator.Resources.ProStrings.FrameDataNoResults</p>
+            }
+        }
+    }
+    
+</div> 

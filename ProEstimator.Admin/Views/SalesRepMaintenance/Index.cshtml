@@ -1,0 +1,306 @@
+﻿@model ProEstimator.Admin.ViewModel.SalesRepVM
+
+@using ProEstimator.Admin.ViewModel;
+
+@{
+    ViewBag.Title = "Administration - Sales Rep Maintenance";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<style>
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .padd-top {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    .header {
+        padding-bottom: 15px;
+        border-bottom: 1px solid black;
+        width: 100%;
+    }
+
+    .page-header {
+        border-bottom: 0px;
+        padding-top: 0px;
+        margin-top: 0px;
+    }
+
+    .details-form {
+        padding-top: 15px;
+        padding-bottom: 15px;
+        width: 100%;
+    }
+
+    .details-form:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+
+    .details-form td {
+        padding: 1px;
+    }
+
+    .details-column {
+        float: left;
+        width: 50%;
+    }
+
+    input[type=text] {
+        width: 250px;
+    }
+
+    label {
+        font-weight: normal;
+    }
+
+    .save-container {
+        text-align: center;
+        padding: 10px;
+        border-top: 1px solid black;
+    }
+
+    .save-container input {
+        padding: 10px;
+        width: 150px;
+        font-size: 1.1em;
+    }
+
+    .new-confirm {
+        text-align: right;
+        display: none;
+    }
+
+    .checkbox-row {
+        padding-bottom: 20px;
+    }
+
+    .checkbox-row label {
+        padding-right: 20px;
+    }
+
+    .datagrid table td a:visited{
+        color: black !important;
+        background-color: lightgray;
+    }
+
+</style>
+
+<script>
+
+    $(document).ready(function () {
+
+        $("#filter").on("input", function (e) {
+
+            var grid = $("#salesRepMaintenance-grid").data("kendoGrid");
+            var valuetoFilter = e.target.value;
+
+            var filter = KendogridSearchFilter(grid, valuetoFilter);
+
+            grid.dataSource.filter(filter);
+        });
+
+        $("#btnCancel").click(function () {
+
+            $("#sales").val('');
+            $("#firstName").val('');
+            $("#lastName").val('');
+            $("#email").val('');
+
+        });
+
+        $("#btnInsert").click(function () {
+
+            $.ajax({
+                url: '@Url.Action("InsertSalesRep", "SalesRepMaintenance")',
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({
+                    "Number": $("#sales").val(), "FirstName": $("#firstName").val(), "LastName": $("#lastName").val(), "Email": $("#email").val()
+                }),
+                success: function (result) {
+                    console.log(result);
+
+                    if (result.Success === true) {
+                        alert('Insert successful');
+
+                        $("#sales").val('');
+                        $("#firstName").val('');
+                        $("#lastName").val('');
+                        $("#email").val('');
+
+                        // Refresh the salesRepMaintenance grid
+                        var grid = $("#salesRepMaintenance-grid").data("kendoGrid");
+
+                        if (grid) {
+                            grid.dataSource.read();
+                        }
+                    }
+                },
+                error: function (error) {
+                    alert('Error occured while insertion.');
+                }
+            });
+        });
+    });
+
+    function DeleteSalesRep(salesRepID) {
+
+        var proceed = confirm("Are you sure you would like to delete this sales rep?");
+
+        if (proceed) {
+            $.ajax({
+                url: '@Url.Action("DeleteRep", "SalesRepMaintenance")',
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({
+                    "id": salesRepID
+                }),
+                success: function (result) {
+                    console.log(result);
+
+                    if (result.Success === true) {
+                        alert('Update successful');
+
+                        // Refresh the salesRepMaintenance grid
+                        var grid = $("#salesRepMaintenance-grid").data("kendoGrid");
+
+                        if (grid) {
+                            grid.dataSource.read();
+                        }
+                    }
+                },
+                error: function (error) {
+                    alert('Error occured while deletion.');
+                }
+            });
+        }
+    }
+
+</script>
+
+<div class="row">
+    <div class="col-lg-8 col-md-7 col-sm-6">
+        <h3>
+            Sales Rep Maintenance
+        </h3>
+    </div>
+</div>
+
+@if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(Model.SalesRepID, "RepMaintenance"))
+{
+    <form id="SalesRepMaintenance" name="salesRepMaintenance">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>User Detail</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-6 stackem">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Sales #:</span>
+                                        <input type="text" class="form-control" placeholder="Sales #" aria-describedby="sales" id="sales" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 stackem">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">First Name:</span>
+                                        <input type="text" class="form-control" placeholder="First Name" aria-describedby="firstName" id="firstName" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6 stackem">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Last Name:</span>
+                                        <input type="text" class="form-control" placeholder="Last Name" aria-describedby="lastName" id="lastName" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 stackem">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Email:</span>
+                                        <input type="text" class="form-control" placeholder="Email" aria-describedby="email" id="email" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-footer">
+                        <div class="col-lg-9 pull-left">
+
+                        </div>
+                        <div class="col-lg-3 pull-left">
+                            <a class="btn btn-default pull-right" href="javascript:void(0);" role="button" id="btnCancel" name="btnCancel">Cancel</a>
+                            <a class="btn btn-default pull-right" href="javascript:void(0);" role="button" id="btnInsert" name="btnInsert">Insert</a>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: right;">
+                Search: <input type="text" id="filter" />
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="customer-grid-container" class="datagrid">
+                        @(Html.Kendo().Grid<SalesRepVM>()
+                        .Name("salesRepMaintenance-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.SalesRepID).Hidden(true);
+                            columns.Bound(item => item.Number).Title("Sales #").Width(50);
+                            columns.Bound(item => item.FirstName).Title("First Name");
+                            columns.Bound(item => item.LastName).Title("Last Name");
+                            columns.Bound(item => item.Email).Title("Email");
+                            columns.Bound(item => item.UserName).Title("User Name");
+                            columns.Bound(item => item.Password).Title("Password");
+                            columns.Command(command => { command.Edit(); }).Width(150);
+                            columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"DeleteSalesRep('#= SalesRepID#')\">Delete</a>").Title("");
+                        })
+                            //.ToolBar(toolBar =>
+                            //{
+                            //    toolBar.Save(ActiveLogin.ID);
+                            //})
+                                .Sortable()
+                                .Selectable()
+                                .Editable(editable => editable.Mode(GridEditMode.InLine))
+                            //.Editable(editable => editable.Mode(GridEditMode.InCell))
+                                .Pageable(pageable => pageable
+                                    .Refresh(false)
+                                )
+                                .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .ServerOperation(false)
+                                    .Model(model =>
+                                    {
+                                        model.Id(p => p.SalesRepID);
+                                        model.Field(p => p.Number).Editable(false);
+                                    })
+                                    .Read(read => read.Action("GetSalesReps", "SalesRepMaintenance"))
+                                    .Update(update => update.Action("UpdateSalesRep", "SalesRepMaintenance"))
+                                    .PageSize(30)
+                                )
+                        )
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+}
+else
+{
+    <p>You do not have access to this page.</p>
+}

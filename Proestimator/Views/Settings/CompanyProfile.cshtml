@@ -1,0 +1,306 @@
+﻿@model Proestimator.ViewModel.CompanyProfileVM
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_CompanyProfile;
+}
+
+<style>
+    @@media screen and (max-width:900px) {
+        #smEstimateNavRow {
+            border: 1px solid #349ad8;
+            background-color: #f5f9fb;
+            max-width: 100%;
+            padding-right: 30px;
+        }
+
+        #estimateNavigation {
+            margin-top: 15px;
+        }
+    }
+</style>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $(".btnRemoveImage").click(function () {
+            $.getJSON('@Url.Action("RemoveCustomIcon", "Settings")', { userID: @ViewBag.UserID, loginID: @Model.LoginID }, function (data) {
+                $("#imgLogo").attr('src', data.DataItem);
+            });
+        });
+
+        ValidateEmail("Email");
+
+        $(".disabled").prop("disabled", true);
+        $(".disabled").css("color", "grey");
+        $(".disabled").css("opacity", "0.5");
+
+        $("#submitButton").click(function() {
+
+            // file
+            var filename = $("#file").val();
+    
+            if(filename != '')
+            {
+                var fileExt = $("#file").val().split('.').pop().toLowerCase();
+
+                if((fileExt == 'png') || (fileExt == 'jpg') || (fileExt == 'jpeg') || (fileExt == 'pdf'))
+                {
+                    $("form").submit(); 
+                }
+                else
+                {
+                    $("#file").val('');
+
+                    if($("#redirectData").val() == '')
+                    {
+                        alert('Only Image and PDF files can be uploaded.');
+                        return false;
+                    }
+                    else
+                    {
+                        $("form").submit(); 
+                    }
+                }
+            }
+            else
+            {
+                $("form").submit(); 
+            }
+        });
+
+    });
+
+</script>
+
+<div id="workDesk" class="page-container">
+
+    @using (Html.BeginForm("CompanyProfile", "Settings", FormMethod.Post, new { @class = "container", enctype = "multipart/form-data" }))
+    {
+
+        @Html.Partial("settingTopMenu")
+
+        @Html.HiddenFor(o => o.IsLocked)
+        @Html.HiddenFor(o => o.Serialized)
+        @Html.HiddenFor(o => o.LoginID)
+
+        <input type="hidden" id="redirectData" name="redirectDataField" />
+
+        <div class="tabcontent container">
+
+            <div id="lgRow1" class="container">
+
+                @* The save and cancel buttons *@
+                <div class="container center" style="padding-bottom: 20px;">
+                    <input id="submitButton" class="button nav-btn" type="submit" value="@Proestimator.Resources.ProStrings.Save" />
+
+                    @if (Model.IsLocked)
+                {
+                <p class="error-message">@Proestimator.Resources.ProStrings.CompanyProfileLocked</p>
+                }
+
+                    <p class="error-message">@Model.ErrorMessage</p>
+                </div>
+
+                @* Part 1. Company Name - Top left form *@
+                <div id="contactFields" class="half-container">
+
+                    <fieldset id="companyNameFieldset">
+                        <legend><span class="number">1</span>@Proestimator.Resources.ProStrings.CompanyProfile_CompanyName</legend>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.CompanyProfile_CompanyName</label>
+                            <div class="field-control">
+                                @Html.TextBoxFor(model => model.CompanyName, new { autocomplete = "off", @class = @Model.DisabledClass })
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.EstimateHeaderContact</label>
+                            <div class="field-control">
+                                @Html.TextBoxFor(model => model.HeaderContact, new { autocomplete = "off", @class = @Model.DisabledClass })
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Logo</label>
+                            <div class="field-control">
+                                <img id="imgLogo" src="@Model.LogoImagePath" style="max-width: 250px; float: left;" />
+                                <br /><input type="file" name="file" id="file" style="width: 100%; margin: 5px; float: left;" />
+                                <input id="submitButton" type="button" class="button btnRemoveImage do-not-disable" value="@Proestimator.Resources.ProStrings.CompanyProfile_RemoveCustomIcon" style="max-width: 200px; float: left;" />
+                            </div>
+                        </div>
+
+                    </fieldset>
+
+                </div>
+
+                @* Part 2. Company Contact - Top right form *@
+                <div id="customerField" class="half-container">
+
+                    <fieldset id="customerFieldSet">
+
+                        <legend><span class="number">2</span> @Proestimator.Resources.ProStrings.CompanyProfile_CompanyContactInfo</legend>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.FirstName</label>
+                            <div class="field-control">
+                                @Html.TextBoxFor(model => model.FirstName, new { autocomplete = "off", @class = @Model.DisabledClass })
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.LastName</label>
+                            <div class="field-control">
+                                @Html.TextBoxFor(model => model.LastName, new { autocomplete = "off", @class = @Model.DisabledClass })
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Email</label>
+                            <div class="field-control">
+                                @Html.TextBoxFor(model => model.Email, new { autocomplete = "off", @class = @Model.DisabledClass + " email-address" } )
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Phone</label>
+                            <div class="field-control">
+                                @Html.TextBoxFor(model => model.Phone, new { autocomplete = "off", @class = @Model.DisabledClass + " phone" })
+                                @Html.DropDownListFor(m => m.PhNumberType1, Model.PhoneTypes, "-- Select Type --", new { @class = "form-control " + @Model.DisabledClass })
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Phone<span>2</span></label>
+                            <div class="field-control">
+                                @Html.TextBoxFor(model => model.PhoneTwo, new { autocomplete = "off", @class = @Model.DisabledClass + " phone" })
+                                @Html.DropDownListFor(m => m.PhNumberType2, Model.PhoneTypes, "-- Select Type --", new { @class = "form-control " + @Model.DisabledClass })
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Fax</label>
+                            <div class="field-control">
+                                @Html.TextBoxFor(model => model.Fax, new { autocomplete = "off", @class = @Model.DisabledClass + " phone" })
+                            </div>
+                        </div>
+
+                    </fieldset>
+
+                </div>
+
+            </div>
+            <style>
+                .div{
+                    display:inline-block;
+
+                }
+            </style>
+
+            @* Part 3. Address fields - Bottom left form *@
+            <div id="addressFields" class="half-container">
+
+                <fieldset id="companyAddressFieldSet">
+
+                    <legend><span class="number">3</span>@Proestimator.Resources.ProStrings.CompanyProfile_CompanyAddress</legend>
+
+                    <div class="field-wrapper">
+                        <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Address1</label>
+                        <div class="field-control">
+                            @Html.TextBoxFor(model => model.Address1, new { autocomplete = "off", @class = @Model.DisabledClass })
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper">
+                        <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Address2</label>
+                        <div class="field-control">
+                            @Html.TextBoxFor(model => model.Address2, new { autocomplete = "off", @class = @Model.DisabledClass })
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper">
+                        <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.City</label>
+                        <div class="field-control">
+                            @Html.TextBoxFor(model => model.City, new { autocomplete = "off", @class = @Model.DisabledClass })
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper">
+                        <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.State</label>
+                        <div class="field-control">
+                            @Html.DropDownListFor(model => model.State, Model.States, new { @class = @Model.DisabledClass })
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper">
+                        <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Zip</label>
+                        <div class="field-control">
+                            @Html.TextBoxFor(model => model.Zip, new { autocomplete = "off", @class = @Model.DisabledClass })
+                        </div>
+                    </div>
+
+                </fieldset>
+
+            </div>
+
+            @* Part 4. Company ID - Bottom right form *@
+            <div id="addressFields" class="half-container">
+
+                <fieldset id="companyIDFieldset">
+
+                    <legend>
+                        <span class="number">4</span>@Proestimator.Resources.ProStrings.CompanyProfile_CompanyID<span class="inlineNote">&nbsp;*@Proestimator.Resources.ProStrings.CompanyProfile_CheckPrintNote*</span>
+                    </legend>
+
+                    <div class="field-wrapper">
+                        <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.CompanyProfile_CompanyType</label>
+                        <div class="field-control">
+                            @Html.DropDownListFor(model => model.CompanyType, Model.CompanyTypes, new { @class = @Model.DisabledClass })
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper">
+                        <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.CompanyProfile_FederalTaxID</label>
+                        <div class="field-control">
+                            @Html.TextBoxFor(model => model.FederalTaxID, new { autocomplete = "off" })
+                            <br />
+                            @Html.CheckBoxFor(model => model.PrintFederalTaxID) @Proestimator.Resources.ProStrings.PrintQuestion
+                            @Html.CheckBoxFor(model => model.UseTaxID) @Proestimator.Resources.ProStrings.CompanyProfile_UserTinCheckbox
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper">
+                        <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.CompanyProfile_LicenseNumber</label>
+                        <div class="field-control">
+                            @Html.TextBoxFor(model => model.LicenseNumber, new { autocomplete = "off" })
+                            <br />
+                            @Html.CheckBoxFor(model => model.PrintLicenseNumber) @Proestimator.Resources.ProStrings.PrintQuestion
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper">
+                        <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.CompanyProfile_BarNumber</label>
+                        <div class="field-control">
+                            @Html.TextBoxFor(model => model.BarNumber, new { autocomplete = "off" })
+                            <br />
+                            @Html.CheckBoxFor(model => model.PrintBarNumber) @Proestimator.Resources.ProStrings.PrintQuestion
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper">
+                        <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.CompanyProfile_RegistrationNumber</label>
+                        <div class="field-control">
+                            @Html.TextBoxFor(model => model.RegistrationNumber, new { autocomplete = "off" })
+                            <br />
+                            @Html.CheckBoxFor(model => model.PrintRegistration) @Proestimator.Resources.ProStrings.PrintQuestion
+                        </div>
+                    </div>
+
+                </fieldset>
+            </div>
+
+        </div>
+    }
+</div>

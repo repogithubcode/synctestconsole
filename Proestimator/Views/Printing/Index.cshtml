@@ -1,0 +1,393 @@
+﻿@model Proestimator.ViewModel.Printing.PrintingVM
+
+@using ProEstimatorData.DataModel;
+@using Proestimator.ViewModel.Printing;
+@using Proestimator.ViewModel.SendEstimate;
+
+@{
+    Model.IsIncludeImagesInPDF = true;
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_Printing;
+}
+
+<script>
+
+    //function openPdf(url) {
+    //    CallInApp.openPdf(url);
+    //}
+
+    function DeleteReport(id,showDeletedReport)
+    {
+        var loadingImage = $.parseHTML("<img src='/Images/animatedCircle.gif' width='15' height='15' id='Loading" + id + "' />");
+        $("#DeleteLink" + id).replaceWith(loadingImage);
+
+        $.getJSON("/Printing/DeleteReport", { userID: @ViewBag.UserID, loginID: @ViewBag.LoginID, reportID: id, restoreDeletedReport:showDeletedReport }, function (data)
+        {
+            if (data != "")
+            {
+                ShowUserMessage(data, true, 5000);
+            }
+
+            RefreshHistoryTypesList();
+        });
+    }
+
+    function GenerateReport(reportType, language, extraParam, _isModelPopup, version, customReportType) {
+        $.ajax({
+            url: "/SendEstimate/CreateReportAttachment/",
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ "userID": @ViewBag.UserID, "estimateID": @Model.EstimateID, "reportType": reportType, "language": language, "extraParam": extraParam, "version": version, "customReportType": customReportType }),
+            beforeSend: function () {
+                if(_isModelPopup) {
+                    _loadingPopupHeightDiv = 1;
+                    applyLoadingPopup();
+                }
+                else {
+                    applyLoading();
+                }
+            },
+            success: function (result) {
+                if(_isModelPopup) {
+                    removeLoadingPopup();
+                }
+                else {
+                    removeLoading();
+                }
+
+                if (result.Success === true) {
+                    RefreshGrid();
+                    RefreshHistoryTypesList();
+
+                    @if (Model.DownloadPDF == ProEstimatorData.PDFDownloadSetting.Download)
+                    {
+                        <text>
+                    var win = window.open("/@ViewBag.UserID/estimate/@Model.EstimateID/view-attachment/" + result.Report.ID + "/" + result.Report.ReportName, "_self");
+                    </text>
+                    }
+                    else
+                    {
+                        <text>
+                    var win = window.open("/@ViewBag.UserID/estimate/@Model.EstimateID/view-attachment/" + result.Report.ID + "/" + result.Report.ReportName, "_blank");
+                    </text>
+                    }
+                    if (win) {
+                        //Browser has allowed it to be opened
+                        win.focus();
+                    } else {
+                        //Browser has blocked it
+                        alert("@Proestimator.Resources.ProStrings.BrowserBlockedSite.");
+                    }
+
+                    if (result.ErrorMessage.length > 0) {
+                        ShowUserMessage(result.ErrorMessage, false, 5000);
+                    }
+                }
+                else {
+                    ShowUserMessage(result.ErrorMessage, true, 4000);
+                }
+                $(".ui-dialog-titlebar-close").trigger('click');
+            },
+            error: function (error) {
+                removeLoading();
+                ShowUserMessage(error, true, 4000);
+            }
+        });
+    }
+
+    function GetReportHistoryParameters()
+    {
+        var result = { loginID: @ViewBag.LoginID, estimateID: @ViewBag.EstimateID, showDeletedReport: $("#chkShowDeletedReport").is(":checked"), reportType: $("#ddlReportHistoryTypes").val(), showAllReportTypes:$("#chkShowAllReportTypes").is(":checked")};
+        return result
+    }
+
+    function RefreshGrid() {
+
+        if($("#grid").data("kendoGrid") != undefined)
+        {
+            $("#grid").data("kendoGrid").dataSource.read();
+            $("#grid").data("kendoGrid").refresh();
+
+            console.log("refresh grid done");
+        }
+
+    }
+
+    function RefreshHistoryTypesList()
+    {
+        var reportHistoryTypes = $("#ddlReportHistoryTypes");
+        var selectedVal = reportHistoryTypes.val();
+        reportHistoryTypes.empty();
+
+        $.ajax({
+            url: "/Printing/GetReportTypeList/",
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ "userID": @ViewBag.UserID, "loginID": @Model.LoginID, "estimateID": @Model.EstimateID, "deletedReports": $("#chkShowDeletedReport").is(":checked") }),
+            success: function (result) {
+                for(var i = 0; i < result.length; i++)
+                {
+                    reportHistoryTypes.append("<option value='" + result[i].Value + "'>" + result[i].Text + "</option>");
+                }
+
+                reportHistoryTypes.val(selectedVal);
+
+                if (reportHistoryTypes.prop("selectedIndex") == -1)
+                {
+                    reportHistoryTypes.prop("selectedIndex", 0);
+                }
+
+                RefreshGrid();
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        RefreshHistoryTypesList();
+
+        $("#chkShowDeletedReport").change(function() {
+            if($("#chkShowDeletedReport").is(":checked")==true)
+            {
+                $("#grid thead [data-index=5] .k-link").html("Restore")
+            }
+            else
+            {
+                $("#grid thead [data-index=5] .k-link").html("Delete")
+            }
+
+            RefreshHistoryTypesList();
+        });
+
+        $("#ddlReportHistoryTypes").change(function () {
+            RefreshGrid();
+        });
+
+        @if(ViewBag.IsMobileDevice)
+        {
+            <text>
+                $("#modal-window-printReportHistoryMobileDevice").dialog({
+                    autoOpen: false,
+                    modal: true,
+                    title: '@Proestimator.Resources.ProStrings.ReportHistoryTable',
+                    width: ($(window).width()),
+                    minHeight: 0,
+                    position: { my: "center", at: "top" },
+                    close: function () {
+                        _openReportHistoryPopupVisible = false;
+                        console.log("Close");
+                    }
+                });
+            </text>
+        }
+
+    });
+
+    function onDataBound(arg) {
+
+        @if(ViewBag.IsMobileDevice)
+        {
+            <text>
+                ShowHidePrintReportHistoryLegend();
+                if(_openReportHistoryPopupVisible != true)
+                {
+                    $("#history-container").hide();
+                }
+            </text>
+        }
+        else
+        {
+            <text>
+                 $("#history-container").show();
+            </text>
+        }
+    }
+
+    function ShowHidePrintReportHistoryLegend() {
+
+        var grid = $("#grid").data("kendoGrid");
+        if(grid != undefined) {
+            var dataSource = grid.dataSource;
+
+            //total records
+            var totalRecords = dataSource.total();
+
+            if (totalRecords > 0)
+            {
+                $("#isMobileDeviceLegend").show();
+            }
+            else
+            {
+                $("#isMobileDeviceLegend").hide();
+            }
+        }
+        else{
+            $("#isMobileDeviceLegend").hide();
+        }
+    }
+
+    var _openReportHistoryPopupVisible = '';
+    function OpenReportHistoryPopup() {
+        _openReportHistoryPopupVisible = true;
+        $("#history-container").show();
+        $('#history-container').insertAfter('#modal-window-printReportHistoryMobileDevice .modal-body');
+        $('#modal-window-printReportHistoryMobileDevice').dialog('open');
+    }
+
+</script>
+
+<style>
+    .report-list {
+        text-align: left;
+        font-weight: normal;
+        list-style: none;
+        padding-left: 0px;
+    }
+
+        .report-list li {
+            padding-top: 2px;
+            padding-bottom: 2px;
+        }
+
+        .report-list a {
+            color: black;
+            cursor: pointer;
+            margin: 3px;
+        }
+
+            .report-list a:hover {
+                background-color: #349ad8;
+            }
+
+    @@media (min-width: 700px) {
+        #ddlReportHistoryTypes {
+            width: 50%;
+            float: right;
+            max-width: 300px;
+        }
+
+        .chkbxClass {
+            width: 50%;
+            float: left;
+        }
+    }
+
+    @@media (max-width: 700px) {
+        .report-list li {
+            height: 45px;
+            border: 1px solid black;
+            margin-bottom: 10px;
+            padding-top: 14px;
+            padding-left: 10px;
+        }
+    }
+
+    .ui-state-default .ui-icon {
+        -ms-transform: scale(1.5); /* IE 9 */
+        -webkit-transform: scale(1.5); /* Chrome, Safari, Opera */
+        transform: scale(1.5);
+    }
+
+</style>
+
+<div id="workDesk" class="page-container">
+
+    <div id="modal-window-printReportHistoryMobileDevice" style="display:none;" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @using (Html.BeginForm("Index", "Printing", FormMethod.Post, new { @class = "container" }))
+    {
+        <input type="hidden" id="redirectData" name="redirectDataField" />
+
+        @Html.HiddenFor(o => o.LoginID)
+        @Html.HiddenFor(o => o.EstimateID)
+
+        <div id="estimateFormHeader">
+
+            <div id="formHeader-back">
+                <a id="detailsBtn" data-link-id="PaymentInfo-Back" class="button nav-btn" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/estimate/@Model.EstimateID/payment-info');">@Proestimator.Resources.ProStrings.PaymentInfoBackButton</a>
+            </div>
+
+            <div id="formHeader-center">
+                <h1>@Proestimator.Resources.ProStrings.PrintEstimateHeader</h1>
+            </div>
+
+            <div id="formHeader-next">
+                <a class="button nav-btn" data-link-id="SendEstimate-Next" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/estimate/@Model.EstimateID/send-estimate');">@Proestimator.Resources.ProStrings.SendEstimatePageButton</a>
+            </div>
+
+        </div>
+
+        <div class="form-container">
+            <div id="lgRow1" class="container">
+
+                <div class="container" style="margin-bottom: 40px">
+                    <legend><span class="number">1</span>@Proestimator.Resources.ProStrings.GenerateReport</legend>
+                    <div class="container">
+                        @Html.EditorFor(model => model.ReportCreator)
+                    </div>
+                </div>
+
+                @if (ViewBag.IsMobileDevice)
+                {
+                    <text>
+                        <legend><a href="#" onclick="OpenReportHistoryPopup();" style="color:black">@Proestimator.Resources.ProStrings.ViewReportHistoryTable</a></legend>
+                    </text>
+                }
+
+                <div style="width: 100%; max-width: 1200px; margin: auto;" class="container">
+
+                    @if (ViewBag.IsMobileDevice == false)
+                    {
+                        <text>
+                            <legend><span class="number">2</span>@Proestimator.Resources.ProStrings.ReportHistoryTable</legend>
+                        </text>
+                    }
+
+                    <div id="history-container" style="display: none;">
+
+                        <select id="ddlReportHistoryTypes" />
+
+                        <label class="chkbxClass">
+                            <input type="checkbox" id="chkShowDeletedReport" />@Proestimator.Resources.ProStrings.ShowDeletedReports
+                        </label>
+
+                        <div class="datagrid" style="margin-top: 5px">
+                            @(Html.Kendo().Grid<ReportHistoryRowVM>()
+                        .Name("grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.ReportID).Hidden();
+                            columns.Bound(item => item.TimeStamp).ClientTemplate("#= kendo.toString(kendo.parseDate(TimeStamp), 'M/d/yyyy h:mm:ss tt') #").Title(@Proestimator.Resources.ProStrings.TimeStamp);
+                            columns.Bound(item => item.ReportType).Title(@Proestimator.Resources.ProStrings.ReportType);
+                            columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("  " + "# if (MailID > 0) { #" + "<a href=\"/" + ViewBag.UserID + "/estimate/" + Model.EstimateID + "/send-estimate/#=MailID#\" style=\"color: black;\"><img src=\"/images/view.gif\" width=\"15\" height=\"15\" /></a>" + "# } #").Title(@Proestimator.Resources.ProStrings.Email);
+                            columns.Bound(item => item.Notes).Title(@Proestimator.Resources.ProStrings.Notes);
+                            columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<a href=\"/" + @ViewBag.UserID + "/estimate/" + @Model.EstimateID + "/view-attachment/#=ReportID#/#=FileName#\" target=\"" + @ViewBag.Target + "\"><img src=\"/images/view.gif\" width=\"15\" height=\"15\" /></a>").Title(@Proestimator.Resources.ProStrings.Report);
+                            columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<a id=\"DeleteLink#=ReportID#\" onclick=\"DeleteReport(#=ReportID#,#=IsDeleted#)\" style=\"cursor: pointer;\"><img src=\"/images/#=DeleteRestoreImgName#\" width=\"15\" height=\"15\" /></a>").Title(@Proestimator.Resources.ProStrings.Delete);
+                        })
+                        .Sortable()
+                        .Events(events => events
+                            .DataBound("onDataBound")
+                         )
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Read(read => read.Action("GetReportHistory", "Printing").Data("GetReportHistoryParameters"))
+                        )
+                            )
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    }
+</div>

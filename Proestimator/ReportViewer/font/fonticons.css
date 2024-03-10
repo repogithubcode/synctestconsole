@@ -1,0 +1,43 @@
+@font-face {
+	font-family: 'TelerikWebUI';
+	src: url('TelerikWebUI.eot') format('embedded-opentype'), url('TelerikWebUI.woff') format('woff'), url('TelerikWebUI.ttf') format('truetype');
+    unicode-range: U+E0ED, U+E0EE, U+E0E6, U+E132, U+E12F, U+E008, U+E00B, U+E09C, U+E096, U+E07E, U+E086, U+E06C, U+E07F, U+E080, U+E081, U+E149, U+E087;
+}
+
+.t-font-icon {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  text-decoration: none;
+  color: #555;
+  font-size: 17px;
+}
+
+.t-font-icon:before
+{
+    position: static;
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    vertical-align: middle;
+    font: 1em/1.5em "TelerikWebUI" !important;
+}
+
+.t-i-undo:before { content: "\E0ED"; }
+.t-i-redo:before { content: "\E0EE"; }
+.t-i-refresh-a:before { content: "\E0E6"; }
+.t-i-arrow-double-60-w:before { content: "\E132"; }
+.t-i-arrow-double-60-e:before { content: "\E12F"; }
+.t-i-seek-e:before { content: "\E008"; }
+.t-i-seek-w:before { content: "\E00B"; }
+.t-i-file:before { content: "\E09C"; }
+.t-i-download:before { content: "\E096"; }
+.t-i-print:before { content: "\E07E"; }
+.t-i-book:before { content: "\E086"; }
+.t-i-filter:before { content: "\E06C"; }
+.t-i-zoom:before { content: "\E07F"; }
+.t-i-zoom-in:before { content: "\E080"; }
+.t-i-zoom-out:before { content: "\E081"; }
+.t-i-reorder:before { content: "\E149"; }
+.t-i-bookmark:before { content: "\E087"; }

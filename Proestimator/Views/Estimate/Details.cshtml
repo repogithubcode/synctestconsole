@@ -1,0 +1,444 @@
+﻿@model Proestimator.ViewModel.DetailsVM
+
+@using Proestimator.ViewModel;
+@using ProEstimatorData.DataModel;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_Details;
+}
+
+<script>
+    var _whichButton = '@Model.WhichButtonVisible';
+
+    $(document).ready(function () {
+
+        RefreshCommitButtons();
+
+        $("#btnCommit").click(function () {
+            //$("#btnCommit").prop("disabled", true);
+
+            $("#commitMessage").text("@Proestimator.Resources.ProStrings.Committing...");
+
+            $.getJSON('@Url.Action("CommitEstimate", "Estimate")', { userID: @ViewBag.UserID, estimateID: $("#EstimateID").val() }, function (data) {
+                $("#commitMessage").text(data.Message);
+
+                if (data.Success == true) {
+                    //ShowUserMessage(data.Message, false, 4000);
+
+                    _whichButton = "Uncommit";
+                    RefreshCommitButtons();
+
+                    $("#spanCurrentSupplementLevel").text(data.CurrentSupplementVersion);
+                }
+                else {
+                    ShowUserMessage(data.Message, true, 6000);
+                }
+
+                //$("#btnCommit").prop("disabled", false);
+            });
+        });
+
+        $("#btnUncommit").click(function () {
+           // $("#btnUncommit").prop("disabled", true);
+
+             $("#commitMessage").text("@Proestimator.Resources.ProStrings.Uncommitting...");
+
+            $.getJSON('@Url.Action("UncommitEstimateSupplement", "Estimate")', { userID: @ViewBag.UserID, estimateID: $("#EstimateID").val() }, function (data) {
+                $("#commitMessage").text(data.Message);
+
+                if (data.Success == true) {
+                    _whichButton = "Commit";
+                    RefreshCommitButtons();
+
+                    $("#spanCurrentSupplementLevel").text(data.CurrentSupplementVersion);
+                }
+                else {
+                    ShowUserMessage(data.Message, true, 6000);
+                }
+            });
+        });
+
+        var _currentHours = '@Model.HoursInDay';
+        var _manualDays = '@Model.DaysToRepair';
+        AutoFillButtonState($("#ManualRepairDays").val());
+
+        $("#autoFillButton").click(function () {
+            $("#DaysToRepair").val(Math.ceil($("#NonUserDaysToRepair").val() * $("#HoursInDayHidden").val() / $("#HoursInDay").val()));
+            $("#ManualRepairDays").val("False");
+            AutoFillButtonState($("#ManualRepairDays").val());
+        });
+
+        $("#HoursInDay").change(function () {
+            if ($("#ManualRepairDays").val() == "True") {
+                if ($.isNumeric(_manualDays)) {
+                    $("#DaysToRepair").val(Math.ceil(_manualDays * _currentHours / this.value));
+                }
+                else {
+                    $("#DaysToRepair").val(0);
+                }
+            }
+            else {
+                $("#DaysToRepair").val(Math.ceil($("#NonUserDaysToRepair").val() * $("#HoursInDayHidden").val() / this.value));
+            }
+        });
+
+        $("#DaysToRepair").on("input", function (e) {
+            $("#ManualRepairDays").val("True");
+            AutoFillButtonState($("#ManualRepairDays").val());
+            _manualDays = this.value;
+            _currentHours = $("#HoursInDay").val();
+        });
+    });
+
+    function AutoFillButtonState(isManual) {
+        if (isManual == "True") {
+            $("#autoFillButton").attr("disabled", false);
+            $("#autoFillButton").css("opacity", 1);
+        }
+        else {
+            $("#autoFillButton").attr("disabled", true);
+            $("#autoFillButton").css("opacity", 0.4);
+        }
+    }
+
+    function RefreshCommitButtons()
+    {
+        if (_whichButton == "Commit") {
+            $(".commit-stuff").show();
+            $(".uncommit-stuff").hide();
+        }
+        else if (_whichButton == "Uncommit") {
+            $(".commit-stuff").hide();
+            $(".uncommit-stuff").show();
+        }
+    }
+
+
+</script>
+
+<style>
+    #jobHistoryTable tr:first-child td {
+        font-weight: bold;
+    }
+
+    .commit-stuff, .uncommit-stuff {
+        display: none;
+    }
+</style>
+
+<div id="workDesk" class="page-container">
+
+    @using (Html.BeginForm("Details", "Estimate", FormMethod.Post, new { @class = "container" }))
+    {
+        Html.EnableClientValidation(false);
+
+        @Html.HiddenFor(o => o.UserID)
+        @Html.HiddenFor(o => o.LoginID)
+        @Html.HiddenFor(o => o.EstimateID)
+        @Html.HiddenFor(o => o.OriginalRateProfileID)
+        @Html.HiddenFor(o => o.ManualRepairDays)
+        @Html.HiddenFor(o => o.NonUserDaysToRepair)
+        <input id="HoursInDayHidden" name="HoursInDayHidden" type="hidden" value="@Model.HoursInDay" />
+
+        <input type="hidden" id="redirectData" name="redirectDataField" />
+
+        <div id="estimateFormHeader">
+
+            <div id="formHeader-back">
+                <a class="button nav-btn" data-link-id="Images-Back" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/estimate/@Model.EstimateID/images');">@Proestimator.Resources.ProStrings.ImagesBackButton</a>
+            </div>
+
+            <div id="formHeader-center">
+                <h1>@Proestimator.Resources.ProStrings.EstimateDetailsHeader</h1>
+
+                @if (!Model.EstimateIsLocked)
+                {
+                    @Html.ActionLink(@Proestimator.Resources.ProStrings.UndoChanges, "Details", "Estimate", new { @class = "button nav-btn" })
+                    <input type="submit" id="submitButton" class="button nav-btn" value="@Proestimator.Resources.ProStrings.Save" name="action:SaveDetails" />
+                }
+                @if (Model.EstimateIsLocked)
+                {
+                    <p class="error-message">@Proestimator.Resources.ProStrings.Estimate_Message_LockedNoEdit</p>
+                }
+            </div>
+
+            <div id="formHeader-next">
+                <a class="button nav-btn" data-link-id="EstimateNotes-Next" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/estimate/@Model.EstimateID/estimatenotes');">@Proestimator.Resources.ProStrings.EstimateNotesPageButton</a>
+            </div>
+
+        </div>
+
+        <div class="form-container">
+
+
+
+            <div id="lgRow1" class="container">
+
+                @* Part 1. Estimate Info - Top left form *@
+                <div id="customerField" class="col sm_4_4 md_4_8 lg_5_12 xl_6_14">
+
+                    <fieldset id="customerFieldSet">
+
+                        <legend><span class="number">1</span> @Proestimator.Resources.ProStrings.EstimateInfoHeader</legend>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.RateProfile</label>
+
+                            <div class="field-control">
+                                @Html.DropDownListFor(model => model.RateProfileID, Model.RateProfileSelections)
+                            </div>
+                        </div>
+
+                        @if (Model.UseAddOns)
+                        {
+                            <div class="field-wrapper">
+                                <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.AddOnRateProfile</label>
+
+                                <div class="field-control">
+                                    @Html.DropDownListFor(model => model.AddOnProfileID, Model.AddOnProfileSelections)
+                                </div>
+                            </div>
+                        }
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.SelectReportHeader</label>
+
+                            <div class="field-control">
+                                @Html.DropDownListFor(model => model.SelectedReportHeader, Model.ReportHeaderSelections)
+                            </div>
+                        </div>
+
+                        @if (Model.HasPDRRateProfile)
+                        {
+                            <div class="field-wrapper">
+                                <label class="inputLabel field-label">PDR @Proestimator.Resources.ProStrings.RateProfile</label>
+
+                                <div class="field-control">
+                                    @Html.DropDownListFor(model => model.PDRRateProfileID, Model.PDRRateProfileSelections)
+                                </div>
+                            </div>
+                        }
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.EstimateDescription</label>
+                            <div class="field-control">
+                                @Html.TextBoxFor(model => model.EstimateDescription, new { autocomplete = "off" })
+                            </div>
+                        </div>
+
+                        @if (Model.HasEstimators)
+                        {
+                            <div class="field-wrapper">
+                                <label class="inputLabel field-label">@Model.EstimatorOrAppraiser</label>
+                                <div class="field-control">
+                                    @Html.DropDownListFor(model => model.EstimatorID, Model.EstimatorSelections)
+                                </div>
+                            </div>
+                        }
+
+                        @Html.HiddenFor(model => model.ShowRepairFacilities)
+
+                        @if (Model.ShowRepairFacilities)
+                        {
+                            <div class="field-wrapper">
+                                <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.RepairFacility</label>
+                                <div class="field-control">
+                                    @Html.DropDownListFor(model => model.SelectedRepairFacility, Model.RepairFacilities)
+                                </div>
+                            </div>
+
+                            <div class="field-wrapper">
+                                <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.FacilityRepairOrder</label>
+                                <div class="field-control">
+                                    @Html.TextBoxFor(model => model.FacilityRepairOrder, new { autocomplete = "off" })
+                                </div>
+                            </div>
+                            <div class="field-wrapper">
+                                <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.FacilityRepairInvoice</label>
+                                <div class="field-control">
+                                    @Html.TextBoxFor(model => model.FacilityRepairInvoice, new { autocomplete = "off" })
+                                </div>
+                            </div>
+                        }
+
+                        @if (Model.UseAlternateIdentities)
+                        {
+                            <div class="field-wrapper">
+                                <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.AlternateIdentity</label>
+                                <div class="field-control">
+                                    @Html.DropDownListFor(model => model.SelectedAlternateIdentity, Model.AlternateIdentities)
+                                </div>
+                            </div>
+                        }
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.EstimateLocation</label>
+                            <div class="field-control">
+                                @Html.TextBoxFor(model => model.EstimateLocation, new { autocomplete = "off" })
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.EstimateNotesLabel</label>
+                            <div class="field-control">
+                                @Html.TextAreaFor(model => model.EstimateNotes)
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label"></label>
+                            <div class="field-control">
+                                @Html.CheckBoxFor(model => model.IncludeNotesInReport)
+                                <label class="light">@Proestimator.Resources.ProStrings.NotesCheckBox</label>
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.PurchaseOrderNumber</label>
+                            <div class="field-control">
+                                @Html.TextBoxFor(model => model.PurchaseOrderNumber, new { autocomplete = "off" })
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper-half">
+                            <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.InspectionDate</label>
+                            <div class="field-control-half">
+                                @Html.TextBoxFor(model => model.InspectionDate, new { autocomplete = "off", @class = "datepicker" })
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper-half">
+                            <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.AssignmentDate</label>
+                            <div class="field-control-half">
+                                @Html.TextBoxFor(model => model.AssignmentDate, new { autocomplete = "off", @class = "datepicker" })
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper-half">
+                            <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.DaysToRepair</label>
+                            <div class="field-control-half">
+                                <div class="field-control-half">
+                                    @Html.TextBoxFor(model => model.DaysToRepair, new { autocomplete = "off" })
+                                </div>
+                                <div class="field-control-half">
+                                    <input type="button" id="autoFillButton" class="button do-not-disable" value="Auto Fill" style="margin-top: 0px; margin-left: 2px;" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper-half">
+                            <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.RepairHours</label>
+                            <div class="field-control-half">
+                                @Html.DropDownListFor(model => model.HoursInDay, Model.HoursInDaySelections)
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.CreditCardFeePercentage</label>
+                            <div class="field-control">
+                                @Html.TextBoxFor(model => model.CreditCardFeePercentage, new { autocomplete = "off" })
+                                <div>
+                                    @Html.CheckBoxFor(model => model.ApplyCreditCardFee)
+                                    <label class="light">@Proestimator.Resources.ProStrings.ApplyCreditCardFee</label>
+                                </div>
+                                <div>
+                                    @Html.CheckBoxFor(model => model.TaxedCreditCardFee)
+                                    <label class="light">@Proestimator.Resources.ProStrings.Taxed</label>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                </div>
+
+                @* Part 2. Job Status - Top right form *@
+                <div id="contactFields" class="col sm_4_4 md_4_8 lg_push_1_12 lg_6_12 xl_6_14">
+
+                    <fieldset>
+                        <legend><span class="number">2</span>@Proestimator.Resources.ProStrings.JobStatusHeader</legend>
+
+                        @if (!string.IsNullOrEmpty(Model.RepairOrderNumber) && Model.RepairOrderNumber != "0")
+                        {
+                            <div class="field-wrapper">
+                                <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.RepairOrderNumber</label>
+                                <div class="field-control">
+                                    <p class="inputLabel">@Model.RepairOrderNumber</p>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="field-wrapper-half">
+                            <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.ChangeStatus</label>
+                            <div class="field-control-half">
+                                @Html.DropDownListFor(model => model.SelectedStatus, Model.Statuses)
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper-half" style="clear: both;">
+                            <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Date</label>
+                            <div class="field-control-half">
+                                @Html.TextBoxFor(model => model.StatusDate, new { autocomplete = "off", @class = "datepicker" })
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper-half" style="clear: both;">
+                            <label class="inputLabel field-label-half"></label>
+                            <div class="field-control-half">
+                                <input type="submit" class="button nav-btn" value="@Proestimator.Resources.ProStrings.ChangeJobStatus" data-form-action="/@ViewBag.UserID/estimate/@Model.EstimateID/change-job-status" />
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label"></label>
+                            <div class="field-control">
+                                <p id="statusHistoryLabel"></p>
+                                <table id="jobHistoryTable">
+                                    @if (Model.StatusHistory.Count > 0)
+                                    {
+                                        foreach (JobStatusHistoryVM history in Model.StatusHistory)
+                                        {
+                                            <tr>
+                                                <td>@history.Description</td>
+                                                <td>@history.TimeStamp</td>
+                                            </tr>
+                                        }
+                                    }
+                                </table>
+                            </div>
+                        </div>
+
+                    </fieldset>
+                </div>
+
+                @* Part 3. Supplement *@
+                <div id="contactFields" class="col sm_4_4 md_4_8 lg_push_1_12 lg_6_12 xl_6_14">
+
+                    <fieldset>
+                        <legend><span class="number">3</span>@Proestimator.Resources.ProStrings.Details_SupplementHeader</legend>
+
+                        <div class="field-wrapper">
+                            <div class="field-control">
+                                <p><b>@Proestimator.Resources.ProStrings.Details_CurrentSupLevel:</b> <span id="spanCurrentSupplementLevel">@Model.CurrentSupplementLevel</span></p>
+
+                                <p class="commit-stuff">@Proestimator.Resources.ProStrings.Details_SupplementNote</p>
+                                <p class="uncommit-stuff">@Proestimator.Resources.ProStrings.Details_UncommitSupplementNote</p>
+
+                                @if (!Model.EstimateIsLocked)
+                                {
+                                    <input id="btnCommit" class="button nav-btn commit-stuff do-not-disable" type="button" value="@Proestimator.Resources.ProStrings.CreateSupplement">
+                                    <input id="btnUncommit" class="button nav-btn uncommit-stuff do-not-disable" type="button" value="@Proestimator.Resources.ProStrings.UndoSupplement">
+                                }
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <div class="field-control">
+                                <p id="commitMessage" style="color: red;"></p>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    }
+</div>

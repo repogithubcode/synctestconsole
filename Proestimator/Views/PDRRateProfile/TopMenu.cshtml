@@ -1,0 +1,27 @@
+﻿<div id="smEstimateNavRow" class="col sm_4_4 md_8_8">
+    <select id="estimateNavigation" class="lg_hide" onchange="SubmitAndRedirectAction(this.options[this.selectedIndex].value);">
+        <option value="@("/" + ViewBag.UserID + "/pdr-rates/" + Model)" @(ViewBag.RateProfileNavID == 0 ? "selected" : "")>Info</option>
+        <option value="@("/" + ViewBag.UserID + "/pdr-rates/" + Model + "/rate-matrix")" @(ViewBag.RateProfileNavID == 1 ? "selected" : "")>Rate Matrix</option>
+        <option value="@("/" + ViewBag.UserID + "/pdr-rates/" + Model + "/oversized-dents")" @(ViewBag.RateProfileNavID == 2 ? "selected" : "")>@Proestimator.Resources.PDRStrings.OversizedDents</option>
+        <option value="@("/" + ViewBag.UserID + "/pdr-rates/" + Model + "/multipliers")" @(ViewBag.RateProfileNavID == 3 ? "selected" : "")>@Proestimator.Resources.PDRStrings.Multipliers</option>
+    </select>
+    <p class="error-message">@ViewBag.PDRErrorMessage</p>
+</div>
+<div id="lgEstimateNavRowRatesProfile2" class="col lg_12_12">
+    @if (ViewBag.EstimateID != null && ViewBag.EstimateID > 0)
+    {
+        <a class="button nav-btn" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/estimate/@ViewBag.EstimateID/add-parts');">@Proestimator.Resources.ProStrings.Back </a>
+    }
+    else
+    {
+        <a class="button nav-btn" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/rates/rateProfileSelect/@ViewBag.RateProfileSelectedTab');">@Proestimator.Resources.ProStrings.Back </a>
+    }
+    
+    <ul id="estimateList">
+        <a class="rateProfileTopMenuAnchor" style="padding-left: 8px;" href="@("javascript:SubmitAndRedirect('/" + ViewBag.UserID + "/pdr-rates/" + Model + "'"));" )"><li id="estimateNav" class="rateProfileTopMenu">Info</li></a>
+        <a class="rateProfileTopMenuAnchor" href="@("javascript:SubmitAndRedirect('/" + ViewBag.UserID + "/pdr-rates/" + Model + "/rate-matrix'"));" )"><li id="estimateNav" class="rateProfileTopMenu">Rate Matrix</li></a>
+        <a class="rateProfileTopMenuAnchor" href="@("javascript:SubmitAndRedirect('/" + ViewBag.UserID + "/pdr-rates/" + Model + "/oversized-dents')");" )"><li id="estimateNav" class="rateProfileTopMenu">@Proestimator.Resources.PDRStrings.OversizedDents</li></a>
+        <a class="rateProfileTopMenuAnchor" href="@("javascript:SubmitAndRedirect('/" + ViewBag.UserID + "/pdr-rates/" + Model + "/multipliers')");" )"><li id="estimateNav" class="rateProfileTopMenu">@Proestimator.Resources.PDRStrings.Multipliers</li></a>
+    </ul>
+    <p class="error-message">@ViewBag.PDRErrorMessage</p>
+</div>  

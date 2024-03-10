@@ -1,0 +1,1049 @@
+﻿@model ProEstimator.Admin.ViewModel.LinkRules.LinkRulesPageVM
+
+@using ProEstimator.Admin.ViewModel.LinkRules;
+@using ProEstimatorData.DataModel.LinkRules;
+
+@{
+    ViewBag.Title = "Administration - Link Rules";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<script>
+
+    var _fadeSpeed = 250;
+
+    var _childRulesDDLTemplate = "";
+    var _linkRuleTypeID = 1;        // 1 = section, 2 = primary panel
+
+    var _panelDetails;              // Returned from the server in LoadPanel
+
+    $(document).ready(function () {
+        LoadPanelsList();
+
+        $("#btnSavePanel").click(function () {
+            SavePanelDetails();
+        });
+
+        $("#btnAddMatchText").click(function () {
+            AddMatchTextControls(0, _linkRuleTypeID, 0, "", "", "", false, false);
+        });
+
+        $("#btnDeleteRule").click(function () {
+            if (confirm('Are you sure you want to delete this rule?')) {
+
+                $.getJSON("/LinkRules/DeleteLinkRule", { panelID: _panelDetails.ID, ruleTypeID: _linkRuleTypeID }, function (data) {
+                    LoadPanel(_panelDetails.ID);
+                });
+            }
+        });
+
+        $("#btnSaveMatchText").click(function () {
+            var count = $(".match-text-line").length;
+
+            var sortOrder = 0;
+
+            var first = true;
+
+            $(".match-text-line").each(function (key, value) {
+                var id = $(value).find(".match-id").val();
+                var isRemoved = $(value).find(".match-removed").is(":checked");
+                var matchPiece = $(value).find(".match-piece-dropdown").val();
+                var childRuleID = $(value).find(".child-rule-dropdown").val();
+                var matchType = $(value).find(".match-type-dropdown").val();
+                var matchText = $(value).find(".match-text-input").val();
+                var disabled = $(value).find(".match-disabled").is(":checked");
+                var indented = $(value).find(".match-text-wrapper").hasClass("indented");
+
+                if (first === true) {
+                    indented = false;
+                    $(value).removeClass("indented");
+                }
+
+                if (!childRuleID) {
+                    childRuleID = 0;
+                }
+
+                $.getJSON("/LinkRules/SaveMatchText", { ruleID: $("#hdnLinkRuleID").val(), id: id, sortOrder: sortOrder, matchPiece: matchPiece, childRuleID: childRuleID, matchType: matchType, matchText: matchText, removed: isRemoved, disabled: disabled, indented: indented }, function (data) {
+                    $(value).find(".match-id").val(data);
+
+                    if (isRemoved == true) {
+                        $(value).remove();
+                    }
+
+                    count--;
+                    if (count == 0) {
+                        GetMatchDetails();
+                        RefreshSectionSummaries();
+                    }
+                });
+
+                if (isRemoved == false) {
+                    sortOrder++;
+                }
+
+                first = false;
+            });
+        });
+    });
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    /// Panels Grid stuff
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+
+    function LoadPanelsList() {
+        var grid = $("#panels-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+    }
+
+    function PanelsGridDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#panels-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+    }
+
+    function PanelsGridLineSelectionChanged(arg) {
+
+        // Get the selected item and call the ClickedItem event
+        var row = $("#panels-grid").find(".k-state-selected").first();
+        var panelID = row.find("td").first().html();
+
+        LoadPanel(panelID);
+    }
+
+    function GetPanelsSearchParams() {
+        var result =
+        {
+            
+        };
+        return result;
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    /// Linked Panels Grid stuff
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+
+    function LoadLinkedPanelsList() {
+        var grid = $("#linked-panels-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+    }
+
+    function LinkedPanelsGridDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#linked-panels-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+    }
+
+    function LinkedPanelsGridLineSelectionChanged(arg) {
+
+        // Get the selected item and call the ClickedItem event
+        var row = $("#linked-panels-grid").find(".k-state-selected").first();
+    
+        var checkbox = row.find(".select-checkbox");
+        checkbox.prop("checked", !checkbox.prop("checked"));
+    }
+
+    function GetLinkedPanelsSearchParams() {
+        if (_panelDetails) {
+            var result =
+            {
+                panelID: (_panelDetails ? _panelDetails.ID : 0)
+            };
+            return result;
+        }
+        
+    }
+
+    function LoadPanel(panelID) {
+
+        $(".link-selected-details").fadeOut(_fadeSpeed);
+        $(".section-outline-selected").removeClass("section-outline-selected");
+
+        var elements = $(".panel-selected-details").length;
+        $(".panel-selected-details").fadeOut(_fadeSpeed, function () {
+            if (--elements == 0) {      // this handler runs once for every .panel-selected-details class, but we only want it to run once
+                $.getJSON("/LinkRules/GetPanelDetails", { panelID: panelID }, function (data) {
+                    if (data.Success == true) {
+                        _panelDetails = data.PanelDetails;
+                        console.log(_panelDetails);
+
+                        $("#lblPanelName").val(data.PanelDetails.PanelName);
+                        $("#lblSortOrder").val(data.PanelDetails.SortOrder);
+                        $("#chkSymmetry").prop("checked", data.PanelDetails.Symmetry);
+
+                        $("#lnkSectionLink").text(data.PanelDetails.SectionLinkSummary);
+                        $("#lnkPrimarySectionLink").text(data.PanelDetails.PrimarySectionLinkSummary);
+                        $("#lnkPrimaryPanelLink").text(data.PanelDetails.PrimaryPanelLinkSummary);
+
+                        $(".panel-selected-details").fadeIn(_fadeSpeed);
+
+                        LoadSectionLink();
+                        LoadLinkedPanelsList();
+                    }
+                    else {
+                        alert(data.ErrorMessage);
+                    }
+
+                });
+            }
+        });
+    }
+
+    function RefreshSectionSummaries() {
+        $.getJSON("/LinkRules/GetPanelDetails", { panelID: _panelDetails.ID }, function (data) {
+            if (data.Success == true) {
+
+                $("#lnkSectionLink").text(data.PanelDetails.SectionLinkSummary);
+                $("#lnkPrimarySectionLink").text(data.PanelDetails.PrimarySectionLinkSummary);
+                $("#lnkPrimaryPanelLink").text(data.PanelDetails.PrimaryPanelLinkSummary);
+            }
+        });
+    }
+
+    function SavePanelDetails() {
+
+        var panelName = $("#lblPanelName").val();
+        var sortOrder = $("#lblSortOrder").val();
+        var symmetry = $("#chkSymmetry").is(":checked");
+        var selectedLinkedPanels = GetSelectedLinkedPanels();
+
+        var elements = $(".panel-selected-details").length;
+
+        $(".panel-selected-details").fadeOut(_fadeSpeed, function () {
+            if (--elements == 0) {      // this handler runs once for every .panel-selected-details class, but we only want it to run once
+                $.getJSON("/LinkRules/SavePanelDetails",
+                {
+                      panelID: _panelDetails.ID
+                    , panelName: panelName
+                    , sortOrder: sortOrder
+                    , symmetry: symmetry
+                    , sectionLinkRuleID: _panelDetails.SectionLinkRuleID
+                    , primaryPanelLinkRuleID: _panelDetails.PrimaryPanelLinkRuleID
+                    , selectedLinkedIDs: selectedLinkedPanels
+                }
+                , function (data) {
+
+                    if (data.Success == true) {
+                        LoadPanel(_panelDetails.ID);
+                    }
+                    else {
+                        $(".panel-selected-details").fadeIn(_fadeSpeed);
+                        alert(data.ErrorMessage);
+                    }
+                });
+            }
+        });
+    }
+
+    function GetSelectedLinkedPanels() {
+        var selectedIDs = [];
+
+        // Iterate through the checked checkboxes
+        $(".select-checkbox:checked").each(function () {
+            var dataID = $(this).data("id");
+            selectedIDs.push(dataID);
+        });
+
+        // Create a comma-separated list
+        var commaSeparatedIDs = selectedIDs.join(", ");
+
+        return commaSeparatedIDs;
+    }
+
+    function LoadSectionLink() {
+        LoadLinkRule(_panelDetails.SectionLinkRuleID);
+    }
+
+    function LoadPrimarySectionLink() {
+        LoadLinkRule(_panelDetails.PrimarySectionLinkRuleID);
+    }
+
+    function LoadPrimaryPanelLink() {
+        LoadLinkRule(_panelDetails.PrimaryPanelLinkRuleID);
+    }
+
+    function LoadLinkRule(ruleID) {     
+        var elements = $(".link-selected-details").length;
+
+        $(".link-selected-details").fadeOut(_fadeSpeed, function () {
+            if (--elements == 0) {
+                $.getJSON("/LinkRules/GetLinkRuleDetails", { id: ruleID }, function (data) {
+                
+                    if (data) {
+                        $("#hdnLinkRuleID").val(data.ID);
+                        _linkRuleTypeID = data.TypeID;
+
+                        _childRulesDDLTemplate = "<select class='child-rule-dropdown form-control medium-dropdown'>";
+                        for (var i = 0; i < data.RulesDropDown.length; i++) {
+                            _childRulesDDLTemplate += "<option value='" + data.RulesDropDown[i].ID + "'>" + data.RulesDropDown[i].Name + "</option>";
+                        }
+                        _childRulesDDLTemplate += "</select>";
+
+                        //$(".RuleName").val(data.Name);
+                        //$("#RuleActive").prop("checked", data.Active);
+
+                        $("#match-text-container").empty();
+
+                        for (var i = 0; i < data.MatchTexts.length; i++) {
+                            AddMatchTextControls(data.MatchTexts[i].ID, data.TypeID, data.MatchTexts[i].ChildRuleID, data.MatchTexts[i].MatchText, data.MatchTexts[i].MatchPiece, data.MatchTexts[i].MatchType, data.MatchTexts[i].Disabled, data.MatchTexts[i].Indented);
+                        }
+
+                        RefreshAndOr();
+
+                        $(".match-text-wrapper").each(function (key, value) {
+                            UpdateMatchRowDisplay($(value));
+                        });
+
+                        GetMatchDetails();
+
+                        $(".link-selected-details").fadeIn(_fadeSpeed);
+
+                        // Hilight the correct button
+                        $(".section-outline-selected").removeClass("section-outline-selected");
+                        if (_linkRuleTypeID == 1) {
+                            $("#btnSectionContainerLink").addClass("section-outline-selected");
+                        }
+                        else if (_linkRuleTypeID == 2) {
+                            $("#btnPrimarySectionLink").addClass("section-outline-selected");
+                        }
+                        else {
+                            $("#btnPrimaryPanelLink").addClass("section-outline-selected");
+                        }              
+                    }
+                    else {
+                        $(".match-details").hide();
+                        alert("Error: rule not found.");
+                    }
+                });
+            }
+        });
+    }
+
+    function RefreshMatchTextLine(lineWrapper) {
+        var selectedMatchType = lineWrapper.find(".match-piece-dropdown").val();
+
+        if (selectedMatchType == 3) // Child rule
+        {
+            lineWrapper.find(".match-type-dropdown").hide();
+            lineWrapper.find(".match-text-input").hide();
+
+            lineWrapper.find(".child-rule-dropdown").show();
+        }
+        else {
+            lineWrapper.find(".match-type-dropdown").show();
+            lineWrapper.find(".match-text-input").show();
+
+            lineWrapper.find(".child-rule-dropdown").hide();
+        }
+    }
+
+    function RefreshAndOr() {
+        $(".match-text-line").each(function (key, value) {
+            var andOrDiv = $(value).find(".and-or-or");
+
+            if (key == 0) {
+                andOrDiv.text("");
+            }
+            else {
+                if ($(value).find(".match-text-wrapper").hasClass("indented")) {
+                    andOrDiv.text("or");
+                }
+                else {
+                    andOrDiv.text("and");
+                }
+            }
+        });
+    }
+
+    function AddMatchTextControls(id, ruleTypeID, childRuleID, matchText, matchPiece, matchType, disabled, indented) {
+        var html =
+            "<div class='match-text-line'><div class='and-or-or'>and</div>" +
+            "<div class='match-text-wrapper" + (indented == true ? " indented" : "") + "'>" +
+            "<input type='button' value='" + (indented == true ? "<" : ">") + "' class='btn btn-default btn-indent' onclick='ToggleIndent(this);' />" +
+            "<input class='match-id' type='text' value='" + id + "' /><input class='match-removed' type='checkbox' />" +
+            "<input type='checkbox' class='match-disabled' " + (disabled == true ? "checked='checked'" : "") + " />" +
+            "<select class='match-piece-dropdown form-control short-dropdown'>" +
+            ((ruleTypeID == 1 || ruleTypeID == 2) ? "<option value='1'>Category</option>" : "") +
+            ((ruleTypeID == 1 || ruleTypeID == 2) ? ("<option value='4' " + (matchPiece == 4 ? 'selected' : '') + ">Sub Category</option>") : "") +
+            (ruleTypeID == 3 ? ("<option value='2' " + (matchPiece == 2 ? 'selected' : '') + ">Part Description</option>") : "") +
+            "</select>" +
+            "<select class='match-type-dropdown form-control short-dropdown'>" +
+            "<option value='1'>Include</option>" +
+            "<option value='2' " + (matchType == 2 ? 'selected' : '') + ">Do Not Include</option>" +
+            "<option value='3' " + (matchType == 3 ? 'selected' : '') + ">Exact Match</option>" +
+            "</select>" +
+            "<input type='text' autocomplete='new-password' class='match-text-input form-control' value='" + matchText + "' />" +
+            _childRulesDDLTemplate +
+            "<input type='button' value='Remove' class='btn btn-default btn-remove' onclick='RemoveMatchText(this);' />" +
+            "<input type='button' value='Disable' class='btn btn-default btn-disable' onclick='DisableMatchText(this);' />" +
+            "<input type='button' value='Up' class='btn btn-default btn-up' onclick='MoveUp(this);' />" +
+            "<input type='button' value='Down' class='btn btn-default btn-down' onclick='MoveDown(this);' />" +
+            "</div></div>";
+
+        var wrapper = $($.parseHTML(html));
+
+        $("#match-text-container").append(wrapper);
+
+        RefreshMatchTextLine(wrapper);
+
+        wrapper.find(".match-piece-dropdown").change(function () {
+            RefreshMatchTextLine(wrapper);
+        });
+
+        wrapper.find(".child-rule-dropdown").val(childRuleID);
+    }
+
+    function RemoveMatchText(sender) {
+        var wrapper = $(sender).closest(".match-text-wrapper");
+        var checkbox = wrapper.find(".match-removed");
+        checkbox.prop("checked", !checkbox.is(":checked"));
+        UpdateMatchRowDisplay(wrapper);
+    }
+
+    function DisableMatchText(sender) {
+        var wrapper = $(sender).closest(".match-text-wrapper");
+        var checkbox = wrapper.find(".match-disabled");
+        checkbox.prop("checked", !checkbox.is(":checked"));
+        UpdateMatchRowDisplay(wrapper);
+    }
+
+    function MoveUp(sender) {
+        var wrapper = $(sender).closest(".match-text-line");
+        var previousWrapper = wrapper.prev();
+
+        if (previousWrapper) {
+            wrapper.insertBefore(previousWrapper);
+        }
+    }
+
+    function MoveDown(sender) {
+        var wrapper = $(sender).closest(".match-text-line");
+        var nextWrapper = wrapper.next();
+
+        if (nextWrapper) {
+            wrapper.insertAfter(nextWrapper);
+        }
+    }
+
+    function ToggleIndent(sender) {
+        var wrapper = $(sender).closest(".match-text-wrapper");
+        if (wrapper.hasClass("indented")) {
+            wrapper.removeClass("indented");
+            wrapper.find(".btn-indent").val(">");
+        }
+        else {
+            wrapper.addClass("indented");
+            wrapper.find(".btn-indent").val("<");
+        }
+
+        RefreshAndOr();
+    }
+
+    function UpdateMatchRowDisplay(wrapper) {
+        var removed = wrapper.find(".match-removed").is(":checked");
+        var disabled = wrapper.find(".match-disabled").is(":checked");
+
+        if (removed == true || disabled == true) {
+            wrapper.css("opacity", 0.3);
+        }
+        else {
+            wrapper.css("opacity", 1);
+        }
+
+        wrapper.find(".btn-disable").val(disabled == true ? "Enable" : "Disable");
+        wrapper.find(".btn-remove").val(removed == true ? "Restore" : "Remove");
+    }
+
+    function GetMatchDetails() {
+        $.getJSON("/LinkRules/GetMatchDetails", { panelID: _panelDetails.ID, ruleTypeID: _linkRuleTypeID }, function (data) {
+            console.log(data);
+
+            var grid = $("#match-count-grid").data("kendoGrid");
+            grid.dataSource.data(data.MatchCounts);
+
+            if (_linkRuleTypeID == 1) {
+                grid.hideColumn(1);
+            }
+            else {
+                grid.showColumn(1);
+            }
+
+            var vehiclesGrid = $("#vehicle-details-grid").data("kendoGrid");
+            vehiclesGrid.dataSource.data(data.NoMatchVehicleDetails);
+
+            $("#pMatchTotalLabel").text(data.MatchCounts.length + " / " + data.MatchCountsTotal);
+
+            RefreshSectionsGrid();
+            RefreshPartsGrid();
+        });
+    }
+
+    function VehicleDetailsGridLineSelectionChanged(arg) {
+        RefreshSectionsGrid();
+        RefreshPartsGrid();
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    /// The Sections grid
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    function RefreshSectionsGrid() {
+        var grid = $("#sections-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+
+        $("#CarDetailsWrapper").show();
+    }
+
+    function GetSectionsSearchParams() {
+        var row = $("#vehicle-details-grid").find(".k-state-selected").first();
+
+        var serviceBarcode = row.find("td").first().html();
+        var year = row.find("td").last().html();
+
+        if (!serviceBarcode) { serviceBarcode = ''; }
+        if (!year) { year = 2020; }
+
+        var result =
+        {
+            serviceBarcode: serviceBarcode
+            , year: year
+        };
+        return result;
+    }
+
+    function SectionsGridLineSelectionChanged(arg) {
+        RefreshPartsGrid();
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    /// The Section Parts grid
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    function RefreshPartsGrid() {
+        var grid = $("#parts-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+    }
+
+    function GetPartsGridSearchParams() {
+        var nheader = 0;
+        var nsection = 0;
+        var serviceBarcode = "";
+        var year = 2020;
+
+        var row = $("#vehicle-details-grid").find(".k-state-selected").first();
+        if (row) {
+            serviceBarcode = row.find("td").first().html();
+            year = row.find("td").last().html();
+        }
+
+        row = $("#sections-grid").find(".k-state-selected").first();
+        if (row) {
+            nheader = row.find("td").first().html();
+            nsection = row.find("td").eq(1).html();
+        }
+
+        if (!nheader) { nheader = 0; }
+        if (!nsection) { nsection = 0; }
+        if (!serviceBarcode) { serviceBarcode = ""; }
+        if (!year) { year = 2020; }
+
+        var result =
+        {
+            nheader: nheader
+            , nsection: nsection
+            , serviceBarcode: serviceBarcode
+            , year: year
+        };
+        return result;
+    }
+
+</script>
+
+<style>
+    #ContentWrapper {
+        position: relative;
+    }
+
+    .admin-container {
+        max-width: 90%;
+    }
+
+    .left-side {
+        width: 550px;
+        padding-top: 5px;
+        height: 100%;
+        float: left;
+    }
+
+    .right-side {
+        float: left;
+        width: 100%;
+        padding-top: 5px;
+        padding-left: 10px;
+        width: calc(100% - 550px);
+    }
+
+    .section-details {
+        height: 400px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        width: 100%;
+    }
+
+    .match-id {
+        display: none;
+    }
+
+    .rule-matches-container {
+        border: 1px solid black;
+        padding: 10px;
+    }
+
+    .match-removed, .match-disabled {
+        display: none;
+    }
+
+    .match-text-line {
+    }
+
+    .and-or-or {
+        float: left;
+        text-align: center;
+        width: 45px;
+        padding-top: 7px;
+    }
+
+    .match-text-wrapper {
+        margin-bottom: 5px;
+    }
+
+    .short-dropdown {
+        width: 165px !important;
+        float: left;
+        margin-right: 10px;
+    }
+
+    .medium-dropdown {
+        width: 250px !important;
+        float: left;
+        margin-right: 10px;
+    }
+
+    .match-text-input {
+        width: 200px;
+        float: left;
+    }
+
+    .list-block {
+        list-style: none;
+        padding-left: 0;
+        cursor: pointer;
+    }
+
+    .rule-selected {
+        font-weight: bold;
+    }
+
+    .panel-default {
+        margin-top: 10px;
+    }
+
+    .panel-selected-details {
+        display: none;
+    }
+
+    .link-selected-details {
+        display: none;
+    }
+
+    .preset-details {
+        display: none;
+    }
+
+    .match-type-dropdown {
+        width: 200px;
+    }
+
+    .form-row {
+        clear: both;
+        padding-top: 10px;
+    }
+
+        .form-row input {
+            width: 400px;
+        }
+
+    .section-outline {
+        border: 1px solid black;
+        border-radius: 10px;
+        padding: 5px;
+        cursor: pointer;
+    }
+
+    .section-outline-selected {
+        background-color: aliceblue;
+    }
+
+    .presets-link-left {
+        width: calc(50% - 5px);
+        float: left;
+    }
+
+    .presets-link-right {
+        width: calc(50% - 5px);
+        margin-left: 10px;
+        float: left;
+    }
+
+    .presets-link-list {
+        height: 300px;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .preset-selected {
+        background-color: #008cba;
+    }
+
+    #presets-link-container p {
+        margin: 0px;
+        padding: 5px;
+    }
+
+    #detailsWorkingOverlay {
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        background-color: white;
+        z-index: 10;
+        opacity: 0.8;
+        text-align: center;
+        padding-top: 50px;
+        display: none;
+    }
+
+    .not-include {
+        text-decoration: line-through;
+    }
+
+    .btn-remove, .btn-disable, .btn-up, .btn-down {
+        margin-left: 10px;
+    }
+
+    .btn-indent {
+        float: left;
+        margin-right: 10px;
+    }
+
+    .indented {
+        margin-left: 55px;
+    }
+
+    .presets-grid-filters-wrapper {
+        height: 49px;
+        width: 100%;
+    }
+
+    .presets-grid-filters-section {
+        padding: 5px;
+        float: left;
+        width: 33%;
+    }
+
+        .presets-grid-filters-section input {
+            height: 39px;
+            width: 100%;
+        }
+
+    .datagrid {
+        cursor: pointer;
+    }
+
+    a {
+        cursor: pointer;
+    }
+
+    .link-title {
+        float: left;
+        width: 200px;
+        font-weight: bold;
+    }
+</style>
+
+
+<div id="ContentWrapper">
+
+    <div class="left-side">
+
+        @*-----------------------------------------------------------------------------------------------------------------------------------------------*@
+        @* The Panels Grid *@
+        @*-----------------------------------------------------------------------------------------------------------------------------------------------*@
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Panels</h4>
+            </div>
+
+            <div class="panel-body">
+                <div class="section-details datagrid">
+                    @(Html.Kendo().Grid<PanelsGridRowVM>()
+                        .Name("panels-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.PanelID).Title("ID").Hidden();
+                            columns.Bound(item => item.PanelName).Title("Panel Name");
+                        })
+                        .Selectable()
+                        .Events(events => events
+                            .DataBound("PanelsGridDataChanged")
+                            .Change("PanelsGridLineSelectionChanged")
+                        )
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Read(read => read.Action("GetPanelsForGrid", "LinkRules").Data("GetPanelsSearchParams"))
+                        )
+                    )
+                </div>
+            </div>
+        </div>
+
+        @*-----------------------------------------------------------------------------------------------------------------------------------------------*@
+        @* The Panel details block *@
+        @*-----------------------------------------------------------------------------------------------------------------------------------------------*@
+        <div class="panel panel-default panel-selected-details">
+            <div class="panel-heading">
+                <h4>Panel Details</h4>
+            </div>
+
+
+            <div class="panel-body">
+                <div class="form-row">
+                    <p style="float: left; margin-right: 10px; padding-top: 8px; width: 100px;">Panel Name: </p>
+                    <input type="text" id="lblPanelName" autocomplete="new-password" class="match-text-input form-control" style="margin-right: 10px;">
+                </div>
+
+                <div class="form-row">
+                    <p style="float: left; margin-right: 10px; padding-top: 8px; width: 100px;">Sort Order: </p>
+                    <input type="text" id="lblSortOrder" autocomplete="new-password" class="match-text-input form-control" style="margin-right: 10px;">
+                </div>
+
+                <div class="form-row" id="SymmetryContainer">
+                    <p style="float: left; margin-right: 10px; padding-top: 8px; width: 100px;">Symmetry: </p>
+                    <input id="chkSymmetry" type="checkbox" style="width: 30px; height: 30px;" />
+                </div>
+
+                <div class="section-details datagrid">
+                    @(Html.Kendo().Grid<PanelsGridRowVM>()
+                        .Name("linked-panels-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.PanelID).Title("ID").Hidden();
+                            columns.Template(@<text></text>).ClientTemplate("<input type='checkbox' class='select-checkbox' data-id='#= PanelID#' # if (Selected) { #" + "checked='checked'" + "# } # />").Width(30);
+                            columns.Bound(item => item.PanelName).Title("Panel Name");
+                        })
+                        .Selectable()
+                        .Events(events => events
+                            .DataBound("LinkedPanelsGridDataChanged")
+                            .Change("LinkedPanelsGridLineSelectionChanged")
+                        )
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Read(read => read.Action("GetLinkedPanelsForGrid", "LinkRules").Data("GetLinkedPanelsSearchParams"))
+                        )
+                    )
+                </div>
+            </div>
+
+            <div class="panel-footer" style=" min-height: 60px;">
+                <p id="SaveMessage" class="pull-left" style="margin-top: 10px;">
+                </p>
+
+                @*<input type="button" id="btnDeleteRule" class="btn btn-default pull-right" value="Delete Rule">*@
+                <input type="button" id="btnSavePanel" class="btn btn-default pull-right" value="Save" style="margin-right: 10px;">
+            </div>
+        </div>
+
+        
+    </div>
+
+    <div class="right-side">
+        @*-----------------------------------------------------------------------------------------------------------------------------------------------*@
+        @* The Link details block *@
+        @*-----------------------------------------------------------------------------------------------------------------------------------------------*@
+        <div class="panel panel-default panel-selected-details">
+            <div class="panel-heading" style="height: 60px;">
+                <h4 class="pull-left">Link Rules</h4>                
+            </div>
+
+            <div class="panel-body">
+                <div id="btnSectionContainerLink" class="form-row section-outline" onclick="LoadSectionLink();">
+                    <p class="link-title">Section Container</p>
+                    <span id="lnkSectionLink"></span>
+                </div>
+
+                <div id="btnPrimarySectionLink" class="form-row section-outline" onclick="LoadPrimarySectionLink();">
+                    <p class="link-title">Primary Section</p>
+                    <span id="lnkPrimarySectionLink"></span>
+                </div>
+
+                <div id="btnPrimaryPanelLink" class="form-row section-outline" onclick="LoadPrimaryPanelLink();">
+                    <p class="link-title">Primary Panel</p>
+                    <span id="lnkPrimaryPanelLink"></span>
+                </div>
+            </div>
+
+        </div>
+
+        @*-----------------------------------------------------------------------------------------------------------------------------------------------*@
+        @* The Rule Match keywords block *@
+        @*-----------------------------------------------------------------------------------------------------------------------------------------------*@
+        <div class="panel panel-default link-selected-details">
+            <div class="panel-heading" style="height: 60px;">
+                <h4 class="pull-left">Match Text</h4>
+            </div>
+
+            <div id="match-text-container" class="panel-body same-as-parent-hide" style="padding-left: 0px;">
+
+            </div>
+
+            <div class="panel-footer same-as-parent-hide" style=" min-height: 60px;">
+                <input type="button" id="btnDeleteRule" class="btn btn-default pull-left" value="Delete Rule">
+
+                <input type="button" id="btnAddMatchText" class="btn btn-default pull-right" value="Add Match Text">
+                <input type="button" id="btnSaveMatchText" class="btn btn-default pull-right" value="Save" style="margin-right: 10px;">
+            </div>
+        </div>
+
+        @*-----------------------------------------------------------------------------------------------------------------------------------------------*@
+        @* The Match details block *@
+        @*-----------------------------------------------------------------------------------------------------------------------------------------------*@
+        <div class="panel panel-default link-selected-details">
+            <div class="panel-heading" style="height: 60px;">
+                <h4 style="float: left;">Match Details</h4>
+
+                <p id="pMatchTotalLabel" style="float: right; margin-top: 10px;"></p>
+
+                <input type="text" id="hdnLinkRuleID" style="display: none;" />
+            </div>
+
+            <div class="panel-body" style="position: relative;">
+                <div id="detailsWorkingOverlay">
+                    <img src="~/images/loading.gif" />
+                </div>
+
+                <div class="datagrid">
+                    @(Html.Kendo().Grid<MatchCount>()
+                        .Name("match-count-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.Category);
+                            columns.Bound(item => item.PartDescription);
+                            columns.Bound(item => item.VehicleCount);
+                        })
+                        .Selectable()
+                        .Sortable()
+                        .Reorderable(reorder => reorder.Columns(true))
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Read(read => read.Action("Empty", "LinkRules"))
+                        )
+                        .AutoBind(false)
+                    )
+                </div>
+
+                <p style="margin-top:30px; margin-bottom: 0px;">No Matches For:</p>
+                <div class="datagrid" style="margin-top: 0px; max-height: 300px; overflow-y: auto;">
+                    @(Html.Kendo().Grid<VehicleDetails>()
+                        .Name("vehicle-details-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.ServiceBarcode);
+                            columns.Bound(item => item.Make);
+                            columns.Bound(item => item.Model);
+                            columns.Bound(item => item.YearStart);
+                            columns.Bound(item => item.YearEnd);
+                        })
+                        .Selectable()
+                        .Events(events => events
+                            .Change("VehicleDetailsGridLineSelectionChanged")
+                        )
+                        .Sortable()
+                        .Reorderable(reorder => reorder.Columns(true))
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Read(read => read.Action("Empty", "LinkRules"))
+                        )
+                        .AutoBind(false)
+                    )
+                </div>
+
+                <div id="CarDetailsWrapper" style="padding-top: 20px; display: none;">
+                    <div class="datagrid" style="width: 200px; float: left; background-color: blue; max-height: 300px; overflow-y: auto;">
+                        @(Html.Kendo().Grid<SectionVM>()
+                        .Name("sections-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.Header).Title("Header").Hidden();
+                            columns.Bound(item => item.Section).Title("Section").Hidden();
+                            columns.Bound(item => item.Name).Title("Section Name");
+                        })
+                        .Selectable()
+                        .Events(events => events
+                            .Change("SectionsGridLineSelectionChanged")
+                        )
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Read(read => read.Action("GetSections", "LinkRules").Data("GetSectionsSearchParams"))
+                        )
+                    )
+                    </div>
+                    <div class="datagrid" style="float: left; background-color: red; width: calc(100% - 210px); margin-left: 10px; max-height: 300px; overflow-y: auto;">
+                        @(Html.Kendo().Grid<PartDetailsVM>()
+                        .Name("parts-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.Description).Title("Description");
+                            columns.Bound(item => item.Comment).Title("Comment");
+                            columns.Bound(item => item.Price).Title("Part #");
+                            columns.Bound(item => item.PartText).Title("Part Text");
+                        })
+                        .Selectable()
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Read(read => read.Action("GetSectionParts", "LinkRules").Data("GetPartsGridSearchParams"))
+                        )
+                    )
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

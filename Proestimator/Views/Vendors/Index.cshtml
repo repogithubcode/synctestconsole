@@ -1,0 +1,308 @@
+﻿@model Proestimator.ViewModel.VendorIndexVM
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.Vendors;
+}
+
+@using Proestimator.ViewModel
+@using ProEstimatorData.Models.SubModel
+@using Proestimator.ViewModel.Vendors
+
+<script type="text/javascript">
+    var _loginID = @Model.LoginID;
+    var _userID = @ViewBag.UserID;
+
+    var _pageStrings = {
+        SaveVendorInfo: "@Proestimator.Resources.ProStrings.SaveVendorInfo"
+        , AddVendorInfo: "@Proestimator.Resources.ProStrings.AddVendorInfo"
+        , EnterCompanyName: "@Proestimator.Resources.ProStrings.EnterCompanyName"
+        , VendorInformationSaved: "@Proestimator.Resources.ProStrings.VendorInformationSaved"
+        , VendorDeleteAlertMessage: "@Proestimator.Resources.ProStrings.VendorDeleteAlertMessage"
+        , VendorDeleteConfirmMessage: "@Proestimator.Resources.ProStrings.VendorDeleteConfirmMessage"
+        , VendorDeleted: "@Proestimator.Resources.ProStrings.VendorDeleted"
+    };
+</script>
+
+<script src="~/Files/js/VendorPage.js?v=2"></script>
+
+<style>
+
+    .a {
+        color: black;
+    }
+
+    .a:visited {
+        color: black;
+    }
+
+    #vendor-grid
+    {
+        height: 500px;
+        overflow-y: scroll;
+    }
+
+    .myVendorsStuff {
+        display: none;
+    }
+
+    .vendor-container {
+        display: none;
+    }
+
+    .save-buttons {
+        width: auto;
+    }
+
+    input[type="checkbox"] {
+        margin: 5px 4px 0px 0;
+    }
+
+    .extra-note {
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+</style>
+
+    @using (Html.BeginForm())
+    {
+        <div class="container">
+            <div class="half-container">
+
+                <ul id="vendorsTabBar" class="tab">
+                    <li id="tabButtonPublicVendors">
+                        <a href="javascript:void(0)" class="button" onclick="ShowPublicVendors()">Global Aftermarket Vendors</a>
+                    </li>
+                    <li id="tabButtonPrivateVendors">
+                        <a href="javascript:void(0)" class="button" onclick="ShowPrivateVendors()">My Vendors</a>
+                    </li>
+                    @if (Model.ShowRepairFacility)
+                    {
+                        <li id="tabButtonRepairFacility">
+                            <a href="javascript:void(0)" class="button" onclick="ShowRepairFacility()">Repair Facility</a>
+                        </li>
+                    }
+                    @if (Model.ShowAlternateIdentity)
+                    {
+                        <li id="tabButtonAlternateIdentity">
+                            <a href="javascript:void(0)" class="button" onclick="ShowAlternateIdentity()">Alternate Identity</a>
+                        </li>
+                    }
+                </ul>
+
+                <ul id="partSourceTabBar" class="tab myVendorsStuff">
+                    @foreach (SimpleListItem vendorType in Model.VendorTypes)
+                    {
+                        <li class="vendor-@vendorType.Value">
+                            <a href="javascript:void(0)" class="button" onclick="ShowVendorType(@vendorType.Value)">@vendorType.Text</a>
+                        </li>
+                    }
+                </ul>
+
+                <div class="tabcontent container">
+
+                    <div class="container" style="padding-top: 10px;">
+                        <div class="half-container">
+                            <input id="SearchText" type="text" style="float: left; width: calc(100% - 130px);" />
+                            <a id="btnSearch" class="button nav-btn do-not-disable" style="float: right; margin-top: 0px;">@Proestimator.Resources.ProStrings.Search</a>
+                        </div>
+
+                        <div class="half-container newButtonContainer">
+                            <input type="button" class="button btnCreateNew do-not-disable" style="width: auto; float: right; margin-top: 0px;" value="@Proestimator.Resources.ProStrings.Vendors_CreateNewVendor" />
+                        </div>
+                    </div>
+
+                    <div class="datagrid">
+                        @(Html.Kendo().Grid<VendorSummaryVM>()
+                            .Name("vendor-grid")
+                            .Columns(columns =>
+                            {
+                                columns.Bound(item => item.ID).Hidden();
+                                columns.Bound(item => item.IsSelected).ClientTemplate("<input type='checkbox' #: IsSelected ? checked='checked' :'' # data-id='#: ID#' class='vendor-checkbox' />").Title("").Width(40);
+                                columns.Bound(item => item.CompanyName).Title(Proestimator.Resources.ProStrings.CompanyName);
+                                columns.Bound(item => item.State).Title(Proestimator.Resources.ProStrings.State);
+                            })
+                            .Sortable()
+                            .Events(events => events
+                                .DataBound("onDataBound")
+                            )
+                            .DataSource(dataSource => dataSource
+                                .Ajax()
+                                .ServerOperation(false)
+                                .Read(read => read.Action("GetVendorList", "Vendors").Data("GetVendorsListParameters"))
+                            )
+                        )
+                    </div>
+
+                    <p class="extra-note">
+                        @Proestimator.Resources.ProStrings.Vendors_CheckBoxNote
+                    </p>
+
+                    <p class="extra-note">
+                        @Proestimator.Resources.ProStrings.Vendors_Note
+                    </p>
+                </div>
+            </div>
+
+            <div class="half-container">
+                <div class="vendor-container">
+      
+                    <div class="tab" style="text-align: center; margin-top: 20px;">
+                        <input type="button" class="button btnSave save-buttons do-not-disable" value="@Proestimator.Resources.ProStrings.SaveVendorInfo" />
+                        <input type="button" class="button btnDelete save-buttons do-not-disable" value="@Proestimator.Resources.ProStrings.Vendors_DeleteVendorInfo" />
+                    </div>
+                    
+
+                    <p class="public-message">@Proestimator.Resources.ProStrings.GlobalVendorCannotBeEdited</p>
+
+                    <div class="message-container">
+
+                    </div>
+
+                    <br />
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">* @Proestimator.Resources.ProStrings.CompanyProfile_CompanyName</label>
+                        <div class="field-control-half">
+                            <input id="txtCompanyName" type="text" class="form-control" />  
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.FirstName</label>
+                        <div class="field-control-half">
+                            <input id="txtFirstName" type="text" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.LastName</label>
+                        <div class="field-control-half">
+                            <input id="txtLastName" type="text" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Email</label>
+                        <div class="field-control-half">
+                            <input id="txtEmail" type="text" class="form-control email-address" />
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.MobilePhone</label>
+                        <div class="field-control-half">
+                            <input id="txtMobileNumber" type="text" class="form-control phone" autocomplete="off" />
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.WorkPhone</label>
+                        <div class="field-control-half">
+                            <input id="txtWorkNumber" type="text" class="form-control phone" autocomplete="off" />
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Extension</label>
+                        <div class="field-control-half">
+                            <input id="txtExtension" type="text" class="form-control" autocomplete="off" />
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Address1</label>
+                        <div class="field-control-half">
+                            <input id="txtAddress1" type="text" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Address2</label>
+                        <div class="field-control-half">
+                            <input id="txtAddress2" type="text" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.City</label>
+                        <div class="field-control-half">
+                            <input id="txtCity" type="text" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.State</label>
+                        <div class="field-control-half">
+                            <input id="txtState" type="text" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Zip</label>
+                        <div class="field-control-half">
+                            <input id="txtZip" type="text" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.TimeZone</label>
+                        <div class="field-control-half">
+                            <select id="ddlTimeZone" class="valid form-control" aria-invalid="false">
+                                <option selected="selected">@Proestimator.Resources.ProStrings.TimeZone_Eastern</option>
+                                <option>@Proestimator.Resources.ProStrings.TimeZone_Central</option>
+                                <option>@Proestimator.Resources.ProStrings.TimeZone_Mountain</option>
+                                <option>@Proestimator.Resources.ProStrings.TimeZone_Pacific</option>
+                                <option>@Proestimator.Resources.ProStrings.TimeZone_Alaska</option>
+                                <option>@Proestimator.Resources.ProStrings.TimeZone_Hawaii</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Fax</label>
+                        <div class="field-control-half">
+                            <input id="txtFax" type="text" class="form-control phone" autocomplete="off" />
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half" id="divFederalTaxID">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.CompanyProfile_FederalTaxID</label>
+                        <div class="field-control-half">
+                            <input id="txtFederalTaxID" type="text" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half" id="divLicenseNumber">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.CompanyProfile_LicenseNumber</label>
+                        <div class="field-control-half">
+                            <input id="txtLicenseNumber" type="text" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half" id="divBarNumber">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.CompanyProfile_BarNumber</label>
+                        <div class="field-control-half">
+                            <input id="txtBarNumber" type="text" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half" id="divRegistrationNumber">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.CompanyProfile_RegistrationNumber</label>
+                        <div class="field-control-half">
+                            <input id="txtRegistrationNumber" type="text" class="form-control" />
+                        </div>
+                    </div>
+
+                    @if (Model.IsAdmin)
+                    {
+                        <div class="field-wrapper-half">
+                            <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Vendors_CanBeSeenByAll</label>
+                            <div class="field-control-half">
+                                <input id="chkUniversal" type="checkbox" class="form-control" />
+                            </div>
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+    }

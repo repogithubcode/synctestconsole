@@ -1,0 +1,312 @@
+﻿@model Proestimator.ViewModel.ContractHistoryTabVM
+
+@using Proestimator.ViewModel;
+@using Proestimator.ViewModel.Contracts;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.Billing_Contract;
+}
+
+
+<script>
+
+    var _contractID;
+
+    $(document).ready(function () {
+        RefreshContractsGrid();
+
+    $("#btnInvoiceHistory").click(function () {
+
+            $.ajax({
+                url: "/Settings/CreateContractReportAttachment/",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ "userID": @ViewBag.UserID, "loginID": @Model.LoginID, "contractID": _contractID, "reportType": "ContractInvoices" }),
+                beforeSend: function () {
+                    applyLoading();
+                },
+                success: function (result) {
+                    removeLoading();
+                    // debugger;
+                    console.log(result);
+                    if (result.Success === true) {
+
+                        var win = window.open("/@ViewBag.UserID/@Model.LoginID/" + _contractID + "/view-contract-report-attachment/" + result.Report.ID + "/" + result.Report.ReportName, "_blank");
+
+                        if (win) {
+                            //Browser has allowed it to be opened
+                            win.focus();
+                        } else {
+                            //Browser has blocked it
+                            alert("@Proestimator.Resources.ProStrings.BrowserBlockedSite.");
+                        }
+
+                        if (result.ErrorMessage.length > 0) {
+                            ShowUserMessage(result.ErrorMessage, false, 5000);
+                        }
+                    }
+                    else {
+                        ShowUserMessage(result.ErrorMessage, true, 4000);
+                    }
+                    //$(".ui-dialog-titlebar-close").trigger('click');
+                },
+                error: function (error) {
+                    removeLoading();
+                    ShowUserMessage(error, true, 4000);
+                }
+            });
+        });
+    });
+
+    function RefreshContractsGrid() {
+        var grid = $("#contract-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+    }
+
+    function ContractGridDataChanged(arg) {
+        var grid = $("#contract-grid").data("kendoGrid");
+        var dataSource = grid.dataSource;
+
+        //total records
+        //var totalRecords = dataSource.total();
+    }
+
+    function ContractGridLineSelectionChanged()
+    {
+
+
+    }
+
+    function GetContractSearchParameters() {
+        var result =
+        {
+            userID: @ViewBag.UserID
+          , loginID: @Model.LoginID
+        };
+
+        return result;
+    }
+
+    function LoadContract(contractID) {
+        _contractID = contractID;
+        LoadContractDetails();
+        LoadInvoices();
+    }
+
+    function LoadContractDetails() {
+        $("#addOnsContainer").fadeOut(300, function () {
+            var addOnsArea = $("#addOnsArea");
+            addOnsArea.empty();
+
+             $.ajax({
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                url: "/ContractHistory/GetContractDetails",
+                type: "POST",
+                processData: false,
+                data: JSON.stringify({ "userID": @ViewBag.UserID, "contractID": _contractID }),
+                success: function (response) {
+                    console.log(response);
+
+                    for (i = 0; i < response.AddOnDetails.length; i++)
+                    {
+                        var html = "<div class='field-wrapper " + (response.AddOnDetails[i].IsBundleable ? " bundlable" : "") + "'> \
+                        <label class='inputLabel field-label'>" + response.AddOnDetails[i].AddOnType + "</label> \
+                        <div class='field-control inputLabel field-value add-on-details-row'>";
+
+                        if (response.AddOnDetails[i].TermDescription) {
+                            html += response.AddOnDetails[i].TermDescription;
+                        }
+
+                        html += "</div></div>";
+
+                        addOnsArea.append(html);
+                    }
+
+                    $("#addOnsContainer").fadeIn(300);
+                },
+                error: function (er) {
+                    ShowUserMessage(er, true);
+                    console.log("Error: " + er);
+                }
+            });
+        });
+    }
+
+     // -------------------------------------------------------------------------------------------------------------------------------------------------
+    // Invoice Grid
+    // -------------------------------------------------------------------------------------------------------------------------------------------------
+    function InvoiceGridDataChanged(arg) {
+        var grid = $("#invoice-grid").data("kendoGrid");
+        var dataSource = grid.dataSource;
+
+        //total records
+        var totalRecords = dataSource.total();
+
+        if (totalRecords > 0)
+        {
+            $("#invoicesContainer").fadeIn();
+        }
+    }
+
+    function InvoiceGridLineSelectionChanged()
+    {
+
+
+    }
+
+    function GetInvoicesSearchParameters() {
+        var result =
+        {
+            userID: @ViewBag.UserID
+          , loginID: @Model.LoginID
+          , contractID: _contractID
+          , addOnID: 0
+        };
+        return result;
+    }
+
+    function LoadInvoices() {
+        $("#invoicesContainer").fadeOut(300, function () {
+            var grid = $("#invoice-grid").data("kendoGrid");
+
+            if (grid) {
+                grid.dataSource.read();
+            }
+        });
+    }
+</script>
+
+<style>
+    h1 {
+        margin-bottom: 5px !important;
+        padding-top: 20px;
+    }
+
+    .contract-history-container {
+        max-width: 80%;
+        margin: 0px auto;
+    }
+
+    #addOnsArea {
+        padding-left: 40px;
+    }
+
+    #addOnsContainer {
+        display: none;
+    }
+
+    .item {
+        display: flex;
+        justify-content: space-between;
+        padding: 3px 0;
+        cursor: pointer;
+    }
+
+        .item:hover {
+            font-weight: bold;
+        }
+
+    .add-on-details-row {
+        max-width: 100px;
+    }
+
+    .bundled {
+        margin: 0px;
+    }
+
+    .bundlable {
+        margin-left: 30px;
+    }
+
+    .field-control a {
+        color: black;
+        text-decoration: underline;
+    }
+
+    .page-link {
+        color: black !important;
+        font-weight: normal;
+        text-decoration: underline;
+    }
+</style>
+
+<div id="workDesk" class="page-container">
+
+
+    @using (Html.BeginForm("Index", "ContractHistory", FormMethod.Post, new { @class = "container" }))
+    {
+        @Html.Partial("~/Views/Settings/SettingTopMenu.cshtml")
+
+        <input type="hidden" id="redirectData" name="redirectDataField" />
+        <input id="submitButton" type="submit" value="@Proestimator.Resources.ProStrings.Save" class="button nav-btn" style="display: none;" />
+        @Html.HiddenFor(o => o.LoginID)
+
+        <div class="tabcontent container">
+
+            <div style="position: fixed; width: 200px; padding-top: 5px;" class="inputLabel"><a class="page-link" href="/@ViewBag.UserID/settings/contract">< Back</a></div>
+
+            <div class="half-container">
+                <h1>Contract History</h1>
+
+                <div class="contract-history-container">
+                    @foreach (ContractVM contract in Model.Contracts)
+                    {
+                        <div class="item inputLabel" onclick="LoadContract(@contract.ContractID)">
+                            <div>@contract.TermDescription</div>
+                            <div>@contract.EffectiveDate.ToShortDateString()</div>
+                            <div>@contract.ExpirationDate.ToShortDateString()</div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="half-container" id="addOnsContainer">
+                <div style="margin: 0px auto; width: 140px;">
+                    <h1>Add Ons</h1>
+                </div>
+
+                <div id="addOnsArea">
+
+                </div>
+            </div>
+
+            <div id="invoicesContainer" class="container" style="display: none; margin-top: 30px;">
+                <h1>Invoices</h1>
+                <input type="button" id="btnInvoiceHistory" class="button do-not-disable" style="max-width: 125px;margin-bottom:10px" value="Export to Pdf">
+
+                <div class="datagrid">
+                    @(Html.Kendo().Grid<InvoiceVM>()
+                            .Name("invoice-grid")
+                            .Columns(columns =>
+                            {
+                                columns.Bound(item => item.InvoiceID).Hidden();
+                                columns.Bound(item => item.Summary).Title(@Proestimator.Resources.ProStrings.Summary);
+                                columns.Bound(item => item.InvoiceAmount).Format("{0:c}").Title(@Proestimator.Resources.ProStrings.InvoiceAmount);
+                                columns.Bound(item => item.SalesTax).Format("{0:c}").Title(@Proestimator.Resources.ProStrings.SalesTax);
+                                columns.Bound(item => item.InvoiceTotal).Format("{0:c}").Title(@Proestimator.Resources.ProStrings.InvoiceTotal);
+                                columns.Bound(item => item.Notes).Title(@Proestimator.Resources.ProStrings.Notes);
+                                columns.Bound(item => item.DueDate).Format("{0:MM/dd/yyyy}").Title(@Proestimator.Resources.ProStrings.Invoice_DueDate);
+                                columns.Bound(item => item.DatePaid).Format("{0:MM/dd/yyyy}").Title(@Proestimator.Resources.ProStrings.DatePaid);
+                            })
+                            .Events(events => events
+                                .DataBound("InvoiceGridDataChanged")
+                                .Change("InvoiceGridLineSelectionChanged")
+                            )
+                            .DataSource(dataSource => dataSource
+                                .Ajax()
+                                .ServerOperation(false)
+                                .Read(read => read.Action("GetInvoicesForContractOrAddOn", "Settings").Data("GetInvoicesSearchParameters"))
+                            )
+                            .AutoBind(false)
+                        )
+                </div>
+            </div>
+        </div>
+    }
+
+</div>  

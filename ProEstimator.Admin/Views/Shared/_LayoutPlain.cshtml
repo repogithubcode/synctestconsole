@@ -1,0 +1,474 @@
+﻿<!DOCTYPE html>
+<html lang="en" ng-app="admin">
+<head ng-controller="themeController as theme">
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title - Web-Est Administration</title>
+    <link rel="stylesheet" href="@Url.Content("~/Content/bootstrap-theme-yeti.css")" />
+
+    <script src="@Url.Content("~/Scripts/jquery-1.10.2.min.js")" type="text/javascript"></script>
+
+    <script src="@Url.Content("~/Scripts/jquery-ui-1.12.1/jquery-ui.min.js")" type="text/javascript"></script>
+    <link rel="stylesheet" href="@Url.Content("~/Scripts/jquery-ui-1.12.1/jquery-ui.css")" />
+
+    <link href="@Url.Content("~/Content/kendo/2020.1.406/kendo.common.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2020.1.406/kendo.mobile.all.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2020.1.406/kendo.dataviz.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2020.1.406/kendo.default.min.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/kendo/2020.1.406/kendo.dataviz.default.min.css")" rel="stylesheet" type="text/css" />
+
+    <link rel="stylesheet" href="@Url.Content("~/Content/Style.css?id=1")" />
+
+    <script src="@Url.Content("~/Scripts/kendo/2020.1.406/jszip.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2020.1.406/kendo.all.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/2020.1.406/kendo.aspnetmvc.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo.modernizr.custom.js")"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.js"></script>
+
+    <script src="@Url.Content("~/Scripts/jquery.inputmask/jquery.inputmask.js")"></script>
+    <script src="@Url.Content("~/Scripts/jquery.mask.js")" type="text/javascript"></script>
+
+    <script src="https://use.fontawesome.com/5028ef63c3.js"></script>
+
+    <script src="@Url.Content("~/Scripts/Common/InputFormattingB.js?v=3")" type="text/javascript"></script>
+
+    <script>
+        $(document).on('click', '[type="submit"][data-form-action]', function (event) {
+            var $this = $(this);
+            var formAction = $this.attr('data-form-action');
+            $this.closest('form').attr('action', formAction);
+        });
+    </script>
+
+    <style>
+
+
+        .top-strip {
+            background-color: #222222;
+            height: 45px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .top-spacer {
+            width: 100%;
+            height: 45px;
+        }
+
+        .top-center {
+            max-width: 1100px;
+            margin: 0px auto;
+            color: white;
+        }
+
+            .top-center h1 {
+                margin: 3px 0px;
+            }
+
+        .top-section {
+            float: left;
+            padding: 0px;
+            margin: 0px;
+        }
+
+        .admin-container {
+            max-width: 1100px;
+            margin: 0px auto;
+            height: 100%;
+        }
+
+        .main-menu {
+            padding: 0px;
+            list-style: none;
+            margin-top: 5px;
+            margin-left: 20px;
+        }
+
+            .main-menu li {
+                float: left;
+                padding: 9px;
+                margin-left: 10px;
+                cursor: pointer;
+            }
+
+                .main-menu li:hover {
+                    background-color: gray;
+                }
+
+        .menu-drop-down {
+            padding: 0px;
+            margin: 0px;
+            list-style: none;
+        }
+
+        .drop-down-container {
+            position: absolute;
+            display: none;
+        }
+
+        .menu-drop-down li {
+            background-color: #222222;
+            width: 220px;
+            height: 30px;
+            margin: 0px;
+            padding: 0px;
+            cursor: pointer;
+        }
+
+        .menu-drop-down a {
+            color: white;
+            text-decoration: none;
+            width: 100%;
+            display: block;
+            padding-top: 5px;
+            padding-left: 5px;
+            height: 100%;
+        }
+
+        .menu-drop-down li:hover {
+            background-color: gray;
+        }
+
+        .sales-rep-details {
+            float: right;
+            padding-top: 15px;
+        }
+
+        .page-header {
+            margin-top: 5px;
+            border-bottom: 0px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1500px;
+        }
+
+        h1 {
+            margin-top: 5px;
+            margin-bottom: 5px;
+            font-size: 1.7em;
+        }
+
+        .deleted-label {
+            font-size: 12px;
+            font-weight: normal;
+        }
+
+        .deleted-row {
+            color: lightgray;
+            font-style: italic;
+        }
+
+        .past-due {
+            color: red !important;
+            font-weight: bold !important;
+        }
+
+        .field-invalid {
+            background-color: pink !important;
+        }
+
+        .details-form td {
+            padding: 1px;
+        }
+
+        .ui-datepicker-trigger {
+            cursor: pointer;
+        }
+
+        input:focus {
+            background-color: #f6f6f6;
+        }
+
+        label {
+            font-weight: normal;
+        }
+
+        .row {
+            padding-top: 15px;
+        }
+
+        #workingOverlay {
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            background-color: white;
+            position: fixed;
+            top: 45px;
+            left: 0px;
+            right: 0px;
+            bottom: 0px;
+            z-index: 10000;
+            padding-top: 100px;
+            opacity: 0.5;
+            display: none;
+        }
+
+        .k-grid-header th.k-header > .k-link {
+            color: white
+        }
+
+        .k-pager-wrap .k-pager-info {
+            display: block !important;
+        }
+
+        .k-pager-wrap .k-pager-numbers-wrap .k-pager-numbers .k-current-page .k-pager-nav {
+            color: #fff;
+            background-color: #f35800;
+            border-color: #f35800;
+        }
+    </style>
+
+    <script>
+        $(document).ready(function () {
+            // Position the menus
+            var menuDropDown = $("#MenuDropDown");
+            var reportsDropDown = $("#ReportsDropDown");
+
+            menuDropDown.css({ top: '45px', left: $("#menuMenu").position().left + 'px' });
+            reportsDropDown.css({ top: '45px', left: $("#menuReports").position().left + 'px' });
+
+            // Wire up the menu buttons
+            $("#menuMenu").click(function () {
+                if (menuDropDown.is(":visible")) {
+                    menuDropDown.hide();
+                }
+                else {
+                    menuDropDown.show();
+                    reportsDropDown.hide();
+                }
+            });
+
+            $("#menuReports").click(function () {
+                if (reportsDropDown.is(":visible")) {
+                    reportsDropDown.hide();
+                }
+                else {
+                    reportsDropDown.show();
+                    menuDropDown.hide();
+                }
+            });
+
+            $(window).click(function () {
+                if (menuDropDown.is(":visible")) {
+                    menuDropDown.hide();
+                }
+
+                if (reportsDropDown.is(":visible")) {
+                    reportsDropDown.hide();
+                }
+            });
+
+            $('#menuMenu').click(function (event) {
+                event.stopPropagation();
+            });
+
+            $('#menuReports').click(function (event) {
+                event.stopPropagation();
+            });
+
+            $(".admin-container").click(function () {
+                menuDropDown.hide();
+                reportsDropDown.hide();
+            });
+
+            UpdateFormattedText();
+
+            $(".datepicker").datepicker();
+
+            // Change a text input to a formatted currency value like $50.00
+            $(document).on('change', '.currency', function () {
+                var currentValue = $(this).val().replace(/[^0-9.-]/g, '');
+                if (currentValue != '') {
+                    $(this).val(parseFloat(currentValue, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString());
+                }
+            });
+
+            // Text boxes with a class alphanumericOnly only allow letters and numbers
+            $("input.alphanumericOnly").bind("keyup", function (e) {
+                this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
+            });
+        });
+
+        function OpenSalesDashboard() {
+            window.open("/MSR/Index", "#1", "toolbar=no,scrollbars=yes,resizable=no,top=25,left=0,width=1350,height=635");
+        }
+
+        function ShowLoadingOverlay() {
+            $("#workingOverlay").show();
+        }
+
+        function HideLoadingOverlay() {
+            $("#workingOverlay").hide();
+        }
+
+        function KendogridSearchFilter(grid, valuetoFilter) {
+
+            var columns = grid.columns;
+
+            var filter = { logic: "or", filters: [] };
+            columns.forEach(function (x) {
+                if (x.field) {
+                    var type = grid.dataSource.options.schema.model.fields[x.field].type;
+                    console.log(type);
+                    if (type == "string") {
+                        filter.filters.push({
+                            field: x.field,
+                            operator: "contains",
+                            value: valuetoFilter
+                        })
+                    } else if (type == "date") {
+                        var data = grid.dataSource.data();
+                        for (var i = 0; i < data.length; i++) {
+                            var dateStr = kendo.format(x.format, data[i][x.field]);
+                            if (dateStr.startsWith(valuetoFilter)) {
+                                filter.filters.push({
+                                    field: x.field,
+                                    operator: "eq",
+                                    value: data[i][x.field]
+                                })
+                            }
+                        }
+                    } else if (type == "boolean" && getBoolean(valuetoFilter) !== null) {
+                        var bool = getBoolean(valuetoFilter);
+                        filter.filters.push({
+                            field: x.field,
+                            operator: "eq",
+                            value: bool
+                        });
+                    }
+                }
+            });
+
+            return filter;
+        }
+
+        function isNumeric(n) {
+            return !isNaN(parseFloat(n)) && isFinite(n);
+        }
+
+        function getBoolean(str) {
+            if ("true".startsWith(str)) {
+                return true;
+            } else if ("false".startsWith(str)) {
+                return false;
+            } else {
+                return null;
+            }
+        }
+
+
+        // This calls the change event on inputs that need formatting after loading.  This should be called by forms after they load data from the database that
+        // might not be formatted for display.
+        function UpdateFormattedText() {
+            $(".phone").unmask().mask("(999) 999-9999");
+
+            $(".currency").change();
+            $(".phone").change();
+        }
+    </script>
+</head>
+<body>
+
+    <div class="top-strip">
+        <div class="top-center">
+            <div class="top-section">
+                <h1>ProEstimator Administration</h1>
+            </div>
+            
+            <div class="top-section">
+                <ul class="main-menu">
+                    <li id="menuMenu">Menu</li>
+                    <li id="menuReports">Reports</li>
+                </ul>
+            </div>
+
+            <div id="MenuDropDown" class="drop-down-container">
+                <ul class="menu-drop-down">
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "AccountMaintenance")) { <li><a href="/Logins/List/0">Account Maintenance</a></li> }
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "ContractsAndInvoices")) { <li><a href="/Contract/List/0">Contract Maintenance</a></li> }
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "RepMaintenance")) { <li><a href="/SalesRepMaintenance/List">Sales Rep Maintenance</a></li> }
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "RepPermissions")) { <li><a href="/SalesRepPermission/List/0">Sales Rep Permission</a></li> }
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "ImportTab")) { <li><a href="/Importer/List">Importer</a></li> }
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "FromWETrial")) { <li><a href="/TrialSetup/List">Trial Setup</a></li> }
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "SuccessBox")) { <li><a href="/SuccessBox/List">Success Box</a></li> }
+
+                    <li><a href="/UserMessages/Index">User Messages</a></li>
+                    @*FW: Admin pages Email hiding unused links*@
+                    @*<li><a href="/SMSDispatcher/List">SMS Dispatcher</a></li>
+                    <li><a href="/#/salesRep/profile">Profile Manager</a></li>*@
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "PartsNow")) { <li><a href="/PartsNowManager/List">PartsNow Manager</a></li> }
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "Panels")) { <li><a href="/LinkRules">Panels</a></li> }
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "ProAdvisorPresets")) { <li><a href="/ProAdvisor">Pro Advisor</a></li> }
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "DocumentsUpload")) { <li><a href="/DocumentsUpload/List">Documents Upload</a></li> }
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "DocumentsDownload")) { <li><a href="/DocumentsDownload/List">Documents Download</a></li> }
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "ChangeLog")) { <li><a href="/ChangeLog/Index">Site Update Log</a></li> }
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "DataChangeLog")) { <li><a href="/DataChangeLog/Index">Data Change Log</a></li> }
+                </ul>
+            </div>
+
+            <div id="ReportsDropDown" class="drop-down-container">
+                <ul class="menu-drop-down">
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "LoginFailure")) { <li><a href="/LoginFailures/List">Login Failures</a></li> } 
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "Errors")) { <li><a href="/ErrorLogReport/List">Error Log Report</a></li> }
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "UserFeedbackBugs")) { <li><a href="/UserFeedBackBugReport/List">User Feedback/Bugs</a></li> }
+                    <li><a href="/SalesBoardReport/List">Sales Board</a></li>
+                    <li><a href="/StripePaymentReport/List">Payment Report</a></li>
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "RenewalReport")) { <li><a href="/Reports/Renewal">Renewal Report</a></li> }
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "ContractReport")) { <li><a href="/Reports/Contract">No Payment Contract Report</a></li> }
+                    <li><a href="/DueInvoiceReport/List">Due Invoice Report</a></li>
+                    @*FW: Admin pages Email hiding unused links*@
+                    @*<li><a href="/PdrReport/List">PDR Report</a></li>*@
+                    @*<li><a href="/TrialReport/List">Trial Report</a></li>*@
+                    @*<li><a href="/MSR/Index">Monthly Sales Dashboard</a></li>
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "RenewalReport"))
+                    {
+                    <li><a href="/Reports/Renewal">Renewal Report</a></li> }*@
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "EmailReport")) { <li><a href="/EmailReport/List">Email Report</a></li> }
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "EmailErrorReport")) { <li><a href="/EmailErrorReport/List">Email Error Report</a></li> }
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "UnsubscribeEmailReport")) { <li><a href="/UnsubscribeEmailReport/List">Unsubscribe Email Report</a></li> }
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "MonthlySalesDashboardReport"))
+                    {
+                        <li><a href="/Reports/MonthlySalesDashboardReport">Monthly Sales Dashboard</a></li>
+                    }
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "ContractAddOnReport")) { <li><a href="/Reports/ContractAddOnReport">Contract Add-On Report</a></li> }
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "ProAdvisorEstimateTotal"))
+                    {
+                        <li><a href="/Reports/ProadvisorTotalReport">Pro-Advisor Estimate Total</a></li>
+                    }
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "InvoiceFailureLog"))
+                    {
+                        <li><a href="/Reports/InvoiceFailures">Invoice Failures</a></li>
+                    }
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(ViewBag.SessionSalesRepID, "FinancingReport"))
+                    {
+                        <li><a href="/Reports/FinancingReport">Financing - Merchants</a></li>
+                        <li><a href="/Reports/FinancingReport/LoanApps">Financing - Loan Apps</a></li>
+                    }
+                </ul>
+            </div>
+
+            <div class="sales-rep-details">
+                @ViewBag.SalesRepName.ToUpper() - <a href="/LogOut" style="color: white;">Log Out</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="workingOverlay">
+        <img src="~/images/loading.gif" />
+    </div>
+
+    <div class="top-spacer">
+        &nbsp;
+    </div>
+    <div class="admin-container">
+        <div id="banner" class="page-header">
+            @RenderBody()
+        </div>
+    </div> 
+</body>
+</html> 

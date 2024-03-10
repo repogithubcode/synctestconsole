@@ -1,0 +1,53 @@
+﻿<style>
+    @@media screen and (max-width:900px) {
+        #smEstimateNavRow {
+            border: 1px solid #349ad8;
+            background-color: #f5f9fb;
+            max-width: 100%;
+            padding-right: 30px;
+        }
+
+        #estimateNavigation {
+            margin-top: 15px;
+        }
+
+        .hide-small {
+            display: none;
+        }
+    }
+
+</style>
+
+<div id="smEstimateNavRow" class="col sm_4_4 md_8_8 lg_10_12">
+    <select id="estimateNavigation" onchange="location = this.options[this.selectedIndex].value;">
+        <option value="@("/" + ViewBag.UserID + "/reports/create-report")" @(ViewBag.EstimateNavID == 0 ? "selected" : "")>@Proestimator.Resources.ProStrings.CreateReportsHeader</option>
+        <option value="@("/" + ViewBag.UserID + "/reports/custom-report")" @(ViewBag.EstimateNavID == 1 ? "selected" : "")>@Proestimator.Resources.ProStrings.PageTitle_CustomReports</option>
+        <option value="@("/" + ViewBag.UserID + "/reports/qb-report")" @(ViewBag.EstimateNavID == 2 ? "selected" : "")>@Proestimator.Resources.ProStrings.QBExport</option>
+    </select>
+</div>
+<div id="lgEstimateNavRowRatesProfile" class="col lg_12_12 sm_hide">
+    <ul id="estimateList">
+        <a class="settingsTopMenuAnchor" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/reports/create-report');">
+            <li id="estimateNav" class="settingNavID">@Proestimator.Resources.ProStrings.CreateReportsHeader</li>
+        </a>
+        <a class="settingsTopMenuAnchor" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/reports/custom-report');">
+            <li id="estimateNav" class="settingNavID">@Proestimator.Resources.ProStrings.PageTitle_CustomReports</li>
+        </a>
+        @if (ViewBag.QBExport)
+        {
+            <a class="settingsTopMenuAnchor" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/reports/qb-report');">
+                <li id="estimateNav" class="settingNavID">@Proestimator.Resources.ProStrings.QBExport</li>
+            </a>
+        }
+    </ul>
+</div>
+
+<script type="text/javascript">
+
+    if(@ViewBag.settingsTopMenuID != "0"){
+        $('.settingsTopMenuAnchor:eq(0)').attr('id', 'estimateNavAnchorFirst');
+    }
+
+</script>
+    @*}
+</div>*@ 

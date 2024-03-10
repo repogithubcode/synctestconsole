@@ -1,0 +1,356 @@
+﻿@model Proestimator.ViewModel.QBExportVM
+
+@using Proestimator.ViewModel
+@using ProEstimatorData.DataModel
+
+@{
+    ViewBag.Title = @Proestimator.Resources.ProStrings.QBExport_Header;
+}
+
+<script>
+    function GridDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#export-grid tbody tr").hover(
+            function () {
+                var row = $(this).closest("tr");
+                //var exportDate = row.find("td").eq(2).html();
+                //var hasChanges = row.find("td").eq(9).html();
+
+                //if (exportDate == "" || hasChanges == "true")
+                //{
+                //    var checkbox = row.find("td").first().find(".checkbox");
+                //    checkbox.prop("checked", true);
+                //}
+
+                row.toggleClass("k-state-hover");
+            }
+        );
+    }
+
+    function GridLineSelectionChanged(arg) {
+
+        // Remove the Hover state from all rows
+        $(".k-state-hover").each(function (index) {
+            $(this).removeClass("k-state-hover");
+        });
+
+        // Get the selected item and call the ClickedItem event
+        var row = $("#export-grid").find(".k-state-selected").first();
+        var checkbox = row.find("td").first().find(".checkbox");
+        checkbox.prop("checked", !checkbox.is(":checked"));
+
+    }
+
+    function HistoryGridDataChanged(arg) {
+
+        var gridName = 'history-grid';
+
+        $("#" + gridName + " thead [data-index=5] .k-link").html("<input type='checkbox' class='invoice-checkbox' id='" + gridName + "-checkbox' />")
+
+        $("#" + gridName + "-checkbox").click(function() {
+            var isChecked = $(this).prop("checked");
+            $('#' + gridName + ' tr:has(td)').find('input[type="checkbox"]').prop('checked', isChecked);
+        });
+
+        $('#' + gridName + ' tbody tr:has(td)').find('input[type="checkbox"]').click(function() {
+            var isChecked = $(this).prop("checked");
+            var isHeaderChecked = $("#" + gridName + "-checkbox").prop("checked");
+            if (isChecked == false && isHeaderChecked)
+                $("#" + gridName + "-checkbox").prop('checked', isChecked);
+            else {
+                $('#' + gridName + ' tbody tr:has(td)').find('input[type="checkbox"]').each(function() {
+                    if ($(this).prop("checked") == false)
+                        isChecked = false;
+                });
+                $("#" + gridName + "-checkbox").prop('checked', isChecked);
+            }
+        });
+
+        // Wire up hilighting the row when hovering.
+        $("#history-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                var customerID = row.find("td").first().html();
+
+                row.toggleClass("k-state-hover");
+            }
+        );
+
+        var grid = $("#history-grid").data("kendoGrid");
+        var dataSource = grid.dataSource;
+        var total = dataSource.total();
+
+        if (total > 0)
+        {
+            $("#history-container").show();
+        }
+        else {
+            $("#history-container").hide();
+        }
+    }
+
+    function HistoryGridLineSelectionChanged(arg) {
+
+        // Remove the Hover state from all rows
+        $(".k-state-hover").each(function (index) {
+            $(this).removeClass("k-state-hover");
+        });
+
+        //LoadCustomerDetails(customerID);
+    }
+
+    function GetSearchParameters() {
+        var result =
+        {
+            userID: $("#UserID").val()
+           , startDate: $("#StartDate").val()
+           , endDate: $("#EndDate").val()
+        };
+        return result;
+    }
+
+    function RefreshGrid() {
+        var grid = $("#export-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+            grid.dataSource.page(1);
+        }
+    }
+
+    function GetHistoryParameters() {
+        var result =
+        {
+            userID: $("#UserID").val() ,
+            showDeletedQBExportLog:$("#chkShowDeleteRestoreQBExportLog").is(":checked")
+        };
+        return result;
+    }
+
+    function RefreshHistoryGrid() {
+        var grid = $("#history-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+            grid.dataSource.page(1);
+        }
+
+        var showDeletedQBExportLog = $("#chkShowDeleteRestoreQBExportLog").is(":checked")
+        if(showDeletedQBExportLog == true) {
+            $('#btnQBExportLogDeleteRestore').val("@Proestimator.Resources.ProStrings.RestoreQBExportHistory");
+        }
+        else
+        {
+            $('#btnQBExportLogDeleteRestore').val("@Proestimator.Resources.ProStrings.DeleteQBExportHistory");
+        }
+    }
+
+    $(document).ready(function () {
+        $("#HeaderCheckbox").change(function () {
+            $(".checkbox").prop("checked", $("#HeaderCheckbox").is(":checked"));
+        });
+
+        $("#btnExportData").click(function () {
+
+            var checkedIDs = "";
+
+            $(".checkbox").each(function (index) {
+                var checkbox = $(this);
+                if (checkbox.is(":checked"))
+                {
+                    var estimateID = checkbox.attr("data-estimate-id");
+                    checkedIDs += estimateID + ",";
+                }
+            });
+
+            if (checkedIDs == "")
+            {
+                ShowUserMessage('@Proestimator.Resources.ProStrings.NoEstimatesSelectedExportCheckbox', true, 5000);
+            }
+            else
+            {
+                applyLoading();
+
+                $.ajax({//ExportData(int loginID, string startDate, string endDate, string selectedIDs)
+                    url: '@Url.Action("ExportData", "QBExport")',
+                    type: "POST",
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({ "userID": $("#UserID").val(), "startDate": $("#StartDate").val(), "endDate": $("#EndDate").val(), "selectedIDs": checkedIDs }),
+                    success: function (result) {
+                        removeLoading();
+                        if (result.Success) {
+                            window.open(result.DownloadLink, "_blank");
+                            RefreshHistoryGrid();
+                        }
+                        else {
+                            ShowUserMessage(result.ErrorMessage, true, 5000);
+                            console.log("Error: " + result.ErrorMessage);
+                        }
+                    }
+                });
+            }
+        });
+
+        $("#btnQBExportLogDeleteRestore").click(function(){
+            var showDeletedQBExportLog = $("#chkShowDeleteRestoreQBExportLog").is(":checked")
+            DeleteRestoreQBExportLog(showDeletedQBExportLog);
+        });
+
+        $("#chkShowDeleteRestoreQBExportLog").change(function() {
+            RefreshHistoryGrid();
+        });
+    });
+
+    function DeleteRestoreQBExportLog(showDeletedQBExportLog)
+    {
+        var historyGridName = 'history-grid';
+        var list = "";
+        var seperator = ", ";
+        var qbExportLogIDs = '';
+
+        $('#' + historyGridName + ' tbody tr:has(td)').find('input[type="checkbox"]').each(function() {
+
+            if ($(this).is(":visible") && $(this).is(":checked"))
+            {
+                var eachQBExportLogID = $(this).attr("id");
+                qbExportLogIDs += seperator + eachQBExportLogID;
+            }
+        });
+
+        if(qbExportLogIDs.length <=0) {
+            alert('Please select export history row checkbox to delete/restore.');
+            return;
+        }
+
+        $.getJSON("/QBExport/DeleteRestoreQBExportLog", { userID: @ViewBag.UserID, loginID: @ViewBag.LoginID, qbExportLogIDs: qbExportLogIDs, showDeletedQBExportLog: showDeletedQBExportLog }, function (data)
+        {
+            if (data != "")
+            {
+                ShowUserMessage(data, true, 5000);
+            }
+
+            RefreshHistoryGrid();
+        });
+    }
+
+</script>
+
+<style>
+    input[type="text"] {
+        width: 150px;
+    }
+
+    .k-state-selected {
+        cursor: pointer;
+    }
+</style>
+
+
+<div class="page-container">
+    @using (Html.BeginForm("QBExport", "Home", FormMethod.Post, new { @class = "container" }))
+    {
+        @Html.ValidationSummary(true)
+        @Html.HiddenFor(model => model.LoginID)
+        @Html.HiddenFor(model => model.UserID)
+
+        <h1>@Proestimator.Resources.ProStrings.QBExport</h1>
+
+        <div>
+            @Html.TextBoxFor(model => model.StartDate, new { autocomplete = "off", @class = "datepicker" })
+            &nbsp; -&nbsp;
+            @Html.TextBoxFor(model => model.EndDate, new { autocomplete = "off", @class = "datepicker" })
+            &nbsp; &nbsp;
+            <input type="button" value="Refresh Data" class="button nav-btn do-not-disable" onclick="RefreshGrid()" />
+        </div>
+
+        <div class="datagrid">
+            @(Html.Kendo().Grid<QBExportSummaryRow>()
+                .Name("export-grid")
+                .Columns(columns =>
+                {
+                    columns.Bound("").Template(@<text></text>).ClientTemplate("<input type='checkbox' class='checkbox' data-estimate-id='#= EstimateID#' # if (ExportDate == null) { #" + "checked" + "# } # />").HeaderTemplate(@<text><input type="checkbox" id="HeaderCheckbox" /></text>).Width(20);
+                    columns.Bound(item => item.EstimateID).Encoded(false).Title(@Proestimator.Resources.ProStrings.EstimateID);
+                    columns.Bound(item => item.ExportDate).Encoded(false).Format("{0:MM/dd/yyyy}").Title(@Proestimator.Resources.ProStrings.ExportedOn);
+                    columns.Bound(item => item.ExportRows).Encoded(false).Title(@Proestimator.Resources.ProStrings.ExportRows);
+                    columns.Bound(item => item.CustomerName).Encoded(false).Title(@Proestimator.Resources.ProStrings.CustomerName);
+                    columns.Bound(item => item.VIN).Encoded(false).Title(@Proestimator.Resources.ProStrings.VIN);
+                    columns.Bound(item => item.InsuranceCompany).Encoded(false).Title(@Proestimator.Resources.ProStrings.InsuranceCompany);
+                    columns.Bound(item => item.ClosedRODate).Encoded(false).Format("{0:MM/dd/yyyy}").Title(@Proestimator.Resources.ProStrings.ClosedRODate);
+                    columns.Bound(item => item.InsuranceClaimDetails).Encoded(false).Title(@Proestimator.Resources.ProStrings.InsuranceClaimDetails);
+                    columns.Bound(item => item.HasChanges).Encoded(false).Hidden();
+                    columns.Bound(item => item.QBInvoiceID).Encoded(false).Title(@Proestimator.Resources.ProStrings.QBInvoiceID);
+                })
+                .Sortable()
+                .Selectable()
+                .Pageable(pageable => pageable
+                    .Refresh(false)
+                    .ButtonCount(8)
+                )
+                .Events(events => events
+                    .DataBound("GridDataChanged")
+                    .Change("GridLineSelectionChanged")
+                )
+                .DataSource(dataSource => dataSource
+                    .Ajax()
+                    .ServerOperation(false)
+                    .Sort(sort => sort.Add("LastView").Descending())
+                    .Read(read => read.Action("GetData", "QBExport").Data("GetSearchParameters"))
+                    .PageSize(50)
+                )
+            )
+        </div>
+
+        <input id="btnExportData" type="button" value="@Proestimator.Resources.ProStrings.ExportData" class="button nav-btn do-not-disable" />
+        <p>
+            <label class="inputLabel"><input type="checkbox" id="chkShowDeleteRestoreQBExportLog" />@Proestimator.Resources.ProStrings.ShowDeletedQBExportHistory</label>
+        </p>
+            <div id="history-container" style="display: none;">
+                <h1>@Proestimator.Resources.ProStrings.ExportHistory</h1>
+
+                <div class="datagrid">
+                    @(Html.Kendo().Grid<QBExportHistoryVM>()
+                    .Name("history-grid")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(item => item.TimeStamp).Encoded(false).Format("{0:MM/dd/yyyy hh:mm tt}").Title(@Proestimator.Resources.ProStrings.ExportedOn);
+                        columns.Bound(item => item.StartDate).Encoded(false).Format("{0:MM/dd/yyyy}").Title(@Proestimator.Resources.ProStrings.StartDate);
+                        columns.Bound(item => item.EndDate).Encoded(false).Format("{0:MM/dd/yyyy}").Title(@Proestimator.Resources.ProStrings.EndDate);
+                        columns.Bound(item => item.EstimateCount).Encoded(false).Title(@Proestimator.Resources.ProStrings.EstimateCount);
+                        columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<a class='button open-button' href='/" + ViewBag.UserID + "/reports/qb-export/#= ID#'>" + @Proestimator.Resources.ProStrings.Download + "</a>").Title("");
+                        columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<input type='checkbox' class='invoice-checkbox' id='#= ID#' />").Width(20);
+                    })
+                    .Sortable()
+                    .Selectable()
+                    .Pageable(pageable => pageable
+                        .Refresh(false)
+                        .ButtonCount(8)
+                    )
+                    .Events(events => events
+                        .DataBound("HistoryGridDataChanged")
+                        .Change("HistoryGridLineSelectionChanged")
+                    )
+                    .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .ServerOperation(false)
+                        .Sort(sort => sort.Add("TimeStamp").Descending())
+                        .Read(read => read.Action("GetHistory", "QBExport").Data("GetHistoryParameters"))
+                        .PageSize(50)
+                    )
+)
+                </div>
+                <p>
+                    <input id="btnQBExportLogDeleteRestore" type="button" value="@Proestimator.Resources.ProStrings.DeleteQBExportHistory" />
+                </p>
+            </div>
+
+            <div style="padding-top: 30px;">
+                <h1 style="text-align: left; margin-bottom: 5px;">Links</h1>
+                <a href="/Files/WebEstQuickbooksImporter.msi" style="color: black; text-decoration: underline;">Download QB Importer</a>
+                <br /><a href="/Files/Online Version - Pro-Estimator QuickBooks Importer Instructions.pdf" target="_blank" style="color: black; text-decoration: underline;">QB Online Instructions</a>
+                <br /><a href="/Files/Desktop Version - Pro-Estimator QuickBooks Importer Instructions.pdf" target="_blank" style="color: black; text-decoration: underline;">QB Desktop Instructions</a>
+            </div>
+    }
+</div>

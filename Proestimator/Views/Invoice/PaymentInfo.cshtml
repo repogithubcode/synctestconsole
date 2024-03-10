@@ -1,0 +1,33 @@
+﻿@model Proestimator.ViewModel.InvoicePaymentInfoVM
+@{
+    ViewBag.Title = @Proestimator.Resources.ProStrings.PaymentInformationHeader;
+}
+
+<div id="workDesk" class="col dt1 sm_4_4 md_8_8 lg_10_12 xl_12_14">
+    @using (Html.BeginForm())
+    {
+        <div>
+           <h1>@Proestimator.Resources.ProStrings.PaymentInformationHeader</h1>
+           @if (Model.HasPaymentInfo)
+           {
+               <p>@Proestimator.Resources.ProStrings.CCCharge_Last4: @Model.Last4</p>
+               <p>@Proestimator.Resources.ProStrings.CCCharge_ExpirationDate: @Model.CardExpiration.ToShortDateString()</p>
+           } 
+           else
+           {
+               <p>@Proestimator.Resources.ProStrings.NoPaymentAssociatedWithAccount</p>
+
+                <form action="/Invoice/PaymentInfo" method="POST">
+                    <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                            data-key="@Model.StripeKey"
+                            data-name="@Proestimator.Resources.ProStrings.WebEst"
+                            data-description="@Proestimator.Resources.ProStrings.WebEstPaymentInformation"
+                            data-zip-code="true"
+                            data-image="https://stripe.com/img/documentation/checkout/marketplace.png"
+                            data-locale="auto">
+                    </script>
+                </form>
+           }
+        </div>
+    }
+</div>

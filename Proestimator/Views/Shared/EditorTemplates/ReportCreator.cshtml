@@ -1,0 +1,878 @@
+﻿@model Proestimator.ViewModel.ReportCreator
+
+@using Proestimator.ViewModel.Printing;
+@using Proestimator.ViewModel.SendEstimate;
+@using Proestimator.ViewModel;
+
+<script>
+    var _reportTypes = JSON.parse('@Html.Raw(Json.Encode(Model.LetterTypes))');
+    var _selectedReportType = "";
+    var _hasEMSContract = @Model.HasEMSContract.ToString().ToLower();
+    var _isModelPopup = false;
+    var selectedTechnicians = '';
+   
+    $(document).ready(function () {
+        $("#PartsOrderLink").click(function () {
+            var partsOrderType = $("#PartsOrderType").val();
+
+            var supplementSelection = $("#ReportType").val();
+            var supplement = -1;
+
+            if (supplementSelection != null) {
+                if (supplementSelection == "Full") {
+                    supplement = -1;
+                }
+                else if (supplementSelection == "Original") {
+                    supplement = 0;
+                }
+                else {
+                    supplement = supplementSelection.replace("Supplement", "");
+                }
+            }
+
+            window.open("/Printing/ReportPartsOrder?type=" + partsOrderType + "&supplement=" + supplement, "_blank");
+        });
+
+        $("#ReportCreator_ReportType").change(function () {
+            if(($("#ReportCreator_ReportType").is(":visible")==true) && ($("#ReportCreator_ReportType").val() == "-2"))
+            {
+                $("#printSupplementPhotosOnly").show();
+            }
+            else
+            {
+                $("#printSupplementPhotosOnly").hide();
+            }
+        });
+
+        var repairTechniciansWindowWidth = $(window).width() * 0.30;
+
+        @if(ViewBag.IsMobileDevice)
+            {
+                <text>
+        $("#modal-window-report-types").dialog({
+            autoOpen: false,
+            modal: true,
+            title: '@Proestimator.Resources.ProStrings.Detail',
+            modal: true,
+            width: ($(window).width()) * 0.9,
+            minHeight: 0,
+            position: { my: "center", at: "center" },
+            open: function() {
+                _isModelPopup = true;
+                $('.ui-dialog').css('z-index', 100000);
+                $('#ReportCreator_PrintDescription').blur();
+            },
+            close: function () {
+                $('.report-details-all').hide();
+                _isModelPopup = false;
+            }
+        });
+
+        repairTechniciansWindowWidth = $(window).width();
+
+        </text>
+            }
+
+        $("#modal-window-display-dialog").dialog({
+            autoOpen: false,
+            modal: true,
+            title: JSON.parse('@Html.Raw(Json.Encode(@Proestimator.Resources.ProStrings.AssignRepairTechniciansHeaderMessage))'),
+            //width: 950,
+            width: repairTechniciansWindowWidth,
+            modal: true,
+            close: function () {
+                console.log("close modal-window-display-dialog");
+            },
+            open: function (event, ui) {
+                //center the dialog within the viewport (i.e. visible area of the screen)
+                var top = Math.max($(window).height() / 2 - $(this)[0].offsetHeight / 2, 0);
+                var left = Math.max($(window).width() / 2 - $(this)[0].offsetWidth / 2, 0);
+                $(this).parent().css('top', top + "px");
+                $(this).parent().css('left', left + "px");
+                $(this).parent().css('position', 'fixed');
+            },
+            buttons: [
+                {
+                    id: "Yes",
+                    text: "Save",
+                    click: function () {
+                        // ReportTypeSelected('WorkOrderReport');
+                        SaveTechnicians();
+                        $(this).dialog('close');
+                    }
+                },
+                {
+                    id: "No",
+                    text: "Cancel",
+                    click: function () {
+                        $(this).dialog('close');
+                    }
+                }
+            ]
+        });
+
+        $('#chkPrintTechnicians').change(function () {
+            if (this.checked) {
+                $('#WorkOrderLaborTypeTechnicianGrid').insertAfter('#modal-window-display-dialog .modal-body');
+                $(".ui-dialog-buttonset").css("display", "flex");
+                $('#modal-window-display-dialog').dialog('open');
+            }
+        });
+
+        $("#btnSaveTechnician").click(function () {
+            SaveTechnicians();
+        });
+
+        var error = false;
+        $("#btnCreateReport").click(function () {
+            var language = "en";
+            if ($("#languageSelection").is(":visible")) {
+                language = $("#languageSelection").val();
+            }
+
+            var extraParam = "";
+            var version = "";
+            var customReportType = '';
+
+            if (_selectedReportType == "Estimate")
+            {
+                // hideHourlyRates:estimateDiscription:supplementVersion:reportHeader:includeImages:onlyIncludeCheckedImages:onlyIncludeSupplementImages
+
+                var supplementVersion = '';
+                var printSupplementPhotosOnly;
+                if($("#ReportCreator_ReportType").is(":visible")==false)
+                {
+                    supplementVersion = -1;
+                    printSupplementPhotosOnly = false;
+                }
+                else
+                {
+                    if($("#ReportCreator_ReportType").val() == "-2")
+                    {
+                        printSupplementPhotosOnly = $("#chkprintSupplementPhotosOnly").is(":checked");
+                    }
+                    else
+                    {
+                        printSupplementPhotosOnly = false;
+                    }
+                    supplementVersion = $("#ReportCreator_ReportType").val();
+                }
+
+                var printTechnicians = $("#chkPrintTechnicians").is(":checked");
+                if (printTechnicians == true) {
+
+                    selectedTechnicians = GetTechniciansInGrid(false);
+
+                    extraParam = $("#HideHourlyRates").is(":checked") + ":" + $("#ReportCreator_PrintDescription").val() + ":" + supplementVersion + ":" + $("#ReportCreator_SelectedReportHeader").val() + ":" + $("#IncludeImages").is(":checked") + ":" + $("#ImagesOnlyChecked").is(":checked") + ":" + $("#ImagesOnlySupplement").is(":checked") + ":" + $("#PdrOnly").is(":checked") + ":" + $("#PrintPnLNotes").is(":checked") + ":" + $("#chkPrintInspectionDate").is(":checked") + ":" + $("#AttachImages").is(":checked") + ":" + printSupplementPhotosOnly + ":" + $("#PrintHeaderInfo").is(":checked") + ":" + $("#chkPrintRepairDays").is(":checked") + ":" + $("#chkIncludeLoanApplicationLink").is(":checked") + ":" + selectedTechnicians;
+                    console.log('HideHourlyRates = ' + $("#HideHourlyRates").is(":checked") + ":ReportCreator_PrintDescription = " + $("#ReportCreator_PrintDescription").val() + ":supplementVersion = " + supplementVersion + ":ReportCreator_SelectedReportHeader = " + $("#ReportCreator_SelectedReportHeader").val() + ":IncludeImages = " + $("#IncludeImages").is(":checked") + ":ImagesOnlyChecked = " + $("#ImagesOnlyChecked").is(":checked") + ":ImagesOnlySupplement = " + $("#ImagesOnlySupplement").is(":checked") + ":PdrOnly = " + $("#PdrOnly").is(":checked") + ":PrintPnLNotes = " + $("#PrintPnLNotes").is(":checked") + ":chkPrintInspectionDate = " + $("#chkPrintInspectionDate").is(":checked") + ":AttachImages = " + $("#AttachImages").is(":checked") + ":printSupplementPhotosOnly = " + printSupplementPhotosOnly + ":PrintHeaderInfo = " + $("#PrintHeaderInfo").is(":checked") + ":chkPrintRepairDays = " + $("#chkPrintRepairDays").is(":checked") + ":chkIncludeLoanApplicationLink = " + $("#chkIncludeLoanApplicationLink").is(":checked") + ":selectedTechnicians = " + selectedTechnicians);
+                }
+                else {
+                    selectedTechnicians = '';
+                    extraParam = $("#HideHourlyRates").is(":checked") + ":" + $("#ReportCreator_PrintDescription").val() + ":" + supplementVersion + ":" + $("#ReportCreator_SelectedReportHeader").val() + ":" + $("#IncludeImages").is(":checked") + ":" + $("#ImagesOnlyChecked").is(":checked") + ":" + $("#ImagesOnlySupplement").is(":checked") + ":" + $("#PdrOnly").is(":checked") + ":" + $("#PrintPnLNotes").is(":checked") + ":" + $("#chkPrintInspectionDate").is(":checked") + ":" + $("#AttachImages").is(":checked") + ":" + printSupplementPhotosOnly + ":" + $("#PrintHeaderInfo").is(":checked") + ":" + $("#chkPrintRepairDays").is(":checked") + ":" + $("#chkIncludeLoanApplicationLink").is(":checked") + ":" + selectedTechnicians;
+                    console.log('HideHourlyRates = ' + $("#HideHourlyRates").is(":checked") + ":ReportCreator_PrintDescription = " + $("#ReportCreator_PrintDescription").val() + ":supplementVersion = " + supplementVersion + ":ReportCreator_SelectedReportHeader = " + $("#ReportCreator_SelectedReportHeader").val() + ":IncludeImages = " + $("#IncludeImages").is(":checked") + ":ImagesOnlyChecked = " + $("#ImagesOnlyChecked").is(":checked") + ":ImagesOnlySupplement = " + $("#ImagesOnlySupplement").is(":checked") + ":PdrOnly = " + $("#PdrOnly").is(":checked") + ":PrintPnLNotes = " + $("#PrintPnLNotes").is(":checked") + ":chkPrintInspectionDate = " + $("#chkPrintInspectionDate").is(":checked") + ":AttachImages = " + $("#AttachImages").is(":checked") + ":printSupplementPhotosOnly = " + printSupplementPhotosOnly + ":PrintHeaderInfo = " + $("#PrintHeaderInfo").is(":checked") + ":chkPrintRepairDays = " + $("#chkPrintRepairDays").is(":checked") + ":chkIncludeLoanApplicationLink = " + $("#chkIncludeLoanApplicationLink").is(":checked") + ":selectedTechnicians = " + selectedTechnicians);
+                }
+            }
+            else if (_selectedReportType == "WorkOrderReport") {
+
+                selectedTechnicians = '';
+                error = false;
+
+                $("#work-order-labor-type-technician-grid").find("tbody").find("tr").each(function (i, obj) {
+                    var laborTypeID = $(obj).find("td:nth-child(1)").text();
+                    var laborTypeText = $(obj).find("#laborTypeText").text();
+                    var technicianID = $(obj).find("#technicianDDL").val();
+                    var technicianName = $(obj).find("#technicianDDL option:selected").text();
+
+                    if(technicianID == 0)
+                    {
+                        selectedTechnicians =  selectedTechnicians + '~' + laborTypeID + '!' + laborTypeText + '!' + technicianID + '!' + '';
+                    }
+                    else
+                    {
+                        selectedTechnicians =  selectedTechnicians + '~' + laborTypeID + '!' + laborTypeText + '!' + technicianID + '!' + technicianName;
+                    }
+                });
+
+                if(error == true)
+                {
+                    error = false;
+                    return false;
+                }
+
+                extraParam = selectedTechnicians + ":" + $("#chkHideCustomerData").is(":checked") + ":" + $("#ExtraPrintPnLNotes").is(":checked") + ":" + $("#chkPrintInspectionDate").is(":checked") + ":" + $("#chkPrintLaborHours").is(":checked") + ":" + $("#chkPrintRepairDays").is(":checked") + ":" + $("#chkPrintLaborDiscount").is(":checked");
+            }
+            else if (_selectedReportType == "PDRWorkOrderReport")
+            {
+                extraParam = $("#chkPDRHideCustomerData").is(":checked") + ":" + $("#chkPrintInspectionDate").is(":checked") + ":" + $("#chkPrintRepairDays").is(":checked") + ":" + $("#ReportCreator_PDRTechnician").val();
+            }
+            else if (_selectedReportType == "PartsOrder") {
+                extraParam = $("#ReportCreator_PartsOrderType").val() + ":" + $("#DropDownSupplement").val() + ":" + $("#ReportCreator_PartOrderHeader").val();
+            }
+            else if (_selectedReportType == "Estimate") {
+                extraParam = $("#ReportCreator_ReportType").val() + ":" + $("#ReportCreator_SelectedReportHeader").val();
+            }
+            else if (_selectedReportType == "CustomReport") {
+                customReportType = $("#ReportCreator_CustomReportTypes").val();
+
+                var supplementVersion = '';
+                if ($("#ReportCreator_ReportType").is(":visible") == false) {
+                    supplementVersion = -1;
+                }
+                else {
+                    supplementVersion = $("#ReportCreator_ReportType").val();
+                }
+
+                extraParam = "false::" + supplementVersion + "::" + $("#IncludeImages").is(":checked") + ":" + $("#ImagesOnlyChecked").is(":checked") + ":" + $("#ImagesOnlySupplement").is(":checked") + ":false:false:false:false:false:false:false:false";
+            }
+            else if (_selectedReportType == "DirectionOfPaymentLetter") {
+                extraParam = $("#chkPrintInspectionDate").is(":checked") + ":" + $("#chkPrintRepairDays").is(":checked");
+            }
+            else if (_selectedReportType == "EMS") {
+                extraParam = $("#ReportCreator_EMSVersions").val();
+                if ('@Model.ShowEMSVersionSelection' == 'True') {
+                    version = $("#ReportCreator_EMSVersions").find('option:selected').text();
+                }
+            }
+            else if (_selectedReportType == "AuthorizationLetter") {
+                extraParam = $("#chkIncludeCustomerInfo").is(":checked");
+            }
+
+            GenerateReport(_selectedReportType, language, extraParam, _isModelPopup, version, customReportType);
+        });
+
+        $("#IncludeImages").change(function () {
+            RefreshImageOptions();
+        });
+
+        RefreshImageOptions();
+
+        @if(ViewBag.IsMobileDevice == false)
+        {
+            <text>
+                ReportTypeSelected("Estimate");
+            </text>
+        }
+
+        function GetSearchParameters() {
+            var result =
+            {
+                userID: @ViewBag.UserID,
+            };
+            return result;
+        }
+
+        $("#hlnkViewImages").click(function () {
+            if ($("#ThumbnailContainer").is(":hidden")) {
+                $("#ThumbnailContainer").show();
+            }
+            else {
+                $("#ThumbnailContainer").hide();
+            }
+        });
+
+        if ('@Model.ShowEMSVersionSelection' == 'True') {
+            $("#ReportCreator_EMSVersions").show();
+        }
+
+        selectedTechnicians = GetTechniciansInGrid(false);
+        selectedTechnicians = $.trim(selectedTechnicians);
+        if ('@Model.PrintTechnicians' == 'True') {
+            if (selectedTechnicians.length > 0) {
+                $("#chkPrintTechnicians").prop("checked", true);
+            }
+        }
+
+        $("#chkPrintLaborHours").change(function () {
+            if (this.checked) {
+                $("#printLaborDiscount").show();
+                if ($("#chkPrintLaborDiscount").is(":checked")) {
+                    $("#chkPrintLaborDiscount").prop("checked", false);
+                }
+            }
+            else {
+                $("#printLaborDiscount").hide();
+            }
+        });
+    });
+
+    function SaveTechnicians() {
+
+        selectedTechnicians = GetTechniciansInGrid(true);
+
+        $.ajax({
+            url: "/Printing/SavePrintTechniciansMapping/",
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ "userID": @ViewBag.UserID, "estimateID": @ViewBag.EstimateID, "selectedTechnicians": selectedTechnicians }),
+            beforeSend: function () {
+                if(_isModelPopup) {
+                    _loadingPopupHeightDiv = 1;
+                    applyLoadingPopup();
+                }
+                else {
+                    applyLoading();
+                }
+            },
+            success: function (result) {
+                if(_isModelPopup) {
+                    removeLoadingPopup();
+                }
+                else {
+                    removeLoading();
+                }
+
+                if (result.Success === true) {
+                    if (result.ErrorMessage.length > 0) {
+                        ShowUserMessage(result.ErrorMessage, false, 5000);
+                    }
+                }
+                else {
+                    ShowUserMessage(result.ErrorMessage, true, 4000);
+                }
+            },
+            error: function (error) {
+                removeLoading();
+                ShowUserMessage(error, true, 4000);
+            }
+        });
+    }
+
+    function GetTechniciansInGrid(boolvalue) {
+
+        var technicians = '';
+
+        $("#work-order-labor-type-technician-grid").find("tbody").find("tr").each(function (i, obj) {
+            var laborTypeID = $(obj).find("td:nth-child(1)").text();
+            var laborTypeText = $(obj).find("#laborTypeText").text();
+            var technicianID = $(obj).find("#technicianDDL").val();
+            var technicianName = $(obj).find("#technicianDDL option:selected").text();
+
+            if (technicianID == 0) {
+                technicians = technicians + '~' + laborTypeID + '!' + laborTypeText + '!' + technicianID + '!' + '';
+            }
+            else {
+                technicians = technicians + '~' + laborTypeID + '!' + laborTypeText + '!' + technicianID + '!' + technicianName;
+            }
+        });
+
+        return technicians;
+
+    }
+
+    function ReportTypeSelected(reportType) {
+        var reportData = GetReportInfo(reportType);
+        $("#btnSaveTechnician").hide();
+        if (reportData) {
+
+            $('.report-details-all').show();
+
+            _selectedReportType = reportType;
+            $("#options-section").show();
+
+            $("#languageSelection").toggle(reportData.MultiLanguage === true);
+            $(".extraWorkOrder").toggle(reportData.FileName === "WorkOrderReport");
+            $("#extraPartsOrder").toggle(reportData.FileName === "PartsOrder");
+            $(".extraEstimate").toggle(reportData.FileName === "Estimate");
+            $("#extraCustomReports").toggle(reportData.FileName === "CustomReport");
+            $("#extraEMS").toggle(reportData.FileName === "EMS");
+            $(".extraPDRWorkOrder").toggle(reportData.FileName == "PDRWorkOrderReport");
+            $("#extraIncludeCustomerInfo").toggle(reportData.FileName === "AuthorizationLetter");
+
+            console.log('reportData.FileName = ' + reportData.FileName + ' ; _selectedReportType = ' + _selectedReportType);
+
+            if (reportData.FileName === "EMS")
+            {
+                if (_hasEMSContract === true)
+                {
+                    $("#btnCreateReport").show();
+                    $("#btnEMSContract").hide();
+                }
+                else
+                {
+                    $("#btnCreateReport").hide();
+                    $("#btnEMSContract").show();
+                }
+            }
+            else
+            {
+                $("#btnCreateReport").show();
+                $("#btnEMSContract").hide();
+            }
+
+            if (reportData.FileName === "Estimate" || reportData.FileName === "CustomReport") {
+                $(".extraEstimateRightLeft").show();
+            }
+            else {
+                $(".extraEstimateRightLeft").hide();
+            }
+
+            $("#printLaborHours").hide();
+            $("#printLaborDiscount").hide();
+
+            if ((reportData.FileName === "Estimate") || (reportData.FileName === "DirectionOfPaymentLetter") || (reportData.FileName === "WorkOrderReport") || (reportData.FileName === "PDRWorkOrderReport"))
+            {
+                $("#extraPrintInspectionDate").show();
+                $("#extraPrintRepairDays").show();
+
+                if (reportData.FileName === "WorkOrderReport")
+                {
+                    $('#WorkOrderLaborTypeTechnicianGrid').insertAfter('#extraWorkOrderSection .emptyclass');
+                    $("#printLaborHours").show();
+                    if ($("#chkPrintLaborHours").is(":checked")) {
+                        $("#printLaborDiscount").show();
+                        if ($("#chkPrintLaborDiscount").is(":checked")) {
+                            $("#chkPrintLaborDiscount").prop("checked", false);
+                        }
+                    }
+                    $("#extraPrintTechnicians").hide();
+                    $("#btnSaveTechnician").show();
+                }
+                if (reportData.FileName === "Estimate") {
+                    $("#extraPrintTechnicians").show();
+                }
+            }
+            else
+            {
+                $("#extraPrintInspectionDate").hide();
+                $("#extraPrintRepairDays").hide();
+                $("#extraPrintTechnicians").hide();
+            }
+
+            if (reportData.FileName == "PDRWorkOrderReport") {
+                $(".extraPDRWorkOrder").show();
+                $("#extraPrintRepairDays").hide();
+            }
+
+            if (reportData.FileName === "Estimate")
+            {
+                if(($("#ReportCreator_ReportType").is(":visible")==true) && ($("#ReportCreator_ReportType").val() == "-2"))
+                {
+                    $("#printSupplementPhotosOnly").show();
+                }
+                else
+                {
+                    $("#printSupplementPhotosOnly").hide();
+                }
+            }
+            else
+            {
+                $("#printSupplementPhotosOnly").hide();
+            }
+
+            $("#includeLoanApplicationLink").hide();
+            @if (ViewBag.ShowFinancing == true && Model.IsFinancingMerchantApproved)
+            {
+                <text>
+                    if (reportData.FileName === "Estimate") {
+                        $("#includeLoanApplicationLink").show();
+                    }
+                </text>
+            }
+
+            @if(ViewBag.IsMobileDevice)
+            {
+                <text>
+                    $('.report-details-all').insertAfter('#modal-window-report-types .modal-body');
+                    $('#modal-window-report-types').dialog('open');
+                </text>
+            }
+
+        }
+        else {
+            $("#options-section").hide();
+        }
+
+        $(".report-type-selected").removeClass("report-type-selected");
+        $("#ReportType" + _selectedReportType).addClass("report-type-selected");
+
+        RefreshGrid();
+    }
+
+    function GetReportInfo(fileName) {
+        for (var i = 0; i < _reportTypes.length; i++) {
+            if (_reportTypes[i].FileName == fileName) {
+                return _reportTypes[i];
+            }
+        }
+
+        return null;
+    }
+
+    function RefreshImageOptions()
+    {
+        if ($("#IncludeImages").is(":checked"))
+        {
+            $("#IncludeImagesOptions").css("opacity", 1);
+        }
+        else
+        {
+            $("#IncludeImagesOptions").css("opacity", 0.5);
+        }
+    }
+
+    function ImageThumbToggle(imageID) {
+        var container = $("#" + imageID);
+        var img = container.find("img");
+
+        var isSelected = img.hasClass("ImageSelected");
+
+        if (isSelected === true) {
+            img.removeClass("ImageSelected");
+        }
+        else {
+            img.addClass("ImageSelected");
+        }
+
+        $.getJSON('@Url.Action("SetImageIncluded", "Estimate")', { userID: @ViewBag.UserID, estimateID: @ViewBag.EstimateID, imageID: imageID, included: !isSelected }, function (data) {
+
+        });
+    }
+
+</script>
+
+<style>
+    .report-details-left {
+        width: 25%;
+        float: left;
+        padding-right: 20px;
+    }
+
+    .report-details-middle {
+        width: 25%;
+        float: left;
+        padding-right: 20px;
+    }
+
+    .report-details-right-left {
+        width: 25%;
+        float: left;
+    }
+
+    .report-details-right-right {
+        width: 25%;
+        float: left;
+    }
+
+    .report-list {
+        text-align: left;
+        font-weight: normal;
+        list-style: none;
+        padding-left: 0px;
+    }
+
+    .report-list li {
+        padding: 3px;
+        cursor: pointer;
+    }
+
+    .report-list li:hover {
+        background-color: #349ad8;
+    }
+
+    .report-type-selected {
+        background-color: #1d69a6;
+        color: white;
+    }
+
+    #options-section {
+        padding-top: 10px;
+    }
+
+    #options-section p {
+        text-align: left;
+        font-size: 0.8em;
+        margin-bottom: 5px;
+    }
+
+    .thumb-wrapper {
+        display: inline-block;
+        margin-right: 2px;
+        margin-top: 5px;
+    }
+
+    @@media screen and (min-width: 900px) {
+        .thumb-wrapper {
+            display: block;
+            margin-right: 0px;
+            margin-top: 0px;
+        }
+    }
+
+    @@media (max-width: 700px) {
+        .report-details-left {
+            width: 100%;
+            float: left;
+            padding-right: 0px;
+        }
+
+        .report-details-middle {
+            width: 100%;
+            float: left;
+            padding-right: 0px;
+        }
+
+        .report-details-right-left {
+            width: 100%;
+            float: left;
+        }
+
+        .report-details-right-right {
+            width: 100%;
+            float: left;
+        }
+
+        .report-list li {
+            height: 45px;
+            border: 1px solid black;
+            margin-bottom: 10px;
+            padding-top: 14px;
+            padding-left: 10px;
+        }
+
+    }
+
+    #ThumbnailContainer {
+        border: 1px solid black;
+        margin-top: 20px;
+        max-height: 500px;
+        overflow-y: scroll;
+        overflow-x: hidden;
+        display: none;
+        margin-right: 20px;
+    }
+
+    #ThumbnailContainer img {
+        padding: 10px;
+    }
+
+    #ThumbnailContainer img.ImageSelected {
+        border: 2px dashed black;
+        border-radius: 4px;
+    }
+
+    .report-details-all a {
+        color: white;
+    }
+
+</style>
+
+
+
+<div style="max-width: 1200px; margin: 0px auto;" class="container">
+
+    <div id="modal-window-report-types" style="display:none;" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-window-display-dialog" style="display:none;" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="report-details-left">
+
+        <ul class="report-list">
+            @foreach (ReportTypeVM reportType in Model.LetterTypes)
+            {
+                <li id="@("ReportType" + reportType.FileName)" onclick="ReportTypeSelected('@reportType.FileName')">@reportType.ReportName</li>
+            }
+        </ul>
+
+    </div>
+    <div class="report-details-all">
+        <div class="report-details-middle">
+            <div id="options-section" style="display: none;">
+                <select id="languageSelection">
+                    <option value="en">English</option>
+                    <option value="es">Spanish</option>
+                </select>
+
+                <div class="extraEstimate" style="display: none;">
+                    @if (Model.EstimateReportTypes.Count > 0)
+                    {
+                        <p>@Proestimator.Resources.ProStrings.SelectReportType</p>
+                        @Html.DropDownListFor(model => model.ReportType, new SelectList(Model.EstimateReportTypes, "Value", "Text"))
+                    }
+
+                    <p>@Proestimator.Resources.ProStrings.EstimateDescription</p>
+                    @Html.TextBoxFor(model => model.PrintDescription, new { autocomplete = "off" })
+
+                    <p>@Proestimator.Resources.ProStrings.SelectReportHeader</p>
+                    @Html.DropDownListFor(model => model.SelectedReportHeader, Model.ReportHeaderSelections)
+
+                    @if (1 == 2)
+                    {
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.SelectImageSize</label>
+
+                            <div class="field-control">
+                                @Html.DropDownListFor(model => model.ImageSize, new SelectList(Model.ImageSizeSelection, "Value", "Text"))
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="extraWorkOrder" style="display: none;" id="extraWorkOrderSection">
+                    <p class="emptyclass" >
+                        <div class="datagrid" id="WorkOrderLaborTypeTechnicianGrid">
+                            @Html.EditorFor(model => model.WorkOrderReportVM)
+                        </div>
+                    </p>
+                </div>
+
+                <div class="extraPDRWorkOrder" style="display: none;">
+                    <p>
+                        @Html.DropDownListFor(o => o.PDRTechnician, new SelectList(Model.PDRTechnicians, "Value", "Text"))
+                    </p>
+                </div>
+
+                <div id="extraPartsOrder" style="display: none;">
+                    <p>@Proestimator.Resources.ProStrings.PartSource</p>
+                    @Html.DropDownListFor(model => model.PartsOrderType, new SelectList(Model.PartsOrderTypeList, "Value", "Text"))
+
+                    @if (Model.MaxSupplement > 0)
+                    {
+                        <p>Supplement</p>
+                        <select id="DropDownSupplement">
+                            <option selected="selected" value="-1">Full</option>
+                            <option value="0">Base Only</option>
+                            @for (int i = 1; i <= Model.MaxSupplement; i++)
+                            {
+                                <option value="@i">Supplement @i</option>
+                            }
+                        </select>
+                    }
+
+                    <p>@Proestimator.Resources.ProStrings.SelectReportHeader</p>
+                    @Html.DropDownListFor(m => m.PartOrderHeader, Model.PartOrderHeaderList)
+                </div>
+
+                <div id="extraCustomReports" style="display: none;">
+                    @Html.DropDownList("CustomReportTypes", new SelectList(Model.CustomReports, "Value", "Text"))
+                </div>
+
+
+                <div id="extraEMS" style="display: none;">
+
+                    <select id="ReportCreator_EMSVersions" style="display: none;">
+                        <option selected="selected" value="26">2.6</option>
+                        <option value="201">2.01</option>
+                    </select>
+
+                    <a id="btnEMSContract" style="display: none;" class="button do-not-disable nav-btn" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/invoice/@Model.EmsRedirectPage');">@Proestimator.Resources.ProStrings.EMSExport</a>
+
+                    @if (Model.IsTrial)
+                    {
+                        <p style="color: red; font-size: 1.3em;">@Proestimator.Resources.ProStrings.TrialNoteEMS</p>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+        <div class="report-details-right-left">
+            <div class="extraEstimateRightLeft" style="display: none;">
+                <p><label>@Html.CheckBoxFor(o => o.IncludeImages, new { @id = "IncludeImages" })@Proestimator.Resources.ProStrings.IncludeImagesInPDF</label></p>
+
+                <div id="IncludeImagesOptions">
+                    @if (Model.EstimateReportTypes.Count > 0)
+                    {
+                        <p><label><input type="checkbox" id="ImagesOnlySupplement" />@Proestimator.Resources.ProStrings.SelectedSupplement</label></p>
+                    }
+                    <p><label><input type="checkbox" id="ImagesOnlyChecked" />@Proestimator.Resources.ProStrings.OnlyCheckedImages</label></p>
+                </div>
+                @if (Model.SendPage)
+                {
+                    <p><label>@Html.CheckBoxFor(o => o.AttachImages, new { @id = "AttachImages" })@Proestimator.Resources.ProStrings.AttachImageWithEmail</label></p>
+                }
+
+                <p><a class="button nav-btn" id="hlnkViewImages" href="#" data-toggle="modal" data-target="#myModal">Select Images</a></p>
+
+                <div id="ThumbnailContainer">
+                    @foreach (ImageVM image in Model.Images)
+                    {
+                        <div id="@image.ImageID" class="thumb-wrapper" onclick="ImageThumbToggle(@image.ImageID);">
+                            <div class="thumbimage">
+                                <img src="@image.ImagePath" width="150" class="@(image.Include ? "ImageSelected" : "") " />
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="report-details-right-right">
+            <div class="extraEstimate" style="display: none;">
+                <p><label>@Html.CheckBoxFor(o => o.HideHourlyRates, new { @id = "HideHourlyRates" })@Proestimator.Resources.ProStrings.HideRatesBox</label></p>
+
+                <p><label>@Html.CheckBoxFor(o => o.PdrOnly, new { @id = "PdrOnly" })@Proestimator.Resources.ProStrings.PdrOnly</label></p>
+
+                <p><label>@Html.CheckBoxFor(o => o.PrintPnLNotes, new { @id = "PrintPnLNotes" })@Proestimator.Resources.ProStrings.PrintPnLNotes</label></p>
+
+                <p><label>@Html.CheckBoxFor(o => o.PrintHeaderInfo, new { @id = "PrintHeaderInfo" })@Proestimator.Resources.ProStrings.PrintHeaderInfo</label></p>
+            </div>
+
+            <div class="extraWorkOrder" style="display: none;">
+                <p>
+                    <label><input type="checkbox" id="chkHideCustomerData" />@Proestimator.Resources.ProStrings.HideCustomerData</label>
+                </p>
+
+                <p><label>@Html.CheckBoxFor(o => o.PrintPnLNotes, new { @id = "ExtraPrintPnLNotes" })@Proestimator.Resources.ProStrings.PrintPnLNotes</label></p>
+            </div>
+
+            <div class="extraPDRWorkOrder" style="display: none;">
+                <p>
+                    <label><input type="checkbox" id="chkPDRHideCustomerData" />@Proestimator.Resources.ProStrings.HideCustomerData</label>
+                </p>
+            </div>
+
+            <p id="extraPrintInspectionDate" style="display: none;">
+                <label>@Html.CheckBoxFor(o => o.PrintInspectionDate, new { @id = "chkPrintInspectionDate" })@Proestimator.Resources.ProStrings.PrintInspectionDate</label>
+            </p>
+
+            <p id="printSupplementPhotosOnly" style="display: none;">
+                <label>@Html.CheckBoxFor(o => o.PrintSupplementPhotosOnly, new { @id = "chkprintSupplementPhotosOnly" })@Proestimator.Resources.ProStrings.PrintSupplementPhotosOnly</label>
+            </p>
+
+            <p id="printLaborHours" style="display: none;">
+                <label>@Html.CheckBoxFor(o => o.PrintLaborHours, new { @id = "chkPrintLaborHours" })@Proestimator.Resources.ProStrings.PrintLaborHours</label>
+            </p>
+
+            <p id="printLaborDiscount" style="display: none;">
+                <label>@Html.CheckBoxFor(o => o.PrintLaborDiscount, new { @id = "chkPrintLaborDiscount" })@Proestimator.Resources.ProStrings.PrintLaborDiscount</label>
+            </p>
+
+            <p id="extraPrintRepairDays" style="display: none;">
+                <label>@Html.CheckBoxFor(o => o.PrintRepairDays, new { @id = "chkPrintRepairDays" })@Proestimator.Resources.ProStrings.PrintDaysToRepair</label>
+            </p>
+
+            <p id="includeLoanApplicationLink" style="display: none;">
+                <label>@Html.CheckBoxFor(o => o.IncludeLoanApplicationLink, new { @id = "chkIncludeLoanApplicationLink" })@Proestimator.Resources.ProStrings.FinancingLoanApplicationIncludePaymentLinkPDFOption</label>
+            </p>
+
+            <p id="extraPrintTechnicians" style="display: none;">
+                <label>@Html.CheckBoxFor(o => o.PrintTechnicians, new { @id = "chkPrintTechnicians" })@Proestimator.Resources.ProStrings.PrintTechnicians</label>
+            </p>
+
+            <p id="extraIncludeCustomerInfo" style="display: none;">
+                <label>@Html.CheckBoxFor(o => o.IncludeCustomerInfo, new { @id = "chkIncludeCustomerInfo" })@Proestimator.Resources.ProStrings.IncludeCustomerInfo</label>
+            </p>
+
+            <input type="button" id="btnCreateReport" class="button do-not-disable" style="max-width: 150px; display: none;" value="@(Model.SendPage ? Proestimator.Resources.ProStrings.Attach : Proestimator.Resources.ProStrings.Generate)">
+            <input type="button" id="btnSaveTechnician" class="button do-not-disable" style="max-width: 150px; display: none;" value="Save Technician">
+        </div>
+        </div>
+    </div>
+</div>

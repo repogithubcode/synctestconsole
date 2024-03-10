@@ -1,0 +1,1 @@
+insert into EmailTemplate values('Select Add On', 'Sent to sales rep and accounting when a new add on is selected', 'Select Add On - Acct # #LoginId#', '<p>Account: #LoginId#</p>  <p>Contract ID: #ContractID#</p>  <p>Add On type: #AddOnType#</p>  <p>Sales Rep: #SalesRep#</p>')

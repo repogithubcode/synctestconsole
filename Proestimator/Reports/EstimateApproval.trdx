@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report DataSourceName="EstimateHeader" Width="8.49999968210856in" Name="EstimateApproval.trdx" xmlns="http://schemas.telerik.com/reporting/2012/3.8">
+  <DataSources>
+    <SqlDataSource ConnectionString="ProEstimator" SelectCommand="dbo.EstimateReport_GetHeader" SelectCommandType="StoredProcedure" Name="EstimateHeader">
+      <Parameters>
+        <SqlDataSourceParameter DbType="Int32" Name="@AdminInfoID">
+          <Value>
+            <String>= Parameters.AdminInfoID.Value</String>
+          </Value>
+        </SqlDataSourceParameter>
+        <SqlDataSourceParameter DbType="AnsiString" Name="@ContentDirectory">
+          <Value>
+            <String>= Parameters.ContentDirectory.Value</String>
+          </Value>
+        </SqlDataSourceParameter>
+      </Parameters>
+    </SqlDataSource>
+  </DataSources>
+  <Items>
+    <DetailSection Height="10.9in" Name="detailSection1">
+      <Style>
+        <BorderStyle Top="None" Bottom="None" Left="None" Right="None" />
+        <BorderColor Top="Black" Bottom="Black" Left="Black" Right="Black" />
+        <BorderWidth Top="1pt" Bottom="1pt" Left="1pt" Right="1pt" />
+      </Style>
+      <Items>
+        <HtmlTextBox Width="7.40000025431315in" Height="1.29999987284342in" Left="0.599920590718587in" Top="2.80000019073486in" Value="&lt;p&gt;THIS ESTIMATE HAS BEEN PREPARED BASED ON THE USE OF CRASH PARTS SUPPLIED BY A SOURCE OTHER THAN THE MANUFACTURER OF YOUR MOTOR VEHICLE. THE AFTERMARKET CRASH PARTS USED IN THE PREPARATION OF THIS ESTIMATE ARE WARRANTED BY THE MANUFACTURER OR DISTRIBUTOR OF SUCH PARTS RATHER THAN THE MANUFACTURER OF YOUR VEHICLE.&lt;/p&gt;&lt;p&gt;PLEASE READ CAREFULLY, CHECK ONE OF THE STATEMENTS BELOW, AND SIGN: I UNDERSTAND THAT, UNDER STATE LAW, I AM ENTITLED TO A WRITTEN ESTIMATE IF THE FINAL REPAIRS EXCEED $100.00.&lt;/p&gt;" Name="htmlTextBox1">
+          <Style TextAlign="Justify">
+            <Font Bold="True" />
+          </Style>
+        </HtmlTextBox>
+        <HtmlTextBox Width="6.20000012715658in" Height="0.40000057220459in" Left="1.80625025431315in" Top="4.30000019073486in" Value="I REQUEST A WRITTEN ESTIMATE." Name="htmlTextBox2" />
+        <Shape Width="1in" Height="0.100000063578288in" Left="0.606251001358032in" Top="4.40000025431315in" Name="shape1">
+          <ShapeType>
+            <LineShape Direction="EW" />
+          </ShapeType>
+        </Shape>
+        <Shape Width="1in" Height="0.100000061094761in" Left="0.606251001358032in" Top="5in" Name="shape2">
+          <ShapeType>
+            <LineShape Direction="EW" />
+          </ShapeType>
+        </Shape>
+        <HtmlTextBox Width="6.20000028610229in" Height="0.504166603088379in" Left="1.80624993642171in" Top="4.80000019073486in" Value="I DO NOT REQUEST A WRITTEN ESTIMATE AS LONG AS THE REPAIR COSTS DO NOT EXCEED $_______. THE SHOP MAY NOT EXCEED THIS AMOUNT WITHOUT MY WRITTEN OR ORAL APPROVAL." Name="htmlTextBox3" />
+        <HtmlTextBox Width="6.20000028610229in" Height="0.40000057220459in" Left="1.80625025431315in" Top="5.40000025431315in" Value="I DO NOT REQUIRE A WRITTEN ESTIMATE." Name="htmlTextBox4" />
+        <Shape Width="1in" Height="0.100000061094761in" Left="0.606251080830892in" Top="5.5in" Name="shape3">
+          <ShapeType>
+            <LineShape Direction="EW" />
+          </ShapeType>
+        </Shape>
+        <HtmlTextBox Width="0.693749904632568in" Height="0.199999809265137in" Left="0.606251080830892in" Top="6.10000038146973in" Value="SIGNED:" Name="htmlTextBox5">
+          <Style>
+            <Font Bold="True" />
+          </Style>
+        </HtmlTextBox>
+        <Shape Width="4.20000012715658in" Height="0.100000061094761in" Left="1.40008004506429in" Top="6.20000076293945in" Name="shape4">
+          <ShapeType>
+            <LineShape Direction="EW" />
+          </ShapeType>
+        </Shape>
+        <Shape Width="1.89992078145345in" Height="0.100000061094761in" Left="6.206329981486in" Top="6.20000076293945in" Name="shape5">
+          <ShapeType>
+            <LineShape Direction="EW" />
+          </ShapeType>
+        </Shape>
+        <HtmlTextBox Width="0.500000158945719in" Height="0.199999809265137in" Left="5.69992192586263in" Top="6.10000038146973in" Value="DATE:" Name="htmlTextBox6">
+          <Style>
+            <Font Bold="True" />
+          </Style>
+        </HtmlTextBox>
+        <Shape Width="2.90000104904175in" Height="0.100000061094761in" Left="2.7000789642334in" Top="6.59999974568685in" Name="shape6">
+          <ShapeType>
+            <LineShape Direction="EW" />
+          </ShapeType>
+        </Shape>
+        <HtmlTextBox Width="2.09374920527141in" Height="0.199999809265137in" Left="0.606251080830892in" Top="6.5in" Value="ALTERNATE CONTACT NAME:" Name="htmlTextBox7">
+          <Style>
+            <Font Bold="False" />
+          </Style>
+        </HtmlTextBox>
+        <HtmlTextBox Width="0.687499841054281in" Height="0.199999809265137in" Left="5.79575475056966in" Top="6.5in" Value="PHONE:" Name="htmlTextBox8">
+          <Style>
+            <Font Bold="False" />
+          </Style>
+        </HtmlTextBox>
+        <Shape Width="1.6124218304952in" Height="0.100000061094761in" Left="6.49382909138997in" Top="6.59999974568685in" Name="shape7">
+          <ShapeType>
+            <LineShape Direction="EW" />
+          </ShapeType>
+        </Shape>
+        <HtmlTextBox Width="7.49999984105428in" Height="0.300000190734863in" Left="0.606251080830892in" Top="6.90000025431315in" Value="ALL PARTS AND LABOR ARE WARRANTED FOR ______ MONTHS/ ______ MILES UNLESS OTHERWISE STATED." Name="htmlTextBox9">
+          <Style>
+            <Font Bold="False" />
+          </Style>
+        </HtmlTextBox>
+        <HtmlTextBox Width="7.5in" Height="0.300000190734863in" Left="0.599920590718587in" Top="7.3000005086263in" Value="SAVE PARTS: NO_____ YES_____ (core charge may apply)" Name="htmlTextBox10">
+          <Style>
+            <Font Bold="False" />
+          </Style>
+        </HtmlTextBox>
+        <HtmlTextBox Width="7.5in" Height="0.300000190734863in" Left="0.606251080830892in" Top="7.70000012715658in" Value="I UNDERSTAND THAT AN ESTIMATE DIAGNOSIS FEE OF $______ OR ______ HOURS WILL BE CHARGED." Name="htmlTextBox11">
+          <Style>
+            <Font Bold="False" />
+          </Style>
+        </HtmlTextBox>
+        <HtmlTextBox Width="7.5in" Height="0.40000057220459in" Left="0.599921226501465in" Top="8.10000038146973in" Value="I UNDERSTAND THAT A CHARGE OF $______ PER DAY WILL BE CHARGED IF I FAIL TO PICK UP MY VEHICLE WITHIN THREE (3) WORKING DAYS OF NOTIFICATION OF COMPLETION." Name="htmlTextBox12">
+          <Style>
+            <Font Bold="False" />
+          </Style>
+        </HtmlTextBox>
+        <HtmlTextBox Width="0.500000178813934in" Height="0.199999809265137in" Left="5.69992192586263in" Top="8.70000076293945in" Value="DATE:" Name="htmlTextBox13">
+          <Style>
+            <Font Bold="True" />
+          </Style>
+        </HtmlTextBox>
+        <Shape Width="1.89992082118988in" Height="0.100000061094761in" Left="6.20000076293945in" Top="8.8000005086263in" Name="shape8">
+          <ShapeType>
+            <LineShape Direction="EW" />
+          </ShapeType>
+        </Shape>
+        <Shape Width="4.20000028610229in" Height="0.100000061094761in" Left="1.3082545598348in" Top="8.8000005086263in" Name="shape9">
+          <ShapeType>
+            <LineShape Direction="EW" />
+          </ShapeType>
+        </Shape>
+        <HtmlTextBox Width="0.693749904632568in" Height="0.199999809265137in" Left="0.606249968210856in" Top="8.70000012715658in" Value="SIGNED:" Name="htmlTextBox14">
+          <Style>
+            <Font Bold="True" />
+          </Style>
+        </HtmlTextBox>
+        <HtmlTextBox Width="7.5in" Height="0.300000190734863in" Left="0.599921862284342in" Top="9.10000038146973in" Value="PAYMENT METHOD: CASH______ CHECK______" Name="htmlTextBox15">
+          <Style>
+            <Font Bold="False" />
+          </Style>
+        </HtmlTextBox>
+        <HtmlTextBox Width="5.8000005086263in" Height="0.300000190734863in" Left="0.599999745686849in" Top="9.50000063578288in" Value="INSPECTED VEHICLE; CUSTOMER IS SATISFIED WITH REPAIRS AS PER ESTIMATE #" Name="htmlTextBox16">
+          <Style>
+            <Font Bold="False" />
+          </Style>
+        </HtmlTextBox>
+        <TextBox Width="1.20000012715658in" Height="0.200000127156576in" Left="6.49382909138997in" Top="9.50000063578288in" Value="= Parameters.AdminInfoID.Value" Name="textBox1">
+          <Style>
+            <Font Bold="True" />
+          </Style>
+        </TextBox>
+        <HtmlTextBox Width="1.80000003178914in" Height="0.199999809265137in" Left="0.599999904632568in" Top="10.1000010172526in" Value="CUSTOMER SIGNATURE" Name="htmlTextBox17">
+          <Style>
+            <Font Bold="True" />
+          </Style>
+        </HtmlTextBox>
+        <Shape Width="3.09783808390299in" Height="0.100000061094761in" Left="2.60216236114502in" Top="10.2000007629395in" Name="shape10">
+          <ShapeType>
+            <LineShape Direction="EW" />
+          </ShapeType>
+        </Shape>
+        <Shape Width="1.89992082118988in" Height="0.100000061094761in" Left="6.40007909138997in" Top="10.2000007629395in" Name="shape11">
+          <ShapeType>
+            <LineShape Direction="EW" />
+          </ShapeType>
+        </Shape>
+        <HtmlTextBox Width="0.500000178813934in" Height="0.199999809265137in" Left="5.90000025431315in" Top="10.1000010172526in" Value="DATE:" Name="htmlTextBox18">
+          <Style>
+            <Font Bold="True" />
+          </Style>
+        </HtmlTextBox>
+        <HtmlTextBox Width="2.58533600966136in" Height="0.199921205639839in" Left="5.79575475056966in" Top="1.19999996821086in" Value="Est # {Fields.EstimateNumber}" Name="htmlTextBox20">
+          <Style TextAlign="Left">
+            <Font Size="10pt" />
+          </Style>
+          <ConditionalFormatting>
+            <FormattingRule>
+              <Style Visible="False" />
+              <Filters>
+                <Filter Expression="= Parameters.ShowEstimateNumber.Value" Operator="Equal" Value="= False" />
+              </Filters>
+            </FormattingRule>
+          </ConditionalFormatting>
+        </HtmlTextBox>
+        <HtmlTextBox Width="2.08750021457672in" Height="0.199921205639839in" Left="5.79575475056966in" Top="1.40000009536743in" Value="ID # {Fields.EstimateID}" Name="htmlTextBox21">
+          <Style TextAlign="Left">
+            <Font Size="10pt" />
+          </Style>
+          <ConditionalFormatting>
+            <FormattingRule>
+              <Style Visible="False" />
+              <Filters>
+                <Filter Expression="= Parameters.ShowID.Value" Operator="Equal" Value="= False" />
+              </Filters>
+            </FormattingRule>
+          </ConditionalFormatting>
+        </HtmlTextBox>
+        <Shape Width="7.99996185302734in" Height="0.0520833308498065in" Left="0.381128946940104in" Top="2.40000025431315in" Name="shape12">
+          <ShapeType>
+            <LineShape Direction="EW" />
+          </ShapeType>
+        </Shape>
+        <PictureBox Url="= Fields.CompanyLogoPath" Width="2.49996066093445in" Height="1.04823160171509in" Left="0.381128946940104in" Top="1.10000006357829in" Sizing="ScaleProportional" MimeType="" Name="pictureBox4" />
+        <HtmlTextBox Width="2.5866391658783in" Height="1.09791672229767in" Left="2.92161496480306in" Top="1.05031482378642in" Value="= IIf(IsNull(Fields.CompanyContactName, '') &lt;&gt; '',  Fields.CompanyContactName, '')&#xD;&#xA;+ IIf(IsNull(Fields.CompanyName, '') &lt;&gt; '',  '&lt;br /&gt;' + Fields.CompanyName, '')&#xD;&#xA;+ IIf(IsNull(Fields.CompanyAddress, '') &lt;&gt; ' ',  '&lt;br /&gt;' + Fields.CompanyAddress, '')&#xD;&#xA;+ IIf(IsNull(Fields.CompanyCityStateZip, '') &lt;&gt; '',  '&lt;br /&gt;' + Fields.CompanyCityStateZip, '')&#xD;&#xA;+ IIf(IsNull(Fields.CompanyContactCellPhone, '') &lt;&gt; ' ',  '&lt;br /&gt;Phone: ' + Fields.CompanyContactCellPhone, '')&#xD;&#xA;+ IIf(IsNull(Fields.CompanyContactFax, '') &lt;&gt; '',  '&lt;br /&gt;Fax: ' + Fields.CompanyContactFax, '')&#xD;&#xA;+ IIf(IsNull(Fields.CompanyContactEmail, '') &lt;&gt; '',  '&lt;br /&gt;' + Fields.CompanyContactEmail, '')" Name="htmlTextBox33">
+          <Style TextAlign="Center">
+            <Font Size="10pt" />
+          </Style>
+        </HtmlTextBox>
+      </Items>
+    </DetailSection>
+  </Items>
+  <StyleSheet>
+    <StyleRule>
+      <Style>
+        <Padding Left="2pt" Right="2pt" />
+      </Style>
+      <Selectors>
+        <TypeSelector Type="TextItemBase" />
+        <TypeSelector Type="HtmlTextBox" />
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style Color="Black">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Georgia" Size="9pt" />
+      </Style>
+      <Selectors>
+        <StyleSelector Type="Table" StyleName="Civic.TableNormal" />
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style>
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Georgia" Size="9pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Civic.TableBody" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style BackgroundColor="140, 174, 173" Color="228, 238, 243" VerticalAlign="Middle">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Georgia" Size="10pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Civic.TableHeader" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style Color="Black">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Book Antiqua" Size="9pt" />
+      </Style>
+      <Selectors>
+        <StyleSelector Type="Table" StyleName="Apex.TableNormal" />
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style>
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Book Antiqua" Size="9pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Apex.TableBody" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style BackgroundColor="105, 103, 109" Color="206, 185, 102" VerticalAlign="Middle">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Book Antiqua" Size="10pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Apex.TableHeader" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style BackgroundColor="236, 236, 237">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Book Antiqua" Size="9pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Apex.TableGroup" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+  </StyleSheet>
+  <PageSettings>
+    <PageSettings PaperKind="Letter" Landscape="False">
+      <Margins>
+        <MarginsU Left="0in" Right="0in" Top="0in" Bottom="0in" />
+      </Margins>
+    </PageSettings>
+  </PageSettings>
+  <ReportParameters>
+    <ReportParameter Name="AdminInfoID" Type="Integer" Text="123456">
+      <Value>
+        <String>123456</String>
+      </Value>
+    </ReportParameter>
+    <ReportParameter Name="ShowEstimateNumber" Type="Boolean" />
+    <ReportParameter Name="ShowID" Type="Boolean" />
+    <ReportParameter Name="ContentDirectory" />
+  </ReportParameters>
+</Report>

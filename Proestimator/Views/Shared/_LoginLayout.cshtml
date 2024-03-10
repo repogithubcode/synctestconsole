@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>ProEstimator</title>
+    <meta name="viewport" content="width=device-width, initial-scale = 1.0, user-scalable = no">
+    <link href="@Url.Content("~/Content/css/main.css?s=25")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/css/forms.css")" rel="stylesheet" type="text/css" />
+    <script src="@Url.Content("~/Scripts/kendo/2020.1.406/jquery.min.js")"></script>
+
+    <link rel="icon" href="/images/we_app_icon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+    <script src="@Url.Content("~/Scripts/jquery.inputmask/jquery.inputmask.js")"></script>
+    <script src="@Url.Content("~/Scripts/jquery.mask.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/jquery-ui-1.11.4.min.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Content/Datepicker/zebra_datepicker.js")"></script>
+    <script src="@Url.Content("~/Content/Datepicker/core.js")"></script>
+    <script src="@Url.Content("~/Scripts/InputFormattingB.js?v=3")" type="text/javascript"></script>
+
+    <!-- Start of web-est9767 Zendesk Widget script -->
+    @if (!ViewBag.IsMobileDevice)
+    {
+        <script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=cda2c0d5-d64a-4ab9-adbb-32715d600f9f"></script>
+    }
+    <!-- End of web-est9767 Zendesk Widget script -->
+</head>
+<body>
+    <div class="mainWrapper">
+        <div class="container">
+            @Html.Partial("_LoginHeader")
+            <div data-role="content">
+                @RenderBody()
+            </div>
+        </div>
+    </div> 
+    <script>
+        $(document).on("mobileinit", function () {
+            $.mobile.ajaxEnabled = false;
+        });
+    </script>
+   
+    @RenderSection("scripts", required: false)
+</body>
+
+</html>

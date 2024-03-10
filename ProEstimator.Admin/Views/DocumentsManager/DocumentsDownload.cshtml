@@ -1,0 +1,195 @@
+﻿@{
+    ViewBag.Title = "Administration - Documents Download";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<style>
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .padd-top {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    .splitter {
+        width: 100%;
+        height: 515px;
+        display: flex;
+        overflow: auto;
+    }
+
+    #listDocuments {
+        width: 25%;
+        height: 100%;
+        min-width: 10px;
+    }
+
+    #manageDocuments {
+        width: 75%;
+        height: 100%;
+        min-width: 10px;
+        overflow: hidden;
+    }
+
+    input[type="file"] {
+        height: 40px;
+    }
+
+        input[type="file"]::-webkit-file-upload-button {
+            height: 40px;
+        }
+
+    .DocumentsRoot {
+        background-color: black;
+        color: white;
+        box-shadow: inset 0 0 3px 4px black;
+    }
+
+    /* Remove default bullets */
+    ul, #myUL {
+        list-style-type: none;
+    }
+
+    /* Remove margins and padding from the parent ul */
+    #myUL {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Style the caret/arrow */
+    .caret {
+        cursor: default;
+        width: 200px;
+        user-select: element; /* Prevent text selection */
+        border-top: none;
+        font-weight: bold;
+    }
+
+    .displayDocument {
+        user-select: none; /* Prevent text selection */
+        padding-bottom: 5px;
+    }
+
+    /* Create the caret/arrow with a unicode, and style it */
+    .caret::before {
+        /*content: "\25B6";*/
+        font-weight: bold;
+        color: black;
+        /*display: inline-block;*/
+        margin-right: 6px;
+    }
+
+    /* Rotate the caret/arrow icon when clicked on (using JavaScript) */
+    /*.caret-down::before {
+        transform: rotate(90deg);
+    }*/
+
+    /* Hide the nested list */
+    .nested {
+        display: none;
+        padding-top: 15px;
+    }
+
+    /* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
+    .active {
+        display: block;
+    }
+
+    .caretDown {
+        /*display: inline-block;*/
+        cursor: pointer;
+        width: 200px;
+        margin-left: 0px;
+        vertical-align: middle;
+        border-top: none;
+    }
+</style>
+
+<script>
+
+    $(document).ready(function () {
+
+        RefreshDocumentsRootTree();
+
+    });
+
+    function DownloadDocument(documentID) {
+
+        var win = window.open("/DownloadDocument/" + documentID, "_blank");
+        if (win) {
+            //Browser has allowed it to be opened
+            win.focus();
+        } else {
+            //Browser has blocked it
+            alert("Browser has blocked it");
+        }
+    }
+
+    function RefreshDocumentsRootTree() {
+
+        $("#listDocuments").empty();
+
+        $.getJSON("/DocumentsManager/GetAllDocuments", {
+
+        }, function (data) {
+
+            if (data.length <= 0) {
+                return;
+            }
+            else {
+                var documentCategories = data[0].DocumentCategories;
+
+                for (i = 0; i < documentCategories.length; i++) {
+
+                    if (documentCategories[i].Text != 'Select') {
+                        var documentContainer = "<div id='document-container'>";
+                        documentContainer += "<span class='caret'>" + documentCategories[i].Text + "</span>";
+                        documentContainer += "<ul class='nested active'>";
+
+                        for (j = 0; j < data.length; j++) {
+
+                            if (documentCategories[i].Text == data[j].Category) {
+                                documentContainer += "<li class='displayDocument caretDown' onclick='DownloadDocument(" + data[j].DocumentID + ");'>" + data[j].Name + "</li>";
+                            }
+                        }
+                        documentContainer += "</ul>";
+                        documentContainer += "</div>";
+
+                        console.log(documentContainer);
+
+                        $("#listDocuments").append(documentContainer);
+                    }
+                }
+            }
+        });
+    }
+
+</script>
+ 
+<form id="DocumenstManager" name="DocumentsManager">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>Documents Download</h4>
+                </div>
+                <div class="panel-body" style="padding:0px">
+                    <div class="container" style="padding-right:0px">
+                        <div class="row" style="padding:0px">
+                            <div class="col-md-12">
+                                <div class="splitter" id="splitterPanel">
+                                    <div id="listDocuments">
+                                    </div> 
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+</form>
+

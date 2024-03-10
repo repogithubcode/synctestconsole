@@ -1,0 +1,14 @@
+﻿{
+    "name": "ProEstimator",
+    "description": "ProEstimator",
+    "developer": {
+        "name": "web-est",
+        "url": "http://web-est.com/"
+    },
+    "icons": {
+        "128": "Images/pro-e-128x128.gif",
+        "512": "Images/pro-e-512x512.gif"
+    },
+    "background_color": "#ffffff",
+    "display": "standalone"
+}

@@ -1,0 +1,193 @@
+﻿@model Proestimator.ViewModel.SendEstimate.EMSExport.EMSExportPage
+
+@using Proestimator.ViewModel.SendEstimate.EMSExport;
+
+@{
+    ViewBag.Title = @Proestimator.Resources.ProStrings.EMSExport;
+}
+
+<style>
+    .k-state-selected td {
+        background-color: #1d69a6 !important;
+        color: white;
+    }
+
+    .k-state-hover td {
+        background-color: #7ca0bc;
+        color: white;
+    }
+
+    h1 {
+        margin: 0px;
+    }
+
+    #imgLoad {
+        width: 105px;
+        height: 40px;
+    }
+</style>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+    });
+
+    function RefreshGrid() {
+        $("#grid").data("kendoGrid").dataSource.read();
+        $("#grid").data("kendoGrid").refresh();
+    }
+
+    function onDataBound(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#grid tbody tr").hover(
+            function () {
+                // Hilight the hovered row
+                var row = $(this).closest("tr");
+                row.addClass("k-state-hover");
+            }
+            , function () {
+                // Remove the Hover state from all rows
+                $(".k-state-hover").each(function (index) {
+                    $(this).removeClass("k-state-hover");
+                });
+            }
+        );
+    }
+
+    function onPreviewSelectionChange(arg) {
+        // Remove the Hover state from all rows
+        $(".k-state-hover").each(function (index) {
+            $(this).removeClass("k-state-hover");
+        });
+
+        // Get the selected item and call the ClickedItem event
+        var row = $("#grid").find(".k-state-selected").first();
+        var id = row.find("td").first().html();
+
+        LoadSentEmail(id);
+    }
+
+    function exportEms() {
+        $("#btnEMS").prop("disabled", true);
+        var model = new FormData($("#SendEstimateForm")[0]);
+        applyLoading();
+        $.ajax({
+            url: '@Url.Action("SendEMS", "SendEstimate")',
+            type: 'POST',
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            data: model, 
+            contentType: false,
+            processData: false,
+            success: function (result) {
+                $("#btnEMS").prop("disabled", false);
+                removeLoading();
+
+                if (result.Success == true) {
+                    RefreshGrid();
+                }
+                else {
+                    alert(result.ErrorMessage);
+                }
+            }
+        });
+    }
+
+    function GetListParameters() {
+        var result =
+        {
+            estimateID: @Model.EstimateID
+        };
+        return result
+    }
+
+</script>
+
+<div id="workDesk" class="page-container">
+
+    @if (Model.ContractDeactivated)
+    {
+        <p>@Proestimator.Resources.ProStrings.EMSContractDeacivated.</p>
+    }
+    else
+    {
+        using (Html.BeginForm("EMS", "SendEstimate", FormMethod.Post, new { @class = "container", @id = "SendEstimateForm" }))
+        {
+            @Html.HiddenFor(o => o.LoginID)
+            @Html.HiddenFor(o => o.EstimateID)
+
+            <input type="hidden" id="redirectData" name="redirectDataField" />
+            <input id="submitButton" type="submit" value="@Proestimator.Resources.ProStrings.Submit" class="submit" style="display: none;" />
+
+            @* The page title *@
+            <div id="estimateFormHeader">
+
+                <div id="formHeader-back">
+                    <a id="detailsBtn" class="button nav-btn" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/estimate/@Model.EstimateID/printing');">@Proestimator.Resources.ProStrings.Estimate_Navigation_Print</a>
+                </div>
+
+                <div id="formHeader-center">
+                    <h1>@Proestimator.Resources.ProStrings.SendEstimateHeader</h1>
+                    <div style="margin-top: 10px;">
+                        <a class="button nav-btn" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/estimate/@Model.EstimateID/send-estimate');">@Proestimator.Resources.ProStrings.Email / @Proestimator.Resources.ProStrings.SMS</a>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="form-container">
+
+                <div id="lgRow1" class="container">
+
+                    @* The left panel *@
+                    <div id="customerField" class="half-container">
+
+                        <div class="datagrid">
+                            @(Html.Kendo().Grid<SentEmsVM>()
+                            .Name("grid")
+                            .Columns(columns =>
+                            {
+                                columns.Bound(item => item.MessageQueueID).Hidden();
+                                columns.Bound(item => item.TimeStamp).ClientTemplate("#= kendo.toString(kendo.parseDate(TimeStamp), 'M/d/yyyy h:mm:ss tt') #").Title(@Proestimator.Resources.ProStrings.Sent);
+                                columns.Bound("").Sortable(false).Template(@<text></text>);
+                                columns.Bound("").Sortable(false).Template(
+                                    @<text>
+                                        @Html.ActionLink("", "EmsDownload", "SendEstimate", new { id = @item.MessageQueueID }, new { @target = "_blank" })
+                                    </text>).ClientTemplate("<a href='/SendEstimate/EmsDownload?loginID=" + Model.LoginID + "&estimateID=" + Model.EstimateID + "&emsID=#= MessageQueueID#' target='_blank' class='report-link'><img src='/images/view.gif' width='15' height='15' style='margin: 0px auto;'></a>").Title(@Proestimator.Resources.ProStrings.Download);
+                            })
+                                                    .Sortable()
+                                                    .Selectable()
+                                                    .Events(events => events
+                                                        .DataBound("onDataBound")
+                                                        .Change("onPreviewSelectionChange")
+                                                    )
+                                                    .DataSource(dataSource => dataSource
+                                                        .Ajax()
+                                                        .ServerOperation(false)
+                                                        .Read(read => read.Action("GetEMSList", "SendEstimate").Data("GetListParameters"))
+                                                    )
+                            )
+                        </div>
+                    </div>
+
+                    @* The right panel *@
+                    <div class="half-container" style="text-align: center;">
+
+                        <div class="field-wrapper" style="margin-bottom: 10px;">
+                            <label class="inputLabel field-label"></label>
+                            <div class="field-control">
+                                <input id="btnEMS" type="button" onclick="exportEms()" class="button nav-btn" value="@Proestimator.Resources.ProStrings.EMSExport" />
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        }
+    }
+    
+</div>

@@ -1,0 +1,489 @@
+﻿@using ProEstimatorData.Models
+
+
+<script>
+    function RefreshHeaderInfo(estimateID) {
+
+        $.getJSON("@Url.Action("GetEstimateHeaderInfo", "Estimate")", { userID: @ViewBag.UserID, estimateID: estimateID }, function (data) {
+
+            $("#estimateNumbersmall").text(data.EstimateNumber);
+            $("#estimateNumberLarge").text(data.EstimateNumber);
+
+            $("#estimateStatusSmall").text(data.StatusName);
+            $("#estimateStatusLarge").text(data.StatusName);
+
+            $("#estimatePanelNameSmall").text($.trim(data.CustomerName));
+            $("#estimatePanelNameLarge").text($.trim(data.CustomerName));
+
+            $("#estimatePanelVehicleSmall").text($.trim(data.VehicleName));
+            $("#estimatePanelVehicleLarge").text($.trim(data.VehicleName));
+
+            if ($.trim(data.Vin).length == 17) {
+                var estimatePanelVin = $.trim(data.Vin);
+                var estimatePanelVinBeforeLast8Chars = estimatePanelVin.substr(0, 9);
+                var estimatePanelVinLast8Chars = estimatePanelVin.substr(9, 8);
+                $("#estimatePanelVinSmall").html(estimatePanelVinBeforeLast8Chars + "<span class='bold-vin'>" + estimatePanelVinLast8Chars + "</span>");
+                $("#estimatePanelVinLarge").html(estimatePanelVinBeforeLast8Chars + "<span class='bold-vin'>" + estimatePanelVinLast8Chars + "</span>");
+            }
+            else {
+                $("#estimatePanelVinSmall").text($.trim(data.Vin));
+                $("#estimatePanelVinLarge").text($.trim(data.Vin));
+            }
+
+            $("#estiamtePanelCostsSmall").text(data.EstimateTotal);
+            $("#estiamtePanelCostsLarge").text(data.EstimateTotal);
+
+            if (data.IsTotalLoss)
+            {
+                $("#totalLossLarge").show();
+                $("#totalLossSmall").show();
+            }
+            else
+            {
+                $("#totalLossLarge").hide();
+                $("#totalLossSmall").hide();
+            }
+
+            if ($.trim(data.CustomerName) == "") {
+                $("#dividerNameSmall").hide();
+                $("#dividerNameLarge").hide();
+            }
+            else {
+                $("#dividerNameSmall").show();
+                $("#dividerNameLarge").show();
+            }
+
+            if ($.trim(data.VehicleName) == "") {
+                $("#dividerVehicleSmall").hide();
+                $("#dividerVehicleLarge").hide();
+            }
+            else {
+                $("#dividerVehicleSmall").show();
+                $("#dividerVehicleLarge").show();
+            }
+
+            if ($.trim(data.Vin) == "") {
+                $("#dividerVinSmall").hide();
+                $("#dividerVinLarge").hide();
+            }
+            else {
+                $("#dividerVinSmall").show();
+                $("#dividerVinLarge").show();
+            }
+
+            $(".header-detail-container").fadeTo("fast", 1);
+        });
+    }
+
+    function AppTest()
+    {
+        $("#lgHeader").css("background-color", "red");
+        alert("App Test Called");
+        return "hey now";
+    }
+
+    var sticky = true;
+    function sticky_relocate() {
+        if ($("#sticky-anchor").is(":visible"))
+        {
+            var window_top = $(window).scrollTop();
+            var div_top = $('#sticky-anchor').offset().top;
+
+            if (window_top > div_top) {
+                $('#mobileMenuContainer').addClass('stick');
+                $('#sticky-anchor').height($('#mobileMenuContainer').outerHeight());
+            } else {
+                $('#mobileMenuContainer').removeClass('stick');
+                $('#sticky-anchor').height(0);
+            }
+
+            //if ($("#StickyForThumbnail").length) {
+            //    var thumbnail_top = $('#StickyForThumbnail').offset().top;
+            //    if (window_top > thumbnail_top) {
+            //        $('#ThumbnailContainer').addClass('stick');
+            //        $('#ThumbnailContainer').css("top", $('#mobileMenuContainer').outerHeight() + "px");
+            //        sticky = false;
+            //    } else {
+            //        if (sticky) {
+            //            $('#ThumbnailContainer').removeClass('stick');
+            //            $('#ThumbnailContainer').css("top", "");
+            //        }
+            //        else {
+            //            sticky = true;
+            //        }
+            //    }
+            //}
+        }
+    }
+
+    $(function() {
+        $(window).scroll(sticky_relocate);
+        sticky_relocate();
+    });
+
+    $(document).ready(function () {
+        $("input:text,form").attr("autocomplete","off");
+
+        @if (ViewBag.EstimateID != null)
+        {
+            <text>RefreshHeaderInfo(@ViewBag.EstimateID);</text>
+        }
+
+        $.getJSON("@Url.Action("GetMessageAndUpdates", "Home")", { userID: @ViewBag.UserID }, function (data) {
+            if (data.HasUnseenChanges === true)
+            {
+                $("#LgUpdatesLink").addClass("button-green");
+            }
+            //if (data.UnreadMessageCount > 0)
+            //{
+            //    RefreshHeaderMessagesLink(data.UnreadMessageCount);
+            //}
+        });
+
+        $("#userTabLink").click(function () {
+            var buttonContainer = $("#userTabLogOut");
+
+            if (buttonContainer.is(":visible")) {
+                buttonContainer.fadeOut();
+            }
+            else {
+                buttonContainer.fadeIn();
+            }
+        });
+    });
+
+    @*function RefreshHeaderMessagesLink(messageCount)
+    {
+        if (messageCount > 0)
+        {
+            $("#LgMessagesLink").addClass("button-green");
+            $("#LgMessagesLink").text(" @Proestimator.Resources.ProStrings.Messages (" + messageCount + ")");
+        }
+        else{
+            $("#LgMessagesLink").removeClass("button-green");
+            $("#LgMessagesLink").text(" @Proestimator.Resources.ProStrings.Messages");
+        }
+    }*@
+
+    // For showing a error or message to the user
+    var _showMessageTimeout;
+
+    function ShowUserMessage(message, isError, durration, skipDecode)
+    {
+        // Apply the good or bad background colors to the container
+        var messageDiv = $("#header-message");
+        messageDiv.removeClass("header-message-bad");
+        messageDiv.removeClass("header-message-good");
+
+        if (isError === true)
+        {
+            messageDiv.addClass("header-message-bad");
+        }
+        else {
+            messageDiv.addClass("header-message-good");
+        }
+
+        // Set the message
+        if (skipDecode !== true) {
+            message = HtmlDecode(message);
+        }
+        $("#header-message-text").html(message);
+
+        // Show the message display
+        messageDiv.show();
+        messageDiv.css("opacity", 0);
+        messageDiv.css("height", 0);
+
+        messageDiv.animate({
+            opacity: 1.0,
+            height: messageDiv.get(0).scrollHeight
+        }, 300
+        , function () {
+            messageDiv.height("auto");
+        });
+
+        // Set a timer to hide the message
+        if (durration > 0)
+        {
+            if (_showMessageTimeout)
+            {
+                clearTimeout(_showMessageTimeout);
+            }
+
+            _showMessageTimeout = window.setTimeout(function () {
+                HideUserMessage();
+            }, durration);
+        }
+    }
+
+    function HideUserMessage()
+    {
+        var messageDiv = $("#header-message");
+
+        if (_showMessageTimeout) {
+            clearTimeout(_showMessageTimeout);
+        }
+
+        messageDiv.animate({
+            opacity: 0.0,
+            height: 0
+        }, 300
+        , function () {
+            messageDiv.hide();
+        });
+
+        _showMessageTimeout = null;
+    }
+
+    function HtmlDecode(input)
+    {
+        return $("<div/>").html(input).text();
+    }
+
+    function LogSupportChatClick() {
+        $.getJSON('@Url.Action("CSBLogLiveSupport", "Home")', { userID: @ViewBag.UserID }, function (data) {
+        });
+    }
+
+    function LogMiscInfo(userID, estimateID, tag, otherData) {
+        $.getJSON('@Url.Action("LogMiscInfo", "Home")', { userID, estimateID, tag, otherData }, function (data) {
+        });
+    }
+</script>
+
+<style>
+    .home-page-message {
+        max-width: 700px;
+        text-align: center;
+        margin: 0px auto;
+        height: 105px;
+        color: green;
+        font-size: 0.9em;
+        padding-top: 5px;
+    }
+
+        .home-page-message a {
+            color: green;
+            text-decoration: underline;
+        }
+
+    .header-detail-container {
+        opacity: 0;
+    }
+
+    .bold-vin {
+        font-weight: bolder;
+    }
+
+    #userTabLogOut {
+        display: none;
+    }
+</style>
+
+@* A place to show messages or errors to the user. *@
+<div id="main-message-container" style="position: absolute; right: 0; left: 0; top: 0; z-index: 1000000">
+    <div id="header-message" class="header-message">
+        <p id="header-message-text"></p>
+
+        <input type="button" onclick="HideUserMessage()" class="button do-not-disable" style="max-width: 150px;" value="@Proestimator.Resources.ProStrings.Button_OK" />
+    </div>
+</div>
+
+<div id="header" style="width: 100%;">
+    <div id="smHeader" class="col sm_4_4 md_8_8 lg_12_12 xl_14_14" style="background-color: white;">
+
+        <div id="smLogo" class="col" style="width: 100%;">
+            <a href="#" class="button nav-btn" value="Feedback" id="L" style="display:table-header-group;" onclick="location.href='/@ViewBag.UserID/feedback'"> @Proestimator.Resources.ProStrings.Feedback</a>
+            @if (Convert.ToBoolean(ViewBag.IsRemoteSupportOn) == true)
+            {
+                <a id="SLgRemoteSupportLink" href="https://webest.showmypc.com/html/" target="_blank" class="button nav-btn" value="@Proestimator.Resources.ProStrings.RemoteSupport"> @Proestimator.Resources.ProStrings.RemoteSupport</a>
+            }
+            <a href="/@ViewBag.UserID"><img src="~/content/images/WebEstGlobalSmall.png" alt="Web-Est Global" style="width: 60%;" /></a>
+        </div>
+
+        <div id="smSupportNumber" class="col sm_4_4 md_8_8">
+            <p id="supportNumber">
+                <a href="mailto:help@web-est.com" style="color: black !important;">@Proestimator.Resources.ProStrings.HelpWebEstEmail</a>
+                &nbsp;&nbsp;-&nbsp;&nbsp;
+                <a href="tel:888-932-3780" style="color: black;">(888) 932-3780 x203</a>
+            </p>
+        </div>
+
+        @if (ViewBag.EstimateID == null || ViewBag.EstimateID == 0)
+        {
+            <div style="margin-left: 6px; margin-right: 5px; margin-bottom: 13px;">
+                <button class="button nav-btn do-not-disable" onclick="$('#navigation').show();">
+                    @Proestimator.Resources.ProStrings.Menu
+                </button>
+            </div>
+        }
+
+        @if (ViewBag.EstimateID > 0)
+        {
+            <div id="smEstimatePanel" class="col sm_4_4 md_4_8 md_hide">
+
+                <div class="header-detail-container col sm_4_4 md_8_8" style="min-height: 65px; padding-top: 5px;">
+                    <div class="inlineNote col estimate-summary-left">
+                        <div>Current Estimate @ViewBag.EstimateID</div>
+                        <div>@Proestimator.Resources.ProStrings.EstimateNum <span id="estimateNumbersmall"></span></div>
+                        <div id="estimateStatusSmall"></div>
+                    </div>
+
+                    <div id="estimatePanelDetails" class="col estimate-summary-right">
+                        <div id="estimatePanelNameSmall" class="col"></div>
+                        <div id="dividerNameSmall" class="col">&nbsp;&nbsp;</div><br />
+                        <div id="estimatePanelVehicleSmall" class="col"></div>
+                        <div id="dividerVehicleSmall" class="col">&nbsp;&nbsp;</div><br>
+                        <div id="estimatePanelVinSmall"></div>
+                        <div id="dividerVinSmall" class="col">&nbsp;&nbsp;</div><br>
+                        <div>
+                            <div id="estiamtePanelCostsSmall"></div>
+                            <div id="totalLossSmall" style="color: red; display: none;">@Proestimator.Resources.ProStrings.TotalLoss</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col" style="width: 100%;">
+                <div id="sticky-anchor" class="col"></div>
+
+                <div id="mobileMenuContainer" class="mobile-menu-container">
+                    <div style="float: left; width: 25%; padding-left: 10px;">
+                        <button class="button do-not-disable" onclick="$('#navigation').show();">
+                            @Proestimator.Resources.ProStrings.Menu
+                        </button>
+                    </div>
+
+                    <div style="float: left; width: 75%;">
+                        <select onchange="if (this.selectedIndex == 11) { @if (ViewBag.RatesPermit) {<text>SubmitAndRedirect(this.options[this.selectedIndex].value);</text>} else {<text>noPermission('Estimate Rate Profile'); this.selectedIndex = 1; SubmitAndRedirect(this.options[1].value);</text>} }
+                            else if (this.selectedIndex == 4) { @if (ViewBag.InsurancePermit) {<text>SubmitAndRedirect(this.options[this.selectedIndex].value);</text>} else {<text>noPermission('Insurance page'); this.selectedIndex = 1; SubmitAndRedirect(this.options[1].value);</text>} }
+                            else { SubmitAndRedirect(this.options[this.selectedIndex].value); }" style="width: 90%; margin-bottom: 0px; margin-top: 5px;">
+                            <option value="" style="display: @(ViewBag.EstimateNavID == "" ? "block" : "none")">--@Proestimator.Resources.ProStrings.EstimateMenu--</option>
+                            <option value="/@ViewBag.UserID/estimate/@ViewBag.EstimateID/customer" @(ViewBag.EstimateNavID == "customer" ? "selected" : "")>@Proestimator.Resources.ProStrings.PageTitle_Customer</option>
+                            <option value="/@ViewBag.UserID/estimate/@ViewBag.EstimateID/vehicle" @(ViewBag.EstimateNavID == "vehicle" ? "selected" : "")>@Proestimator.Resources.ProStrings.Vehicle</option>
+                            <option value="/@ViewBag.UserID/estimate/@ViewBag.EstimateID/add-parts" @(ViewBag.EstimateNavID == "graphical" ? "selected" : "")>@Proestimator.Resources.ProStrings.PageTitle_AddParts</option>
+                            <option value="/@ViewBag.UserID/estimate/@ViewBag.EstimateID/insurance" @(ViewBag.EstimateNavID == "insurance" ? "selected" : "")>@Proestimator.Resources.ProStrings.PageTitle_Insurance</option>
+                            <option value="/@ViewBag.UserID/estimate/@ViewBag.EstimateID/images" @(ViewBag.EstimateNavID == "images" ? "selected" : "")>@Proestimator.Resources.ProStrings.PageTitle_Images</option>
+                            <option value="/@ViewBag.UserID/estimate/@ViewBag.EstimateID/details" @(ViewBag.EstimateNavID == "details" ? "selected" : "")>@Proestimator.Resources.ProStrings.Estimate_Navigation_Details</option>
+                            <option value="/@ViewBag.UserID/estimate/@ViewBag.EstimateID/estimatenotes" @(ViewBag.EstimateNavID == "estimatenotes" ? "selected" : "")>@Proestimator.Resources.ProStrings.EstimateNotesHeader</option>
+                            <option value="/@ViewBag.UserID/estimate/@ViewBag.EstimateID/payment-info" @(ViewBag.EstimateNavID == "payment" ? "selected" : "")>@Proestimator.Resources.ProStrings.PageTitle_PaymentInfo</option>
+                            <option value="/@ViewBag.UserID/estimate/@ViewBag.EstimateID/printing" @(ViewBag.EstimateNavID == "printing" ? "selected" : "")>@Proestimator.Resources.ProStrings.PrintEstimateHeader</option>
+                            <option value="/@ViewBag.UserID/estimate/@ViewBag.EstimateID/send-estimate" @(ViewBag.EstimateNavID == "sendestimate" ? "selected" : "")>@Proestimator.Resources.ProStrings.SendEstimate</option>
+                            <option value="/@ViewBag.UserID/estimate/@ViewBag.EstimateID/edit-rate-profile" @(ViewBag.EstimateNavID == "profile" ? "selected" : "")>@Proestimator.Resources.ProStrings.EditRateProfile</option>
+                            <option value="/@ViewBag.UserID">@Proestimator.Resources.ProStrings.CloseEstimate</option>
+                        </select>
+                    </div>
+                    <div style="clear: both;"></div>
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+    <div id="lgHeader" class="container">
+
+        <div style="float: left;">
+            <a href="/@ViewBag.UserID"><img src="~/content/images/WebEstGlobalSmall.png" alt="Web-Est Global" /></a>
+            <p style="margin-top: -5px; font-size: .625em;">
+                <a href="mailto:help@web-est.com" style="color: black !important;">@Proestimator.Resources.ProStrings.HelpWebEstEmail</a>
+                &nbsp;&nbsp;-&nbsp;&nbsp;
+                <a href="tel:888-932-3780" style="color: black;">(888) 932-3780 x203</a>
+            </p>
+        </div>
+        <div style="float:right;margin-right: 10px;" class="sm_hide md_display">
+            <a href="#" class="button nav-btn" id="userTabLink" noonclick="location.href='/@ViewBag.UserID/feedback'">@ViewBag.UserEmailAddress</a>
+
+            <p id="userTabLogOut">
+                <a href="#" class="button nav-btn" onclick="SubmitAndRedirect('/@ViewBag.UserID/log-out')" style="padding-left: 30px; padding-right: 30px;">@Proestimator.Resources.ProStrings.Logout</a>
+            </p>
+            
+        </div>
+        <div style="float:right;margin-right: 10px;" class="sm_hide md_display">
+            <a href="#" class="button nav-btn" value="Feedback" id="L" onclick="location.href='/@ViewBag.UserID/feedback'"> @Proestimator.Resources.ProStrings.Feedback</a>
+        </div>
+        <div style="float:right;margin-right: 10px;" class="sm_hide md_display">
+            <a id="LgUpdatesLink" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/change-log');" class="button nav-btn" value="Updates"> @Proestimator.Resources.ProStrings.Updates</a>
+        </div>
+        @if (Convert.ToBoolean(ViewBag.IsRemoteSupportOn) == true)
+        {
+            <div style="float:right;margin-right: 10px;" class="sm_hide md_display">
+                <a id="LgRemoteSupportLink" href="https://webest.showmypc.com/html/" target="_blank" class="button nav-btn" value="@Proestimator.Resources.ProStrings.RemoteSupport"> @Proestimator.Resources.ProStrings.RemoteSupport</a>
+            </div>
+        }
+
+        @*<div style="float:right;margin-right: 10px;" class="sm_hide md_display">
+            <a id="LgMessagesLink" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/messages');" class="button nav-btn" value="Messages"> @Proestimator.Resources.ProStrings.Messages</a>
+        </div>*@
+
+        @if (!string.IsNullOrEmpty(ViewBag.HomePageMessage))
+        {
+            <div class="home-page-message">
+                @Html.Raw(ViewBag.HomePageMessage)
+            </div>
+        }
+
+        @if (!ViewBag.HeaderShowEarlyRenewal && !string.IsNullOrEmpty(ViewBag.AddOnMessage))
+        {
+            <div class="home-page-message" style="font-size:1.2em; padding-top: 42px;">
+                @Html.Raw(ViewBag.AddOnMessage)
+            </div>
+        }
+
+        @if (ViewBag.EstimateID > 0)
+        {
+            <div>
+                @* The top detail banner for the full sized site. *@
+                <div class="header-detail-container inlineNote inlineNoteExtend">
+                    @Proestimator.Resources.ProStrings.CurrentEstimate
+                    @ViewBag.EstimateID
+                    &nbsp;|&nbsp;
+                    @Proestimator.Resources.ProStrings.EstimateNum
+                    <span id="estimateNumberLarge"></span>
+                    &nbsp;|&nbsp;
+                    <span id="estimateStatusLarge"><a href="javascript:SubmitAndRedirect('/@ViewBag.UserID/estimate/@ViewBag.EstimateID/details');" style="color: black;"></a></span>
+                    <span id="dividerNameLarge">&nbsp;|&nbsp;</span>
+
+                    <a id="estimatePanelNameLarge" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/estimate/@ViewBag.EstimateID/customer');" style="color: black;"></a>
+                    <span id="dividerVehicleLarge">&nbsp;|&nbsp;</span>
+                    <a id="estimatePanelVehicleLarge" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/estimate/@ViewBag.EstimateID/vehicle');" style="color: black;"></a>
+                    <span id="dividerVinLarge">&nbsp;|&nbsp;</span>
+                    <span id="estimatePanelVinLarge"></span>
+                    <span>&nbsp;|&nbsp;</span>
+                    <a id="estiamtePanelCostsLarge" href="/@ViewBag.UserID/estimate/@ViewBag.EstimateID/totals-report" style="color: black;" onclick="window.open(this.href,'targetWindow', 'toolbar=no, location=no, status=no, menubar=no, scrollbars=yes, resizable=yes'); return false;"></a>
+                    <span id="totalLossLarge" style="padding-left: 5px; color: red; text-align: center; display: none;">@Proestimator.Resources.ProStrings.TotalLoss</span>
+                    <a href="/@ViewBag.UserID/estimate/@ViewBag.EstimateID/make-and-view" target="@ViewBag.QuickPrintTarget"><img src="/Images/ViewReport.gif" style="display: inline; vertical-align: top; float: none; margin: 0px 5px;" /></a>
+                </div>
+
+                @* The top estimate menu for large screens *@
+                <div id="lgEstimateNavRow">
+                    <ul class="topMenu">
+                        <li class="@(ViewBag.EstimateNavID == "customer" ? "selected" : "")" onclick="SubmitAndRedirect('/@ViewBag.UserID/estimate/@ViewBag.EstimateID/customer');">@Proestimator.Resources.ProStrings.Estimate_Navigation_Customer</li>
+                        <li class="@(ViewBag.EstimateNavID == "vehicle" ? "selected" : "")" onclick="SubmitAndRedirect('/@ViewBag.UserID/estimate/@ViewBag.EstimateID/vehicle');">@Proestimator.Resources.ProStrings.Estimate_Navigation_Vehicle</li>
+                        <li class="@(ViewBag.EstimateNavID == "graphical" ? "selected" : "")" onclick="SubmitAndRedirect('/@ViewBag.UserID/estimate/@ViewBag.EstimateID/add-parts');">@Proestimator.Resources.ProStrings.Estimate_Navigation_AddParts</li>
+                        <li class="@(ViewBag.EstimateNavID == "insurance" ? "selected" : "")" onclick="SubmitAndRedirect('/@ViewBag.UserID/estimate/@ViewBag.EstimateID/insurance');">@Proestimator.Resources.ProStrings.Estimate_Navigation_Insurance</li>
+                        <li class="@(ViewBag.EstimateNavID == "images" ? "selected" : "")" onclick="SubmitAndRedirect('/@ViewBag.UserID/estimate/@ViewBag.EstimateID/images');">@Proestimator.Resources.ProStrings.Estimate_Navigation_Images</li>
+                        <li class="@(ViewBag.EstimateNavID == "details" ? "selected" : "")" onclick="SubmitAndRedirect('/@ViewBag.UserID/estimate/@ViewBag.EstimateID/details');">@Proestimator.Resources.ProStrings.Estimate_Navigation_Details</li>
+                        <li class="@(ViewBag.EstimateNavID == "estimatenotes" ? "selected" : "")" onclick="SubmitAndRedirect('/@ViewBag.UserID/estimate/@ViewBag.EstimateID/estimatenotes');">@Proestimator.Resources.ProStrings.Estimate_Navigation_EstimateNotesHeader</li>
+                        <li class="@(ViewBag.EstimateNavID == "payment" ? "selected" : "")" onclick="SubmitAndRedirect('/@ViewBag.UserID/estimate/@ViewBag.EstimateID/payment-info');">@Proestimator.Resources.ProStrings.Estimate_Navigation_PaymentInfo</li>
+                        <li class="@(ViewBag.EstimateNavID == "printing" ? "selected" : "")" onclick="SubmitAndRedirect('/@ViewBag.UserID/estimate/@ViewBag.EstimateID/printing');">@Proestimator.Resources.ProStrings.Estimate_Navigation_Print</li>
+                        <li class="@(ViewBag.EstimateNavID == "sendestimate" ? "selected" : "")" onclick="SubmitAndRedirect('/@ViewBag.UserID/estimate/@ViewBag.EstimateID/send-estimate');">@Proestimator.Resources.ProStrings.Estimate_Navigation_SendEstimate</li>
+                        <li class="@(ViewBag.EstimateNavID == "profile" ? "selected" : "")" onclick="@if (ViewBag.RatesPermit) {<text>SubmitAndRedirect('/@ViewBag.UserID/estimate/@ViewBag.EstimateID/edit-rate-profile');</text>} else {<text>noPermission('Estimate Rate Profile');</text>}">@Proestimator.Resources.ProStrings.EditRateProfile</li>
+                        <li onclick="SubmitAndRedirect('/@ViewBag.UserID');">@Proestimator.Resources.ProStrings.CloseEstimate</li>
+                    </ul>
+
+                </div>
+
+            </div>
+        }
+        else if (ViewBag.HeaderShowEarlyRenewal)
+        {
+            <div class="message-wrapper" style="max-width: 50%; margin: 10px auto;">
+                <p style="margin: 5px; font-weight: bold;">@Proestimator.Resources.ProStrings.CustomerLoyaltyProgram</p>
+                <p style="margin: 5px;"><a href="/@ViewBag.UserID/invoice/pick-contract" style="color: black; text-decoration: underline;">@Proestimator.Resources.ProStrings.RenewEarlyGet50Credit</a></p>
+                <p style="margin: 0px;">@Proestimator.Resources.ProStrings.OfferExpireRenew</p>
+            </div>
+        }
+
+    </div>
+</div>

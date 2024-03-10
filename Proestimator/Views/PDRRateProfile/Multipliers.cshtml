@@ -1,0 +1,149 @@
+﻿@model Proestimator.ViewModel.PDR.MultipliersVM
+
+@using Proestimator.ViewModel.PDR;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.RateProfile_Multipliers;
+
+}
+
+<link href="@Url.Content("~/Content/css/PDR_RateProfiles.css")" rel="stylesheet" type="text/css" />
+
+<script src="@Url.Content("~/Scripts/jquery.validate.min.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#btnNew").click(function () {
+            $.getJSON('@Url.Action("AddMultiplier", "PDRRateProfile")', { userID: @ViewBag.UserID, loginID: @Model.LoginID, id: @Model.ProfileID }, function (data) {
+                if (data.Success == true) {
+                    ShowMessage("@Proestimator.Resources.ProStrings.MultiplierAdded.");
+
+                    var newRow =
+                    "<tr id='" + data.DataItem.ID + "'> \
+                        <td><input autocomplete='off' id='Multipliers_" + data.DataItem.Index + "__Name' name='Multipliers[" + data.DataItem.Index + "].Name' type='text' value='" + data.DataItem.Name + "' /></td> \
+                        <td><input autocomplete='off' id='Multipliers_" + data.DataItem.Index + "__Value' name='Multipliers[" + data.DataItem.Index + "].Value' type='text' value='" + data.DataItem.Value + "' /></td> \
+                        <td> \
+                            <div class='button-wrapper'> \
+                            <input data-val='true' data-val-number='The field ID must be a number.' data-val-required='The ID field is required.' id='Multipliers_" + data.DataItem.Index + "__ID' name='Multipliers[" + data.DataItem.Index + "].ID' type='hidden' value='" + data.DataItem.ID + "' /> \
+                            <input type='button' id='delete_" + data.DataItem.ID + "' title='Delete' value='Delete' class='button btnDelete'>\
+                            </div> \
+                        </td> \
+                    </tr>";
+
+                    $(newRow).hide().appendTo("#multiplierTable tbody").fadeIn(500);
+
+                    $("#delete_" + data.DataItem.ID).click(function () {
+                        DeleteMultiplier(data.DataItem.ID);
+                    });
+
+                } else {
+                    ShowMessage(data.ErrorMessage);
+                }
+            });
+        });
+
+        $(".btnDelete").click(function () {
+            var multiplierID = $(this).attr("id").replace("delete_", "");
+            DeleteMultiplier(multiplierID);
+        });
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <text>
+            ShowMessage("@Model.ErrorMessage");
+            </text>
+        }
+    });
+
+    function DeleteMultiplier(id)
+    {
+        $.getJSON('@Url.Action("DeleteMultiplier", "PDRRateProfile")', { userID: @ViewBag.UserID, loginID: @Model.LoginID, id: id }, function (data) {
+            if (data.Success == true) {
+                ShowMessage("@Proestimator.Resources.ProStrings.MultiplierDeleted.");
+                $("#" + id).fadeOut(500, function() {
+                    $("#" + id).remove();
+                });
+            } else {
+                ShowMessage(data.ErrorMessage);
+            }
+        });
+    }
+
+    function ShowMessage(message) {
+        var newP = $(document.createElement('p'));
+        newP.text(message);
+
+        $(".message-container").append(newP);
+
+        window.setTimeout(function () {
+            $(".message-container").empty();
+        }, 4000);
+    }
+
+</script>
+
+<style>
+    .button-wrapper {
+        margin-top: -17px;
+    }
+</style>
+
+@using (Html.BeginForm("Multipliers", "PDRRateProfile", FormMethod.Post, new { @class = "container", @style = "margin-left: 20px;width:97%" }))
+{
+    @Html.HiddenFor(o => o.LoginID)
+    @Html.HiddenFor(o => o.ProfileID)
+
+    if (Model.GoodData)
+    {
+        <input type="hidden" id="redirectData" name="redirectDataField" />
+
+        @Html.Partial("TopMenu", Model.ProfileID)
+
+        <div class="tabcontent container">
+
+            <table style="width: 90%; max-width: 600px; margin: 0px auto; padding-top: 40px;" id="multiplierTable">
+                <thead>
+                    <tr>
+                        <td><b>@Proestimator.Resources.PDRStrings.MultiplierName</b></td>
+                        <td><b>@Proestimator.Resources.PDRStrings.MultiplierValue</b></td>
+                        <td></td>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @for (int i = 0; i < Model.Multipliers.Count; i++)
+                    {
+                        <tr id="@Model.Multipliers[i].ID">
+                            <td>@Html.TextBoxFor(o => o.Multipliers[i].Name, new { autocomplete = "off" })</td>
+                            <td>@Html.TextBoxFor(o => o.Multipliers[i].Value, new { autocomplete = "off" })</td>
+                            <td>
+                                <div class="button-wrapper">
+                                    <input type="button" id="delete_@Model.Multipliers[i].ID" title="@Proestimator.Resources.ProStrings.Delete" value="@Proestimator.Resources.ProStrings.Delete" class="button btnDelete">
+                                </div>
+
+                                @Html.HiddenFor(o => o.Multipliers[i].ID)
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="center" style="padding-top: 20px;">
+                <a class="button nav-btn" id="btnNew">@Proestimator.Resources.ProStrings.NewMultiplier</a>
+                <input id="submitButton" type="submit" value="@Proestimator.Resources.ProStrings.Save" class="button nav-btn" />
+
+                <div class="message-container">
+
+                </div>
+            </div>
+
+        </div>
+    }
+    else
+    {
+        <h1>@Proestimator.Resources.ProStrings.InvalidProfileID</h1>
+    }
+
+}

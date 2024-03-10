@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report DataSourceName="ContractsInvoiceReportHeader" Width="8.42847442626953in" Name="ContractInvoices.trdx" ShowSnapGrid="True" xmlns="http://schemas.telerik.com/reporting/2012/3.8">
+	<DataSources>
+		<SqlDataSource ConnectionString="ProEstimator" SelectCommand="dbo.ContractInvoicesReport_GetHeader" SelectCommandType="StoredProcedure" Name="ContractsInvoiceReportHeader" ParameterValues="{&quot;@ContractID&quot;:&quot;3466889&quot;,&quot;@ContentDirectory&quot;:&quot;c:\\&quot;}">
+			<Parameters>
+				<SqlDataSourceParameter DbType="Int32" Name="@ContractID">
+					<Value>
+						<String>= Parameters.ContractID.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="AnsiString" Name="@ContentDirectory">
+					<Value>
+						<String>= Parameters.ContentDirectory.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+			</Parameters>
+		</SqlDataSource>
+	</DataSources>
+	<Items>
+		<PageHeaderSection PrintOnLastPage="True" Height="0.800000111262004in" Name="pageHeaderSection1">
+			<Style Visible="True" BackgroundColor="Transparent" />
+			<Items>
+				<TextBox Width="1.18110237916311in" Height="0.199999809265137in" Left="0.511811065673828in" Top="0.500000238418579in" Value="CompanyName:" Name="textBox118">
+					<Style TextAlign="Right">
+						<Font Bold="True" Underline="False" />
+					</Style>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style>
+								<Font Size="8pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeHeaders.Value" Operator="Equal" Value="=1" />
+							</Filters>
+						</FormattingRule>
+						<FormattingRule>
+							<Style>
+								<Font Size="12pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeHeaders.Value" Operator="Equal" Value="=3" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</TextBox>
+				<TextBox Width="1.37795260349909in" Height="0.199999809265137in" Left="4.48818918863932in" Top="0.5in" Value="Term Description #:" Name="textBox124">
+					<Style TextAlign="Right">
+						<Font Bold="True" Underline="False" />
+					</Style>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style>
+								<Font Size="8pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeHeaders.Value" Operator="Equal" Value="=1" />
+							</Filters>
+						</FormattingRule>
+						<FormattingRule>
+							<Style>
+								<Font Size="12pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeHeaders.Value" Operator="Equal" Value="=3" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</TextBox>
+				<TextBox Width="2.09653790791829in" Height="0.200000047683716in" Left="5.89541524251302in" Top="0.500000238418579in" Value="= Fields.ContractTermDescription" Name="textBox125">
+					<Style>
+						<Font Bold="True" />
+					</Style>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style>
+								<Font Size="8pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeHeaders.Value" Operator="Equal" Value="=1" />
+							</Filters>
+						</FormattingRule>
+						<FormattingRule>
+							<Style>
+								<Font Size="12pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeHeaders.Value" Operator="Equal" Value="=3" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</TextBox>
+				<Shape Width="7.52195692062378in" Height="0.0996061936020851in" Left="0.489583343267441in" Top="0.699999968210856in" Name="shape8">
+					<ShapeType>
+						<LineShape Direction="EW" />
+					</ShapeType>
+				</Shape>
+				<HtmlTextBox Width="2.20472494761149in" Height="0.199921290079753in" Left="1.73228352864583in" Top="0.5in" Value="= Fields.CompanyName" Name="htmlTextBox15">
+					<Style>
+						<Font Bold="True" />
+					</Style>
+				</HtmlTextBox>
+			</Items>
+			<ConditionalFormatting>
+				<FormattingRule>
+					<Style Visible="False" />
+					<Filters>
+						<Filter Expression="= PageNumber" Operator="Equal" Value="=1" />
+					</Filters>
+				</FormattingRule>
+			</ConditionalFormatting>
+		</PageHeaderSection>
+		<DetailSection KeepTogether="False" Height="3.04269536336263in" Name="detailSection1">
+			<Style BackgroundColor="Transparent">
+				<BorderStyle Top="None" Bottom="None" Left="None" Right="None" />
+				<BorderColor Top="Black" Bottom="Black" Left="Black" Right="Black" />
+				<BorderWidth Top="1pt" Bottom="1pt" Left="1pt" Right="1pt" />
+				<Padding Bottom="0in" />
+			</Style>
+			<Items>
+				<SubReport Width="8.31032524108887in" Height="0.393192164103187in" Left="0.118110211690267in" Top="0in" KeepTogether="False" Name="ContractInvoicesDetail">
+					<Style BackgroundColor="Transparent" />
+					<ReportSource>
+						<UriReportSource Uri="ContractInvoicesDetail.trdx">
+							<Parameters>
+								<Parameter Name="ContractID">
+									<Value>
+										<String>= Parameters.ContractID.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="IncludeAddons">
+									<Value>
+										<String>= Parameters.IncludeAddons.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="FontSizeLines">
+									<Value>
+										<String>= Parameters.FontSizeLines.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="FontSizeTableHeaders">
+									<Value>
+										<String>= Parameters.FontSizeTableHeaders.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="FontSizeTotals">
+									<Value>
+										<String>= Parameters.FontSizeTotals.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="FontSizeHeaders">
+									<Value>
+										<String>= Parameters.FontSizeHeaders.Value</String>
+									</Value>
+								</Parameter>
+							</Parameters>
+						</UriReportSource>
+					</ReportSource>
+				</SubReport>
+			</Items>
+		</DetailSection>
+		<ReportHeaderSection Height="2.40208333333333in" Name="reportHeaderSection1">
+			<Style BackgroundColor="White" />
+			<Items>
+				<HtmlTextBox Width="2.40007909138998in" Height="0.297838131586711in" Left="5.60000038146972in" Top="0.902083206176758in" Value="= '&lt;span&gt;&lt;strong&gt;' + Parameters.HeaderText.Value + '&lt;/strong&gt;&lt;/span&gt;&lt;span style=&quot;font-size: 17pt&quot;&gt;&lt;/span&gt;'  + '&lt;br /&gt;' + 'Term Desc. : ' + Fields.ContractTermDescription  + '&lt;br /&gt;' + 'Eff. Date : ' + Format('{0:MM/dd/yyyy}',Fields.ContractsEffectiveDate)  + '&lt;br /&gt;' + 'Exp. Date : ' + Format('{0:MM/dd/yyyy}',Fields.ContractsExpirationDate)" CanShrink="True" Name="htmlTextBox2">
+					<Style TextAlign="Right">
+						<Font Size="9pt" />
+					</Style>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style>
+								<Font Size="7pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeDetails.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+							</Filters>
+						</FormattingRule>
+						<FormattingRule>
+							<Style>
+								<Font Size="11pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeDetails.Value" Operator="Equal" Value="= 3" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</HtmlTextBox>
+				<HtmlTextBox Width="2.51114491621653in" Height="0.997916698455812in" Left="3.0888557434082in" Top="0.902083285649618in" Value="= IIf(IsNull(Fields.CompanyName, '') &lt;&gt; '',  '&lt;b&gt;' + Fields.CompanyName + '&lt;/b&gt;&lt;br /&gt;', '')&#xD;&#xA;+ IIf(IsNull(Fields.CompanyContactName, '') &lt;&gt; '',  Fields.CompanyContactName + '&lt;br /&gt;', '')&#xD;&#xA;+ IIf(IsNull(Fields.CompanyAddress, '') &lt;&gt; ' ',  Fields.CompanyAddress + '&lt;br /&gt;', '')&#xD;&#xA;+ IIf(IsNull(Fields.CompanyCityStateZip, '') &lt;&gt; '',  Fields.CompanyCityStateZip + '&lt;br /&gt;', '')&#xD;&#xA;+ IIf(IsNull(Fields.CompanyContactCellPhone, '') &lt;&gt; ' ',  Fields.CompanyContactPhoneType1 + ': ' + Fields.CompanyContactCellPhone + '&lt;br /&gt;', '')&#xD;&#xA;+ IIf(IsNull(Fields.CompanyContactSecondaryPhone, '') &lt;&gt; ' ',  Fields.CompanyContactPhoneType2 + ': ' + Fields.CompanyContactSecondaryPhone + '&lt;br /&gt;', '')&#xD;&#xA;+ IIf(IsNull(Fields.CompanyContactFax, '') &lt;&gt; '',  'Fax: ' + Fields.CompanyContactFax + '&lt;br /&gt;', '')&#xD;&#xA;+ IIf(IsNull(Fields.CompanyContactEmail, '') &lt;&gt; '',  Fields.CompanyContactEmail, '')" CanShrink="True" Name="htmlTextBox33">
+					<Style TextAlign="Center">
+						<Font Size="9pt" />
+					</Style>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style>
+								<Font Size="7pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeDetails.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+							</Filters>
+						</FormattingRule>
+						<FormattingRule>
+							<Style>
+								<Font Size="11pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeDetails.Value" Operator="Equal" Value="= 3" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</HtmlTextBox>
+				<Panel Width="7.49in" Height="0.0520833333333333in" Left="0.52in" Top="2.35in" Name="panel1">
+					<Style BackgroundColor="GrayText" />
+				</Panel>
+				<PictureBox Url="= Fields.CompanyLogoPath" Width="2.56794349352519in" Height="1.49992084503174in" Left="0.520833492279053in" Top="0.8in" Sizing="ScaleProportional" MimeType="" Name="pictureBox4">
+					<Style Visible="False" TextAlign="Left">
+						<BackgroundImage Repeat="NoRepeat" />
+					</Style>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style Visible="True" />
+						</FormattingRule>
+					</ConditionalFormatting>
+				</PictureBox>
+			</Items>
+		</ReportHeaderSection>
+		<PageFooterSection Height="0.638999283313751in" Name="pageFooterSection1">
+			<Style BackgroundColor="White" />
+			<Items>
+				<Panel Width="8.01150035858154in" Height="0.438999156157176in" Left="0.0000394185371988in" Top="0.0389995574951172in" Name="panel8">
+					<Style BackgroundColor="White" />
+					<Items>
+						<HtmlTextBox Width="1.39374923706055in" Height="0.200000122189522in" Left="1.19537687301636in" Top="0.147961929440498in" Value="Powered By Web-Est" Name="htmlTextBox25">
+							<Style>
+								<Font Size="9pt" />
+							</Style>
+						</HtmlTextBox>
+						<HtmlTextBox Width="2.00000023841858in" Height="0.200000122189522in" Left="3.29537677764893in" Top="0.147961929440498in" Value="{PageNumber} of {PageCount}" Name="htmlTextBox26">
+							<Style TextAlign="Center">
+								<Font Size="9pt" />
+							</Style>
+						</HtmlTextBox>
+						<HtmlTextBox Width="1.90458587805431in" Height="0.200000122189522in" Left="5.89537572860718in" Top="0.147961929440498in" Value="{Parameters.TimeStamp.Value}" Name="htmlTextBox27">
+							<Style Visible="True" />
+							<ConditionalFormatting>
+								<FormattingRule>
+									<Style Visible="False" />
+									<Filters>
+										<Filter Expression="= Parameters.NoFooterDateTimeStamp.Value" Operator="Equal" Value="= 1" />
+									</Filters>
+								</FormattingRule>
+							</ConditionalFormatting>
+						</HtmlTextBox>
+						<Shape Width="7.49195289611816in" Height="0.0996061936020851in" Left="0.499960581461589in" Top="0in" Name="shape5">
+							<ShapeType>
+								<LineShape Direction="EW" />
+							</ShapeType>
+						</Shape>
+					</Items>
+				</Panel>
+			</Items>
+		</PageFooterSection>
+	</Items>
+	<StyleSheet>
+		<StyleRule>
+			<Style>
+				<Padding Left="2pt" Right="2pt" />
+			</Style>
+			<Selectors>
+				<TypeSelector Type="TextItemBase" />
+				<TypeSelector Type="HtmlTextBox" />
+			</Selectors>
+		</StyleRule>
+		<StyleRule>
+			<Style Color="Black">
+				<BorderStyle Default="Solid" />
+				<BorderColor Default="Black" />
+				<BorderWidth Default="1px" />
+				<Font Name="Georgia" Size="9pt" />
+			</Style>
+			<Selectors>
+				<StyleSelector Type="Table" StyleName="Civic.TableNormal" />
+			</Selectors>
+		</StyleRule>
+		<StyleRule>
+			<Style>
+				<BorderStyle Default="Solid" />
+				<BorderColor Default="Black" />
+				<BorderWidth Default="1px" />
+				<Font Name="Georgia" Size="9pt" />
+			</Style>
+			<Selectors>
+				<DescendantSelector>
+					<Selectors>
+						<TypeSelector Type="Table" />
+						<StyleSelector Type="ReportItem" StyleName="Civic.TableBody" />
+					</Selectors>
+				</DescendantSelector>
+			</Selectors>
+		</StyleRule>
+		<StyleRule>
+			<Style BackgroundColor="140, 174, 173" Color="228, 238, 243" VerticalAlign="Middle">
+				<BorderStyle Default="Solid" />
+				<BorderColor Default="Black" />
+				<BorderWidth Default="1px" />
+				<Font Name="Georgia" Size="10pt" />
+			</Style>
+			<Selectors>
+				<DescendantSelector>
+					<Selectors>
+						<TypeSelector Type="Table" />
+						<StyleSelector Type="ReportItem" StyleName="Civic.TableHeader" />
+					</Selectors>
+				</DescendantSelector>
+			</Selectors>
+		</StyleRule>
+		<StyleRule>
+			<Style Color="Black">
+				<BorderStyle Default="Solid" />
+				<BorderColor Default="Black" />
+				<BorderWidth Default="1px" />
+				<Font Name="Book Antiqua" Size="9pt" />
+			</Style>
+			<Selectors>
+				<StyleSelector Type="Table" StyleName="Apex.TableNormal" />
+			</Selectors>
+		</StyleRule>
+		<StyleRule>
+			<Style>
+				<BorderStyle Default="Solid" />
+				<BorderColor Default="Black" />
+				<BorderWidth Default="1px" />
+				<Font Name="Book Antiqua" Size="9pt" />
+			</Style>
+			<Selectors>
+				<DescendantSelector>
+					<Selectors>
+						<TypeSelector Type="Table" />
+						<StyleSelector Type="ReportItem" StyleName="Apex.TableBody" />
+					</Selectors>
+				</DescendantSelector>
+			</Selectors>
+		</StyleRule>
+		<StyleRule>
+			<Style BackgroundColor="105, 103, 109" Color="206, 185, 102" VerticalAlign="Middle">
+				<BorderStyle Default="Solid" />
+				<BorderColor Default="Black" />
+				<BorderWidth Default="1px" />
+				<Font Name="Book Antiqua" Size="10pt" />
+			</Style>
+			<Selectors>
+				<DescendantSelector>
+					<Selectors>
+						<TypeSelector Type="Table" />
+						<StyleSelector Type="ReportItem" StyleName="Apex.TableHeader" />
+					</Selectors>
+				</DescendantSelector>
+			</Selectors>
+		</StyleRule>
+		<StyleRule>
+			<Style BackgroundColor="236, 236, 237">
+				<BorderStyle Default="Solid" />
+				<BorderColor Default="Black" />
+				<BorderWidth Default="1px" />
+				<Font Name="Book Antiqua" Size="9pt" />
+			</Style>
+			<Selectors>
+				<DescendantSelector>
+					<Selectors>
+						<TypeSelector Type="Table" />
+						<StyleSelector Type="ReportItem" StyleName="Apex.TableGroup" />
+					</Selectors>
+				</DescendantSelector>
+			</Selectors>
+		</StyleRule>
+		<StyleRule>
+			<Style Color="Black">
+				<BorderStyle Default="Solid" />
+				<BorderColor Default="Black" />
+				<BorderWidth Default="1px" />
+				<Font Name="Tahoma" Size="9pt" />
+			</Style>
+			<Selectors>
+				<StyleSelector Type="Table" StyleName="Normal.TableNormal" />
+			</Selectors>
+		</StyleRule>
+		<StyleRule>
+			<Style>
+				<BorderStyle Default="Solid" />
+				<BorderColor Default="Black" />
+				<BorderWidth Default="1px" />
+				<Font Name="Tahoma" Size="9pt" />
+			</Style>
+			<Selectors>
+				<DescendantSelector>
+					<Selectors>
+						<TypeSelector Type="Table" />
+						<StyleSelector Type="ReportItem" StyleName="Normal.TableBody" />
+					</Selectors>
+				</DescendantSelector>
+			</Selectors>
+		</StyleRule>
+		<StyleRule>
+			<Style VerticalAlign="Middle">
+				<BorderStyle Default="Solid" />
+				<BorderColor Default="Black" />
+				<BorderWidth Default="1px" />
+				<Font Name="Tahoma" Size="10pt" />
+			</Style>
+			<Selectors>
+				<DescendantSelector>
+					<Selectors>
+						<TypeSelector Type="Table" />
+						<StyleSelector Type="ReportItem" StyleName="Normal.TableHeader" />
+					</Selectors>
+				</DescendantSelector>
+			</Selectors>
+		</StyleRule>
+	</StyleSheet>
+	<PageSettings>
+		<PageSettings PaperKind="Letter" Landscape="False">
+			<Margins>
+				<MarginsU Left="0in" Right="0in" Top="0in" Bottom="0in" />
+			</Margins>
+		</PageSettings>
+	</PageSettings>
+	<ReportParameters>
+		<ReportParameter Name="LoginID" Type="Integer" AllowBlank="False">
+			<Value>
+				<String>3467979</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="ContractID" Type="Integer" AllowBlank="False">
+			<Value>
+				<String>3467979</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="ContentDirectory" Text="ContentDirectory">
+			<Value>
+				<String>C:\ProestimatorUserContent</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="IncludeAddons" Type="Integer" AllowBlank="False">
+			<Value>
+				<String>0</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="FontSizeDetails" Type="Integer">
+			<Value>
+				<String>2</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="FontSizeHeader" Type="Integer">
+			<Value>
+				<String>2</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="FontSizeHeaders" Type="Integer">
+			<Value>
+				<String>2</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="FontSizeLines" Type="Integer">
+			<Value>
+				<String>2</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="FontSizeTableHeaders" Type="Integer">
+			<Value>
+				<String>2</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="FontSizeTotals" Type="Integer">
+			<Value>
+				<String>2</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="ShowHeaderLogo" Type="Boolean">
+			<Value>
+				<String>True</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="NoFooterDateTimeStamp" Type="Integer" Text="0">
+			<Value>
+				<String>0</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="HeaderText">
+			<Value>
+				<String>none</String>
+			</Value>
+		</ReportParameter>
+	</ReportParameters>
+</Report>

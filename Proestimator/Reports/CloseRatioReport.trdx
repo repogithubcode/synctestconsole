@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report Width="11.0000012715658in" Name="CloseRatioReport.trdx" xmlns="http://schemas.telerik.com/reporting/2012/3.8">
+  <DataSources>
+    <SqlDataSource ConnectionString="ProEstimator" SelectCommand="dbo.CloseRatioReport" SelectCommandType="StoredProcedure" Name="ReportData" ParameterValues="{&quot;@LoginID&quot;:&quot;47736&quot;,&quot;@StartDate&quot;:&quot;8/1/2018&quot;,&quot;@EndDate&quot;:&quot;9/5/2018&quot;}">
+      <Parameters>
+        <SqlDataSourceParameter DbType="Int32" Name="@LoginID">
+          <Value>
+            <String>= Parameters.LoginID.Value</String>
+          </Value>
+        </SqlDataSourceParameter>
+        <SqlDataSourceParameter DbType="DateTime" Name="@StartDate">
+          <Value>
+            <String>= Parameters.StartDate.Value</String>
+          </Value>
+        </SqlDataSourceParameter>
+        <SqlDataSourceParameter DbType="DateTime" Name="@EndDate">
+          <Value>
+            <String>= Parameters.EndDate.Value</String>
+          </Value>
+        </SqlDataSourceParameter>
+      </Parameters>
+    </SqlDataSource>
+  </DataSources>
+  <Items>
+    <PageHeaderSection PrintOnLastPage="True" Height="1in" Name="pageHeaderSection1">
+      <Items>
+        <TextBox Width="5.30000114440918in" Height="0.400000015894572in" Left="0.300000031789144in" Top="0.299999952316284in" Value="{Parameters.CompanyName.Value} - Close Ratio Report" Name="textBox25">
+          <Style>
+            <Font Size="20pt" Bold="True" />
+          </Style>
+        </TextBox>
+        <HtmlTextBox Width="2.66249585151672in" Height="0.39999994635582in" Left="8.10834121704102in" Top="0.300000031789144in" Value="&lt;p&gt;&lt;span style=&quot;font-size: 8pt&quot;&gt;&lt;strong&gt;Report Range:&lt;/strong&gt; {Parameters.StartDate.Value.ToString(&quot;M/d/yyyy&quot;)} - {Parameters.EndDate.Value.ToString(&quot;M/d/yyyy&quot;)}&lt;/span&gt;&lt;br /&gt;&lt;span style=&quot;font-size: 8pt&quot;&gt;&lt;strong&gt;Print Date:&lt;/strong&gt;&amp;nbsp; {Now().ToString(&quot;M/d/yyyy&quot;)}&lt;/span&gt;&lt;/p&gt;" Name="htmlTextBox2">
+          <Style TextAlign="Right">
+            <Font Size="8pt" />
+          </Style>
+        </HtmlTextBox>
+      </Items>
+    </PageHeaderSection>
+    <DetailSection Height="1in" Name="detailSection1">
+      <Style>
+        <BorderStyle Top="None" Bottom="None" Left="None" Right="None" />
+        <BorderColor Top="Black" Bottom="Black" Left="Black" Right="Black" />
+        <BorderWidth Top="1pt" Bottom="1pt" Left="1pt" Right="1pt" />
+      </Style>
+      <Items>
+        <Table DataSourceName="ReportData" Width="4.40677185158689in" Height="0.4in" Left="0.200000047683716in" Top="0.199999968210856in" Name="table1" StyleName="Normal.TableNormal">
+          <Body>
+            <Cells>
+              <TableCell RowIndex="0" ColumnIndex="0" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="1.81614591165044in" Height="0.2in" Left="0in" Top="0in" Value="= Fields.CloseRepairOrders" Name="textBox9" StyleName="Normal.TableBody">
+                    <Style>
+                      <BorderStyle Default="None" />
+                      <Font Size="8pt" />
+                    </Style>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="0" ColumnIndex="1" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="1.45156273937234in" Height="0.2in" Left="0in" Top="0in" Value="= Fields.TotalEstimates" Name="textBox10" StyleName="Normal.TableBody">
+                    <Style>
+                      <BorderStyle Default="None" />
+                      <Font Size="8pt" />
+                    </Style>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="0" ColumnIndex="2" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="1.13906287907581in" Height="0.2in" Left="0in" Top="0in" Value="= Fields.CloseRatio" Name="textBox11" StyleName="Normal.TableBody">
+                    <Style>
+                      <BorderStyle Default="None" />
+                      <Font Size="8pt" />
+                    </Style>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+            </Cells>
+            <Columns>
+              <Column Width="1.81614580212897in" />
+              <Column Width="1.45156281854935in" />
+              <Column Width="1.13906323090857in" />
+            </Columns>
+            <Rows>
+              <Row Height="0.2in" />
+            </Rows>
+          </Body>
+          <Corner />
+          <Style>
+            <BorderStyle Default="None" />
+          </Style>
+          <RowGroups>
+            <TableGroup Name="Detail">
+              <Groupings>
+                <Grouping />
+              </Groupings>
+            </TableGroup>
+          </RowGroups>
+          <ColumnGroups>
+            <TableGroup>
+              <ReportItem>
+                <TextBox Width="1.81614591165044in" Height="0.2in" Left="0in" Top="0in" Value="Close Repair Orders" Name="textBox1" StyleName="Normal.TableHeader">
+                  <Style TextAlign="Left">
+                    <BorderStyle Default="None" Bottom="Solid" />
+                    <Font Size="8pt" Bold="True" />
+                  </Style>
+                </TextBox>
+              </ReportItem>
+            </TableGroup>
+            <TableGroup>
+              <ReportItem>
+                <TextBox Width="1.45156273937234in" Height="0.2in" Left="0in" Top="0in" Value="Total Estimates" Name="textBox2" StyleName="Normal.TableHeader">
+                  <Style TextAlign="Left">
+                    <BorderStyle Default="None" Bottom="Solid" />
+                    <Font Size="8pt" Bold="True" />
+                  </Style>
+                </TextBox>
+              </ReportItem>
+            </TableGroup>
+            <TableGroup>
+              <ReportItem>
+                <TextBox Width="1.13906287907581in" Height="0.2in" Left="0in" Top="0in" Value="Closed Ratio" Name="textBox3" StyleName="Normal.TableHeader">
+                  <Style TextAlign="Left">
+                    <BorderStyle Default="None" Bottom="Solid" />
+                    <Font Size="8pt" Bold="True" />
+                  </Style>
+                </TextBox>
+              </ReportItem>
+            </TableGroup>
+          </ColumnGroups>
+        </Table>
+      </Items>
+    </DetailSection>
+  </Items>
+  <StyleSheet>
+    <StyleRule>
+      <Style>
+        <Padding Left="2pt" Right="2pt" />
+      </Style>
+      <Selectors>
+        <TypeSelector Type="TextItemBase" />
+        <TypeSelector Type="HtmlTextBox" />
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style Color="Black">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Georgia" Size="9pt" />
+      </Style>
+      <Selectors>
+        <StyleSelector Type="Table" StyleName="Civic.TableNormal" />
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style>
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Georgia" Size="9pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Civic.TableBody" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style BackgroundColor="140, 174, 173" Color="228, 238, 243" VerticalAlign="Middle">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Georgia" Size="10pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Civic.TableHeader" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style Color="Black">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Book Antiqua" Size="9pt" />
+      </Style>
+      <Selectors>
+        <StyleSelector Type="Table" StyleName="Apex.TableNormal" />
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style>
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Book Antiqua" Size="9pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Apex.TableBody" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style BackgroundColor="105, 103, 109" Color="206, 185, 102" VerticalAlign="Middle">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Book Antiqua" Size="10pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Apex.TableHeader" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style BackgroundColor="236, 236, 237">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Book Antiqua" Size="9pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Apex.TableGroup" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style Color="Black">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Tahoma" Size="9pt" />
+      </Style>
+      <Selectors>
+        <StyleSelector Type="Table" StyleName="Normal.TableNormal" />
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style>
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Tahoma" Size="9pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Normal.TableBody" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style VerticalAlign="Middle">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Tahoma" Size="10pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Normal.TableHeader" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+  </StyleSheet>
+  <PageSettings>
+    <PageSettings PaperKind="Letter" Landscape="True">
+      <Margins>
+        <MarginsU Left="0in" Right="0in" Top="0in" Bottom="0in" />
+      </Margins>
+    </PageSettings>
+  </PageSettings>
+  <ReportParameters>
+    <ReportParameter Name="LoginID" Type="Integer" Text="47736" AllowBlank="False">
+      <Value>
+        <String>47736</String>
+      </Value>
+    </ReportParameter>
+    <ReportParameter Name="StartDate" Type="DateTime" Text="1/1/2017">
+      <Value>
+        <String>1/1/2017</String>
+      </Value>
+    </ReportParameter>
+    <ReportParameter Name="EndDate" Type="DateTime" Text="3/5/2017">
+      <Value>
+        <String>5/5/2017</String>
+      </Value>
+    </ReportParameter>
+    <ReportParameter Name="CompanyName" Text="ACME Car Co" />
+  </ReportParameters>
+</Report>

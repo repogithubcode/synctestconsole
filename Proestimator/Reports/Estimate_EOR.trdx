@@ -1,0 +1,2431 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report Width="8.42739232381185in" Name="Estimate.trdx" xmlns="http://schemas.telerik.com/reporting/2012/3.8">
+  <DataSources>
+    <SqlDataSource ConnectionString="ProEstimator" SelectCommand="dbo.EstimateReport_GetLineItems_EOR" SelectCommandType="StoredProcedure" Name="LineItems_EOR" ParameterValues="{&quot;@AdminInfoID&quot;:&quot;6799423&quot;,&quot;@SupplementVersion&quot;:&quot;1&quot;}">
+      <Parameters>
+        <SqlDataSourceParameter DbType="Int32" Name="@AdminInfoID">
+          <Value>
+            <String>= Parameters.AdminInfoID.Value</String>
+          </Value>
+        </SqlDataSourceParameter>
+        <SqlDataSourceParameter DbType="Int32" Name="@SupplementVersion">
+          <Value>
+            <String>= Parameters.Supplement.Value</String>
+          </Value>
+        </SqlDataSourceParameter>
+        <SqlDataSourceParameter DbType="Int32" Name="@PdrOnly">
+          <Value>
+            <String>= Parameters.PdrOnly.Value</String>
+          </Value>
+        </SqlDataSourceParameter>
+      </Parameters>
+    </SqlDataSource>
+    <SqlDataSource ConnectionString="ProEstimator" SelectCommand="dbo.EstimateReport_GetSubTotals" SelectCommandType="StoredProcedure" Name="SubTotals" ParameterValues="{&quot;@AdminInfoID&quot;:&quot;6797024  &quot;,&quot;@SupplementVersion&quot;:&quot;1&quot;,&quot;@EOR&quot;:&quot;True&quot;}">
+      <Parameters>
+        <SqlDataSourceParameter DbType="Int32" Name="@AdminInfoID">
+          <Value>
+            <String>= Parameters.AdminInfoID.Value</String>
+          </Value>
+        </SqlDataSourceParameter>
+        <SqlDataSourceParameter DbType="Byte" Name="@SupplementVersion">
+          <Value>
+            <String>= Parameters.Supplement.Value</String>
+          </Value>
+        </SqlDataSourceParameter>
+        <SqlDataSourceParameter DbType="Boolean" Name="@EOR">
+          <Value>
+            <String>= True</String>
+          </Value>
+        </SqlDataSourceParameter>
+        <SqlDataSourceParameter DbType="Int32" Name="@PdrOnly">
+          <Value>
+            <String>= Parameters.PdrOnly.Value</String>
+          </Value>
+        </SqlDataSourceParameter>
+      </Parameters>
+    </SqlDataSource>
+    <SqlDataSource ConnectionString="ProEstimator" SelectCommand="dbo.EstimateReport_GetTotals" SelectCommandType="StoredProcedure" Name="Totals" ParameterValues="{&quot;@AdminInfoID&quot;:&quot;6797024  &quot;,&quot;@SupplementVersion&quot;:&quot;1&quot;,&quot;@ForEOR&quot;:&quot;True&quot;}">
+      <Parameters>
+        <SqlDataSourceParameter DbType="Int32" Name="@AdminInfoID">
+          <Value>
+            <String>= Parameters.AdminInfoID.Value</String>
+          </Value>
+        </SqlDataSourceParameter>
+        <SqlDataSourceParameter DbType="Int32" Name="@SupplementVersion">
+          <Value>
+            <String>= Parameters.Supplement.Value</String>
+          </Value>
+        </SqlDataSourceParameter>
+        <SqlDataSourceParameter DbType="Boolean" Name="@ForEOR">
+          <Value>
+            <String>= True</String>
+          </Value>
+        </SqlDataSourceParameter>
+        <SqlDataSourceParameter DbType="Int32" Name="@PdrOnly">
+          <Value>
+            <String>= Parameters.PdrOnly.Value</String>
+          </Value>
+        </SqlDataSourceParameter>
+        <SqlDataSourceParameter DbType="Boolean" Name="@IncludeShowTopLineField">
+          <Value>
+            <String>= True</String>
+          </Value>
+        </SqlDataSourceParameter>
+      </Parameters>
+    </SqlDataSource>
+  </DataSources>
+  <Items>
+    <DetailSection PageBreak="None" KeepTogether="False" Height="3.599999944369in" Name="detailSection1">
+      <Style BackgroundColor="Transparent">
+        <BorderStyle Top="None" Bottom="None" Left="None" Right="None" />
+        <BorderColor Top="Black" Bottom="Black" Left="Black" Right="Black" />
+        <BorderWidth Top="1pt" Bottom="1pt" Left="1pt" Right="1pt" />
+        <Padding Bottom="0in" />
+      </Style>
+      <Items>
+        <Crosstab DataSourceName="LineItems_EOR" Width="7.64882064555696in" Height="1.82145844345143in" Left="0.400000095367432in" Top="0.147916158040365in" KeepTogether="False" Name="crosstab1" StyleName="Apex.TableNormal">
+          <Body>
+            <Cells>
+              <TableCell RowIndex="1" ColumnIndex="4" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <HtmlTextBox Width="2.27845116383156in" Height="0.170000018611108in" Left="0in" Top="0in" Value="= Fields.Description + IIF(Fields.IsPartsQuantity = 1, IIF(Fields.PartsQuantity &gt; 1 And Fields.Price &gt; 0, ' &lt;br /&gt; ($' + CStr(Format(&quot;{0:0.00}&quot;, Fields.Price)) + ' x ' + Fields.PartsQuantity + ')',''),'') + IIf(Fields.IsLaborQuantity = 1, IIF(Fields.LaborQuantity &gt; 1, IIF(Fields.LaborSummaryExtra='','',' &lt;br /&gt; (' + Fields.LaborSummaryExtraPrintDescSubText + ' X ' + Fields.LaborQuantity + ')'), ''),'')  + IIf(Fields.IsPaintQuantity = 1, IIF(Fields.PaintQuantity &gt; 1, IIF(Fields.LaborSummaryPaint='' Or (IndexOfSubstr(Fields.LaborSummaryPaint, 'Clearcoat') &gt; 0),'',' &lt;br /&gt; (' + Fields.LaborSummaryPaint + ' X ' + Fields.PaintQuantity + ')'), ''),'') + IIf(Fields.IsPaintQuantity = 1, IIF(Fields.PaintQuantity &gt; 1, IIF(Fields.LaborSummaryPaintPanelPrintDescSubText ='','',' &lt;br /&gt; (' + Fields.LaborSummaryPaintPanelPrintDescSubText + ' X ' + Fields.PaintQuantity + ')'),''),'')" KeepTogether="False" Name="textBox36" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White" VerticalAlign="Top">
+                      <BorderStyle Default="None" />
+                      <Font Name="Arial" Size="8pt" Strikeout="False" />
+                      <Padding Top="0.04in" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Color="Silver" />
+                        <Filters>
+                          <Filter Expression="= Fields.Removed" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="6pt" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="10pt" Bold="False" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=3" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </HtmlTextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="1" ColumnIndex="6" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="1.22997011679121in" Height="0.169999992709228in" Left="0in" Top="0in" KeepTogether="False" Value="= Fields.PartNumber" Name="textBox37" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White" VerticalAlign="Top">
+                      <BorderStyle Default="None" />
+                      <Font Name="Arial" Size="8pt" Strikeout="False" />
+                      <Padding Top="0.04in" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="6pt" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="10pt" Bold="False" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=3" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style Color="Silver" />
+                        <Filters>
+                          <Filter Expression="= Fields.Removed" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="1" ColumnIndex="7" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.920772717496207in" Height="0.170000019877707in" Left="0in" Top="0in" KeepTogether="False" Value="= IIf(Fields.Price &lt;&gt; 0, (Fields.Price * IIF(Fields.IsPartsQuantity = 1, IsNull(Fields.PartsQuantity, 1),1)),'')" Format="{0:C2}" Name="textBox38" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White" TextAlign="Right" VerticalAlign="Top">
+                      <BorderStyle Default="None" />
+                      <Font Name="Arial" Size="8pt" Strikeout="False" />
+                      <Padding Top="0.04in" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="6pt" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="10pt" Bold="False" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=3" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style Color="Silver" />
+                        <Filters>
+                          <Filter Expression="= Fields.Removed" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="1" ColumnIndex="8" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.104166669778315in" Height="0.170000022058557in" Left="0in" Top="0in" KeepTogether="False" Name="textBox39" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White" TextAlign="Center" VerticalAlign="Top">
+                      <BorderStyle Default="None" />
+                      <Font Name="Arial" Size="8pt" Strikeout="False" />
+                      <Padding Top="0.04in" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Color="Silver" />
+                        <Filters>
+                          <Filter Expression="= Fields.Removed" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="1" ColumnIndex="5" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <PictureBox Value="R0lGODlhIAAgAIcAAAAAAAAAMwAAZgAAmQAAzAAA/wAzAAAzMwAzZgAzmQAzzAAz/wBmAABmMwBmZgBmmQBmzABm/wCZAACZMwCZZgCZmQCZzACZ/wDMAADMMwDMZgDMmQDMzADM/wD/AAD/MwD/ZgD/mQD/zAD//zMAADMAMzMAZjMAmTMAzDMA/zMzADMzMzMzZjMzmTMzzDMz/zNmADNmMzNmZjNmmTNmzDNm/zOZADOZMzOZZjOZmTOZzDOZ/zPMADPMMzPMZjPMmTPMzDPM/zP/ADP/MzP/ZjP/mTP/zDP//2YAAGYAM2YAZmYAmWYAzGYA/2YzAGYzM2YzZmYzmWYzzGYz/2ZmAGZmM2ZmZmZmmWZmzGZm/2aZAGaZM2aZZmaZmWaZzGaZ/2bMAGbMM2bMZmbMmWbMzGbM/2b/AGb/M2b/Zmb/mWb/zGb//5kAAJkAM5kAZpkAmZkAzJkA/5kzAJkzM5kzZpkzmZkzzJkz/5lmAJlmM5lmZplmmZlmzJlm/5mZAJmZM5mZZpmZmZmZzJmZ/5nMAJnMM5nMZpnMmZnMzJnM/5n/AJn/M5n/Zpn/mZn/zJn//8wAAMwAM8wAZswAmcwAzMwA/8wzAMwzM8wzZswzmcwzzMwz/8xmAMxmM8xmZsxmmcxmzMxm/8yZAMyZM8yZZsyZmcyZzMyZ/8zMAMzMM8zMZszMmczMzMzM/8z/AMz/M8z/Zsz/mcz/zMz///8AAP8AM/8AZv8Amf8AzP8A//8zAP8zM/8zZv8zmf8zzP8z//9mAP9mM/9mZv9mmf9mzP9m//+ZAP+ZM/+ZZv+Zmf+ZzP+Z///MAP/MM//MZv/Mmf/MzP/M////AP//M///Zv//mf//zP///////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEBAAAh+QQBAADYACwAAAAAIAAgAAAI/wCxCRxIENs1VqwCKVyF8FrBhxAFsloVCJAeQIGsaLSi0GFEiNcoYlRIMuNGjh4/SgxUChDFVdauyWQF6KRGVipDljL0MhArmUAzmtwYKGLIQKtKrUq6CihQVjY1rsD5MOHSQxMRxnQ6aw8XPRtlWHlCdeBEUoeUImzo9Jq1QF43PhFrJeW1iksRQmO1te1BLntsruBoVhXLvLKgtf0pM9rQjSsGO7zLMq3eWU4nOg3UBaxUqTjfYlx1iKE1xjKhIUJN88rJwZJpKlSrNXMp1NeucAk7dzBCjIDSImUVDehbik5LCbbiuxSXkqtMNX2aECvQWSefMGeeMNBFkgz9iuz3bEXG4LkKv3YZGUiWeL9QrcSAUoWFRpaAOerpyPVa8cUaQSFDFfJZgZBGgOgWiCmbkTSSU10QOBgUN8WnkVes6dFZfj4BZcp8GsVw0zUb1RRIgxxZ0cWIQIVIoRV7GHTSFajJElh+np3Yok2HSHRSX6bs5ppNrNnk0TW7adSKNUsOCVaS9/104EZlYWNhVFGJpV1UJxbECoUgZqndXBrRFSVEGUEhImzbkTnYWER+lNGbg1Uhw1xkkklUKSpZydx8MbCA51hmUtmnRHvEsIKaalphn01dHirQQXNa0SiB90EjKUgIkSRIQ30GBAA7" Width="0.270833571473828in" Height="0.169999992709228in" Left="4in" Top="0.347918192545573in" Sizing="Center" MimeType="image/gif" Name="pictureBox3" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White">
+                      <BorderStyle Default="None" />
+                      <Font Strikeout="False" />
+                    </Style>
+                    <Bindings>
+                      <Binding Path="Value" Expression="= Parameters.ImageDirectory.Value + Fields.PartSourceImage" />
+                    </Bindings>
+                  </PictureBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="1" ColumnIndex="3" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.796875317318139in" Height="0.169999978429536in" Left="5.00000063578288in" Top="0.347917556762695in" KeepTogether="False" Value="= Fields.Action" Name="textBox128" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White" VerticalAlign="Top">
+                      <BorderStyle Default="None" />
+                      <Font Name="Arial" Size="8pt" Strikeout="False" />
+                      <Padding Top="0.04in" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="6pt" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="10pt" Bold="False" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=3" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style Color="Silver" />
+                        <Filters>
+                          <Filter Expression="= Fields.Removed" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="1" ColumnIndex="2" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="25px" Height="0.169999992709228in" Left="4.10000006357829in" Top="0.347917556762695in" KeepTogether="False" Value="= IIf(Fields.SupplementDisplay &gt; 0, &quot;&quot; + Fields.SupplementDisplay, &quot;&quot;)" Name="textBox46" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White" TextAlign="Center" VerticalAlign="Middle" LineWidth="0pt">
+                      <BackgroundImage Repeat="NoRepeat" MimeType="image/png" />
+                      <BorderStyle Default="None" Top="None" Bottom="None" />
+                      <BorderColor Default="White" />
+                      <BorderWidth Default="0px" />
+                      <Font Name="Arial" Size="8pt" Strikeout="False" />
+                      <Padding Left="0in" Right="0in" Top="0.0399999991059303in" Bottom="0in" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="6pt" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="10pt" Bold="False" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=3" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style BackgroundColor="255, 128, 64">
+                          <BackgroundImage Repeat="NoRepeat" MimeType="image/png" />
+                          <BorderStyle Top="None" />
+                          <BorderColor Top="White" />
+                          <BorderWidth Top="0px" />
+                          <Padding Top="0px" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Fields.SupplementDisplay" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style BackgroundColor="128, 255, 0">
+                          <BackgroundImage Repeat="NoRepeat" MimeType="image/png" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Fields.SupplementDisplay" Operator="Equal" Value="=2" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style BackgroundColor="Aqua">
+                          <BackgroundImage Repeat="NoRepeat" MimeType="image/png" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Fields.SupplementDisplay" Operator="Equal" Value="=3" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style BackgroundColor="128, 128, 255">
+                          <BackgroundImage Repeat="NoRepeat" MimeType="image/png" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Fields.SupplementDisplay" Operator="Equal" Value="=4" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style BackgroundColor="238, 218, 149">
+                          <BackgroundImage Repeat="NoRepeat" MimeType="image/png" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Fields.SupplementDisplay" Operator="Equal" Value="=5" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style BackgroundColor="255, 128, 192">
+                          <BackgroundImage Repeat="NoRepeat" MimeType="image/png" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Fields.SupplementDisplay" Operator="Equal" Value="=6" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style BackgroundColor="130, 253, 173">
+                          <BackgroundImage Repeat="NoRepeat" MimeType="image/png" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Fields.SupplementDisplay" Operator="Equal" Value="=7" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style BackgroundColor="255, 128, 128">
+                          <BackgroundImage Repeat="NoRepeat" MimeType="image/png" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Fields.SupplementDisplay" Operator="GreaterOrEqual" Value="=8" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="7" ColumnIndex="1" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.273958444363491in" Height="0.168750057641272in" Left="0in" Top="0in" KeepTogether="False" CanShrink="True" Name="textBox126" StyleName="Apex.TableBody">
+                    <Style Visible="True" BackgroundColor="White">
+                      <BorderStyle Default="None" />
+                      <Padding Left="15pt" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.Notes" Operator="Equal" Value="=&quot;&quot;" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="0" ColumnIndex="0" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.260416706238818in" Height="0.200000029097285in" Left="0in" Top="0in" KeepTogether="False" Name="textBox142" StyleName="Apex.TableGroup">
+                    <Style BackgroundColor="Silver">
+                      <BorderStyle Default="None" Top="None" Right="None" />
+                      <BorderWidth Bottom="2px" Right="0px" />
+                      <Font Bold="True" />
+                      <Padding Top="2pt" />
+                    </Style>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="7" ColumnIndex="0" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.260416706238818in" Height="0.168749949129802in" Left="0in" Top="0in" KeepTogether="False" CanShrink="True" Name="textBox145" StyleName="Apex.TableBody">
+                    <Style Visible="True" BackgroundColor="White">
+                      <BorderStyle Default="None" />
+                      <Padding Left="15pt" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.Notes" Operator="Equal" Value="=&quot;&quot;" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="1" ColumnIndex="0" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.260416706238818in" Height="0.170000017344509in" Left="4.20000012715658in" Top="0.347917556762695in" KeepTogether="False" Value="= Fields.LineNumberCalculated" Name="textBox146" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White" TextAlign="Left" VerticalAlign="Top">
+                      <BorderStyle Default="None" Bottom="None" />
+                      <BorderColor Default="White" />
+                      <Font Name="Arial" Size="8pt" />
+                      <Padding Top="0.04in" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="6pt" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="10pt" Bold="False" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=3" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="0" ColumnIndex="1" RowSpan="1" ColumnSpan="9">
+                <ReportItem>
+                  <TextBox Width="7.38840391477862in" Height="0.200000030587401in" Left="0in" Top="0in" KeepTogether="False" Value="= IIf (Fields.Panel = &quot;ZZZ&quot;, &quot;OTHER&quot;, Fields.Panel)" Name="textBox123" StyleName="Apex.TableGroup">
+                    <Style BackgroundColor="Silver">
+                      <BorderStyle Default="None" Top="None" Left="None" Right="None" />
+                      <BorderWidth Bottom="2px" Right="1px" />
+                      <Font Bold="True" />
+                      <Padding Top="2pt" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="7pt" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="11pt" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=3" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="1" ColumnIndex="1" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.273958469338264in" Height="0.169999992709228in" Left="4.10000006357829in" Top="0.347917556762695in" Value="= IIf(Fields.Removed = 1, &quot;-&quot;, IIf(Fields.Added = 1, &quot;+&quot;, &quot;&quot;))" Name="textBox43" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White" TextAlign="Justify" VerticalAlign="Top">
+                      <BorderStyle Default="None" />
+                      <BorderColor Default="White" />
+                      <Font Name="Arial" Size="8pt" />
+                      <Padding Top="0.04in" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="6pt" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="10pt" Bold="False" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=3" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="4" ColumnIndex="4" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="2.27845116383156in" Height="0.173958323766688in" Left="4.10000006357829in" Top="0.5in" Value="= Fields.BettermentNote" CanShrink="True" Name="textBox21" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White" VerticalAlign="Middle">
+                      <BorderStyle Default="None" />
+                      <Font Name="Arial" Size="8pt" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="6pt" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="10pt" Bold="False" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=3" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.BettermentType" Operator="Equal" Value="=&quot;&quot;" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                    <Bindings>
+                      <Binding Path="Height" Expression="= 3" />
+                    </Bindings>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="4" ColumnIndex="7" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.920772717496207in" Height="0.173958325062779in" Left="4.10000006357829in" Top="0.5in" Value="= IIf(Fields.BettermentAmount &gt; 0, Fields.BettermentAmount, &quot;&quot;)" Format="{0:C2}" CanShrink="True" Name="textBox23" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White" TextAlign="Right" VerticalAlign="Middle">
+                      <BorderStyle Default="None" />
+                      <Font Name="Arial" Size="8pt" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="6pt" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="10pt" Bold="False" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=3" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.BettermentType" Operator="Equal" Value="=&quot;&quot;" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                    <Bindings>
+                      <Binding Path="Height" Expression="= 3" />
+                    </Bindings>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="4" ColumnIndex="0" RowSpan="1" ColumnSpan="4">
+                <ReportItem>
+                  <TextBox Width="1.59166685712258in" Height="0.173958322470598in" Left="0in" Top="0in" CanShrink="True" Name="textBox27" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White">
+                      <BorderColor Default="White" />
+                    </Style>
+                    <Bindings>
+                      <Binding Path="Height" Expression="= 3" />
+                    </Bindings>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="4" ColumnIndex="5" RowSpan="1" ColumnSpan="2">
+                <ReportItem>
+                  <TextBox Width="1.5008033018645in" Height="0.173958390826402in" Left="0in" Top="0in" CanShrink="True" Name="textBox68" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White">
+                      <BorderStyle Default="None" />
+                    </Style>
+                    <Bindings>
+                      <Binding Path="Height" Expression="= 3" />
+                    </Bindings>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="4" ColumnIndex="8" RowSpan="1" ColumnSpan="2">
+                <ReportItem>
+                  <TextBox Width="1.3571263358669in" Height="0.173958327007695in" Left="0in" Top="0in" CanShrink="True" Name="textBox71" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White" TextAlign="Center">
+                      <BorderStyle Default="None" />
+                    </Style>
+                    <Bindings>
+                      <Binding Path="Height" Expression="= 3" />
+                    </Bindings>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="3" ColumnIndex="0" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.260416706238818in" Height="0.170000017344509in" Left="0in" Top="0in" Name="textBox35" StyleName="Apex.TableBody">
+                    <Style Visible="False" BackgroundColor="White">
+                      <BorderColor Default="White" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= IIf(Fields.IsPaintQuantity = 1, IIF(Fields.PaintQuantity &gt; 1, IIF(Fields.LaborSummaryPaint='','',' &lt;br /&gt; (' + Fields.LaborSummaryPaint + ' X ' + Fields.PaintQuantity + ')'), ''),'')" Operator="Equal" Value="=&quot;&quot;" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="3" ColumnIndex="1" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.273958483116024in" Height="0.169999994615207in" Left="0in" Top="0in" Name="textBox40" StyleName="Apex.TableBody">
+                    <Style Visible="False" BackgroundColor="White">
+                      <BorderColor Default="White" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.LaborSummaryPaint" Operator="Equal" Value="=&quot;&quot;" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="3" ColumnIndex="2" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="25px" Height="0.169999994615207in" Left="0in" Top="0in" Name="textBox41" StyleName="Apex.TableBody">
+                    <Style Visible="False" BackgroundColor="White">
+                      <BorderColor Default="White" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.LaborSummaryPaint" Operator="Equal" Value="=&quot;&quot;" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="3" ColumnIndex="3" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.796875317318139in" Height="0.169999978429536in" Left="0in" Top="0in" Name="textBox47" StyleName="Apex.TableBody">
+                    <Style Visible="False" BackgroundColor="White">
+                      <BorderColor Default="White" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.LaborSummaryPaint" Operator="Equal" Value="=&quot;&quot;" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="3" ColumnIndex="4" RowSpan="1" ColumnSpan="5">
+                <ReportItem>
+                  <TextBox Width="4.8041938340609in" Height="0.170000018611108in" Left="3.76710510253906in" Top="0.652085622151693in" Value="= Fields.LaborSummaryPaint" Name="textBox66" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White" VerticalAlign="Top">
+                      <BorderStyle Default="None" />
+                      <Font Name="Arial" Size="8pt" />
+                      <Padding Left="4pt" Top="0.04in" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="6pt" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="10pt" Bold="False" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=3" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.LaborSummaryPaint" Operator="Equal" Value="=&quot;&quot;" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="2" ColumnIndex="0" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.260416706238818in" Height="0.170000017344509in" Left="0in" Top="0in" Name="textBox18" StyleName="Apex.TableBody">
+                    <Style Visible="False" BackgroundColor="White">
+                      <BorderColor Default="White" />
+                    </Style>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="2" ColumnIndex="1" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.273958472910274in" Height="0.169999993628721in" Left="0in" Top="0in" Name="textBox19" StyleName="Apex.TableBody">
+                    <Style Visible="False" BackgroundColor="White">
+                      <BorderColor Default="White" />
+                    </Style>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="2" ColumnIndex="2" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="25px" Height="0.169999993628721in" Left="0in" Top="0in" Name="textBox20" StyleName="Apex.TableBody">
+                    <Style Visible="False" BackgroundColor="White">
+                      <BorderColor Default="White" />
+                    </Style>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="2" ColumnIndex="3" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.796875317318139in" Height="0.169999997096346in" Left="0in" Top="0in" Name="textBox24" StyleName="Apex.TableBody">
+                    <Style Visible="False" BackgroundColor="White">
+                      <BorderColor Default="White" />
+                    </Style>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="1" ColumnIndex="9" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <HtmlTextBox Width="1.25295959783026in" Height="0.169999999629543in" Left="3.76710510253906in" Top="0.652084986368815in" Value="= IIf(Fields.LaborIncluded = True, 'Included', Fields.LaborSummaryExtra)" Name="htmlTextBox3" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White" TextAlign="Left">
+                      <BorderStyle Default="None" />
+                      <Font Name="Arial" Size="8pt" />
+                      <Padding Top="0.0399999991059303in" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="6pt" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="10pt" Bold="False" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=3" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </HtmlTextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="2" ColumnIndex="9" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <HtmlTextBox Width="1.25295959783026in" Height="0.170000018296352in" Left="3.76710510253906in" Top="0.652084986368815in" Value="= Fields.LaborSummaryPaintPanel" Name="htmlTextBox4" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White" TextAlign="Left">
+                      <BorderStyle Default="None" />
+                      <Font Name="Arial" Size="8pt" />
+                      <Padding Top="0.04in" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="6pt" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="10pt" Bold="False" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=3" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.LaborSummaryPaintPanel" Operator="Equal" Value="=&quot;&quot;" />
+                          <Filter Expression="= Fields.DeductionsMessage" Operator="Equal" Value="=&quot;&quot;" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </HtmlTextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="3" ColumnIndex="9" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <HtmlTextBox Width="1.25295959783026in" Height="0.169999999629543in" Left="3.76710510253906in" Top="0.652084986368815in" Value="= IIf&#xD;&#xA;(&#xD;&#xA;        IndexOfSubstr(Fields.LaborSummaryPaint, '$') &gt; -1&#xD;&#xA;      , IIf(IsNull(Fields.LaborTotalPaintDollars, 0) &lt;&gt; 0, '$' + Format(&quot;{0:0.00}&quot;, Fields.LaborTotalPaintDollars) + ' Paint', '')&#xD;&#xA;      , IIf(IsNull(Fields.LaborSummaryPaint, '') &lt;&gt; '' AND Fields.LaborTotalPaint + Fields.LaborTotalClearCoat &lt;&gt; 0, CStr(Format(&quot;{0:0.0}&quot;, Fields.LaborTotalPaint + Fields.LaborTotalClearCoat)) + ' hrs. Refinish', '')&#xD;&#xA;)" Name="htmlTextBox12" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White" TextAlign="Left">
+                      <BorderStyle Default="None" />
+                      <Font Name="Arial" Size="8pt" />
+                      <Padding Top="0.04in" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="6pt" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="10pt" Bold="False" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=3" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.LaborSummaryPaint" Operator="Equal" Value="=&quot;&quot;" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </HtmlTextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="2" ColumnIndex="4" RowSpan="1" ColumnSpan="5">
+                <ReportItem>
+                  <TextBox Width="4.8041938340609in" Height="0.170000018611108in" Left="3.76710510253906in" Top="0.652084986368815in" Value="= Fields.DeductionsMessage" Name="textBox32" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White">
+                      <BorderStyle Default="None" />
+                      <Font Name="Arial" Size="8pt" />
+                      <Padding Left="4pt" Top="0.04in" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="6pt" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="10pt" Bold="False" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=3" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.LaborSummaryPaintPanel" Operator="Equal" Value="=&quot;&quot;" />
+                          <Filter Expression="= Fields.DeductionsMessage" Operator="Equal" Value="=&quot;&quot;" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="5" ColumnIndex="0" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.260416706238818in" Height="0.200000029097285in" Left="0in" Top="0in" Name="textBox29" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White">
+                      <BorderColor Default="White" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.OversizedPrice" Operator="Equal" Value="=0" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="5" ColumnIndex="1" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.273958441351287in" Height="0.2in" Left="0in" Top="0in" Name="textBox30" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White">
+                      <BorderColor Default="White" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.OversizedPrice" Operator="Equal" Value="=0" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="5" ColumnIndex="2" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="25px" Height="0.2in" Left="0in" Top="0in" Name="textBox31" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White">
+                      <BorderColor Default="White" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.OversizedPrice" Operator="Equal" Value="=0" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="5" ColumnIndex="3" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.796875167184487in" Height="0.2in" Left="0in" Top="0in" Name="textBox42" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White">
+                      <BorderColor Default="White" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.OversizedPrice" Operator="Equal" Value="=0" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="6" ColumnIndex="0" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.260416706238818in" Height="0.200000029097285in" Left="0in" Top="0in" Name="textBox65" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White">
+                      <BorderColor Default="White" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.ModifierPrice" Operator="Equal" Value="=0" />
+                          <Filter Expression="= Fields.OtherCharges" Operator="Equal" Value="=0" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="6" ColumnIndex="1" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.273958421273215in" Height="0.2in" Left="0in" Top="0in" Name="textBox69" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White">
+                      <BorderColor Default="White" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.ModifierPrice" Operator="Equal" Value="=0" />
+                          <Filter Expression="= Fields.OtherCharges" Operator="Equal" Value="=0" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="6" ColumnIndex="2" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="25px" Height="0.2in" Left="0in" Top="0in" Name="textBox70" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White">
+                      <BorderColor Default="White" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.ModifierPrice" Operator="Equal" Value="=0" />
+                          <Filter Expression="= Fields.OtherCharges" Operator="Equal" Value="=0" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="6" ColumnIndex="3" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.796875134447878in" Height="0.2in" Left="0in" Top="0in" Name="textBox72" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White">
+                      <BorderColor Default="White" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.ModifierPrice" Operator="Equal" Value="=0" />
+                          <Filter Expression="= Fields.OtherCharges" Operator="Equal" Value="=0" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="5" ColumnIndex="8" RowSpan="1" ColumnSpan="2">
+                <ReportItem>
+                  <TextBox Width="1.3571263358669in" Height="0.200000032470228in" Left="0in" Top="0in" Name="textBox63" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White" TextAlign="Center">
+                      <BorderStyle Default="None" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.OversizedPrice" Operator="Equal" Value="=0" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="6" ColumnIndex="8" RowSpan="1" ColumnSpan="2">
+                <ReportItem>
+                  <TextBox Width="1.3571263358669in" Height="0.200000032470228in" Left="0in" Top="0in" Name="textBox77" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White" TextAlign="Center">
+                      <BorderStyle Default="None" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.ModifierPrice" Operator="Equal" Value="=0" />
+                          <Filter Expression="= Fields.OtherCharges" Operator="Equal" Value="=0" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="5" ColumnIndex="4" RowSpan="1" ColumnSpan="3">
+                <ReportItem>
+                  <TextBox Width="3.77925436342026in" Height="0.200000030587401in" Left="3.76710510253906in" Top="0.852085113525391in" Value="= Fields.OversizedDescription" Name="textBox45" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White" VerticalAlign="Middle">
+                      <BorderStyle Default="None" />
+                      <Font Name="Arial" Size="8pt" />
+                      <Padding Left="4pt" Top="0.04in" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="6pt" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="10pt" Bold="False" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=3" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.OversizedPrice" Operator="Equal" Value="=0" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="5" ColumnIndex="7" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.920772717496207in" Height="0.200000032077518in" Left="3.76710510253906in" Top="0.852085113525391in" Value="= Fields.OversizedPrice" Format="{0:C2}" Name="textBox44" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White" TextAlign="Right" VerticalAlign="Top">
+                      <BorderStyle Default="None" />
+                      <Font Name="Arial" Size="8pt" />
+                      <Padding Top="0.04in" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="6pt" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="10pt" Bold="False" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=3" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.OversizedPrice" Operator="Equal" Value="=0" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="6" ColumnIndex="4" RowSpan="1" ColumnSpan="3">
+                <ReportItem>
+                  <TextBox Width="3.77925436342026in" Height="0.200000030587401in" Left="3.76710510253906in" Top="0.852085113525391in" Value="= Fields.ModifierDescription + IIF(Fields.IsOtherChargesQuantity = 1, IIF(Fields.OtherChargesQuantity &gt; 1, ' ($' + CStr(Format(&quot;{0:0.00}&quot;, Fields.OtherChargesPreview)) + ' Other charges x ' + Fields.OtherChargesQuantity + ')',''),'')" Name="textBox49" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White" VerticalAlign="Middle">
+                      <BorderStyle Default="None" />
+                      <Font Name="Arial" Size="8pt" />
+                      <Padding Left="4pt" Top="0.04in" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="6pt" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="10pt" Bold="False" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=3" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.ModifierPrice" Operator="Equal" Value="=0" />
+                          <Filter Expression="= Fields.OtherCharges" Operator="Equal" Value="=0" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="6" ColumnIndex="7" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.920772717496207in" Height="0.200000032077518in" Left="3.76710510253906in" Top="0.852085113525391in" Value="= Fields.ModifierPrice + (Fields.OtherCharges * Fields.OtherChargesQuantity)" Format="{0:C2}" Name="textBox62" StyleName="Apex.TableBody">
+                    <Style BackgroundColor="White" TextAlign="Right" VerticalAlign="Top">
+                      <BorderStyle Default="None" />
+                      <Font Name="Arial" Size="8pt" />
+                      <Padding Top="0.04in" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="6pt" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=1" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style>
+                          <Font Size="10pt" Bold="False" />
+                        </Style>
+                        <Filters>
+                          <Filter Expression="= Parameters.FontSizeLines.Value" Operator="Equal" Value="=3" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.ModifierPrice" Operator="Equal" Value="=0" />
+                          <Filter Expression="= Fields.OtherCharges" Operator="Equal" Value="=0" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="7" ColumnIndex="2" RowSpan="1" ColumnSpan="8">
+                <ReportItem>
+                  <HtmlTextBox Width="683px" Height="0.168749961886485in" Left="3.79999987284342in" Top="0.852083841959635in" Value="{Fields.Notes}" Name="htmlTextBox1" StyleName="Apex.TableBody">
+                    <Style Visible="True" BackgroundColor="White" Color="Black" VerticalAlign="Middle">
+                      <BorderStyle Default="None" />
+                      <BorderWidth Default="0px" Top="0px" Bottom="0px" Left="0px" Right="0px" />
+                      <Font Name="Arial" Size="8pt" />
+                      <Padding Left="105px" Right="118px" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.Notes" Operator="Equal" Value="=&quot;&quot;" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </HtmlTextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="8" ColumnIndex="0" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.260416706238818in" Height="0.168749949129802in" Left="0in" Top="0in" KeepTogether="False" CanShrink="True" Name="textBox147" StyleName="Apex.TableBody">
+                    <Style Visible="True" BackgroundColor="White">
+                      <BorderStyle Default="None" />
+                      <Padding Left="15pt" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= IsNull(Fields.NotesPNL,&quot;&quot;)" Operator="Equal" Value="=&quot;&quot;" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.NotesPNL" Operator="Equal" Value="=Fields.Notes" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="8" ColumnIndex="1" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="0.273958444363491in" Height="0.168750057641272in" Left="0in" Top="0in" KeepTogether="False" CanShrink="True" Name="textBox148" StyleName="Apex.TableBody">
+                    <Style Visible="True" BackgroundColor="White">
+                      <BorderStyle Default="None" />
+                      <Padding Left="15pt" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= IsNull(Fields.NotesPNL,&quot;&quot;)" Operator="Equal" Value="=&quot;&quot;" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.NotesPNL" Operator="Equal" Value="=Fields.Notes" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="8" ColumnIndex="2" RowSpan="1" ColumnSpan="8">
+                <ReportItem>
+                  <HtmlTextBox Width="683px" Height="0.168749961886485in" Left="3.79999987284342in" Top="0.852083841959635in" Value="{Fields.NotesPNL}" Name="htmlTextBox5" StyleName="Apex.TableBody">
+                    <Style Visible="True" BackgroundColor="White" Color="Black" VerticalAlign="Middle">
+                      <BorderStyle Default="None" />
+                      <BorderWidth Default="0px" Top="0px" Bottom="0px" Left="0px" Right="0px" />
+                      <Font Name="Arial" Size="8pt" />
+                      <Padding Left="105px" Right="118px" />
+                    </Style>
+                    <ConditionalFormatting>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= IsNull(Fields.NotesPNL,&quot;&quot;)" Operator="Equal" Value="=&quot;&quot;" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Fields.NotesPNL" Operator="Equal" Value="=Fields.Notes" />
+                        </Filters>
+                      </FormattingRule>
+                      <FormattingRule>
+                        <Style Visible="False" />
+                        <Filters>
+                          <Filter Expression="= Parameters.PrintPnLNotes.Value" Operator="Equal" Value="=0" />
+                        </Filters>
+                      </FormattingRule>
+                    </ConditionalFormatting>
+                  </HtmlTextBox>
+                </ReportItem>
+              </TableCell>
+            </Cells>
+            <Columns>
+              <Column Width="0.260416690424443in" />
+              <Column Width="0.273958187248074in" />
+              <Column Width="25px" />
+              <Column Width="0.796875282985086in" />
+              <Column Width="2.27845116309539in" />
+              <Column Width="0.270833555220436in" />
+              <Column Width="1.22996975785965in" />
+              <Column Width="0.920772831182004in" />
+              <Column Width="0.104166703239151in" />
+              <Column Width="1.25295980524884in" />
+            </Columns>
+            <Rows>
+              <Row Height="0.200000038264472in" />
+              <Row Height="0.169999993169124in" />
+              <Row Height="0.169999993169124in" />
+              <Row Height="0.169999993169124in" />
+              <Row Height="0.173958332829508in" />
+              <Row Height="0.200000038264472in" />
+              <Row Height="0.200000038264472in" />
+              <Row Height="0.168749961886485in" />
+              <Row Height="0.168749961886485in" />
+            </Rows>
+          </Body>
+          <Corner />
+          <Style>
+            <BorderStyle Default="None" />
+            <BorderWidth Default="0px" />
+          </Style>
+          <RowGroups>
+            <TableGroup Name="rowGroup">
+              <ChildGroups>
+                <TableGroup Name="panel1">
+                  <ChildGroups>
+                    <TableGroup Name="group1" />
+                    <TableGroup Name="Detail">
+                      <ChildGroups>
+                        <TableGroup Name="group" />
+                        <TableGroup Name="group32" />
+                        <TableGroup Name="group34" />
+                        <TableGroup Name="group30" />
+                        <TableGroup Name="group41" />
+                        <TableGroup Name="group42" />
+                        <TableGroup Name="group2" />
+                        <TableGroup Name="group43" />
+                      </ChildGroups>
+                      <Groupings>
+                        <Grouping />
+                      </Groupings>
+                    </TableGroup>
+                  </ChildGroups>
+                  <Groupings>
+                    <Grouping Expression="= Fields.Panel" />
+                  </Groupings>
+                  <Sortings>
+                    <Sorting Expression="= Fields.LineNumberCalculated" Direction="Asc" />
+                  </Sortings>
+                </TableGroup>
+              </ChildGroups>
+            </TableGroup>
+          </RowGroups>
+          <ColumnGroups>
+            <TableGroup Name="group24">
+              <ReportItem>
+                <TextBox Width="0.260416706238818in" Height="0.200000090665475in" Left="0in" Top="0in" KeepTogether="False" Name="textBox138" StyleName="Apex.TableHeader">
+                  <Style BackgroundColor="GrayText" Color="White" LineWidth="0pt">
+                    <BorderStyle Default="None" Left="None" Right="None" />
+                    <Padding Left="4pt" Top="3pt" />
+                  </Style>
+                </TextBox>
+              </ReportItem>
+              <ChildGroups>
+                <TableGroup Name="group25" />
+              </ChildGroups>
+            </TableGroup>
+            <TableGroup Name="group16">
+              <ReportItem>
+                <TextBox Width="0.273958400776096in" Height="0.200000069688972in" Left="0in" Top="0in" KeepTogether="False" Name="textBox119" StyleName="Apex.TableHeader">
+                  <Style BackgroundColor="GrayText" Color="White" LineWidth="0pt">
+                    <BorderStyle Default="None" Left="None" Right="None" />
+                    <Padding Left="4pt" Top="3pt" />
+                  </Style>
+                </TextBox>
+              </ReportItem>
+              <ChildGroups>
+                <TableGroup Name="group17" />
+              </ChildGroups>
+            </TableGroup>
+            <TableGroup Name="group14">
+              <ReportItem>
+                <TextBox Width="25px" Height="0.200000069688972in" Left="0in" Top="0in" KeepTogether="False" Name="textBox122" StyleName="Apex.TableHeader">
+                  <Style BackgroundColor="GrayText" Color="White" LineWidth="0pt">
+                    <BorderStyle Default="None" Left="None" Right="None" />
+                    <Padding Left="4pt" Top="3pt" />
+                  </Style>
+                </TextBox>
+              </ReportItem>
+              <ChildGroups>
+                <TableGroup Name="group15" />
+              </ChildGroups>
+            </TableGroup>
+            <TableGroup Name="group6">
+              <ReportItem>
+                <TextBox Width="0.796875317318139in" Height="0.200000005368317in" Left="0in" Top="0in" KeepTogether="False" Value="Oper" Name="textBox116" StyleName="Apex.TableHeader">
+                  <Style BackgroundColor="GrayText" Color="White" VerticalAlign="Middle" LineWidth="0pt">
+                    <BorderStyle Default="None" Left="None" Right="None" />
+                    <Font Name="Arial" Size="9pt" />
+                    <Padding Left="4pt" Top="0pt" />
+                  </Style>
+                  <ConditionalFormatting>
+                    <FormattingRule>
+                      <Style>
+                        <Font Size="7pt" />
+                      </Style>
+                      <Filters>
+                        <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=1" />
+                      </Filters>
+                    </FormattingRule>
+                    <FormattingRule>
+                      <Style>
+                        <Font Size="11pt" />
+                      </Style>
+                      <Filters>
+                        <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=3" />
+                      </Filters>
+                    </FormattingRule>
+                  </ConditionalFormatting>
+                </TextBox>
+              </ReportItem>
+              <ChildGroups>
+                <TableGroup Name="group7" />
+              </ChildGroups>
+            </TableGroup>
+            <TableGroup>
+              <ReportItem>
+                <TextBox Width="2.27845116383156in" Height="0.200000092155591in" Left="0in" Top="0in" KeepTogether="False" Value="Description" Name="textBox12" StyleName="Apex.TableHeader">
+                  <Style BackgroundColor="GrayText" Color="White" VerticalAlign="Middle" LineWidth="0pt">
+                    <BorderStyle Default="None" Left="None" Right="None" />
+                    <Font Name="Arial" Size="9pt" />
+                    <Padding Left="4pt" Top="0pt" />
+                  </Style>
+                  <ConditionalFormatting>
+                    <FormattingRule>
+                      <Style>
+                        <Font Size="7pt" />
+                      </Style>
+                      <Filters>
+                        <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=1" />
+                      </Filters>
+                    </FormattingRule>
+                    <FormattingRule>
+                      <Style>
+                        <Font Size="11pt" />
+                      </Style>
+                      <Filters>
+                        <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=3" />
+                      </Filters>
+                    </FormattingRule>
+                  </ConditionalFormatting>
+                </TextBox>
+              </ReportItem>
+              <ChildGroups>
+                <TableGroup Name="group8" />
+              </ChildGroups>
+            </TableGroup>
+            <TableGroup Name="group5">
+              <ReportItem>
+                <TextBox Width="0.270833385283299in" Height="0.200000069688972in" Left="0in" Top="0in" KeepTogether="False" Name="textBox114" StyleName="Apex.TableHeader">
+                  <Style BackgroundColor="GrayText" Color="White" LineWidth="0pt">
+                    <BorderStyle Default="None" Left="None" Right="None" />
+                    <Padding Left="4pt" Top="3pt" />
+                  </Style>
+                </TextBox>
+              </ReportItem>
+              <ChildGroups>
+                <TableGroup Name="group9" />
+              </ChildGroups>
+            </TableGroup>
+            <TableGroup>
+              <ReportItem>
+                <TextBox Width="1.22996972339675in" Height="0.200000071315039in" Left="0in" Top="0in" KeepTogether="False" Value="Part Number" Name="textBox13" StyleName="Apex.TableHeader">
+                  <Style BackgroundColor="GrayText" Color="White" VerticalAlign="Middle" LineWidth="0pt">
+                    <BorderStyle Default="None" Left="None" Right="None" />
+                    <Font Name="Arial" Size="9pt" />
+                    <Padding Left="4pt" Top="0pt" />
+                  </Style>
+                  <ConditionalFormatting>
+                    <FormattingRule>
+                      <Style>
+                        <Font Size="7pt" />
+                      </Style>
+                      <Filters>
+                        <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=1" />
+                      </Filters>
+                    </FormattingRule>
+                    <FormattingRule>
+                      <Style>
+                        <Font Size="11pt" />
+                      </Style>
+                      <Filters>
+                        <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=3" />
+                      </Filters>
+                    </FormattingRule>
+                  </ConditionalFormatting>
+                </TextBox>
+              </ReportItem>
+              <ChildGroups>
+                <TableGroup Name="group10" />
+              </ChildGroups>
+            </TableGroup>
+            <TableGroup>
+              <ReportItem>
+                <TextBox Width="0.920772717496207in" Height="0.200000093645709in" Left="0in" Top="0in" KeepTogether="False" Value="Price" Name="textBox14" StyleName="Apex.TableHeader">
+                  <Style BackgroundColor="GrayText" Color="White" TextAlign="Right" VerticalAlign="Middle" LineWidth="0pt">
+                    <BorderStyle Default="None" Left="None" Right="None" />
+                    <Font Name="Arial" Size="9pt" />
+                    <Padding Left="4pt" Top="0pt" />
+                  </Style>
+                  <ConditionalFormatting>
+                    <FormattingRule>
+                      <Style>
+                        <Font Size="7pt" />
+                      </Style>
+                      <Filters>
+                        <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=1" />
+                      </Filters>
+                    </FormattingRule>
+                    <FormattingRule>
+                      <Style>
+                        <Font Size="11pt" />
+                      </Style>
+                      <Filters>
+                        <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=3" />
+                      </Filters>
+                    </FormattingRule>
+                  </ConditionalFormatting>
+                </TextBox>
+              </ReportItem>
+              <ChildGroups>
+                <TableGroup Name="group11" />
+              </ChildGroups>
+            </TableGroup>
+            <TableGroup>
+              <ReportItem>
+                <TextBox Width="0.104166669778315in" Height="0.200000094038415in" Left="0in" Top="0in" KeepTogether="False" Name="textBox15" StyleName="Apex.TableHeader">
+                  <Style BackgroundColor="GrayText" Color="White" TextAlign="Center" VerticalAlign="Middle" LineWidth="0pt">
+                    <BorderStyle Default="None" Left="None" Right="None" />
+                    <Font Name="Arial" Size="9pt" />
+                    <Padding Left="4pt" Top="0pt" />
+                  </Style>
+                </TextBox>
+              </ReportItem>
+              <ChildGroups>
+                <TableGroup Name="group12" />
+              </ChildGroups>
+            </TableGroup>
+            <TableGroup>
+              <ReportItem>
+                <TextBox Width="1.25295959783026in" Height="0.200000083015788in" Left="0in" Top="0in" KeepTogether="False" Value="Labor" Name="textBox16" StyleName="Apex.TableHeader">
+                  <Style BackgroundColor="GrayText" Color="White" VerticalAlign="Middle" LineWidth="0pt">
+                    <BorderStyle Default="None" Left="None" Right="None" />
+                    <Font Name="Arial" Size="9pt" />
+                    <Padding Left="4pt" Top="0pt" />
+                  </Style>
+                  <ConditionalFormatting>
+                    <FormattingRule>
+                      <Style>
+                        <Font Size="7pt" />
+                      </Style>
+                      <Filters>
+                        <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=1" />
+                      </Filters>
+                    </FormattingRule>
+                    <FormattingRule>
+                      <Style>
+                        <Font Size="11pt" />
+                      </Style>
+                      <Filters>
+                        <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=3" />
+                      </Filters>
+                    </FormattingRule>
+                  </ConditionalFormatting>
+                </TextBox>
+              </ReportItem>
+              <ChildGroups>
+                <TableGroup Name="group13" />
+              </ChildGroups>
+            </TableGroup>
+          </ColumnGroups>
+        </Crosstab>
+        <Panel Width="7.6488208770752in" Height="1.39999997615814in" Left="0.400000095367432in" Top="2.10000006357829in" Name="panel30">
+          <Items>
+            <HtmlTextBox Width="5.10000046094259in" Height="0.299999872843425in" Left="0in" Top="0in" Value="&lt;span&gt;Totals&lt;/span&gt;" Name="htmlTextBox22">
+              <Style>
+                <Font Size="18pt" Bold="True" />
+              </Style>
+              <ConditionalFormatting>
+                <FormattingRule>
+                  <Style>
+                    <Font Size="15pt" />
+                  </Style>
+                  <Filters>
+                    <Filter Expression="= Parameters.FontSizeHeaders.Value" Operator="Equal" Value="=1" />
+                  </Filters>
+                </FormattingRule>
+                <FormattingRule>
+                  <Style>
+                    <Font Size="21pt" />
+                  </Style>
+                  <Filters>
+                    <Filter Expression="= Parameters.FontSizeHeaders.Value" Operator="Equal" Value="=3" />
+                  </Filters>
+                </FormattingRule>
+              </ConditionalFormatting>
+            </HtmlTextBox>
+            <Table DataSourceName="SubTotals" Width="5.49375053317709in" Height="0.368750016803379in" Left="0in" Top="0.30000114440918in" Name="table1" StyleName="Apex.TableNormal">
+              <Body>
+                <Cells>
+                  <TableCell RowIndex="0" ColumnIndex="0" RowSpan="1" ColumnSpan="1">
+                    <ReportItem>
+                      <TextBox Width="1.74123355285361in" Height="0.168750007317153in" Left="0in" Top="0in" Value="= Fields.RateName" Name="textBox7" StyleName="Apex.TableBody">
+                        <Style VerticalAlign="Middle">
+                          <BorderStyle Default="None" />
+                          <Font Name="Arial" Size="8pt" />
+                        </Style>
+                        <ConditionalFormatting>
+                          <FormattingRule>
+                            <Style>
+                              <Font Size="6pt" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Parameters.FontSizeTotals.Value" Operator="Equal" Value="=1" />
+                            </Filters>
+                          </FormattingRule>
+                          <FormattingRule>
+                            <Style>
+                              <Font Size="10pt" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Parameters.FontSizeTotals.Value" Operator="Equal" Value="=3" />
+                            </Filters>
+                          </FormattingRule>
+                        </ConditionalFormatting>
+                      </TextBox>
+                    </ReportItem>
+                  </TableCell>
+                  <TableCell RowIndex="0" ColumnIndex="1" RowSpan="1" ColumnSpan="1">
+                    <ReportItem>
+                      <TextBox Width="0.847543861550397in" Height="0.168750007317153in" Left="2.70000012715658in" Top="0.200000127156576in" Value="=CStr(Format(&quot;{0:0.0}&quot;, Fields.Hours))" Name="textBox1" StyleName="Apex.TableBody">
+                        <Style VerticalAlign="Middle">
+                          <BorderStyle Default="None" />
+                          <Font Name="Arial" Size="8pt" />
+                          <Padding Left="10pt" />
+                        </Style>
+                        <ConditionalFormatting>
+                          <FormattingRule>
+                            <Style Visible="True" Color="Transparent" />
+                            <Filters>
+                              <Filter Expression="= Parameters.HideHours.Value" Operator="Equal" Value="= True" />
+                            </Filters>
+                          </FormattingRule>
+                          <FormattingRule>
+                            <Style>
+                              <Font Size="6pt" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Parameters.FontSizeTotals.Value" Operator="Equal" Value="=1" />
+                            </Filters>
+                          </FormattingRule>
+                          <FormattingRule>
+                            <Style>
+                              <Font Size="10pt" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Parameters.FontSizeTotals.Value" Operator="Equal" Value="=3" />
+                            </Filters>
+                          </FormattingRule>
+                        </ConditionalFormatting>
+                      </TextBox>
+                    </ReportItem>
+                  </TableCell>
+                  <TableCell RowIndex="0" ColumnIndex="2" RowSpan="1" ColumnSpan="1">
+                    <ReportItem>
+                      <TextBox Width="0.813499959719804in" Height="0.168750007317153in" Left="2.70000012715658in" Top="0.200000127156576in" Value="= IIf(Fields.Rate = 0, '', Fields.Rate)" Format="{0:C2}" Name="textBox8" StyleName="Apex.TableBody">
+                        <Style TextAlign="Right" VerticalAlign="Middle">
+                          <BorderStyle Default="None" />
+                          <Font Name="Arial" Size="8pt" />
+                          <Padding Right="5pt" />
+                        </Style>
+                        <ConditionalFormatting>
+                          <FormattingRule>
+                            <Style Visible="False" Color="Transparent" />
+                            <Filters>
+                              <Filter Expression="= Parameters.HideHours.Value" Operator="Equal" Value="= True" />
+                            </Filters>
+                          </FormattingRule>
+                          <FormattingRule>
+                            <Style>
+                              <Font Size="6pt" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Parameters.FontSizeTotals.Value" Operator="Equal" Value="=1" />
+                            </Filters>
+                          </FormattingRule>
+                          <FormattingRule>
+                            <Style>
+                              <Font Size="10pt" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Parameters.FontSizeTotals.Value" Operator="Equal" Value="=3" />
+                            </Filters>
+                          </FormattingRule>
+                        </ConditionalFormatting>
+                      </TextBox>
+                    </ReportItem>
+                  </TableCell>
+                  <TableCell RowIndex="0" ColumnIndex="3" RowSpan="1" ColumnSpan="1">
+                    <ReportItem>
+                      <TextBox Width="1.40126688557088in" Height="0.168750007317153in" Left="2.70000012715658in" Top="0.200000127156576in" Value="= IIF(Fields.DiscountMarkupLineItemTotal &lt; 0, Fields.DirectLineItemTotal, Fields.FinalLineItemTotal)" Format="{0:C2}" Name="textBox9" StyleName="Apex.TableBody">
+                        <Style TextAlign="Right" VerticalAlign="Middle">
+                          <BorderStyle Default="None" />
+                          <Font Name="Arial" Size="8pt" />
+                          <Padding Right="5pt" />
+                        </Style>
+                        <ConditionalFormatting>
+                          <FormattingRule>
+                            <Style>
+                              <Font Size="6pt" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Parameters.FontSizeTotals.Value" Operator="Equal" Value="=1" />
+                            </Filters>
+                          </FormattingRule>
+                          <FormattingRule>
+                            <Style>
+                              <Font Size="10pt" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Parameters.FontSizeTotals.Value" Operator="Equal" Value="=3" />
+                            </Filters>
+                          </FormattingRule>
+                        </ConditionalFormatting>
+                      </TextBox>
+                    </ReportItem>
+                  </TableCell>
+                  <TableCell RowIndex="0" ColumnIndex="4" RowSpan="1" ColumnSpan="1">
+                    <ReportItem>
+                      <PictureBox Value="iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAYAAAA71pVKAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAOvAAADrwBlbxySQAAAFpJREFUOE+9ywEKwCAIhWEv5MG8/wGMF2tYukqE/TBY6kdaKI2Z+flLYiLq3+gaD5jGFv6HvyCaXm65geidREfRzNanIuIO13fUtLHgBJHbljC6geh8samAVRvlw/XqoF+stwAAAABJRU5ErkJggg==" Width="0.690206600935454in" Height="0.168750007317153in" Left="2.70000012715658in" Top="0.199999491373698in" MimeType="image/png" Name="pictureBox2" StyleName="Apex.TableBody">
+                        <Style TextAlign="Center" VerticalAlign="Middle">
+                          <BorderStyle Default="None" />
+                          <Padding Left="0.3in" Top="2px" />
+                        </Style>
+                        <ConditionalFormatting>
+                          <FormattingRule>
+                            <Style Visible="False" />
+                            <Filters>
+                              <Filter Expression="= Fields.Taxable" Operator="Equal" Value="= 0" />
+                            </Filters>
+                          </FormattingRule>
+                        </ConditionalFormatting>
+                      </PictureBox>
+                    </ReportItem>
+                  </TableCell>
+                </Cells>
+                <Columns>
+                  <Column Width="1.74123289794751in" />
+                  <Column Width="0.847544434593232in" />
+                  <Column Width="0.813499632266754in" />
+                  <Column Width="1.40126688557088in" />
+                  <Column Width="0.690206682798716in" />
+                </Columns>
+                <Rows>
+                  <Row Height="0.168750007317153in" />
+                </Rows>
+              </Body>
+              <Corner />
+              <Style>
+                <BorderStyle Default="None" />
+              </Style>
+              <RowGroups>
+                <TableGroup Name="Detail">
+                  <Groupings>
+                    <Grouping />
+                  </Groupings>
+                </TableGroup>
+              </RowGroups>
+              <ColumnGroups>
+                <TableGroup>
+                  <ReportItem>
+                    <TextBox Width="1.7412335778172in" Height="0.200000002980232in" Left="0in" Top="0in" Value="Type" Name="textBox2" StyleName="Apex.TableHeader">
+                      <Style BackgroundColor="GrayText" Color="White">
+                        <BorderStyle Default="None" Left="None" Right="None" />
+                        <Font Name="Arial" Size="9pt" />
+                      </Style>
+                      <ConditionalFormatting>
+                        <FormattingRule>
+                          <Style>
+                            <Font Size="7pt" />
+                          </Style>
+                          <Filters>
+                            <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=1" />
+                          </Filters>
+                        </FormattingRule>
+                        <FormattingRule>
+                          <Style>
+                            <Font Size="11pt" />
+                          </Style>
+                          <Filters>
+                            <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=3" />
+                          </Filters>
+                        </FormattingRule>
+                      </ConditionalFormatting>
+                    </TextBox>
+                  </ReportItem>
+                </TableGroup>
+                <TableGroup>
+                  <ReportItem>
+                    <TextBox Width="0.847543712144414in" Height="0.200000002980232in" Left="0in" Top="0in" Value="Labor Time" Name="textBox3" StyleName="Apex.TableHeader">
+                      <Style BackgroundColor="GrayText" Color="White" TextAlign="Center">
+                        <BorderStyle Default="None" Left="None" Right="None" />
+                        <Font Name="Arial" Size="9pt" />
+                      </Style>
+                      <ConditionalFormatting>
+                        <FormattingRule>
+                          <Style>
+                            <Font Size="7pt" />
+                          </Style>
+                          <Filters>
+                            <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=1" />
+                          </Filters>
+                        </FormattingRule>
+                        <FormattingRule>
+                          <Style>
+                            <Font Size="11pt" />
+                          </Style>
+                          <Filters>
+                            <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=3" />
+                          </Filters>
+                        </FormattingRule>
+                        <FormattingRule>
+                          <Style Visible="True" Color="Transparent" />
+                          <Filters>
+                            <Filter Expression="= Parameters.HideHours.Value" Operator="Equal" Value="= True" />
+                          </Filters>
+                        </FormattingRule>
+                      </ConditionalFormatting>
+                    </TextBox>
+                  </ReportItem>
+                </TableGroup>
+                <TableGroup>
+                  <ReportItem>
+                    <TextBox Width="0.813499731163603in" Height="0.200000002980232in" Left="0in" Top="0in" Value="Cost" Name="textBox4" StyleName="Apex.TableHeader">
+                      <Style BackgroundColor="GrayText" Color="White" TextAlign="Right">
+                        <BorderStyle Default="None" Left="None" Right="None" />
+                        <Font Name="Arial" Size="9pt" />
+                      </Style>
+                      <ConditionalFormatting>
+                        <FormattingRule>
+                          <Style>
+                            <Font Size="7pt" />
+                          </Style>
+                          <Filters>
+                            <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=1" />
+                          </Filters>
+                        </FormattingRule>
+                        <FormattingRule>
+                          <Style>
+                            <Font Size="11pt" />
+                          </Style>
+                          <Filters>
+                            <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=3" />
+                          </Filters>
+                        </FormattingRule>
+                        <FormattingRule>
+                          <Style Visible="True" Color="Transparent" />
+                          <Filters>
+                            <Filter Expression="= Parameters.HideHours.Value" Operator="Equal" Value="= True" />
+                          </Filters>
+                        </FormattingRule>
+                      </ConditionalFormatting>
+                    </TextBox>
+                  </ReportItem>
+                </TableGroup>
+                <TableGroup>
+                  <ReportItem>
+                    <TextBox Width="1.40126628272115in" Height="0.200000002980232in" Left="0in" Top="0in" Value="Total" Name="textBox5" StyleName="Apex.TableHeader">
+                      <Style BackgroundColor="GrayText" Color="White" TextAlign="Right">
+                        <BorderStyle Default="None" Left="None" Right="None" />
+                        <Font Name="Arial" Size="9pt" />
+                      </Style>
+                      <ConditionalFormatting>
+                        <FormattingRule>
+                          <Style>
+                            <Font Size="7pt" />
+                          </Style>
+                          <Filters>
+                            <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=1" />
+                          </Filters>
+                        </FormattingRule>
+                        <FormattingRule>
+                          <Style>
+                            <Font Size="11pt" />
+                          </Style>
+                          <Filters>
+                            <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=3" />
+                          </Filters>
+                        </FormattingRule>
+                      </ConditionalFormatting>
+                    </TextBox>
+                  </ReportItem>
+                </TableGroup>
+                <TableGroup>
+                  <ReportItem>
+                    <TextBox Width="0.690206791521064in" Height="0.200000002980232in" Left="0in" Top="0in" Value="Taxable" Name="textBox6" StyleName="Apex.TableHeader">
+                      <Style BackgroundColor="GrayText" Color="White" TextAlign="Center">
+                        <BorderStyle Default="None" Left="None" />
+                        <Font Name="Arial" Size="9pt" />
+                      </Style>
+                      <ConditionalFormatting>
+                        <FormattingRule>
+                          <Style>
+                            <Font Size="7pt" />
+                          </Style>
+                          <Filters>
+                            <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=1" />
+                          </Filters>
+                        </FormattingRule>
+                        <FormattingRule>
+                          <Style>
+                            <Font Size="11pt" />
+                          </Style>
+                          <Filters>
+                            <Filter Expression="= Parameters.FontSizeTableHeaders.Value" Operator="Equal" Value="=3" />
+                          </Filters>
+                        </FormattingRule>
+                      </ConditionalFormatting>
+                    </TextBox>
+                  </ReportItem>
+                </TableGroup>
+              </ColumnGroups>
+            </Table>
+            <Table DataSourceName="Totals" Width="5.46670807221808in" Height="0.17in" Left="0in" Top="0.909960428873698in" Name="table2">
+              <Body>
+                <Cells>
+                  <TableCell RowIndex="0" ColumnIndex="0" RowSpan="1" ColumnSpan="1">
+                    <ReportItem>
+                      <TextBox Width="1.23543107781096in" Height="0.17in" Left="1.80003960927327in" Top="0.200000127156576in" Value="= Fields.Type" Name="textBox22" StyleName="">
+                        <Style VerticalAlign="Top">
+                          <Font Name="Arial" Size="8pt" />
+                        </Style>
+                        <ConditionalFormatting>
+                          <FormattingRule>
+                            <Style>
+                              <Font Size="6pt" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Parameters.FontSizeTotals.Value" Operator="Equal" Value="=1" />
+                            </Filters>
+                          </FormattingRule>
+                          <FormattingRule>
+                            <Style>
+                              <Font Size="10pt" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Parameters.FontSizeTotals.Value" Operator="Equal" Value="=3" />
+                            </Filters>
+                          </FormattingRule>
+                          <FormattingRule>
+                            <Style>
+                              <BorderStyle Top="Solid" />
+                              <Padding Top="5px" Bottom="3px" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Fields.ShowTopLine" Operator="Equal" Value="= 1" />
+                            </Filters>
+                          </FormattingRule>
+                        </ConditionalFormatting>
+                      </TextBox>
+                    </ReportItem>
+                  </TableCell>
+                  <TableCell RowIndex="0" ColumnIndex="1" RowSpan="1" ColumnSpan="1">
+                    <ReportItem>
+                      <TextBox Width="2.16251336006733in" Height="0.17in" Left="1.80003960927327in" Top="0.100000063578288in" Value="= Fields.Note" Multiline="False" Name="textBox10" StyleName="">
+                        <Style VerticalAlign="Top">
+                          <Font Name="Arial" Size="8pt" />
+                        </Style>
+                        <ConditionalFormatting>
+                          <FormattingRule>
+                            <Style>
+                              <Font Size="6pt" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Parameters.FontSizeTotals.Value" Operator="Equal" Value="=1" />
+                            </Filters>
+                          </FormattingRule>
+                          <FormattingRule>
+                            <Style>
+                              <Font Size="10pt" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Parameters.FontSizeTotals.Value" Operator="Equal" Value="=3" />
+                            </Filters>
+                          </FormattingRule>
+                          <FormattingRule>
+                            <Style>
+                              <BorderStyle Top="Solid" />
+                              <Padding Top="5px" Bottom="3px" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Fields.ShowTopLine" Operator="Equal" Value="= 1" />
+                            </Filters>
+                          </FormattingRule>
+                        </ConditionalFormatting>
+                      </TextBox>
+                    </ReportItem>
+                  </TableCell>
+                  <TableCell RowIndex="0" ColumnIndex="2" RowSpan="1" ColumnSpan="1">
+                    <ReportItem>
+                      <TextBox Width="1.41251385277511in" Height="0.17in" Left="1.80003960927327in" Top="0.100000063578288in" Value="= Fields.Amount" Format="{0:C2}" Name="textBox17" StyleName="">
+                        <Style TextAlign="Right" VerticalAlign="Top">
+                          <Font Name="Arial" Size="8pt" />
+                          <Padding Right="5pt" />
+                        </Style>
+                        <ConditionalFormatting>
+                          <FormattingRule>
+                            <Style>
+                              <Font Size="6pt" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Parameters.FontSizeTotals.Value" Operator="Equal" Value="=1" />
+                            </Filters>
+                          </FormattingRule>
+                          <FormattingRule>
+                            <Style>
+                              <Font Size="10pt" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Parameters.FontSizeTotals.Value" Operator="Equal" Value="=3" />
+                            </Filters>
+                          </FormattingRule>
+                          <FormattingRule>
+                            <Style>
+                              <BorderStyle Top="Solid" />
+                              <Padding Top="5px" Bottom="3px" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Fields.ShowTopLine" Operator="Equal" Value="= 1" />
+                            </Filters>
+                          </FormattingRule>
+                        </ConditionalFormatting>
+                      </TextBox>
+                    </ReportItem>
+                  </TableCell>
+                  <TableCell RowIndex="0" ColumnIndex="3" RowSpan="1" ColumnSpan="1">
+                    <ReportItem>
+                      <TextBox Width="0.656250068040551in" Height="0.17in" Left="0in" Top="0in" Name="textBox11" StyleName="">
+                        <Style TextAlign="Right">
+                          <Font Size="8pt" />
+                          <Padding Right="5pt" />
+                        </Style>
+                        <ConditionalFormatting>
+                          <FormattingRule>
+                            <Style>
+                              <BorderStyle Top="Solid" />
+                              <Padding Top="5px" Bottom="3px" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Fields.ShowTopLine" Operator="Equal" Value="= 1" />
+                            </Filters>
+                          </FormattingRule>
+                        </ConditionalFormatting>
+                      </TextBox>
+                    </ReportItem>
+                  </TableCell>
+                </Cells>
+                <Columns>
+                  <Column Width="1.23543095527087in" />
+                  <Column Width="2.16251268763544in" />
+                  <Column Width="1.41251407616018in" />
+                  <Column Width="0.656250149500849in" />
+                </Columns>
+                <Rows>
+                  <Row Height="0.17in" />
+                </Rows>
+              </Body>
+              <Corner />
+              <RowGroups>
+                <TableGroup Name="detailTableGroup">
+                  <Groupings>
+                    <Grouping />
+                  </Groupings>
+                </TableGroup>
+              </RowGroups>
+              <ColumnGroups>
+                <TableGroup Name="tableGroup" />
+                <TableGroup Name="tableGroup1" />
+                <TableGroup Name="tableGroup2" />
+                <TableGroup Name="group3" />
+              </ColumnGroups>
+            </Table>
+            <Table DataSourceName="SubTotals" Width="5.48058026018242in" Height="0.18in" Left="0.0999999046325684in" Top="0.700000127156576in" Name="table8">
+              <Body>
+                <Cells>
+                  <TableCell RowIndex="0" ColumnIndex="0" RowSpan="1" ColumnSpan="1">
+                    <ReportItem>
+                      <HtmlTextBox Width="4.25029013009121in" Height="0.18in" Left="2.69999980926514in" Top="0.099999745686849in" Value="{Fields.Notes}" Name="htmlTextBox16" StyleName="">
+                        <Style VerticalAlign="Middle">
+                          <Font Size="8pt" Italic="True" />
+                          <Padding Right="5pt" />
+                        </Style>
+                        <ConditionalFormatting>
+                          <FormattingRule>
+                            <Style Visible="False" />
+                            <Filters>
+                              <Filter Expression="= Fields.Notes" Operator="Equal" Value="=&quot;&quot;" />
+                            </Filters>
+                          </FormattingRule>
+                          <FormattingRule>
+                            <Style>
+                              <Font Size="6pt" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Parameters.FontSizeTotals.Value" Operator="Equal" Value="=1" />
+                            </Filters>
+                          </FormattingRule>
+                          <FormattingRule>
+                            <Style>
+                              <Font Size="10pt" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Parameters.FontSizeTotals.Value" Operator="Equal" Value="=3" />
+                            </Filters>
+                          </FormattingRule>
+                        </ConditionalFormatting>
+                      </HtmlTextBox>
+                    </ReportItem>
+                  </TableCell>
+                  <TableCell RowIndex="0" ColumnIndex="1" RowSpan="1" ColumnSpan="1">
+                    <ReportItem>
+                      <HtmlTextBox Width="1.23029013009121in" Height="0.18in" Left="2.69999980926514in" Top="0.099999745686849in" Value="= '-$' + Abs(Fields.DiscountMarkupLineItemTotal)" Name="htmlTextBox166" StyleName="">
+                        <Style VerticalAlign="Middle">
+                          <Font Size="8pt" Italic="True" />
+                          <Padding Right="5pt" />
+                        </Style>
+                        <ConditionalFormatting>
+                          <FormattingRule>
+                            <Style Visible="False" />
+                            <Filters>
+                              <Filter Expression="= Fields.Notes" Operator="Equal" Value="=&quot;&quot;" />
+                            </Filters>
+                          </FormattingRule>
+                          <FormattingRule>
+                            <Style>
+                              <Font Size="6pt" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Parameters.FontSizeTotals.Value" Operator="Equal" Value="=1" />
+                            </Filters>
+                          </FormattingRule>
+                          <FormattingRule>
+                            <Style>
+                              <Font Size="10pt" />
+                            </Style>
+                            <Filters>
+                              <Filter Expression="= Parameters.FontSizeTotals.Value" Operator="Equal" Value="=3" />
+                            </Filters>
+                          </FormattingRule>
+                        </ConditionalFormatting>
+                      </HtmlTextBox>
+                    </ReportItem>
+                  </TableCell>
+                </Cells>
+                <Columns>
+                  <Column Width="4.25028994957823in" />
+                  <Column Width="1.2302903922712in" />
+                </Columns>
+                <Rows>
+                  <Row Height="0.18in" />
+                </Rows>
+              </Body>
+              <Corner />
+              <RowGroups>
+                <TableGroup Name="detailTableGroup3">
+                  <Groupings>
+                    <Grouping />
+                  </Groupings>
+                </TableGroup>
+              </RowGroups>
+              <ColumnGroups>
+                <TableGroup Name="tableGroup6" />
+                <TableGroup Name="tableGroup66" />
+              </ColumnGroups>
+            </Table>
+          </Items>
+        </Panel>
+      </Items>
+    </DetailSection>
+  </Items>
+  <StyleSheet>
+    <StyleRule>
+      <Style>
+        <Padding Left="2pt" Right="2pt" />
+      </Style>
+      <Selectors>
+        <TypeSelector Type="TextItemBase" />
+        <TypeSelector Type="HtmlTextBox" />
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style Color="Black">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Georgia" Size="9pt" />
+      </Style>
+      <Selectors>
+        <StyleSelector Type="Table" StyleName="Civic.TableNormal" />
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style>
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Georgia" Size="9pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Civic.TableBody" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style BackgroundColor="140, 174, 173" Color="228, 238, 243" VerticalAlign="Middle">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Georgia" Size="10pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Civic.TableHeader" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style Color="Black">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Book Antiqua" Size="9pt" />
+      </Style>
+      <Selectors>
+        <StyleSelector Type="Table" StyleName="Apex.TableNormal" />
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style>
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Book Antiqua" Size="9pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Apex.TableBody" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style BackgroundColor="105, 103, 109" Color="206, 185, 102" VerticalAlign="Middle">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Book Antiqua" Size="10pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Apex.TableHeader" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style BackgroundColor="236, 236, 237">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Book Antiqua" Size="9pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Apex.TableGroup" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style Color="Black">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Tahoma" Size="9pt" />
+      </Style>
+      <Selectors>
+        <StyleSelector Type="Table" StyleName="Normal.TableNormal" />
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style>
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Tahoma" Size="9pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Normal.TableBody" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style VerticalAlign="Middle">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Tahoma" Size="10pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Normal.TableHeader" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+  </StyleSheet>
+  <PageSettings>
+    <PageSettings PaperKind="Letter" Landscape="False">
+      <Margins>
+        <MarginsU Left="0in" Right="0in" Top="0in" Bottom="0in" />
+      </Margins>
+    </PageSettings>
+  </PageSettings>
+  <ReportParameters>
+    <ReportParameter Name="AdminInfoID" Type="Integer" AllowBlank="False">
+      <Value>
+        <String>3467979</String>
+      </Value>
+    </ReportParameter>
+    <ReportParameter Name="ImageDirectory">
+      <Value>
+        <String>C:\ProEstimator\Images\</String>
+      </Value>
+    </ReportParameter>
+    <ReportParameter Name="Supplement" Type="Integer" Text="0">
+      <Value>
+        <String>0</String>
+      </Value>
+    </ReportParameter>
+    <ReportParameter Name="ShowExternalNotes" Type="Boolean" />
+    <ReportParameter Name="HideHours" Type="Boolean">
+      <Value>
+        <String>false</String>
+      </Value>
+    </ReportParameter>
+    <ReportParameter Name="FontSizeLines" Type="Integer">
+      <Value>
+        <String>2</String>
+      </Value>
+    </ReportParameter>
+    <ReportParameter Name="FontSizeTableHeaders" Type="Integer">
+      <Value>
+        <String>2</String>
+      </Value>
+    </ReportParameter>
+    <ReportParameter Name="FontSizeTotals" Type="Integer">
+      <Value>
+        <String>2</String>
+      </Value>
+    </ReportParameter>
+    <ReportParameter Name="FontSizeHeaders" Type="Integer">
+      <Value>
+        <String>2</String>
+      </Value>
+    </ReportParameter>
+    <ReportParameter Name="PdrOnly" Type="Integer" Text="0">
+      <Value>
+        <String>0</String>
+      </Value>
+    </ReportParameter>
+    <ReportParameter Name="PrintPnLNotes" Type="Integer" Text="0">
+      <Value>
+        <String>0</String>
+      </Value>
+    </ReportParameter>
+    <ReportParameter Name="IncludeLoanApplicationLink" Type="Boolean" Text="IncludeLoanApplicationLink">
+      <Value>
+        <String>= False</String>
+      </Value>
+    </ReportParameter>
+    <ReportParameter Name="FinancingAsLowAsMonthlyAmount">
+      <Value>
+        <String>2.22</String>
+      </Value>
+    </ReportParameter>
+    <ReportParameter Name="FinancingLoanApplicationLink" AllowNull="True">
+      <Value>
+        <String>na</String>
+      </Value>
+    </ReportParameter>
+  </ReportParameters>
+</Report>

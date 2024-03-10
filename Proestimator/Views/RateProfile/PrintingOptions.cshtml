@@ -1,0 +1,276 @@
+﻿@model Proestimator.ViewModel.Profiles.PrintVM
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitles_PrintingOptions;
+}
+
+<style>
+
+    @@media screen and (max-width:700px) {
+        #smEstimateNavRow {
+            border: 1px solid #349ad8;
+            background-color: #f5f9fb;
+            max-width: 100%;
+            padding-right: 30px;
+        }
+
+        #estimateNavigation {
+            margin-top: 15px;
+        }
+    }
+</style>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(".radiobuttons").change(function () {
+            refreshSizeMessage();
+        });
+
+        refreshSizeMessage();
+
+        $("#PrintingOptionsForm").submit(function () {
+            var FooterText = document.getElementById("EditorFrame").contentWindow.GetTemplate();
+            $("#FooterText").val(FooterText);
+        });
+
+    });
+
+    function refreshSizeMessage()
+    {
+        if ($("input.quality-med:checked").val() || $("input.quality-high:checked").val()) {
+            $("#size-message").show();
+        }
+        else {
+            $("#size-message").hide();
+        }
+    }
+
+    function IFrameLoaded() {
+        document.getElementById("EditorFrame").contentWindow.SetupEditor("");
+        document.getElementById("EditorFrame").contentWindow.SetEditorText($("#FooterText").val());
+    }
+
+</script>
+
+
+<div id="workDesk" class="page-container">
+
+    @if (!Model.ProfileIsValid)
+    {
+        <h2>@Proestimator.Resources.ProStrings.InvalidProfile</h2>
+    }
+    else
+    {
+        using (Html.BeginForm("PrintingOptions", "RateProfile", FormMethod.Post, new { @id = "PrintingOptionsForm", @class = "container" }))
+        {
+            @Html.Partial("RateProfileTopMenu", Model.ProfileID)
+
+            @Html.HiddenFor(model => model.LoginID)
+            @Html.HiddenFor(model => model.ProfileID)
+            @Html.HiddenFor(model => model.ProfileName)
+            @Html.HiddenFor(model => model.Description)
+            @Html.HiddenFor(model => model.EstimateID)
+
+            Html.EnableClientValidation(false);
+
+            <input type="hidden" id="redirectData" name="redirectDataField" />
+
+            <div class="tabcontent container">
+
+                <div id="formHeader">
+                    <div id="profileName" class="container rate-ProfileName">
+                        <label>
+                            <b>@Proestimator.Resources.ProStrings.RateProfile_ProfileName: @Model.ProfileName</b>
+
+                            <p class="profile-message">
+                                @if (Model.IsGlobalProfile)
+                                {
+                                    @Proestimator.Resources.ProStrings.ProfileMessage_Global
+                                }
+                                else
+                                {
+                                    @Proestimator.Resources.ProStrings.ProfileMessage_Estimate
+                                }
+                            </p>
+                        </label>
+                    </div>
+
+                    @* The previous and next buttons *@
+                    <div id="container">
+                        <div class="half-container">
+                            <a class="button nav-btn" href="@("javascript:SubmitAndRedirect('/" + ViewBag.UserID + "/paint-finish/" + Model.ProfileID + "');")">&lt;&lt; @Proestimator.Resources.ProStrings.PageTitle_PaintFinish</a>
+                        </div>
+
+                        <div class="half-container">
+                            <a class="button nav-btn" href="@("javascript:SubmitAndRedirect('/" + ViewBag.UserID + "/taxes/" + Model.ProfileID + "');")">@Proestimator.Resources.ProStrings.Taxes >></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="lgRow1" class="container">
+
+                    @* The Save button above the forms *@
+                    @if (Model.EstimateID > 0 && Model.EstimateIsLocked)
+                    {
+                        <p class="error-message">@Proestimator.Resources.ProStrings.RateProfile_LockedEstimate</p>
+                    }
+
+                    <div class="container center" style="padding-bottom: 20px;">
+                        @if (!Model.EstimateIsLocked)
+                        {
+                            <input id="submitButton" class="button nav-btn" type="submit" value="@Proestimator.Resources.ProStrings.Save" />
+                        }
+                    </div>
+
+                    <div id="overlapFieldSetContainer" class="container">
+
+                        <fieldset id="customerFieldSet">
+
+                            <div id="ratesHeader" class="container">
+                                <div class="col md_3_8 lg_7_12 xl_5_14">
+                                    <legend><span class="number">1</span> @Proestimator.Resources.ProStrings.RateProfile_EstimateReportOptions</legend>
+                                </div>
+                            </div>
+
+                            <div id="rateProfileTableContainer" class="container ">
+                                <div id="estimateBoxContainer" class="container">
+                                    <div id="printOptionsBoxesColOne" class="col md_4_8 lg_6_12 xl_7_14">
+                                        @Html.CheckBoxFor(model => model.NoHeaderLogo)
+                                        <label class="light">@Proestimator.Resources.ProStrings.RateProfile_NoHeaderLogo</label><br />
+
+                                        @Html.CheckBoxFor(model => model.NoInsuranceSection)
+                                        <label class="light">@Proestimator.Resources.ProStrings.RateProfile_NoInsuranceSection</label><br />
+
+                                        @Html.CheckBoxFor(model => model.NoPhotos)
+                                        <label class="light">@Proestimator.Resources.ProStrings.RateProfile_NoPhotoPage</label><br />
+
+                                        @Html.CheckBoxFor(model => model.PrintPublicNotes)
+                                        <label class="light">@Proestimator.Resources.ProStrings.RateProfile_ExternalNotes</label><br />
+
+                                        @Html.CheckBoxFor(model => model.NoFooterDateTimeStamp)
+                                        <label class="light">@Proestimator.Resources.ProStrings.RateProfile_NoFooterDateTimeStamp</label><br />
+                                    </div>
+                                    <div id="printOptionsBoxesColTwo" class="col md_4_8 lg_6_12 xl_7_14">
+                                        @*
+        @Html.CheckBoxFor(model => model.SeparateLabor)
+        <label class="light">Put labor and paint into own columns separate from other labor times.</label><br />
+                                        *@
+                                        @Html.CheckBoxFor(model => model.EstimateNumber)
+                                        <label class="light">@Proestimator.Resources.ProStrings.RateProfile_PrintEstimateNumber</label> <br>
+
+                                        @Html.CheckBoxFor(model => model.AdminInfoID)
+                                        <label class="light">@Proestimator.Resources.ProStrings.RateProfile_PrintID</label><br />
+
+                                        @Html.CheckBoxFor(model => model.PrintPaymentInfo)
+                                        <label class="light">@Proestimator.Resources.ProStrings.RateProfile_PrintPaymentInfo</label><br />
+
+                                        @Html.CheckBoxFor(model => model.Dollars)
+                                        <label class="light">@Proestimator.Resources.ProStrings.RateProfile_UseDollarsInsteadOfLaborTime</label> <br>
+
+                                        @if (1 == 2)
+                                        {
+                                            @Html.CheckBoxFor(model => model.GreyBars)
+                                            <label class="light">@Proestimator.Resources.ProStrings.RateProfile_GrayBars</label> <br>
+                                        }
+
+                                        @Html.CheckBoxFor(model => model.PrintEstimator)
+                                        <label class="light">@Proestimator.Resources.ProStrings.RateProfile_PrintEstimator</label> <br>
+
+                                        @Html.CheckBoxFor(model => model.PrintVendors)
+                                        <label class="light">@Proestimator.Resources.ProStrings.RateProfile_PrintVendors</label> <br>
+
+                                        @Html.CheckBoxFor(model => model.PrintTechnicians)
+                                        <label class="light">@Proestimator.Resources.ProStrings.PrintTechnicians</label> <br>
+                                    </div>
+                                </div>
+                                <div id="estimatePrintSelectContainer" class="col md_4_8">
+
+                                    <br><label class="light">@Proestimator.Resources.ProStrings.RateProfile_SelectImageQuality</label><br>
+                                    @Html.RadioButtonFor(model => model.GraphicsQuality, 0, new { @class = "radiobuttons quality-low" })
+                                    <label class="light">@Proestimator.Resources.ProStrings.Low</label>
+                                    @Html.RadioButtonFor(model => model.GraphicsQuality, 1, new { @class = "radiobuttons quality-med" })
+                                    <label class="light">@Proestimator.Resources.ProStrings.Medium</label>
+                                    @Html.RadioButtonFor(model => model.GraphicsQuality, 2, new { @class = "radiobuttons quality-high" })
+                                    <label class="light">@Proestimator.Resources.ProStrings.High</label>
+
+                                    <p style="font-size: small;" id="size-message">@Proestimator.Resources.ProStrings.MessageChangeImageSize</p>
+                                </div>
+
+                            </div>
+
+                        </fieldset>
+
+                    </div>
+                </div>
+
+                <div id="lgRow1" class="container">
+
+                    <div id="overlapFieldSetContainer" class="container">
+
+                        <fieldset id="paintFinishFieldsetContainer">
+
+                            <div id="ratesHeader" class="container">
+                                <div class="container">
+                                    <legend><span class="number">2</span>@Proestimator.Resources.ProStrings.RateProfile_ContactInfoPrint</legend>
+                                </div>
+                            </div>
+
+                            <div id="estimatePrintSelectContainer" class="col md_8_8">
+                                <br><label class="light">@Proestimator.Resources.ProStrings.RateProfile_SelectContactInfoDisplay</label><br>
+                                <div id="lineContainer" class="col md_4_8">
+                                    @Html.RadioButtonFor(model => model.ContactOption, "Line")
+                                    <label class="light">@Proestimator.Resources.ProStrings.RateProfile_LineFormat</label>
+                                    <img src="@Url.Content("~/Content/img/LineSample.jpg")"> <br>
+                                </div>
+                                <div id="labelContainer" class="col md_4_8">
+                                    @Html.RadioButtonFor(model => model.ContactOption, "Label")
+                                    <label class="light">@Proestimator.Resources.ProStrings.RateProfile_LabelFormat</label>
+
+                                    <img src="@Url.Content("~/Content/img/LabelSample.jpg")" />  <br>
+                                </div>
+                            </div>
+
+                        </fieldset>
+
+                    </div> <!-- //#customerFields -->
+                </div> <!-- //#lgRow1 -->
+
+                <div id="lgRow1" class="container">
+
+                    <div id="overlapFieldSetContainer" class="container">
+
+                        <fieldset id="customerFieldSet">
+
+                            <div id="ratesHeader" class="container">
+                                <div class="container">
+                                    <legend><span class="number">3</span>@Proestimator.Resources.ProStrings.RateProfile_EstimateReportNotes</legend>
+                                </div>
+                            </div>
+
+                            <div id="estimatePrintSelectContainer">
+                                <br><label class="light">@Proestimator.Resources.ProStrings.RateProfile_FooterNotes</label><br>
+                                @Html.TextBoxFor(model => model.FooterText, new { style = "display: none;" })
+                                <iframe id="EditorFrame" src="~/Files/TemplateEditor.html" style="width: 100%; height: 600px; border: 0px;"></iframe>
+                            </div>
+
+                        </fieldset>
+
+                    </div>
+                </div>
+
+            </div>
+
+            @* The bottom previous and next buttons *@
+            <div id="bottomBtns" class="container">
+                <div class="half-container">
+                    <a class="button nav-btn" href="@("javascript:SubmitAndRedirect('/" + ViewBag.UserID + "/paint-finish/" + Model.ProfileID + "');")">@Proestimator.Resources.ProStrings.PreviousButton</a>
+                </div>
+
+                <div class="half-container">
+                    <a class="button nav-btn" href="@("javascript:SubmitAndRedirect('/" + ViewBag.UserID + "/taxes/" + Model.ProfileID + "');")">@Proestimator.Resources.ProStrings.NextButton</a>
+                </div>
+            </div>
+        }
+    }
+</div>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://tempuri.org/" elementFormDefault="qualified" targetNamespace="http://tempuri.org/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://proestimatorservice.web-est.com/ImportService.svc?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/ProEstimator.Business.Model" />
+  <xs:element name="AddImportToQueue">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/ProEstimator.Business.Model" minOccurs="0" name="account" nillable="true" type="q1:QueueImportRequest" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="AddImportToQueueResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/ProEstimator.Business.Model" minOccurs="0" name="AddImportToQueueResult" nillable="true" type="q2:QueueImportResponse" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetQueueSize">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q3="http://schemas.datacontract.org/2004/07/ProEstimator.Business.Model" minOccurs="0" name="request" nillable="true" type="q3:QueueSizeRequest" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetQueueSizeResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q4="http://schemas.datacontract.org/2004/07/ProEstimator.Business.Model" minOccurs="0" name="GetQueueSizeResult" nillable="true" type="q4:QueueSizeResponse" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="QueryQueue">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q5="http://schemas.datacontract.org/2004/07/ProEstimator.Business.Model" minOccurs="0" name="request" nillable="true" type="q5:QueueQueryRequest" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="QueryQueueResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q6="http://schemas.datacontract.org/2004/07/ProEstimator.Business.Model" minOccurs="0" name="QueryQueueResult" nillable="true" type="q6:QueueQueryReponse" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetQueueProgress">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q7="http://schemas.datacontract.org/2004/07/ProEstimator.Business.Model" minOccurs="0" name="request" nillable="true" type="q7:QueueProgressRequest" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetQueueProgressResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q8="http://schemas.datacontract.org/2004/07/ProEstimator.Business.Model" minOccurs="0" name="GetQueueProgressResult" nillable="true" type="q8:QueueProgressResponse" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

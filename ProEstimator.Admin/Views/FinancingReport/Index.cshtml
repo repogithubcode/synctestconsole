@@ -1,0 +1,531 @@
+﻿@model ProEstimator.Admin.ViewModel.Financing.FinancingPageVM
+
+@using ProEstimator.Business.Logic;
+@using ProEstimator.Admin.ViewModel.Financing;
+@using ProEstimatorData.DataModel.Financing;
+@{
+    ViewBag.Title = "Administration - Financing: Merchants";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<style>
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .padd-top {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    .k-grid td {
+        white-space: normal;
+    }
+
+    .stackem {
+        margin-bottom: 5px;
+    }
+
+    #merchant-signups-grid {
+        cursor: pointer;
+    }
+
+    .row-line-hovered {
+        background-color: #dddddd !important;
+        border-color: gray;
+    }
+
+    .ui-datepicker {
+        z-index: 1000 !important;
+    }
+
+    .loanAppListFilterSearchContainer {
+        padding: 3px;
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+
+    .loanAppListFilterSearchCol1 {
+        float: left;
+        font-size: 12px;
+        margin-right: 100px;
+        margin-left: 10px;
+        white-space: nowrap;
+        margin-top: 10px;
+    }
+
+    .loanAppListFilterSearchCol2 {
+        float: right;
+        font-size: 12px;
+        white-space: nowrap;
+        margin-top: 7px;
+        margin-right: 10px;
+    }
+
+    .loanAppListFilterSearchText {
+        height: 26px;
+        min-width: 250px;
+        max-width: 350px;
+    }
+
+    .modal-header {
+        display: none;
+    }
+</style>
+<script>
+
+    var _merchantID = '';
+    var _viewLogMerchantID = '';
+    var _viewLogTransactionID = '';
+
+    $(document).ready(function () {
+
+        $(".closeBtnMerchantsLog").click(function () {
+            $('#merchantsSignupLogModal').dialog('close');
+        });
+
+        $(".closeBtnLoanAppsLog").click(function () {
+            $('#loanApplicationsLogModal').dialog('close');
+        });
+
+        $("#RangeStart").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        $("#RangeEnd").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        $("#btnSearch").click(function () {
+
+            RefreshDetails(0);
+            $('#loanAppTitleCompanyName').html('');
+            $("#loanAppFilter").val('');
+            var loanAppsGrid = $("#loan-apps-grid").data("kendoGrid");
+            var filter = KendogridSearchFilter(loanAppsGrid, '');
+            loanAppsGrid.dataSource.filter(filter);
+
+            // Refresh the history grid
+            var grid = $("#merchant-signups-grid").data("kendoGrid");
+
+            if (grid) {
+                if (grid.dataSource.page() != 1) {
+                    grid.dataSource.page(1);
+                }
+
+                grid.dataSource.read();
+            }
+        });
+
+        $("#btnClear").click(function () {
+            $("#RangeStart").val("");
+            $("#RangeEnd").val("");
+            $("#LoginID").val("");
+            $("#MerchantName").val("");
+            $("#SignupStatus").val("");
+            $("#MinLoanApps").val("");
+        });
+
+        $("#loanAppFilter").on("input", function (e) {
+            var grid = $("#loan-apps-grid").data("kendoGrid");
+            var valuetoFilter = e.target.value;
+            var filter = KendogridSearchFilter(grid, valuetoFilter);
+            grid.dataSource.filter(filter);
+
+            if (grid.dataSource.page() != 1) {
+                grid.dataSource.page(1);
+            }
+        });
+
+        $("#chkShowAllLoanApps").change(function () {
+            RefreshDetails(_merchantID);
+        });
+    });
+
+    function GetMerchantSignupsSearchParameters() {
+        return {
+            rangeStart: $("#RangeStart").val(),
+            rangeEnd: $("#RangeEnd").val(),
+            loginID: $("#LoginID").val(),
+            merchantName: $("#MerchantName").val(),
+            signupStatus: $("#SignupStatus").val(),
+            minLoanApps: $("#MinLoanApps").val()
+        };
+    }
+
+    function GetLoanAppsSearchParameters() {
+        return {
+            merchantID: _merchantID,
+            includeAllLoanApps: $('#chkShowAllLoanApps').is(":checked")
+        };
+    }
+
+    function GetMerchantSignupLogSearchParameters() {
+        return {
+            merchantID: _viewLogMerchantID
+        };
+    }
+
+    function GetLoanApplicationLogSearchParameters() {
+        return {
+            transactionID: _viewLogTransactionID
+        };
+    }
+
+    function MerchantSignupsDataChanged(arg) {
+        // Wire up hilighting the row when hovering.
+        $("#merchant-signups-grid tr").hover(
+            function () {
+                var row = $(this).closest("tr");
+                row.toggleClass("row-line-hovered");
+            }
+        );
+    }
+
+    function MerchantSignupsSelectionChanged(arg) {
+        var row = $("#merchant-signups-grid").find(".k-state-selected").first();
+
+        var merchantID = row.find("td").eq(2).html();
+        var merchantName = row.find("td").eq(1).html();
+        if (merchantName != '') {
+            $('#loanAppTitleCompanyName').html(' for ' + merchantName);
+        } else {
+            $('#loanAppTitleCompanyName').html('');
+        }
+        RefreshDetails(merchantID);
+    }
+
+    function RefreshDetails(merchantID) {
+        _merchantID = merchantID;
+
+        var grid = $("#loan-apps-grid").data("kendoGrid");
+
+        if (grid) {
+            if (grid.dataSource.page() != 1) {
+                grid.dataSource.page(1);
+            }
+
+            grid.dataSource.read();
+        }
+    }
+
+    function ViewMerchantsSignupLog(loginID, merchantName, merchantID) {
+
+        _viewLogMerchantID = merchantID;
+
+        $("#merchantsSignupLogModal").dialog({
+            modal: true,
+            autoOpen: false,
+            title: "Merchant Signup Log for " + loginID + " - " + merchantName.replace("'", "''") + " (" + merchantID + ")",
+            width: 1500
+            , position: {
+                my: "center",
+                at: "center",
+                of: "#pageContainer",
+                collision: "none"
+            }
+        });
+
+        var grid = $("#merchants-signup-log-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+
+        $("#merchantsSignupLogModal").removeClass('modal');
+        $("#merchantsSignupLogModal").removeClass('fade');
+        $('#merchantsSignupLogModal').dialog('open');
+    }
+
+    function ViewLoanApplicationLog(estimateID, transactionID, customerName) {
+
+        _viewLogTransactionID = transactionID;
+
+        $("#loanApplicationsLogModal").dialog({
+            modal: true,
+            autoOpen: false,
+            title: "Loan Application Log for Estimate ID: " + estimateID + ", Customer: '" + customerName.replace("'", "''") + "', Transaction ID: " + transactionID,
+            width: 1850
+            , position: {
+                my: "center",
+                at: "center",
+                of: "#pageContainer",
+                collision: "none"
+            }
+        });
+
+        var grid = $("#loan-app-log-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+
+        $("#loanApplicationsLogModal").removeClass('modal');
+        $("#loanApplicationsLogModal").removeClass('fade');
+        $('#loanApplicationsLogModal').dialog('open');
+    }
+
+</script>
+
+<div id="pageContainer" class="page-container">
+    <div class="row padd-top">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>Financing: Merchants</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="container">
+                            <div class="row stackem">
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Login ID</span>
+                                        <input type="text" class="form-control" placeholder="Login ID" aria-describedby="loginId" id="LoginID" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Range Start</span>
+                                        <input type="text" value="@(DateTime.Now.AddMonths(-2).ToString("MM/01/yyyy"))" class="input-group-addon" placeholder="Range Start" aria-describedby="RangeStart" id="RangeStart" readonly="true" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Signup Status</span>
+                                        @Html.DropDownListFor(model => model.SelectedMerchantSignupStatus, Model.MerchantSignupStatusList, new { @id = "SignupStatus", style = "width: 200px;height:35px" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row stackem">
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Merchant Name</span>
+                                        <input type="text" class="form-control" placeholder="Merchant Name" aria-describedby="MerchantName" id="MerchantName" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Range End</span>
+                                        <input type="text" class="input-group-addon" placeholder="Range End" aria-describedby="RangeEnd" id="RangeEnd" readonly="true" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Min Loan Apps</span>
+                                        <input type="text" class="form-control" placeholder="Min Loan Apps" aria-describedby="minLoanApps" id="MinLoanApps" style="min-width:200px;" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row stackem">
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <a class="btn btn-primary" href="javascript:void(0);" style="width:60% !important" id="btnSearch" role="button">Search</a>
+                                    <a class="" href="javascript:void(0);" style="margin-left: 15px;" id="btnClear" role="button">Clear</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading panel-height">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <h4>Merchant Signups</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <div class="datagrid">
+                    @(Html.Kendo().Grid<FinancingReportMerchantSignup>()
+                        .Name("merchant-signups-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.LoginID);
+                            columns.Bound(item => item.MerchantName);
+                            columns.Bound(item => item.MerchantID);
+                            columns.Bound(item => item.SignupLink);
+                            columns.Bound(item => item.LastCallbackDate).Title("Status Updated On").Format("{0:MM/dd/yyyy h:mm tt}");
+                            columns.Bound(item => item.SignupStatus);
+                            columns.Bound(item => item.LoanAppCount).Title("Loan Apps");
+                            columns.Template(@<text></text>).ClientTemplate("  " + "# if (SignupStatus != '') { #" + "<a href='javascript: void(0);' onclick=\"ViewMerchantsSignupLog('#=LoginID#', '#=MerchantNameFormatted#', '#=MerchantID#')\" style=\"cursor: pointer;\">View Log</a>" + "# } #").Title("").Width(85);
+                        })
+                        .Sortable()
+                        .Selectable()
+                        .Pageable(pageable => pageable
+                            .Refresh(false)
+                        )
+                        .Events(events => events
+                            .DataBound("MerchantSignupsDataChanged")
+                            .Change("MerchantSignupsSelectionChanged")
+                        )
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Read(read => read.Action("GetMerchantSignupsList", "FinancingReport").Data("GetMerchantSignupsSearchParameters"))
+                            .PageSize(8)
+                        )
+                    )
+                </div>
+            </div>
+        </div>
+
+        <div class="row" id="detailsPanel">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>Loan Applications <span id="loanAppTitleCompanyName"></span></h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="container">
+                            <div class="datagrid">
+
+                                <div class="loanAppListFilterSearchContainer">
+                                    <div class="loanAppListFilterSearchCol1">
+                                        <label><input type="checkbox" id="chkShowAllLoanApps" /> Include all loan appliations</label>
+                                    </div>
+
+                                    <div class="loanAppListFilterSearchCol2">
+                                        Search: <input type="text" id="loanAppFilter" name="loanAppFilter" class="loanAppListFilterSearchText" />
+                                    </div>
+                                </div>
+
+                                @(Html.Kendo().Grid<FinancingReportLoanApplication>()
+                                    .Name("loan-apps-grid")
+                                    .Columns(columns =>
+                                    {
+                                        //columns.Bound(item => item.MerchantID);
+                                        //columns.Bound(item => item.MerchantName).Title("Company Name");
+                                        //columns.Bound(item => item.LoginID);
+                                        columns.Bound(item => item.EstimateID);
+                                        columns.Bound(item => item.CustomerName);
+                                        columns.Bound(item => item.TransactionID).Hidden();
+                                        //columns.Bound(item => item.EstimateGrandTotal).Title("Estimate Total");
+                                        //columns.Bound(item => item.MaximumAmount);
+                                        columns.Bound(item => item.RequestedLoanAmount).Title("Requested Amount");
+                                        columns.Bound(item => item.ApprovedLoanAmount).Title("Approved Amount");
+                                        //columns.Bound(item => item.LoanApplicationLink).Title("Loan App Link");
+                                        //columns.Bound(item => item.ApplicationStartDate).Title("Started On").Format("{0:MM/dd/yyyy h:mm tt}").Width(150);
+                                        columns.Bound(item => item.ExpirationDate).Title("Expires On").Format("{0:MM/dd/yyyy h:mm tt}").Width(150);
+                                        columns.Bound(item => item.DateOfLastUpdate).Title("Status Updated On").Format("{0:MM/dd/yyyy h:mm tt}").Width(150);
+                                        columns.Bound(item => item.LoanApplicationStatus).Title("Status");
+                                        columns.Template(@<text></text>).ClientTemplate("  " + "# if (LoanApplicationStatus != '') { #" + "<a href='javascript: void(0);' onclick=\"ViewLoanApplicationLog('#=EstimateID#', '#=TransactionID#', '#=CustomerNameFormatted#')\" style=\"cursor: pointer;\">View Log</a>" + "# } #").Title("").Width(85);
+                                    })
+                                    .Sortable()
+                                    .Pageable(pageable => pageable
+                                        .Refresh(true)
+                                    )
+                                    .DataSource(dataSource => dataSource
+                                        .Ajax()
+                                        .ServerOperation(false)
+                                        .Read(read => read.Action("GetMerchantLoanApplicationsList", "FinancingReport").Data("GetLoanAppsSearchParameters"))
+                                        .PageSize(8)
+                                    )
+                                )
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="merchantsSignupLogModal" tabindex="-1" role="dialog" aria-labelledby="merchantsSignupLogModal" aria-hidden="true">
+            <div class="modal-dialog" style="width: 1400px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close closeBtnMerchantsLog" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    </div>
+                    <div class="modal-body" style="width: 1400px;">
+
+                        <div class="datagrid">
+                            @(Html.Kendo().Grid<FinancingReportMerchantSignupLog>()
+                                .Name("merchants-signup-log-grid")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(item => item.CreatedDate).Format("{0:MM/dd/yyyy h:mm tt}").Width(150);
+                                    columns.Bound(item => item.CallbackDate).Format("{0:MM/dd/yyyy h:mm tt}").Width(150);
+                                    columns.Bound(item => item.SignupStatus);
+                                    columns.Bound(item => item.Reasons);
+                                    columns.Bound(item => item.ExternalID);
+                                    columns.Bound(item => item.EventType);
+                                    columns.Bound(item => item.OnboardingType);
+                                })
+                                .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .ServerOperation(false)
+                                    .Read(read => read.Action("GetMerchantSignupLogList", "FinancingReport").Data("GetMerchantSignupLogSearchParameters"))
+                                )
+                            )
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default closeBtnMerchantsLog" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="loanApplicationsLogModal" tabindex="-1" role="dialog" aria-labelledby="loanApplicationsLogModal" aria-hidden="true">
+            <div class="modal-dialog" style="width: 1800px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close closeBtnLoanAppsLog" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    </div>
+                    <div class="modal-body" style="width: 1700px;">
+
+                        <div class="datagrid">
+                            @(Html.Kendo().Grid<FinancingReportLoanApplicationLog>()
+                                .Name("loan-app-log-grid")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(item => item.CreatedDate).Format("{0:MM/dd/yyyy h:mm tt}").Width(150);
+                                    //columns.Bound(item => item.CallbackDate).Format("{0:MM/dd/yyyy h:mm tt}").Width(100);
+                                    columns.Bound(item => item.ChangedStatus).Title("Status");
+                                    //columns.Bound(item => item.ActionsRequired);
+                                    columns.Bound(item => item.RequestedLoanAmount).Title("Requested Amt");
+                                    columns.Bound(item => item.ApprovedLoanAmount).Title("Approved Amt");
+                                    columns.Bound(item => item.SettledLoanAmount).Title("Settled Amt");
+                                    columns.Bound(item => item.ProcessingFee);
+                                    columns.Bound(item => item.MaximumAmount).Title("Max Amt");
+                                    //columns.Bound(item => item.TilaAcceptedOn).Format("{0:MM/dd/yyyy h:mm tt}").Width(150);
+                                    columns.Bound(item => item.LoanCreatedAt).Title("Loan Created On").Format("{0:MM/dd/yyyy}").Width(100);
+                                    columns.Bound(item => item.EventType);
+                                    columns.Bound(item => item.ExpirationDate).Format("{0:MM/dd/yyyy}").Width(100);
+                                    columns.Bound(item => item.CustomerID);
+                                })
+                                .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .ServerOperation(false)
+                                    .Read(read => read.Action("GetLoanApplicationLogList", "FinancingReport").Data("GetLoanApplicationLogSearchParameters"))
+                                )
+                            )
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default closeBtnLoanAppsLog" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+

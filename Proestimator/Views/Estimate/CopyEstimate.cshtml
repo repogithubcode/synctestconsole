@@ -1,0 +1,101 @@
+﻿@model Proestimator.ViewModel.CopyEstimateVM
+
+@using ProEstimatorData.Models.SubModel
+@{
+
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_CopyEstimate;
+}
+
+<div id="workDesk" class="page-container">
+    <br />
+    @using (Html.BeginForm("CopyEstimate", "Estimate", FormMethod.Post, new { @id = "estimateForm", @class = "container" }))
+    {
+        <input type="hidden" id="redirectData" name="redirectDataField" />
+        @Html.HiddenFor(o => o.UserID)
+        @Html.HiddenFor(o => o.LoginID)
+        @Html.HiddenFor(o => o.EstimateID)
+        
+        <div id="container">
+
+            @if (Model.GoodEstimate)
+            {
+                
+                @* The title and header area *@
+                <div id="formHeadline" class="container">
+                    <h1 id="vehicleInfoHeadline">
+                        @Proestimator.Resources.ProStrings.CopyEstimate
+                    </h1>
+                </div>
+
+                <div class="half-container">
+
+                    <fieldset id="customerFieldSet" style="text-align: left;">
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label"></label>
+                            <div class="field-control">
+                                <h2>@Proestimator.Resources.ProStrings.EstimateNum: @Model.EstimateID </h2>
+                                <h3>@Proestimator.Resources.ProStrings.CopyEstimate_Select</h3>
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label"></label>
+                            <div class="field-control">
+                                @Html.CheckBoxFor(o => o.CreateBlankCustomer) @Proestimator.Resources.ProStrings.CopyEstimate_BlankCustomer
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label"></label>
+                            <div class="field-control">@Html.CheckBoxFor(o => o.CopyInsuranceInformation) @Proestimator.Resources.ProStrings.CopyEstimate_InsuranceInformation</div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label"></label>
+                            <div class="field-control">@Html.CheckBoxFor(o => o.CopyClaimantInformation) @Proestimator.Resources.ProStrings.CopyEstimate_ClaimantInformation</div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label"></label>
+                            <div class="field-control">@Html.CheckBoxFor(o => o.CopyAttachedImages) @Proestimator.Resources.ProStrings.CopyEstimate_Images</div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label"></label>
+                            <div class="field-control">@Html.CheckBoxFor(o => o.CopyLineItems) @Proestimator.Resources.ProStrings.CopyEstimate_LineItems</div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label"></label>
+                            <div class="field-control">@Html.CheckBoxFor(o => o.CopyLatestItemsOnly) @Proestimator.Resources.ProStrings.CopyEstimate_LatestOnly</div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.CopyEstimate_EditName:</label>
+                            <div class="field-control">
+                                @Html.TextBoxFor(o => o.NewName, new { autocomplete = "off" })
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label"></label>
+                            <div class="field-control">
+                                <input id="submitButton" class="button nav-btn" type="submit" value="Copy" />
+                                <a class="button nav-btn" href="/@ViewBag.UserID">@Proestimator.Resources.ProStrings.Button_Cancel</a>
+                            </div>
+                        </div>
+
+                    </fieldset>
+
+                </div>
+            }
+            else
+            {
+                <p>@Proestimator.Resources.ProStrings.InvalidEstimateNumber</p>
+            }
+
+        </div>
+           
+    }
+</div>

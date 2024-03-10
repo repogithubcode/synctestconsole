@@ -1,0 +1,303 @@
+﻿@model ProEstimator.Admin.ViewModel.SmsHistoryVM
+
+@using ProEstimator.Admin.ViewModel;
+
+@{
+    ViewBag.Title = "Administration - SMS Dispatcher";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<style>
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .padd-top {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+</style>
+
+<script>
+
+    $(document).ready(function () {
+
+        // Set up calendar controls
+        $("#startDate").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        // Set up calendar controls
+        $("#endDate").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        // GetUsers
+        $("#btnSendSMS").click(function () {
+
+            $.ajax({
+                url: '@Url.Action("GetUsers", "SalesRep")',
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({
+                    "loginId": $("#loginId").val()
+                }),
+                //beforeSend: function () {
+                //    applyLoading();
+                //},
+                success: function (res) {
+                    console.log(res.length);
+
+                    if (res.length == 1) {
+                        SendSMS();
+                    } else {
+                        alert("Invalid login entered...");
+                    }
+                },
+                error: function (error) {
+                    //removeLoading();
+                    //ShowUserMessage(error, true, 4000);
+                }
+            });
+        });
+
+        function SendSMS()
+        {
+            var phone = $('#phoneNumber').val();
+
+            //var contact = res.data[0].FirstName + " " + res.data[0].LastName;
+            //var company = res.data[0].CompanyName;
+
+            var message = "Confirm text message transmission";
+            var proceed = confirm(message);
+
+            if (proceed) {
+
+                $.ajax({
+                    url: '@Url.Action("SendSms", "SMSDispatcher")',
+                    type: "POST",
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({
+                        "phoneNumber": $("#phoneNumber").val(), "message": $("#messageDetail").val(),
+                        "salesRep": '@ViewBag.SalesRepName', "salesRepId": @Session["SalesRepID"],
+                        "loginId": $("#loginId").val()
+                    }),
+                    success: function (res) {
+                        alert('Message dispatched');
+
+                        // Refresh the smshistoryreport grid
+                        var grid = $("#smshistoryreport-grid").data("kendoGrid");
+
+                        if (grid) {
+                            grid.dataSource.read();
+                        }
+                    },
+                    error: function (error) {
+                        alert('Error occured while dispatching messsage');
+                        //removeLoading();
+                        //ShowUserMessage(error, true, 4000);
+                    }
+                });
+            }
+        }
+
+        $('#chkStandard').change(function() {
+            if(this.checked) {
+                var standardMessage = "Welcome to Pro Estimator. Please use the following link to log into your new account: https://proestimator.web-est.com/login/code/";
+                $('#messageDetail').val(standardMessage);
+            }
+            else
+            {
+                $('#messageDetail').val('');
+            }
+        });
+
+        // Do the SmsHistory search
+        $("#btnSearchSmsHistory").click(function () {
+
+            $.ajax({
+                url: '@Url.Action("GetSmsHistoryByDates", "SMSDispatcher")',
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({
+                    "startDate": $("#startDate").val(), "endDate": $("#endDate").val()
+                }),
+                //beforeSend: function () {
+                //    applyLoading();
+                //},
+                success: function (result) {
+
+                    var dataSource = new kendo.data.DataSource({
+                        data: result
+                    });
+
+                    console.log(result);
+                    console.log(dataSource);
+
+                    // Refresh the history grid
+                    var grid = $("#smshistoryreport-grid").data("kendoGrid");
+
+                    dataSource.read();
+                    grid.setDataSource(dataSource);
+                    grid.refresh();
+
+                    // When datasource is bind this way then it becomes mandatory to refresh footer by doing this.
+                    // Otherwise it won't show current page number initially.
+                    $('.k-link').click();
+                },
+                error: function (error) {
+                    //removeLoading();
+                    //ShowUserMessage(error, true, 4000);
+                }
+            });
+        });
+
+        $("#filter").on("input", function (e) {
+
+            var grid = $("#smshistoryreport-grid").data("kendoGrid");
+            var valuetoFilter = e.target.value;
+
+            var filter = KendogridSearchFilter(grid, valuetoFilter);
+
+            grid.dataSource.filter(filter);
+        });
+    });
+
+</script>
+
+<div class="row padd-top">
+    <div class="col-lg-8 col-md-7 col-sm-6">
+        <h3>
+            SMS Dispatcher
+        </h3>
+    </div>
+    <form>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>Message Detail</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group col-lg-3">
+                            <label class="control-label" for="phoneNumber">Phone Number</label>
+                            <div class="input-group">
+                                <span class="input-group-addon" style="min-width: 0;"><button type="button"><i class="glyphicon glyphicon-phone"></i></button></span>
+                                <input type="tel" class="form-control" placeholder="Phone Number" aria-describedby="phoneNumber" id="phoneNumber" />
+                            </div>
+                            <label class="control-label" for="loginId">Login ID</label>
+                            <div class="input-group">
+                                <span class="input-group-addon" style="min-width: 0;"><button type="button"><i class="glyphicon glyphicon-user"></i></button></span>
+                                <input type="text" class="form-control" placeholder="Login ID" aria-describedby="loginId" id="loginId" />
+                            </div>
+                        </div>
+                        <div class="form-group col-lg-9">
+                            <label class="control-label" for="messageDetail">Message Detail</label>
+                            <div class="input-group">
+                                <span class="input-group-addon" style="min-width: 0;"><button type="button"><i class="glyphicon glyphicon-envelope"></i></button></span>
+                                <textarea rows="8" type="text" class="form-control" placeholder="Enter message detail..." aria-describedby="messageDetail" id="messageDetail"></textarea>
+                            </div>
+                            <br />
+                            <div class="alert alert-dismissible alert-danger">
+                                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                                <strong>Standard Message:</strong>
+                                <ul>
+                                    <li>To send the standard message select the checkbox below:</li>
+                                    <li>Welcome to Pro Estimator. Please use the following link to log into your new account: https://proestimator.web-est.com/login/code/ </li>
+                                    <li>
+                                        <div class="checkbox">
+                                            <input class="btn btn-default" type="checkbox" id="chkStandard" />Use standard message
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-footer">
+                        <a class="btn btn-default pull-right" href="javascript:void(0);" role="button" id="btnSendSMS">Send</a>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>SMS History</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="form-group col-lg-6">
+                                <div class="input-group">
+                                    <input type="text" class="input-group-addon" placeholder="Start Date" aria-describedby="StartDate" id="startDate" readonly="true" />
+                                </div>
+                            </div>
+                            <div class="form-group col-lg-6">
+                                <div class="input-group">
+                                    <input type="text" class="input-group-addon" placeholder="End Date" aria-describedby="EndDate" id="endDate" readonly="true" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-lg-12">
+                                <a class="btn btn-default pull-right" href="javascript:void(0);" role="button" id="btnSearchSmsHistory">Search</a>
+                                <div class="clearfix"></div>
+                                <hr />
+                            </div>
+                        </div>
+                        <div class="panel panel-default">
+                            <div style="text-align: right;margin-top:5px;">
+                                Search: <input type="text" id="filter" />
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div id="smshistoryreport-grid-container" class="datagrid">
+                                        @(Html.Kendo().Grid<SmsHistoryVM>()
+                                            .Name("smshistoryreport-grid")
+                                            .Columns(columns =>
+                                            {
+                                                columns.Bound(item => item.Id).Title("Id");
+                                                columns.Bound(item => item.PhoneNumber).Title("Phone Number");
+                                                columns.Bound(item => item.Message).Title("Message");
+                                                columns.Bound(item => item.SalesRep).Title("Sent From");
+                                                columns.Bound(item => item.DateSent).Title("Date Sent");
+                                                @*columns.Bound(item => item.Description).Title("Description").Hidden();
+                                                columns.Bound(item => item.MainModule).Title("MainModule");
+                                                columns.Bound(item => item.SubModule).Title("SubModule");
+                                                columns.Bound(item => item.CreatedDate).Title("Date Occurred").Hidden();
+                                                columns.Template(@<text></text>).ClientTemplate("  " + "# if (ImagePaths != '') { #" + "<a href='javascript: void(0);' onclick=\"OpenImageViewer('#=ImagePaths#')\" style=\"cursor: pointer;\">View</a>" + "# } #").Title("").Width(25);*@
+                                            })
+                                            .Sortable()
+                                            .Pageable(pageable => pageable
+                                                .Refresh(false)
+                                            )
+                                            .DataSource(dataSource => dataSource
+                                                .Ajax()
+                                                .ServerOperation(false)
+                                                .Read(read => read.Action("GetSmsHistory", "SMSDispatcher"))
+                                                .PageSize(10)
+                                            ))
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+

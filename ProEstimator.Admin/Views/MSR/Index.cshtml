@@ -1,0 +1,360 @@
+﻿@model ProEstimator.Admin.ViewModel.Contracts.WebEstMonthlySalesVM
+
+@using ProEstimator.Admin.ViewModel.Contracts;
+
+@{
+    ViewBag.Title = "Administration - Monthly Sales Dashboard";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<style>
+    #parent {
+        height: 300px;
+    }
+
+    #fixTable {
+        width: 1800px !important;
+    }
+
+    #parentNewSales {
+        height: 340px;
+    }
+
+    #parentRenewalSales {
+        height: 300px;
+    }
+
+    #parentNonRenewalSales {
+        height: 300px;
+    }
+
+    #fixTableNewSales {
+        width: 1300px !important;
+    }
+
+    #fixTableRenewalSales {
+        width: 1300px !important;
+    }
+
+    #fixTableNonRenewalSales {
+        width: 1300px !important;
+    }
+
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .input-group-addon-custom {
+        min-width: 0px;
+        text-align: left;
+    }
+
+    .padd-top {
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+
+    .panel-heading-custom {
+        padding: 1px 15px;
+    }
+
+    .panel-custom {
+        margin-bottom: 0px;
+    }
+
+    .row-custom {
+        background-color: whitesmoke;
+        margin-right: 0px;
+    }
+
+    .panel-body-custom {
+        padding: 5px;
+    }
+
+    .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active, a.ui-button:active, .ui-button:active, .ui-button.ui-state-active:hover {
+        /* border: 1px solid #003eff; */
+        border: 1px solid #0079a1;
+        color: #ffffff;
+        background-color: #008cba;
+    }
+</style>
+
+<script>
+    $(function () {
+        $("#tabs").tabs({
+            collapsible: true
+        });
+    });
+</script>
+
+@using (Html.BeginForm("SearchMonthlySales", "MSR", FormMethod.Post))
+{
+    <div class="row padd-top">
+        <div class="col-lg-8 col-md-7 col-sm-6">
+            <h3>
+                Monthly Sales Dashboard
+            </h3>
+        </div>
+    </div>
+
+    <form>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>Monthly Sales Search</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-6 stackem">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Month Sold</span>
+                                        @Html.DropDownListFor(x => x.SelectedMonth, Model.MonthSoldList, htmlAttributes: new { @class = "form-control", id = "MonthSoldList", name = "MonthSoldList" })
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 stackem">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Year sold</span>
+                                        @Html.DropDownListFor(x => x.SelectedYear, Model.YearSoldList, htmlAttributes: new { @class = "form-control", id = "YearSoldList", name = "YearSoldList" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-footer">
+                        <div class="col-lg-10 pull-left">
+
+                        </div>
+                        <div class="col-lg-2 pull-left">
+                            <button type="submit" name="SearchMonthlySales" value="SearchMonthlySales" class="btn btn-default pull-right" href="javascript:void(0);" role="button">Search</button>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+}
+
+<div id="tabs">
+    <ul>
+        <li><a href="#tabs-1">Monthly Sales - New</a></li>
+        <li><a href="#tabs-2">Monthly Sales - Renewal</a></li>
+    </ul>
+    <div id="tabs-1">
+        @using (Html.BeginForm("SaveNewMonthlySales", "MSR", FormMethod.Post))
+        {
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body panel-body-custom">
+                            <div class="col-lg-2">
+                                <div class="input-group">
+                                    <span class="input-group-addon input-group-addon-custom">Cust Count</span>
+                                    @Html.TextBoxFor(a => Model.CustCount, new { @readonly = "readonly", @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="input-group">
+                                    <span class="input-group-addon input-group-addon-custom">Reg Contracts</span>
+                                    @Html.TextBoxFor(a => Model.RegContracts, new { @readonly = "readonly", @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="input-group">
+                                    <span class="input-group-addon input-group-addon-custom">Comm Pkg</span>
+                                    @Html.TextBoxFor(a => Model.CommPkg, new { @readonly = "readonly", @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="input-group">
+                                    <span class="input-group-addon input-group-addon-custom">Frame</span>
+                                    @Html.TextBoxFor(a => Model.Frame, new { @readonly = "readonly", @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="input-group">
+                                    <span class="input-group-addon input-group-addon-custom">AVG1 YTD(Total Price)</span>
+                                    @Html.TextBoxFor(a => Model.AVG1YTDTotalPrice, new { @readonly = "readonly", @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-body panel-body-custom">
+                            <div class="col-lg-2">
+                                <div class="input-group">
+                                    <span class="input-group-addon input-group-addon-custom">MTH(Cust Count)</span>
+                                    @Html.TextBoxFor(a => Model.MTHCustCount, new { @readonly = "readonly", @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="input-group">
+                                    <span class="input-group-addon input-group-addon-custom">YTD(Cust Count)</span>
+                                    @Html.TextBoxFor(a => Model.YTDCustCount, new { @readonly = "readonly", @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="input-group">
+                                    <span class="input-group-addon input-group-addon-custom">MTH(Total Price)</span>
+                                    @Html.TextBoxFor(a => Model.MTHTotalPrice, new { @readonly = "readonly", @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <div class="input-group">
+                                    <span class="input-group-addon input-group-addon-custom">YTD(Total Price)</span>
+                                    @Html.TextBoxFor(a => Model.YTDTotalPrice, new { @readonly = "readonly", @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="input-group">
+                                    <span class="input-group-addon input-group-addon-custom">AVG2 YTD(Total Price)</span>
+                                    @Html.TextBoxFor(a => Model.AVG2YTDTotalPrice, new { @readonly = "readonly", @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="parentNewSales" style="overflow-x: scroll">
+                <table id="fixTableNewSales" class="table">
+                    <thead>
+                        <tr style="font-size:12px">
+                            <th>Cust #</th>
+                            <th>Price Level</th>
+                            <th>Customer Name</th>
+                            <th>Address</th>
+                            <th>City</th>
+                            <th>State</th>
+                            <th>Zip Code</th>
+                            <th>Phone #</th>
+                            <th>Walk Through</th>
+                            <th>Contract</th>
+                            <th>Comm. Package</th>
+                            <th>Frame</th>
+                            <th>$ Down</th>
+                            <th>Date</th>
+                            <th>Total</th>
+                            <th>Pmt. Amount</th>
+                            @*<th>Pmt. Type</th>*@
+                            @*<th>Notes</th>
+                                <th>Rep</th>
+                                <th>PayCode</th>
+                                <th>Commission</th>*@
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+
+                            if (Model.MonthlySalesNew != null)
+                            {
+                                for (int i = 0; i < Model.MonthlySalesNew.Count(); i++)
+                                {
+                        <tr>
+                            <td>
+                                @Html.TextBoxFor(a => Model.MonthlySalesNew[i].CustNo, new { @readonly = "readonly", Style = "width:50px;height:25px;font-size:12px;border-width: 2px;" })
+                                @Html.HiddenFor(m => Model.MonthlySalesNew[i].WebEstMonthlySalesID)
+                            </td>
+                            <td>@Html.TextBoxFor(a => Model.MonthlySalesNew[i].PriceLevel, new { @readonly = "readonly", Style = "width:40px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                            <td>@Html.TextBoxFor(a => Model.MonthlySalesNew[i].CompanyName, new { @readonly = "readonly", Style = "width:100px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                            <td>@Html.TextBoxFor(a => Model.MonthlySalesNew[i].Address1, new { @readonly = "readonly", Style = "width:125px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                            <td>@Html.TextBoxFor(a => Model.MonthlySalesNew[i].City, new { @readonly = "readonly", Style = "width:50px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                            <td>@Html.TextBoxFor(a => Model.MonthlySalesNew[i].State, new { @readonly = "readonly", Style = "width:50px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                            <td>@Html.TextBoxFor(a => Model.MonthlySalesNew[i].Zip, new { @readonly = "readonly", Style = "width:60px;height:25px;font-size:12px;border-width: 2px;" })</td>
+
+                            <td>@Html.TextBoxFor(a => Model.MonthlySalesNew[i].Phone1, new { @readonly = "readonly", Style = "width:80px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                            <td>@Html.CheckBoxFor(a => Model.MonthlySalesNew[i].walkthough, new { Style = "height: 15px;width: 20px;background-color: #eee;" })</td>
+                            <td>@Html.TextBoxFor(a => Model.MonthlySalesNew[i].Contract, new { @readonly = "readonly", Style = "width:50px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                            <td>@Html.TextBoxFor(a => Model.MonthlySalesNew[i].Comm, new { @readonly = "readonly", Style = "width:50px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                            <td>@Html.TextBoxFor(a => Model.MonthlySalesNew[i].frame, new { @readonly = "readonly", Style = "width:50px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                            <td>@Html.TextBoxFor(a => Model.MonthlySalesNew[i].Down, new { @readonly = "readonly", Style = "width:50px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                            <td>@Html.TextBoxFor(a => Model.MonthlySalesNew[i].DateVal, new { @readonly = "readonly", Style = "width:60px;height:25px;font-size:12px;border-width: 2px;" })</td>
+
+                            <td>@Html.TextBoxFor(a => Model.MonthlySalesNew[i].Total, new { @readonly = "readonly", Style = "width:50px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                            <td>@Html.TextBoxFor(a => Model.MonthlySalesNew[i].PaymentAmount, new { @readonly = "readonly", Style = "width:80px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                        </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+                <br />
+            </div>
+
+            <input type="submit" name="SaveNewMonthlySales" value="Save New Monthly Sale" style="margin-bottom: -25px;color: #ffffff;background-color: #008cba; border: 1px solid #0079a1; padding: 5px;" />
+      }
+    </div>
+    <div id="tabs-2">
+        @using (Html.BeginForm("SaveRenewalMonthlySales", "MSR", FormMethod.Post))
+        {
+            <div id="parentRenewalSales" style="overflow-x: scroll">
+                <table id="fixTableRenewalSales" class="table">
+                    <thead>
+                        <tr style="font-size:12px">
+                            <th>Cust #</th>
+                            <th>Price Level</th>
+                            <th>Customer Name</th>
+                            <th>Address</th>
+                            <th>City</th>
+                            <th>State</th>
+                            <th>Zip Code</th>
+                            <th>Phone #</th>
+                            <th>Walk Through</th>
+                            <th>Contract</th>
+                            <th>Comm. Package</th>
+                            <th>Frame</th>
+                            <th>$ Down</th>
+                            <th>Date</th>
+                            <th>Total</th>
+                            <th>Pmt. Amount</th>
+
+                            @*<th>Pmt. Type</th>*@
+                            @*<th>Notes</th>
+                                <th>Rep</th>
+                                <th>PayCode</th>
+                                <th>Commission</th>*@
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+
+                            if (Model.MonthlySalesRenewal != null)
+                            {
+                                for (int i = 0; i < Model.MonthlySalesRenewal.Count(); i++)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.TextBoxFor(a => Model.MonthlySalesRenewal[i].CustNo, new { @readonly = "readonly", Style = "width:50px;height:25px;font-size:12px;border-width: 2px;" })
+                                            @Html.HiddenFor(m => Model.MonthlySalesRenewal[i].WebEstMonthlySalesID)
+                                        </td>
+                                        <td>@Html.TextBoxFor(a => Model.MonthlySalesRenewal[i].PriceLevel, new { @readonly = "readonly", Style = "width:50px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                                        <td>@Html.TextBoxFor(a => Model.MonthlySalesRenewal[i].CompanyName, new { @readonly = "readonly", Style = "width:125px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                                        <td>@Html.TextBoxFor(a => Model.MonthlySalesRenewal[i].Address1, new { @readonly = "readonly", Style = "width:125px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                                        <td>@Html.TextBoxFor(a => Model.MonthlySalesRenewal[i].City, new { @readonly = "readonly", Style = "width:75px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                                        <td>@Html.TextBoxFor(a => Model.MonthlySalesRenewal[i].State, new { @readonly = "readonly", Style = "width:75px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                                        <td>@Html.TextBoxFor(a => Model.MonthlySalesRenewal[i].Zip, new { @readonly = "readonly", Style = "width:75px;height:25px;font-size:12px;border-width: 2px;" })</td>
+
+                                        <td>@Html.TextBoxFor(a => Model.MonthlySalesRenewal[i].Phone1, new { @readonly = "readonly", Style = "width:100px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                                        <td>@Html.CheckBoxFor(a => Model.MonthlySalesRenewal[i].walkthough, new { Style = "height: 15px;width: 20px;background-color: #eee;" })</td>
+                                        <td>@Html.TextBoxFor(a => Model.MonthlySalesRenewal[i].Contract, new { @readonly = "readonly", Style = "width:50px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                                        <td>@Html.TextBoxFor(a => Model.MonthlySalesRenewal[i].Comm, new { @readonly = "readonly", Style = "width:50px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                                        <td>@Html.TextBoxFor(a => Model.MonthlySalesRenewal[i].frame, new { @readonly = "readonly", Style = "width:50px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                                        <td>@Html.TextBoxFor(a => Model.MonthlySalesRenewal[i].Down, new { @readonly = "readonly", Style = "width:75px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                                        <td>@Html.TextBoxFor(a => Model.MonthlySalesRenewal[i].DateVal, new { @readonly = "readonly", Style = "width:125px;height:25px;font-size:12px;border-width: 2px;" })</td>
+
+                                        <td>@Html.TextBoxFor(a => Model.MonthlySalesRenewal[i].Total, new { @readonly = "readonly", Style = "width:75px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                                        <td>@Html.TextBoxFor(a => Model.MonthlySalesRenewal[i].PaymentAmount, new { @readonly = "readonly", Style = "width:100px;height:25px;font-size:12px;border-width: 2px;" })</td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+                <br />
+                <input type="submit" name="SaveRenewalMonthlySales" value="Save Renewal Monthly Sale" style="margin-bottom: -25px;color: #ffffff;background-color: #008cba; border: 1px solid #0079a1; padding: 5px;" />
+            </div>
+                            }
+    </div>
+</div>

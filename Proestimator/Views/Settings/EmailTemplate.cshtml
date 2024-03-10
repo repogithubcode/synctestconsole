@@ -1,0 +1,260 @@
+﻿@model Proestimator.ViewModel.EmailTemplateVM
+
+@using System.Linq;
+@using Proestimator.Resources;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_LoginInformation;
+}
+
+<head>
+    <title></title>
+
+</head>
+<style>
+    table a {
+        color: black;
+    }
+
+    #buttonsDiv {
+        position: relative;
+        /*left: 55px;*/
+    }
+
+    .hide-small {
+        width: 150px;
+    }
+
+    .inputLabel {
+        display: inline;
+    }
+
+    .hide-a {
+        display: none;
+    }
+
+    @@media screen and (max-width:900px) {
+        #smEstimateNavRow {
+            border: 1px solid #349ad8;
+            background-color: #f5f9fb;
+            max-width: 100%;
+            padding-right: 30px;
+        }
+
+        #estimateNavigation {
+            margin-top: 15px;
+        }
+
+        .hide-small {
+            display: none;
+        }
+    }
+</style>
+
+<div id="workDesk" class="page-container">
+
+    @using (Html.BeginForm("LoginInformation", "Settings", FormMethod.Post, new { @class = "container" }))
+    {
+
+        @Html.Partial("SettingTopMenu")
+
+        @Html.HiddenFor(o => o.LoginID)
+
+        <div class="tabcontent container">
+
+            <div id="lgRow1" class="container" style="margin-top: 20px;">
+                <div class="container">
+                    <div class="half-container">
+                        <div>
+                            <p style="margin: 5px;"><a href="https://www.youtube.com/watch?v=ZFd2PE1l6vU" target="_blank" style="color: black; text-decoration: underline;">Text editor help video</a></p>
+                        </div>
+                        <textarea class="ckeditor" cols="20" id="Template-TextArea" name="Template" rows="2"></textarea>
+                        <div class="field-wrapper" style="margin-top: 10px;">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Name</label>
+                            <div class="field-control">
+                                <input type="text" id="Name" />
+                            </div>
+                        </div>
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Description</label>
+                            <div class="field-control">
+                                <input type="text" id="Description" />
+                            </div>
+                        </div>
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.IsDefault</label>
+                            <div class="field-control">
+                                <input type="checkbox" id="IsDefault" />
+                            </div>
+                        </div>
+                        <div class="container center" id="buttonsDiv" style="padding-bottom: 10px; padding-top: 10px;">
+                            <input type="button" class="button nav-btn do-not-disable" onclick="SaveTemplate()" value="@Proestimator.Resources.ProStrings.Save" />
+                            <input type="button" class="button nav-btn do-not-disable" onclick="NewTemplate()" value="@Proestimator.Resources.ProStrings.New" />
+                        </div>
+                    </div>
+
+                    <div class="half-container" style="padding-left: 20px;">
+
+                        <p>
+                            <label class="inputLabel"><input type="checkbox" id="chkShowDeleted" />@Proestimator.Resources.ProStrings.CustomEmailTemplatesShowDeleted</label>
+                        </p>
+                        <div class="datagrid">
+                            @(Html.Kendo().Grid<Proestimator.ViewModel.EmailTemplateVM>()
+                                .Name("grid")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(item => item.ID).Hidden();
+                                    columns.Bound(item => item.Name).Title(@Proestimator.Resources.ProStrings.Name);
+                                    columns.Bound(item => item.Description).Title(@Proestimator.Resources.ProStrings.Description);
+                                    columns.Bound(item => item.DefaultTemplate).Title(@Proestimator.Resources.ProStrings.IsDefaultAbbrv);
+                                    columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<a class='button' onclick='EditTemplate(#= ID#)'>" + @Proestimator.Resources.ProStrings.Edit + "</a>").Width(50).Title("");
+                                    columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<a id=\"DeleteLink#=ID#\" class='button' onclick=\"DeleteTemplate(#= ID#,#=IsDeleted#)\"># if (!IsDeleted) { #" + @Proestimator.Resources.ProStrings.Delete + "# } #" + "# if (IsDeleted) { #" + @Proestimator.Resources.ProStrings.Restore + "# } # </a>").Width(100).Title("");
+                                })
+                                .Sortable()
+                                .Pageable(pageable => pageable
+                                    .Refresh(false)
+                                    .ButtonCount(8)
+                                )
+                                .Events(events => events
+                                    .DataBound("onChange")
+                                )
+                                .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .ServerOperation(false)
+                                    .Sort(sort => sort.Add("LastView").Descending())
+                                    .Read(read => read.Action("GetTemplates", "Settings").Data("GetListParameters"))
+                                )
+                                )
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    }
+</div>
+<script>
+    var _templateID = 0;
+
+    function GetListParameters() {
+        var result =
+        {
+            loginID: @Model.LoginID,
+            showDeleted: $("#chkShowDeleted").is(":checked")
+        };
+
+        return result
+    }
+
+    function RefreshGrid() {
+        var grid = $("#grid").data("kendoGrid");
+        if (grid) {
+            grid.dataSource.read();
+            grid.refresh();
+            grid.dataSource.page(1);
+        }
+    }
+
+    function onChange(arg) {
+
+    }
+
+    function SaveTemplate()
+    {
+        var template = CKEDITOR.instances['Template-TextArea'].getData();
+        if ($("#Name").val().replace(/^\s+|\s+$/g, "").length == 0 || template.replace(/^\s+|\s+$/g, "").length == 0) {
+            ShowUserMessage('Please enter the template content and a Name for the template', true, 4000);
+            return;
+        }
+
+        applyLoading();
+        $.ajax({
+            url: '@Url.Action("SaveTemplate", "Settings")',
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({
+                "userID": @ViewBag.UserID, "templateID": _templateID, "template": template, "name": $("#Name").val(),
+                "description": $("#Description").val(), "isDefault": $("#IsDefault").is(":checked") }),
+            success: function (result) {
+                removeLoading();
+                if (result)
+                {
+                    ShowUserMessage(result, true, 4000);
+                }
+                else{
+                    ShowUserMessage("@Proestimator.Resources.ProStrings.TemplateDataSaved", false, 3000);
+                    RefreshGrid();
+                    NewTemplate();
+                }
+            }
+        });
+    }
+
+    function NewTemplate() {
+        _templateID = 0;
+        $("#Name").val("");
+        $("#Description").val("");
+        $("#IsDefault").prop('checked', false);
+        CKEDITOR.instances['Template-TextArea'].setData('');
+    }
+
+    function EditTemplate(templateID)
+    {
+        applyLoading();
+        _templateID = templateID;
+
+        $.ajax({
+            url: '@Url.Action("GetTemplate", "Settings")',
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ "userID": @ViewBag.UserID, "templateID": _templateID }),
+            success: function (result) {
+                removeLoading();
+                if (result)
+                {
+                    $("#Name").val(result.Name);
+                    $("#Description").val(result.Description);
+                    $("#IsDefault").prop('checked', result.IsDefault);
+                    CKEDITOR.instances['Template-TextArea'].setData(result.Template);
+                }
+            }
+        });
+    }
+
+    function DeleteTemplate(templateID, restoreDeleteTemplate)
+    {
+        if (restoreDeleteTemplate || confirm("@Proestimator.Resources.ProStrings.CustomEmailTemplateDeleteAlertMessage")) {
+
+            var loadingImage = $.parseHTML("<img src='/Images/animatedCircle.gif' width='15' height='15' id='Loading" + templateID + "' />");
+            $("#DeleteLink" + templateID).replaceWith(loadingImage);
+
+            $.ajax({
+                url: '@Url.Action("DeleteTemplate", "Settings")',
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ "userID": @ViewBag.UserID, "templateID": templateID, "restoreDeleteTemplate": restoreDeleteTemplate }),
+                success: function (result) {
+                    NewTemplate();
+                    RefreshGrid();
+                }
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        CKEDITOR.replace('Template-TextArea', {
+            extraPlugins: 'find,placeholder,base64image,justify,spacingsliders,font',
+            removePlugins: 'image,sourcearea,about'
+        });
+
+        $("#chkShowDeleted").change(function() {
+            RefreshGrid();
+            NewTemplate();
+        });
+
+    });
+
+</script>

@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Quotes.Business" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Quotes.Business" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="https://lkqintegrationcteqc.ekeyconnect.com/Quotes.svc?xsd=xsd4" namespace="http://schemas.datacontract.org/2004/07/LKQQuoteUtility" />
+  <xs:import schemaLocation="https://lkqintegrationcteqc.ekeyconnect.com/Quotes.svc?xsd=xsd5" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+  <xs:import schemaLocation="https://lkqintegrationcteqc.ekeyconnect.com/Quotes.svc?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" />
+  <xs:complexType name="Estimate">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="ClaimNumber" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="CreatedDate" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="EstimateId" nillable="true" type="xs:string" />
+      <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/LKQQuoteUtility" minOccurs="0" name="Estimator" nillable="true" type="q1:Contact" />
+      <xs:element minOccurs="0" name="InspectionType" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/" />
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="InsuranceCompanyParent" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="IsInsuranceQuote" type="xs:boolean" />
+      <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/LKQQuoteUtility" minOccurs="0" name="LineItems" nillable="true" type="q2:ArrayOfLineItem" />
+      <xs:element minOccurs="0" name="PartnerKey" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="PostalCode" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="RepairFacilityId" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="RequestId" nillable="true" type="xs:string" />
+      <xs:element xmlns:q3="http://schemas.datacontract.org/2004/07/LKQQuoteUtility" minOccurs="0" name="Vehicle" nillable="true" type="q3:Vehicle" />
+      <xs:element minOccurs="0" name="WrittenBy" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="Estimate" nillable="true" type="tns:Estimate" />
+  <xs:complexType name="Quote">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="AvailableParts" nillable="true" type="tns:ArrayOfPart" />
+      <xs:element minOccurs="0" name="Estimate" nillable="true" type="tns:Estimate" />
+      <xs:element minOccurs="0" name="InsuranceCompanyWasValidated" nillable="true" type="xs:boolean">
+        <xs:annotation>
+          <xs:appinfo>
+            <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/" />
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="QuoteExpirationDate" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="QuoteId" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Warehouse" nillable="true" type="tns:Location" />
+      <xs:element minOccurs="0" name="Yard" nillable="true" type="tns:Location" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="Quote" nillable="true" type="tns:Quote" />
+  <xs:complexType name="ArrayOfPart">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="Part" nillable="true" type="tns:Part" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfPart" nillable="true" type="tns:ArrayOfPart" />
+  <xs:complexType name="Part">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="AlternatePartNumber" nillable="true" type="xs:string" />
+      <xs:element xmlns:q4="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="Brands" nillable="true" type="q4:ArrayOfstring" />
+      <xs:element minOccurs="0" name="Condition" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="CoreCharge" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Cost" type="xs:decimal" />
+      <xs:element minOccurs="0" name="DRPs" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="DamageCode" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Description" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="EstimateLineId" type="xs:int" />
+      <xs:element minOccurs="0" name="EstimatedDateOfAvailability" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="EstimatedDaysForDelivery" type="xs:int" />
+      <xs:element minOccurs="0" name="Grade" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="HollanderInterchange" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Images" nillable="true" type="tns:ArrayOfPartImage" />
+      <xs:element xmlns:q5="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="IndustryCertifications" nillable="true" type="q5:ArrayOfstring" />
+      <xs:element xmlns:q6="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="InsurancePrograms" nillable="true" type="q6:ArrayOfstring" />
+      <xs:element minOccurs="0" name="KeyList" type="xs:decimal" />
+      <xs:element minOccurs="0" name="KeyPartNumber" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Manufacturer" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Methodology" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="OEPartDescription" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="OEPartNumber" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="PartMileage" type="xs:double" />
+      <xs:element xmlns:q7="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="PartSupplierDesignation" nillable="true" type="q7:ArrayOfstring" />
+      <xs:element minOccurs="0" name="PartType" type="tns:Part.CiecaPartCode" />
+      <xs:element minOccurs="0" name="PartYear" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="PrimaryManufacturer" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/" />
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="Quantity" type="xs:int" />
+      <xs:element minOccurs="0" name="StockNumber" nillable="true" type="xs:string" />
+      <xs:element xmlns:q8="http://schemas.datacontract.org/2004/07/LKQQuoteUtility" minOccurs="0" name="Vehicle" nillable="true" type="q8:Vehicle" />
+      <xs:element minOccurs="0" name="WarrantyInformation" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="WarrantyLength" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="WarrantyType" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="Part" nillable="true" type="tns:Part" />
+  <xs:complexType name="ArrayOfPartImage">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="PartImage" nillable="true" type="tns:PartImage" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfPartImage" nillable="true" type="tns:ArrayOfPartImage" />
+  <xs:complexType name="PartImage">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="ImageUrl" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Size" type="tns:ImageSizes" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="PartImage" nillable="true" type="tns:PartImage" />
+  <xs:simpleType name="ImageSizes">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Thumbnail_90x90" />
+      <xs:enumeration value="Small_200x200" />
+      <xs:enumeration value="Large_400x400" />
+      <xs:enumeration value="Large_640x480" />
+      <xs:enumeration value="Other" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="ImageSizes" nillable="true" type="tns:ImageSizes" />
+  <xs:simpleType name="Part.CiecaPartCode">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="None" />
+      <xs:enumeration value="Aftermarket" />
+      <xs:enumeration value="Remanufactured" />
+      <xs:enumeration value="New" />
+      <xs:enumeration value="Recycle" />
+      <xs:enumeration value="Other" />
+      <xs:enumeration value="New_OEM" />
+      <xs:enumeration value="Core_Only" />
+      <xs:enumeration value="New_OEM_Discounted" />
+      <xs:enumeration value="Reconditioned" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="Part.CiecaPartCode" nillable="true" type="tns:Part.CiecaPartCode" />
+  <xs:complexType name="Location">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Address" nillable="true" type="tns:Address" />
+      <xs:element minOccurs="0" name="DeliveryMethod" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Email" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Fax" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Id" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Phone" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="Location" nillable="true" type="tns:Location" />
+  <xs:complexType name="Address">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Address1" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Address2" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="City" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Country" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="PostalCode" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="State" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="Address" nillable="true" type="tns:Address" />
+  <xs:complexType name="EstimateGeneric">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="ClaimNumber" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="CreatedDate" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="EstimateId" nillable="true" type="xs:string" />
+      <xs:element xmlns:q9="http://schemas.datacontract.org/2004/07/LKQQuoteUtility" minOccurs="0" name="Estimator" nillable="true" type="q9:Contact" />
+      <xs:element minOccurs="0" name="InspectionType" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/" />
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="InsuranceCompanyParent" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="IsInsuranceQuote" type="xs:boolean" />
+      <xs:element minOccurs="0" name="PartnerKey" nillable="true" type="xs:string" />
+      <xs:element xmlns:q10="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="PointsOfImpact" nillable="true" type="q10:ArrayOfstring" />
+      <xs:element minOccurs="0" name="PostalCode" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="RepairFacilityId" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="RequestId" nillable="true" type="xs:string" />
+      <xs:element xmlns:q11="http://schemas.datacontract.org/2004/07/LKQQuoteUtility" minOccurs="0" name="Vehicle" nillable="true" type="q11:Vehicle" />
+      <xs:element minOccurs="0" name="WrittenBy" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="EstimateGeneric" nillable="true" type="tns:EstimateGeneric" />
+  <xs:complexType name="QuoteByVin">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="AvailableParts" nillable="true" type="tns:ArrayOfPart" />
+      <xs:element minOccurs="0" name="Estimate" nillable="true" type="tns:EstimateGeneric" />
+      <xs:element minOccurs="0" name="InsuranceCompanyWasValidated" nillable="true" type="xs:boolean">
+        <xs:annotation>
+          <xs:appinfo>
+            <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/" />
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="QuoteExpirationDate" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="QuoteId" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Warehouse" nillable="true" type="tns:Location" />
+      <xs:element minOccurs="0" name="Yard" nillable="true" type="tns:Location" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="QuoteByVin" nillable="true" type="tns:QuoteByVin" />
+  <xs:complexType name="PurchaseOrderRequest">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="ClaimNumber" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="EstimateId" nillable="true" type="xs:string" />
+      <xs:element xmlns:q12="http://schemas.datacontract.org/2004/07/LKQQuoteUtility" minOccurs="0" name="Estimator" nillable="true" type="q12:Contact" />
+      <xs:element minOccurs="0" name="InsuranceCompanyParent" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="PartnerKey" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Parts" nillable="true" type="tns:ArrayOfPurchaseOrderPart" />
+      <xs:element minOccurs="0" name="PurchaseDetails" nillable="true" type="tns:PurchaseDetails" />
+      <xs:element minOccurs="0" name="RepairFacilityId" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="RepairOrderNumber" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="RequestId" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="RequestedDeliveryDate" nillable="true" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="RetryCount" type="xs:int" />
+      <xs:element minOccurs="0" name="ShipTo" nillable="true" type="tns:Address" />
+      <xs:element xmlns:q13="http://schemas.datacontract.org/2004/07/LKQQuoteUtility" minOccurs="0" name="Vehicle" nillable="true" type="q13:Vehicle" />
+      <xs:element minOccurs="0" name="WrittenBy" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="PurchaseOrderRequest" nillable="true" type="tns:PurchaseOrderRequest" />
+  <xs:complexType name="ArrayOfPurchaseOrderPart">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="PurchaseOrderPart" nillable="true" type="tns:PurchaseOrderPart" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfPurchaseOrderPart" nillable="true" type="tns:ArrayOfPurchaseOrderPart" />
+  <xs:complexType name="PurchaseOrderPart">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="AlternatePartNumber" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Description" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="EstimateLineId" type="xs:int" />
+      <xs:element minOccurs="0" name="EstimateList" type="xs:decimal" />
+      <xs:element minOccurs="0" name="KeyPartNumber" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="OEPartDescription" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="OEPartNumber" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="PartType" type="tns:Part.CiecaPartCode" />
+      <xs:element minOccurs="0" name="Quantity" type="xs:int" />
+      <xs:element minOccurs="0" name="QuoteId" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="QuoteListPrice" type="xs:double" />
+      <xs:element minOccurs="0" name="QuoteNetPrice" type="xs:double" />
+      <xs:element minOccurs="0" name="UnitOfMeasure" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/" />
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="Warranty" nillable="true" type="xs:string">
+        <xs:annotation>
+          <xs:appinfo>
+            <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/" />
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="WarrantyPrice" type="xs:decimal">
+        <xs:annotation>
+          <xs:appinfo>
+            <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/" />
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="PurchaseOrderPart" nillable="true" type="tns:PurchaseOrderPart" />
+  <xs:complexType name="PurchaseDetails">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="AftermarketNotes" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="AftermarketPurchaseOrderNumber" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="RequestedDeliveryDate" nillable="true" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="SalvageNotes" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="SalvagePurchaseOrderNumber" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="SpecialInstructions" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="PurchaseDetails" nillable="true" type="tns:PurchaseDetails" />
+  <xs:complexType name="PurchaseOrderResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="InsuranceCompanyWasValidated" nillable="true" type="xs:boolean">
+        <xs:annotation>
+          <xs:appinfo>
+            <DefaultValue EmitDefaultValue="false" xmlns="http://schemas.microsoft.com/2003/10/Serialization/" />
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="PurchaseOrderDetails" nillable="true" type="tns:ArrayOfPurchaseOrderDetail" />
+      <xs:element minOccurs="0" name="PurchaseOrderRequest" nillable="true" type="tns:PurchaseOrderRequest" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="PurchaseOrderResponse" nillable="true" type="tns:PurchaseOrderResponse" />
+  <xs:complexType name="ArrayOfPurchaseOrderDetail">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="PurchaseOrderDetail" nillable="true" type="tns:PurchaseOrderDetail" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfPurchaseOrderDetail" nillable="true" type="tns:ArrayOfPurchaseOrderDetail" />
+  <xs:complexType name="PurchaseOrderDetail">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="OrderedParts" nillable="true" type="tns:ArrayOfOrderedPart" />
+      <xs:element minOccurs="0" name="PurchaseOrderNumber" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="SalesOrderNumber" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="ShippingLocation" nillable="true" type="tns:Location" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="PurchaseOrderDetail" nillable="true" type="tns:PurchaseOrderDetail" />
+  <xs:complexType name="ArrayOfOrderedPart">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="OrderedPart" nillable="true" type="tns:OrderedPart" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfOrderedPart" nillable="true" type="tns:ArrayOfOrderedPart" />
+  <xs:complexType name="OrderedPart">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="AlternatePartNumber" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="BackOrderedQuantity" type="xs:int" />
+      <xs:element minOccurs="0" name="Cost" type="xs:decimal" />
+      <xs:element minOccurs="0" name="DeliverySchedule" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Description" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="EstimateLineId" type="xs:int" />
+      <xs:element minOccurs="0" name="EstimateList" type="xs:decimal" />
+      <xs:element minOccurs="0" name="EstimatedDateOfDelivery" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="HollanderInterchange" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="KeyList" type="xs:decimal" />
+      <xs:element minOccurs="0" name="KeyPartNumber" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="OEPartDescription" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="OEPartNumber" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="OrderedQuantity" type="xs:int" />
+      <xs:element minOccurs="0" name="PartType" type="tns:Part.CiecaPartCode" />
+      <xs:element minOccurs="0" name="QuoteId" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="OrderedPart" nillable="true" type="tns:OrderedPart" />
+  <xs:complexType name="RegisterRepairFacilityRequest">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="CompanyCode" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="CustomerNumber" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="RepairFacilityId" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="SampleInvoiceNumber" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="SampleInvoiceTotalAmount" type="xs:decimal" />
+      <xs:element minOccurs="0" name="ShipToCode" nillable="true" type="xs:string" />
+      <xs:element xmlns:q14="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" minOccurs="0" name="UserRequestInfo" nillable="true" type="q14:UserInformation" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="RegisterRepairFacilityRequest" nillable="true" type="tns:RegisterRepairFacilityRequest" />
+  <xs:complexType name="RepairFacilityRegistration">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Customer" nillable="true" type="tns:Customer" />
+      <xs:element minOccurs="0" name="Location" nillable="true" type="tns:Location" />
+      <xs:element minOccurs="0" name="RepairFacilityId" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="RepairFacilityRegistration" nillable="true" type="tns:RepairFacilityRegistration" />
+  <xs:complexType name="Customer">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Address1" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Address2" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="City" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Country" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="CustomerName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="PostalCode" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="StateProvince" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="Customer" nillable="true" type="tns:Customer" />
+  <xs:complexType name="UnRegisterRepairFacilityRequest">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="RepairFacilityId" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="User" nillable="true" type="xs:string" />
+      <xs:element xmlns:q15="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" minOccurs="0" name="UserRequestInfo" nillable="true" type="q15:UserInformation" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="UnRegisterRepairFacilityRequest" nillable="true" type="tns:UnRegisterRepairFacilityRequest" />
+  <xs:complexType name="LineItemPreferenceRequest">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="LineItemPreferences" nillable="true" type="tns:ArrayOfLineItemPreference" />
+      <xs:element minOccurs="0" name="QuoteId" type="xs:int" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="LineItemPreferenceRequest" nillable="true" type="tns:LineItemPreferenceRequest" />
+  <xs:complexType name="ArrayOfLineItemPreference">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="LineItemPreference" nillable="true" type="tns:LineItemPreference" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfLineItemPreference" nillable="true" type="tns:ArrayOfLineItemPreference" />
+  <xs:complexType name="LineItemPreference">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="EstimateLineId" type="xs:int" />
+      <xs:element minOccurs="0" name="KeyPartNumber" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="LineItemPreference" nillable="true" type="tns:LineItemPreference" />
+</xs:schema>

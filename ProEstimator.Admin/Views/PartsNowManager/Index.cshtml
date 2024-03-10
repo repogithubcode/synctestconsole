@@ -1,0 +1,205 @@
+﻿@using ProEstimator.Admin.ViewModel;
+
+@{
+    ViewBag.Title = "Administration - PartsNow Manager";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<style>
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .input-group-addon-custom {
+        min-width: 0px;
+        text-align: left;
+    }
+
+    .padd-top {
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+
+    .panel-heading-custom {
+        padding: 1px 15px;
+    }
+
+    .panel-custom {
+        margin-bottom: 0px;
+    }
+
+    .row-custom {
+        background-color: whitesmoke;
+        margin-right: 0px;
+    }
+
+    .panel-body-custom {
+        padding: 5px;
+    }
+</style>
+
+<script>
+    $(function () {
+        $("#tabs").tabs({
+            collapsible: false
+            //collapsible: true
+        });
+    });
+
+    function GetSearchParameters() {
+        return {
+            startDateFilter: $("#startDate").val(), endDateFilter: $("#endDate").val()
+        };
+    }
+
+    $(document).ready(function () {
+
+        // Set up calendar controls
+        $("#startDate").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        // Set up calendar controls
+        $("#endDate").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        $("#filter").on("input", function (e) {
+
+            var grid = $("#active-parts-now-grid").data("kendoGrid");
+            var valuetoFilter = e.target.value;
+
+            var filter = KendogridSearchFilter(grid, valuetoFilter);
+
+            grid.dataSource.filter(filter);
+        });
+
+        var currentDate = new Date();
+        var dateChange = new Date();
+        dateChange.setDate(currentDate.getDate() - 7)
+
+        // startDate
+        var startDate = GetDayMonthYear(dateChange);
+        $("#startDate").val(startDate);
+
+        // endDate
+        dateChange = new Date();
+        var endDate = GetDayMonthYear(dateChange);
+        $("#endDate").val(endDate);
+
+        function GetDayMonthYear(dateChange) {
+            var d = dateChange.getDate();
+            var day = (d < 10) ? '0' + d : d;
+            var m = dateChange.getMonth() + 1;
+            var month = (m < 10) ? '0' + m : m;
+            var yy = dateChange.getYear();
+            var year = (yy < 1000) ? yy + 1900 : yy;
+
+            var dateRange = month + "/" + day + "/" + year;
+
+            return dateRange;
+        }
+
+        $("#btnExcelExport").click(function () {
+
+            var win = window.open("/PartsNowManager/DownloadActivePartsNowShopsData", "_blank");
+
+            if (win) {
+                //Browser has allowed it to be opened
+                win.focus();
+            } else {
+                //Browser has blocked it
+                alert("Your browser blocked the site from opening a new tab, please allow popups for this site.");
+            }
+        });
+    });
+
+    function MakePartsActive(checkbox, Id) {
+        $.getJSON("/PartsNowManager/SavePartsNow", { active: checkbox.checked, Id: Id }, function (data) {
+            if (data) {
+                if (checkbox.checked)
+                    alert('Parts Now enabled for Shop Id ' + Id);
+                else
+                    alert('Parts Now disabled for Shop Id ' + Id);
+            }
+            else {
+                alert("parts now can't set active for Id : " + Id);
+            }
+        });
+    }
+
+</script>
+
+<div class="row padd-top">
+    <div class="col-lg-8 col-md-7 col-sm-6">
+        <h3>
+            PartsNow Manager
+        </h3>
+    </div>
+</div>
+
+<div id="tabs">
+    <ul>
+        <li><a href="#activePartsNowShops">Active Parts Now Shops</a></li>
+    </ul>
+
+    <div class="panel panel-default" id="activePartsNowShops">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="bs-component">
+                    <div class="alert alert-dismissible alert-warning">
+                        <button type="button" class="close" data-dismiss="alert">×</button>
+                        <h4 class="alert-heading">Enable / Disable Parts now functionality for shops identified below</h4>
+                        <p class="mb-0">In the table displayed below the checkbox item identifies a parts now enabled business in Pro Estimator. To enable parts now for a shop please set the checkbox value to true (checked). To disable parts now for a shop please set the checkbox value to false (unchecked).</a>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8 col-md-7 col-sm-6" style="margin-top:5px">
+            <div class="dt-buttons ui basic buttons"><button id="btnExcelExport" name="btnExcelExport" class="ui button buttons-excel buttons-html5" tabindex="0" aria-controls="cc-wei-table"><span class="ui-button-text">Excel</span></button></div>
+        </div>
+        <div style="text-align: right;margin-top:5px;">
+            Search: <input type="text" id="filter" />
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div id="active-parts-now-grid-container" class="datagrid">
+                    @(Html.Kendo().Grid<PartsNowCustomerVM>()
+                                .Name("active-parts-now-grid")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(item => item.Id).Title("Id").Hidden();
+                                    columns.Bound(item => item.companyname).Title("Company Name");
+                                    columns.Bound(item => item.address1).Title("Address 1");
+                                    columns.Bound(item => item.address2).Title("Address 2");
+                                    columns.Bound(item => item.city).Title("City");
+                                    columns.Bound(item => item.state).Title("State");
+                                    columns.Bound(item => item.zip).Title("Zip");
+                                    columns.Bound(item => item.phone1).Title("Phone");
+                                    columns.Bound(item => item.firstname).Title("First Name");
+                                    columns.Bound(item => item.lastname).Title("Last Name");
+                                    columns.Bound(item => item.Active).Template(@<text></text>).ClientTemplate("<input type='checkbox' onchange=\"MakePartsActive(this, #= Id#);\" # if (Active) { #" + "checked" + "# } # />").Width(10).HeaderTemplate("Active");
+                                })
+                                .Sortable()
+                                .Pageable(pageable => pageable
+                                    .Refresh(false)
+                                )
+                                .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .ServerOperation(false)
+                                    .Read(read => read.Action("GetPartsNow", "PartsNowManager"))
+                                    .PageSize(25)
+                   ))
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,4663 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AddImagesPageButton" xml:space="preserve">
+    <value>Add Images &gt;&gt;</value>
+  </data>
+  <data name="AddPartsBackButton" xml:space="preserve">
+    <value>&lt;&lt; Add Parts</value>
+  </data>
+  <data name="AddPartsGraphPageButton" xml:space="preserve">
+    <value>Add Parts Graphical&gt;</value>
+  </data>
+  <data name="AddPartsGraphSmButton" xml:space="preserve">
+    <value>Graphical&gt;</value>
+  </data>
+  <data name="AddPartsManPageButton" xml:space="preserve">
+    <value>Add Parts Manual&gt;</value>
+  </data>
+  <data name="AddPartsManSmButton" xml:space="preserve">
+    <value>Manual&gt;</value>
+  </data>
+  <data name="AddresInsHeader" xml:space="preserve">
+    <value>Address</value>
+  </data>
+  <data name="Address1" xml:space="preserve">
+    <value>Address 1</value>
+  </data>
+  <data name="Address2" xml:space="preserve">
+    <value>Address 2</value>
+  </data>
+  <data name="AddressHeader" xml:space="preserve">
+    <value>Address</value>
+  </data>
+  <data name="AdjusterEmail" xml:space="preserve">
+    <value>Adjuster Email</value>
+  </data>
+  <data name="AdjusterFax" xml:space="preserve">
+    <value>Adjuster Fax</value>
+  </data>
+  <data name="AdjusterFirstName" xml:space="preserve">
+    <value>Adjuster First Name</value>
+  </data>
+  <data name="AdjusterLastName" xml:space="preserve">
+    <value>Adjuster Last Name</value>
+  </data>
+  <data name="AdjusterPhone" xml:space="preserve">
+    <value>Adjuster Phone</value>
+  </data>
+  <data name="AgentEmail" xml:space="preserve">
+    <value>Agent Email</value>
+  </data>
+  <data name="AgentFax" xml:space="preserve">
+    <value>Agent Fax</value>
+  </data>
+  <data name="AgentFirstName" xml:space="preserve">
+    <value>Agent First Name</value>
+  </data>
+  <data name="AgentLastName" xml:space="preserve">
+    <value>Agent Last Name</value>
+  </data>
+  <data name="AgentPhone" xml:space="preserve">
+    <value>Agent Phone</value>
+  </data>
+  <data name="BodyType" xml:space="preserve">
+    <value>Body Type</value>
+  </data>
+  <data name="BusinessName" xml:space="preserve">
+    <value>Business Name</value>
+  </data>
+  <data name="CheckVinButton" xml:space="preserve">
+    <value>Check Vin</value>
+  </data>
+  <data name="City" xml:space="preserve">
+    <value>City</value>
+  </data>
+  <data name="ClaimantFirstName" xml:space="preserve">
+    <value>Claimant First Name</value>
+  </data>
+  <data name="ClaimantHeader" xml:space="preserve">
+    <value>Claimant</value>
+  </data>
+  <data name="ClaimantLastName" xml:space="preserve">
+    <value>Claimant Last Name</value>
+  </data>
+  <data name="ClaimantMiddleName" xml:space="preserve">
+    <value>Claimant Middle Name</value>
+  </data>
+  <data name="ClaimRepEmail" xml:space="preserve">
+    <value>Claim Rep Email</value>
+  </data>
+  <data name="ClaimRepFax" xml:space="preserve">
+    <value>Claim Rep Fax</value>
+  </data>
+  <data name="ClaimRepFirstName" xml:space="preserve">
+    <value>Claim Rep First Name</value>
+  </data>
+  <data name="ClaimRepLastName" xml:space="preserve">
+    <value>Claim Rep Last Name</value>
+  </data>
+  <data name="ClaimRepPhone" xml:space="preserve">
+    <value>Claim Rep Phone</value>
+  </data>
+  <data name="ConactWorkNumber" xml:space="preserve">
+    <value>Contact Work Number</value>
+  </data>
+  <data name="ContactEmail" xml:space="preserve">
+    <value>Contact Email</value>
+  </data>
+  <data name="ContactHeader" xml:space="preserve">
+    <value>Contact</value>
+  </data>
+  <data name="ContactHomeNumber" xml:space="preserve">
+    <value>Contact Home Number</value>
+  </data>
+  <data name="ContactInsHeader" xml:space="preserve">
+    <value>Contact</value>
+  </data>
+  <data name="ContactMobile" xml:space="preserve">
+    <value>Contact Mobile Number</value>
+  </data>
+  <data name="ContactPreference" xml:space="preserve">
+    <value>Contact Preference</value>
+  </data>
+  <data name="CoverageType" xml:space="preserve">
+    <value>Coverage Type</value>
+  </data>
+  <data name="CustomerFormLabel" xml:space="preserve">
+    <value>Add necessary customer information.</value>
+  </data>
+  <data name="CustomerHeader" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="CustomerInformationHeader" xml:space="preserve">
+    <value>Customer Information</value>
+  </data>
+  <data name="CustomerNotes" xml:space="preserve">
+    <value>Customer Notes</value>
+  </data>
+  <data name="CustomerPageBack" xml:space="preserve">
+    <value>&lt;&lt; Customer</value>
+  </data>
+  <data name="DecodeButton" xml:space="preserve">
+    <value>Decode</value>
+  </data>
+  <data name="Deductible" xml:space="preserve">
+    <value>Deductible</value>
+  </data>
+  <data name="DriveType" xml:space="preserve">
+    <value>Drive Type</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Engine" xml:space="preserve">
+    <value>Engine</value>
+  </data>
+  <data name="EstimatedValue" xml:space="preserve">
+    <value>Estimated Value</value>
+  </data>
+  <data name="EstimateListPageButton" xml:space="preserve">
+    <value>&lt;&lt; Estimate List</value>
+  </data>
+  <data name="EstimateNotes" xml:space="preserve">
+    <value>Add notes about this estimate.</value>
+  </data>
+  <data name="EstimateNotesLabel" xml:space="preserve">
+    <value>Repair Notes</value>
+  </data>
+  <data name="ExistingCustomer" xml:space="preserve">
+    <value>Existing Customer</value>
+  </data>
+  <data name="ExteriorColor" xml:space="preserve">
+    <value>Color exterior</value>
+  </data>
+  <data name="FirstName" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="FirstNameRequired" xml:space="preserve">
+    <value>First name is required</value>
+  </data>
+  <data name="FrameButton" xml:space="preserve">
+    <value>Click Here for Frame Dimensions</value>
+  </data>
+  <data name="HomePhone" xml:space="preserve">
+    <value>Home Phone</value>
+  </data>
+  <data name="HomePreference" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="InsuranceCompanyName" xml:space="preserve">
+    <value>Insurance Company Name</value>
+  </data>
+  <data name="InsuranceFormLabel" xml:space="preserve">
+    <value>Add customer insurance information. Not Required.</value>
+  </data>
+  <data name="InsuranceInfoHeader" xml:space="preserve">
+    <value>Insurance Information</value>
+  </data>
+  <data name="InsurancePageHeader" xml:space="preserve">
+    <value>Customer Insurance Information</value>
+  </data>
+  <data name="InsuredHeader" xml:space="preserve">
+    <value>Insured</value>
+  </data>
+  <data name="InteriorColor" xml:space="preserve">
+    <value>Color Interior</value>
+  </data>
+  <data name="KBBButton" xml:space="preserve">
+    <value>KBB Value</value>
+  </data>
+  <data name="LastName" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="LicenseNo" xml:space="preserve">
+    <value>License Plate</value>
+  </data>
+  <data name="LicenseState" xml:space="preserve">
+    <value>License State</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Logout</value>
+  </data>
+  <data name="Make" xml:space="preserve">
+    <value>Make</value>
+  </data>
+  <data name="Menu" xml:space="preserve">
+    <value>Menu</value>
+  </data>
+  <data name="MiddleName" xml:space="preserve">
+    <value>Middle Name</value>
+  </data>
+  <data name="MileageIn" xml:space="preserve">
+    <value>Mileage In</value>
+  </data>
+  <data name="MileageOut" xml:space="preserve">
+    <value>Mileage Out</value>
+  </data>
+  <data name="MobilePhone" xml:space="preserve">
+    <value>Mobile Phone</value>
+  </data>
+  <data name="MobilePreference" xml:space="preserve">
+    <value>Mobile</value>
+  </data>
+  <data name="Model" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="NextButton" xml:space="preserve">
+    <value>Next &gt;&gt;</value>
+  </data>
+  <data name="NotesHeader" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="NotRequiredNote" xml:space="preserve">
+    <value>*Not Required*</value>
+  </data>
+  <data name="Or" xml:space="preserve">
+    <value>~OR~</value>
+  </data>
+  <data name="PaintCode" xml:space="preserve">
+    <value>Paint Code</value>
+  </data>
+  <data name="PaintType" xml:space="preserve">
+    <value>Paint Type</value>
+  </data>
+  <data name="PointOfImpact" xml:space="preserve">
+    <value>Point of Impact</value>
+  </data>
+  <data name="PreviousButton" xml:space="preserve">
+    <value>&lt;&lt; Previous</value>
+  </data>
+  <data name="RememberNewCustomer" xml:space="preserve">
+    <value>Remember New Customer</value>
+  </data>
+  <data name="SameAsOwner" xml:space="preserve">
+    <value>Same As Owner</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="ScanNote" xml:space="preserve">
+    <value>Use your mobile or tablet device to scan VIN.</value>
+  </data>
+  <data name="State" xml:space="preserve">
+    <value>State</value>
+  </data>
+  <data name="TimeZone" xml:space="preserve">
+    <value>Time Zone</value>
+  </data>
+  <data name="Transmission" xml:space="preserve">
+    <value>Transmission</value>
+  </data>
+  <data name="Trim" xml:space="preserve">
+    <value>Trim</value>
+  </data>
+  <data name="VehicleDetailsHeader" xml:space="preserve">
+    <value>Vehicle Details</value>
+  </data>
+  <data name="VehicleFormLabel" xml:space="preserve">
+    <value>Enter VIN or Year, Make, Model.</value>
+  </data>
+  <data name="VehicleInfoHeader" xml:space="preserve">
+    <value>Vehicle Information</value>
+  </data>
+  <data name="VehiclePageButton" xml:space="preserve">
+    <value>Vehicle &gt;&gt;</value>
+  </data>
+  <data name="VehicleTypesHeader" xml:space="preserve">
+    <value>Vehicle Types</value>
+  </data>
+  <data name="VINHeader" xml:space="preserve">
+    <value>Vehicle Id Number</value>
+  </data>
+  <data name="VinLabel" xml:space="preserve">
+    <value>Enter Vin</value>
+  </data>
+  <data name="WorkPhone" xml:space="preserve">
+    <value>Work Phone</value>
+  </data>
+  <data name="WorkPreference" xml:space="preserve">
+    <value>Work</value>
+  </data>
+  <data name="Year" xml:space="preserve">
+    <value>Year</value>
+  </data>
+  <data name="YearMakeModelHeader" xml:space="preserve">
+    <value>Year, Make, Model</value>
+  </data>
+  <data name="Zip" xml:space="preserve">
+    <value>Zip</value>
+  </data>
+  <data name="ActivityDate" xml:space="preserve">
+    <value>Activity Date</value>
+  </data>
+  <data name="AddButton" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="AddDescription" xml:space="preserve">
+    <value>Add Description</value>
+  </data>
+  <data name="AddImagesHeader" xml:space="preserve">
+    <value>Add Images</value>
+  </data>
+  <data name="Adjuster" xml:space="preserve">
+    <value>Adjuster</value>
+  </data>
+  <data name="ChooseFile" xml:space="preserve">
+    <value>Choose File</value>
+  </data>
+  <data name="ClaimantAddress1" xml:space="preserve">
+    <value>Claimant Address 1</value>
+  </data>
+  <data name="ClaimantAddress2" xml:space="preserve">
+    <value>Claimant Address 2</value>
+  </data>
+  <data name="ClaimantBusinessName" xml:space="preserve">
+    <value>Claimant Business Name</value>
+  </data>
+  <data name="ClaimantCity" xml:space="preserve">
+    <value>Claimant City</value>
+  </data>
+  <data name="ClaimantEmail" xml:space="preserve">
+    <value>Claimant Email</value>
+  </data>
+  <data name="ClaimantHome" xml:space="preserve">
+    <value>Claimant Home Phone</value>
+  </data>
+  <data name="ClaimantMobile" xml:space="preserve">
+    <value>Claimant Mobile</value>
+  </data>
+  <data name="ClaimantState" xml:space="preserve">
+    <value>Claimant State</value>
+  </data>
+  <data name="ClaimantWork" xml:space="preserve">
+    <value>Claimant Work Phone</value>
+  </data>
+  <data name="ClaimNumber" xml:space="preserve">
+    <value>Claim Number</value>
+  </data>
+  <data name="ClaimRepresentative" xml:space="preserve">
+    <value>Claim Representative</value>
+  </data>
+  <data name="CreateDate" xml:space="preserve">
+    <value>Date Created</value>
+  </data>
+  <data name="DateOfLoss" xml:space="preserve">
+    <value>Date of Loss</value>
+  </data>
+  <data name="DeleteButton" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="DetailsBackButton" xml:space="preserve">
+    <value>&lt;&lt; Details</value>
+  </data>
+  <data name="DetailsPageButton" xml:space="preserve">
+    <value>Details &gt;&gt;</value>
+  </data>
+  <data name="EstimateDescription" xml:space="preserve">
+    <value>Estimate Description</value>
+  </data>
+  <data name="EstimateDetailsHeader" xml:space="preserve">
+    <value>Details / Supplements</value>
+  </data>
+  <data name="EstimateInfoHeader" xml:space="preserve">
+    <value>Estimate Info</value>
+  </data>
+  <data name="EstimateLocation" xml:space="preserve">
+    <value>Estimate Location</value>
+  </data>
+  <data name="EstimateReportNote" xml:space="preserve">
+    <value>Create a new report or select one previously created.</value>
+  </data>
+  <data name="Estimator" xml:space="preserve">
+    <value>Estimator</value>
+  </data>
+  <data name="ExcelPrintButton" xml:space="preserve">
+    <value>Print as Excel</value>
+  </data>
+  <data name="HideRatesBox" xml:space="preserve">
+    <value>Hide Hourly Rates From Report</value>
+  </data>
+  <data name="ImageNotes" xml:space="preserve">
+    <value>*Image Format: .gif, .jpg, .jpeg, .png, .bmp</value>
+  </data>
+  <data name="ImagesBackButton" xml:space="preserve">
+    <value>&lt;&lt; Images</value>
+  </data>
+  <data name="InsuranceAgent" xml:space="preserve">
+    <value>Insurance Agent</value>
+  </data>
+  <data name="InsuranceBackButton" xml:space="preserve">
+    <value>&lt;&lt; Insurance</value>
+  </data>
+  <data name="Insured" xml:space="preserve">
+    <value>Insured</value>
+  </data>
+  <data name="InsuredAddress1" xml:space="preserve">
+    <value>Insured Address 1</value>
+  </data>
+  <data name="InsuredAddress2" xml:space="preserve">
+    <value>Insured Address 2</value>
+  </data>
+  <data name="InsuredBusinessName" xml:space="preserve">
+    <value>Insured Business Name</value>
+  </data>
+  <data name="InsuredCity" xml:space="preserve">
+    <value>Insured City</value>
+  </data>
+  <data name="InsuredEmail" xml:space="preserve">
+    <value>Insured Email</value>
+  </data>
+  <data name="InsuredFirstName" xml:space="preserve">
+    <value>Insured First Name</value>
+  </data>
+  <data name="InsuredHome" xml:space="preserve">
+    <value>Insured Home Phone</value>
+  </data>
+  <data name="InsuredLastName" xml:space="preserve">
+    <value>Insured Last Name</value>
+  </data>
+  <data name="InsuredMiddleName" xml:space="preserve">
+    <value>Insured Middle Name</value>
+  </data>
+  <data name="InsuredMobile" xml:space="preserve">
+    <value>Insured Mobile Phone</value>
+  </data>
+  <data name="InsuredState" xml:space="preserve">
+    <value>Insured State</value>
+  </data>
+  <data name="InsuredWork" xml:space="preserve">
+    <value>Insured Work Phone</value>
+  </data>
+  <data name="InsuredZip" xml:space="preserve">
+    <value>Insured Zip</value>
+  </data>
+  <data name="JobHistoryTableHeader" xml:space="preserve">
+    <value>Job History</value>
+  </data>
+  <data name="JobStatusHeader" xml:space="preserve">
+    <value>Job Status</value>
+  </data>
+  <data name="NoFile" xml:space="preserve">
+    <value>No File Selected</value>
+  </data>
+  <data name="NotesCheckBox" xml:space="preserve">
+    <value>Include Notes in Estimate Report</value>
+  </data>
+  <data name="Owner" xml:space="preserve">
+    <value>Owner</value>
+  </data>
+  <data name="PDFPrintButton" xml:space="preserve">
+    <value>Print as PDF</value>
+  </data>
+  <data name="PolicyNumber" xml:space="preserve">
+    <value>Policy Number</value>
+  </data>
+  <data name="PrintEstimateCheckBox" xml:space="preserve">
+    <value>Do not show this page in the future.</value>
+  </data>
+  <data name="PrintEstimateHeader" xml:space="preserve">
+    <value>Print Estimate</value>
+  </data>
+  <data name="PrintOptions" xml:space="preserve">
+    <value>Print Options</value>
+  </data>
+  <data name="PrintOptionsNote" xml:space="preserve">
+    <value>Select Items to Print on the Estimate Report</value>
+  </data>
+  <data name="PrintPageButton" xml:space="preserve">
+    <value>Print &gt;&gt;</value>
+  </data>
+  <data name="RateProfile" xml:space="preserve">
+    <value>Rate Profile</value>
+  </data>
+  <data name="ReportDescription" xml:space="preserve">
+    <value>Enter a report description.</value>
+  </data>
+  <data name="ReportHistoryTable" xml:space="preserve">
+    <value>Report History</value>
+  </data>
+  <data name="ReportType" xml:space="preserve">
+    <value>Select Report Type</value>
+  </data>
+  <data name="SavedImagesHeader" xml:space="preserve">
+    <value>Saved Images</value>
+  </data>
+  <data name="SelectEstimator" xml:space="preserve">
+    <value>Select Estimator</value>
+  </data>
+  <data name="SelectReportHeader" xml:space="preserve">
+    <value>Select Report Header</value>
+  </data>
+  <data name="SendEstimatePageButton" xml:space="preserve">
+    <value>Send Estimate &gt;&gt;</value>
+  </data>
+  <data name="SendEstimateSmall" xml:space="preserve">
+    <value>Send &gt;&gt;</value>
+  </data>
+  <data name="States" xml:space="preserve">
+    <value>State</value>
+  </data>
+  <data name="StatusLevel" xml:space="preserve">
+    <value>Status Level</value>
+  </data>
+  <data name="StatusSaveButton" xml:space="preserve">
+    <value>Click to Save New Status</value>
+  </data>
+  <data name="UploadButton" xml:space="preserve">
+    <value>Upload</value>
+  </data>
+  <data name="AddChargeHeader" xml:space="preserve">
+    <value>Add Charge</value>
+  </data>
+  <data name="AddChargeNote" xml:space="preserve">
+    <value>--or complete the form to add a part--</value>
+  </data>
+  <data name="AddLaborHeader" xml:space="preserve">
+    <value>Add Labor</value>
+  </data>
+  <data name="AddNotesHeader" xml:space="preserve">
+    <value>AddNotes</value>
+  </data>
+  <data name="AddPaintHeader" xml:space="preserve">
+    <value>Add Paint</value>
+  </data>
+  <data name="AddPartsGraphicalBtn" xml:space="preserve">
+    <value>Add Parts Graphical</value>
+  </data>
+  <data name="AddPartsHeader" xml:space="preserve">
+    <value>Add Parts</value>
+  </data>
+  <data name="AddPartsNote" xml:space="preserve">
+    <value>Add parts using the form below or visit the graphical page to use the point-and-click interface.</value>
+  </data>
+  <data name="AdjacentPanel" xml:space="preserve">
+    <value>Adjacent Panel</value>
+  </data>
+  <data name="Aftermarket" xml:space="preserve">
+    <value>Aftermarket</value>
+  </data>
+  <data name="Align" xml:space="preserve">
+    <value>Align</value>
+  </data>
+  <data name="Betterment" xml:space="preserve">
+    <value>Betterment</value>
+  </data>
+  <data name="BettermentPercent" xml:space="preserve">
+    <value>Betterment %</value>
+  </data>
+  <data name="Blend" xml:space="preserve">
+    <value>Blend</value>
+  </data>
+  <data name="BlendTime" xml:space="preserve">
+    <value>Blend Time</value>
+  </data>
+  <data name="Body" xml:space="preserve">
+    <value>Body</value>
+  </data>
+  <data name="Cleanup" xml:space="preserve">
+    <value>Cleanup</value>
+  </data>
+  <data name="ClearButton" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="ClearcoatTime" xml:space="preserve">
+    <value>Clearcoat Time</value>
+  </data>
+  <data name="CustomerNotesPlaceholder" xml:space="preserve">
+    <value>Enter notes for customer.</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Detail" xml:space="preserve">
+    <value>Detail</value>
+  </data>
+  <data name="EdgingTime" xml:space="preserve">
+    <value>Edging Time</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Electrical" xml:space="preserve">
+    <value>Electrical</value>
+  </data>
+  <data name="FirstPanel" xml:space="preserve">
+    <value>First Panel</value>
+  </data>
+  <data name="Frame" xml:space="preserve">
+    <value>Frame</value>
+  </data>
+  <data name="Glass" xml:space="preserve">
+    <value>Glass</value>
+  </data>
+  <data name="Group" xml:space="preserve">
+    <value>Group</value>
+  </data>
+  <data name="Include" xml:space="preserve">
+    <value>Include?</value>
+  </data>
+  <data name="InsurancePageButton" xml:space="preserve">
+    <value>Insurance &gt;&gt;</value>
+  </data>
+  <data name="LaborItems" xml:space="preserve">
+    <value>Labor Items</value>
+  </data>
+  <data name="LaborTime" xml:space="preserve">
+    <value>Labor Time</value>
+  </data>
+  <data name="LaborType" xml:space="preserve">
+    <value>Labor Type</value>
+  </data>
+  <data name="LineNumber" xml:space="preserve">
+    <value>Line #</value>
+  </data>
+  <data name="LKQ" xml:space="preserve">
+    <value>LKQ</value>
+  </data>
+  <data name="LockPanel" xml:space="preserve">
+    <value>Lock Panel Type</value>
+  </data>
+  <data name="Mechanical" xml:space="preserve">
+    <value>Mechanical</value>
+  </data>
+  <data name="NonAdjacentPanel" xml:space="preserve">
+    <value>Non-Adjacent Panel</value>
+  </data>
+  <data name="OEM" xml:space="preserve">
+    <value>OEM</value>
+  </data>
+  <data name="Op" xml:space="preserve">
+    <value>Op</value>
+  </data>
+  <data name="OpDescription" xml:space="preserve">
+    <value>Operation Description</value>
+  </data>
+  <data name="Operation" xml:space="preserve">
+    <value>Operation</value>
+  </data>
+  <data name="Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="OtherCharges" xml:space="preserve">
+    <value>Other Charges</value>
+  </data>
+  <data name="OtherType" xml:space="preserve">
+    <value>Other Type</value>
+  </data>
+  <data name="Overhaul" xml:space="preserve">
+    <value>Overhaul</value>
+  </data>
+  <data name="OverhaulHeader" xml:space="preserve">
+    <value>Overhaul</value>
+  </data>
+  <data name="OverhaulNote" xml:space="preserve">
+    <value>This item is part of an overhaul</value>
+  </data>
+  <data name="PaintTime" xml:space="preserve">
+    <value>Paint Time</value>
+  </data>
+  <data name="PanelType" xml:space="preserve">
+    <value>Panel Type</value>
+  </data>
+  <data name="PartDescription" xml:space="preserve">
+    <value>Part Description</value>
+  </data>
+  <data name="PartName" xml:space="preserve">
+    <value>Part Name</value>
+  </data>
+  <data name="PartNo" xml:space="preserve">
+    <value>Part #</value>
+  </data>
+  <data name="PartNumber" xml:space="preserve">
+    <value>Part Number</value>
+  </data>
+  <data name="PartNumberNote" xml:space="preserve">
+    <value>Enter a part number then clicks "Search."</value>
+  </data>
+  <data name="PartPrice" xml:space="preserve">
+    <value>Part Price</value>
+  </data>
+  <data name="PartSource" xml:space="preserve">
+    <value>Part Source</value>
+  </data>
+  <data name="PresetCharge" xml:space="preserve">
+    <value>Select a Preset Charge</value>
+  </data>
+  <data name="Quantity" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="Remanufactured" xml:space="preserve">
+    <value>Remanufactured</value>
+  </data>
+  <data name="RI" xml:space="preserve">
+    <value>R&amp;I</value>
+  </data>
+  <data name="RR" xml:space="preserve">
+    <value>R&amp;R</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Section" xml:space="preserve">
+    <value>Section</value>
+  </data>
+  <data name="ShopNotes" xml:space="preserve">
+    <value>Shop Notes</value>
+  </data>
+  <data name="ShopNotesPlaceholder" xml:space="preserve">
+    <value>Enter notes only for the shop to view.</value>
+  </data>
+  <data name="Source" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="Structure" xml:space="preserve">
+    <value>Structure</value>
+  </data>
+  <data name="Sublet" xml:space="preserve">
+    <value>Sublet</value>
+  </data>
+  <data name="ToneStageNote" xml:space="preserve">
+    <value>2 Tone/3 Stage</value>
+  </data>
+  <data name="UndersideTime" xml:space="preserve">
+    <value>Underside Time</value>
+  </data>
+  <data name="VehicleBackButton" xml:space="preserve">
+    <value>&lt;&lt; Vehicle</value>
+  </data>
+  <data name="Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="AftermarketGraphical" xml:space="preserve">
+    <value>After.</value>
+  </data>
+  <data name="BodyLabor" xml:space="preserve">
+    <value>Body Labor</value>
+  </data>
+  <data name="Clearcoat" xml:space="preserve">
+    <value>Clearcoat</value>
+  </data>
+  <data name="Labor" xml:space="preserve">
+    <value>Labor</value>
+  </data>
+  <data name="Left" xml:space="preserve">
+    <value>Left</value>
+  </data>
+  <data name="Notes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="PartDetails" xml:space="preserve">
+    <value>Part Details</value>
+  </data>
+  <data name="PartListNote" xml:space="preserve">
+    <value>Part list is loading.</value>
+  </data>
+  <data name="Parts" xml:space="preserve">
+    <value>Parts</value>
+  </data>
+  <data name="PartsLabor" xml:space="preserve">
+    <value>Parts &amp; Labor</value>
+  </data>
+  <data name="Price" xml:space="preserve">
+    <value>Price</value>
+  </data>
+  <data name="Reman" xml:space="preserve">
+    <value>Reman.</value>
+  </data>
+  <data name="Right" xml:space="preserve">
+    <value>Right</value>
+  </data>
+  <data name="SingleStage" xml:space="preserve">
+    <value>Single Stage</value>
+  </data>
+  <data name="ThreeStage" xml:space="preserve">
+    <value>3 Stage</value>
+  </data>
+  <data name="TwoStage" xml:space="preserve">
+    <value>2 Stage</value>
+  </data>
+  <data name="TwoTone" xml:space="preserve">
+    <value>2 Tone</value>
+  </data>
+  <data name="OpenEstimate_Filter_All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="AllEstimates" xml:space="preserve">
+    <value>All Estimates</value>
+  </data>
+  <data name="ClosedRepairOrders" xml:space="preserve">
+    <value>Closed Repair Orders</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="DateCreated" xml:space="preserve">
+    <value>Date Created</value>
+  </data>
+  <data name="EstimateNumber" xml:space="preserve">
+    <value>Estimate Number</value>
+  </data>
+  <data name="FilterEstimatesNote" xml:space="preserve">
+    <value>Filter Estimates By:</value>
+  </data>
+  <data name="FrameData" xml:space="preserve">
+    <value>Frame Data</value>
+  </data>
+  <data name="ManageEstimateHeader" xml:space="preserve">
+    <value>Manage Estimates</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="NewEstimate" xml:space="preserve">
+    <value>New Estimate</value>
+  </data>
+  <data name="OpenEstimate_Filter_Open" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="OpenEstimate" xml:space="preserve">
+    <value>Open Estimate</value>
+  </data>
+  <data name="OpenEstimate_Filter_OpenRepairOrders" xml:space="preserve">
+    <value>Open Repair Orders</value>
+  </data>
+  <data name="PartsSearch" xml:space="preserve">
+    <value>Parts Search</value>
+  </data>
+  <data name="Print" xml:space="preserve">
+    <value>Print</value>
+  </data>
+  <data name="Rates" xml:space="preserve">
+    <value>Rates</value>
+  </data>
+  <data name="OpenEstimate_Filter_Recent" xml:space="preserve">
+    <value>Recent</value>
+  </data>
+  <data name="Reports" xml:space="preserve">
+    <value>Reports</value>
+  </data>
+  <data name="SearchEstimates" xml:space="preserve">
+    <value>Search For Estimates</value>
+  </data>
+  <data name="SendEstimate" xml:space="preserve">
+    <value>Send Estimate</value>
+  </data>
+  <data name="Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="ShopManage" xml:space="preserve">
+    <value>Shop Manage</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Support" xml:space="preserve">
+    <value>Support</value>
+  </data>
+  <data name="TotalCost" xml:space="preserve">
+    <value>Total Cost</value>
+  </data>
+  <data name="OpenEstimate_Filter_Totaled" xml:space="preserve">
+    <value>Totaled</value>
+  </data>
+  <data name="Vehicle" xml:space="preserve">
+    <value>Vehicle</value>
+  </data>
+  <data name="Vendors" xml:space="preserve">
+    <value>Vendors</value>
+  </data>
+  <data name="WorkDesk" xml:space="preserve">
+    <value>Work Desk</value>
+  </data>
+  <data name="Claimant" xml:space="preserve">
+    <value>Claimant</value>
+  </data>
+  <data name="CreateButton" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="Created" xml:space="preserve">
+    <value>Created</value>
+  </data>
+  <data name="CreateReportsHeader" xml:space="preserve">
+    <value>Create Reports</value>
+  </data>
+  <data name="CreateReportsNote" xml:space="preserve">
+    <value>Only closed work orders will be included.</value>
+  </data>
+  <data name="CustomerList" xml:space="preserve">
+    <value>Customer List</value>
+  </data>
+  <data name="EmailButton" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="EmailEstimateHeader" xml:space="preserve">
+    <value>Email Estimate</value>
+  </data>
+  <data name="EmailEstimateHeaderNote" xml:space="preserve">
+    <value>Check who you would like to email the estimate to. If not listed, enter the email below.</value>
+  </data>
+  <data name="EMSExport" xml:space="preserve">
+    <value>EMS Export</value>
+  </data>
+  <data name="EnterEndDate" xml:space="preserve">
+    <value>Enter End Date</value>
+  </data>
+  <data name="EnterStartDate" xml:space="preserve">
+    <value>Enter Start Date</value>
+  </data>
+  <data name="ExportButton" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="ExportNumber" xml:space="preserve">
+    <value>Export #</value>
+  </data>
+  <data name="FrameDataHeader" xml:space="preserve">
+    <value>Frame Data</value>
+  </data>
+  <data name="FrameDataNote" xml:space="preserve">
+    <value>Please call 888-932-3780, ext 203 if you need assistance.</value>
+  </data>
+  <data name="FrameDetails" xml:space="preserve">
+    <value>Frame Details</value>
+  </data>
+  <data name="OpenFrame" xml:space="preserve">
+    <value>Open Frame</value>
+  </data>
+  <data name="PartsLookupHeader" xml:space="preserve">
+    <value>Parts Lookup</value>
+  </data>
+  <data name="PopUpNote" xml:space="preserve">
+    <value>Please disable pop-up blocker</value>
+  </data>
+  <data name="SalesReportHeader" xml:space="preserve">
+    <value>Sales Report</value>
+  </data>
+  <data name="SearchForPart" xml:space="preserve">
+    <value>Search For Part</value>
+  </data>
+  <data name="SearchVehicle" xml:space="preserve">
+    <value>Search For Vehicle</value>
+  </data>
+  <data name="SendEstimateHeader" xml:space="preserve">
+    <value>Send Estimate</value>
+  </data>
+  <data name="SendEstimateNote" xml:space="preserve">
+    <value>Send estimate as an email attachment or through EMS Export.</value>
+  </data>
+  <data name="SupplierListHeader" xml:space="preserve">
+    <value>Supplier List</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="VIN" xml:space="preserve">
+    <value>VIN</value>
+  </data>
+  <data name="YearMakeModel" xml:space="preserve">
+    <value>Select Year, Make and Model</value>
+  </data>
+  <data name="UndoChanges" xml:space="preserve">
+    <value>Undo Changes</value>
+  </data>
+  <data name="ExistingInsuranceCompanyName" xml:space="preserve">
+    <value>Existing Insurance Company</value>
+  </data>
+  <data name="ShowRatesBox" xml:space="preserve">
+    <value>Show Hourly Rates On Report</value>
+  </data>
+  <data name="FrameDataNoResults" xml:space="preserve">
+    <value>No results found for that make/model/year combination.</value>
+  </data>
+  <data name="LockedCheckbox" xml:space="preserve">
+    <value>Locked?</value>
+  </data>
+  <data name="InvalidProfile" xml:space="preserve">
+    <value>Invalid Profile</value>
+  </data>
+  <data name="PaymentInformationHeader" xml:space="preserve">
+    <value>Payment Information</value>
+  </data>
+  <data name="PaymentInfoBackButton" xml:space="preserve">
+    <value>&lt;&lt;Payment Info</value>
+  </data>
+  <data name="PaymentInfoPageButton" xml:space="preserve">
+    <value>Payment Info &gt;&gt;</value>
+  </data>
+  <data name="Extension" xml:space="preserve">
+    <value>Extension</value>
+  </data>
+  <data name="Phone" xml:space="preserve">
+    <value>Phone</value>
+  </data>
+  <data name="Login_Button" xml:space="preserve">
+    <value>Login To ProEstimator</value>
+  </data>
+  <data name="Login_LoginName" xml:space="preserve">
+    <value>Login Name</value>
+  </data>
+  <data name="Login_Organization" xml:space="preserve">
+    <value>Organization</value>
+  </data>
+  <data name="Login_Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Login_Remember" xml:space="preserve">
+    <value>Remember by Login Name and Organization</value>
+  </data>
+  <data name="Login_Title" xml:space="preserve">
+    <value>Member Login</value>
+  </data>
+  <data name="OpenEstimate_Filter_AllLong" xml:space="preserve">
+    <value>All Repair Orders</value>
+  </data>
+  <data name="AlternateIdentity" xml:space="preserve">
+    <value>Alternate Identity</value>
+  </data>
+  <data name="AssignmentDate" xml:space="preserve">
+    <value>Assignment Date</value>
+  </data>
+  <data name="Button_AddPart" xml:space="preserve">
+    <value>Add Part</value>
+  </data>
+  <data name="Button_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Button_OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="ChangeStatus" xml:space="preserve">
+    <value>Change Status</value>
+  </data>
+  <data name="ClosePartsAndLabor" xml:space="preserve">
+    <value>Close Parts &amp; Labor Window</value>
+  </data>
+  <data name="CloseWindow" xml:space="preserve">
+    <value>Close Window</value>
+  </data>
+  <data name="Collision" xml:space="preserve">
+    <value>Collision</value>
+  </data>
+  <data name="Comment" xml:space="preserve">
+    <value>Comment</value>
+  </data>
+  <data name="Comprehensive" xml:space="preserve">
+    <value>Comprehensive</value>
+  </data>
+  <data name="CopyEstimate" xml:space="preserve">
+    <value>Copy Estimate</value>
+  </data>
+  <data name="CopyEstimate_ClaimantInformation" xml:space="preserve">
+    <value>Claimant Information</value>
+  </data>
+  <data name="CopyEstimate_EditName" xml:space="preserve">
+    <value>Enter/Change/Delete the name</value>
+  </data>
+  <data name="CopyEstimate_Images" xml:space="preserve">
+    <value>Attached Images</value>
+  </data>
+  <data name="CopyEstimate_InsuranceInformation" xml:space="preserve">
+    <value>Insurance Information</value>
+  </data>
+  <data name="CopyEstimate_LatestOnly" xml:space="preserve">
+    <value>Latest line items only (if supplements exist)</value>
+  </data>
+  <data name="CopyEstimate_LineItems" xml:space="preserve">
+    <value>Line Items</value>
+  </data>
+  <data name="CopyEstimate_OwnerInformation" xml:space="preserve">
+    <value>Owner Information</value>
+  </data>
+  <data name="CopyEstimate_Select" xml:space="preserve">
+    <value>Select the information to use for the new estimate</value>
+  </data>
+  <data name="CopyEstimate_VehicleInformation" xml:space="preserve">
+    <value>Vehicle Information</value>
+  </data>
+  <data name="Details_CurrentSupLevel" xml:space="preserve">
+    <value>Current Supplement Level</value>
+  </data>
+  <data name="Details_SupVersionToPrint" xml:space="preserve">
+    <value>Supplement Version To Print</value>
+  </data>
+  <data name="Details_UpdatingStatus" xml:space="preserve">
+    <value>Updating status</value>
+  </data>
+  <data name="EstimateNum" xml:space="preserve">
+    <value>Estimate #</value>
+  </data>
+  <data name="Estimate_Message_LockedNoEdit" xml:space="preserve">
+    <value>Information cannot be edited on a locked estimate.</value>
+  </data>
+  <data name="Estimate_Navigation_AddParts" xml:space="preserve">
+    <value>Add Parts</value>
+  </data>
+  <data name="Estimate_Navigation_Customer" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="Estimate_Navigation_Details" xml:space="preserve">
+    <value>Details/Supplement</value>
+  </data>
+  <data name="Estimate_Navigation_Images" xml:space="preserve">
+    <value>Images</value>
+  </data>
+  <data name="Estimate_Navigation_Insurance" xml:space="preserve">
+    <value>Insurance</value>
+  </data>
+  <data name="Estimate_Navigation_PaymentInfo" xml:space="preserve">
+    <value>Payment Info</value>
+  </data>
+  <data name="Estimate_Navigation_Print" xml:space="preserve">
+    <value>Print</value>
+  </data>
+  <data name="Estimate_Navigation_SendEstimate" xml:space="preserve">
+    <value>Send Estimate</value>
+  </data>
+  <data name="Estimate_Navigation_Vehicle" xml:space="preserve">
+    <value>Vehicle</value>
+  </data>
+  <data name="Graphcial_LockMessage2" xml:space="preserve">
+    <value>Estimate Information cannot be edited on a locked estimate.</value>
+  </data>
+  <data name="Graphical_AddingPart" xml:space="preserve">
+    <value>Adding part</value>
+  </data>
+  <data name="Graphical_AddToRefinish" xml:space="preserve">
+    <value>Add To Refinish</value>
+  </data>
+  <data name="Graphical_CloseMultiPart" xml:space="preserve">
+    <value>Close Multiple Parts Window</value>
+  </data>
+  <data name="Graphical_CloseNonOem" xml:space="preserve">
+    <value>Close NonOem Window</value>
+  </data>
+  <data name="Graphical_Confirm_Delete" xml:space="preserve">
+    <value>This will delete the operation from your estimate.</value>
+  </data>
+  <data name="Graphical_Confirm_DeleteRI" xml:space="preserve">
+    <value>This will delete the R&amp;I and Repair operations from your estimate.</value>
+  </data>
+  <data name="Graphical_EnterPrice" xml:space="preserve">
+    <value>Enter Price.</value>
+  </data>
+  <data name="Graphical_EnterQuantity" xml:space="preserve">
+    <value>Enter quantity for</value>
+  </data>
+  <data name="Graphical_IncludeRI" xml:space="preserve">
+    <value>Include R&amp;I with repair</value>
+  </data>
+  <data name="Graphical_LockMessage" xml:space="preserve">
+    <value>Locking an item will not allow the programs automatic calculations to change the value.</value>
+  </data>
+  <data name="Graphical_MultiplePartNumbers" xml:space="preserve">
+    <value>Multiple part numbers exist. Please select the part to add</value>
+  </data>
+  <data name="Graphical_NoVendorsFound" xml:space="preserve">
+    <value>No OEM part number has been provided, please call your local supplier for price &amp; availability.</value>
+  </data>
+  <data name="Graphical_OverlapAcceptAll" xml:space="preserve">
+    <value>Accept All Overlaps</value>
+  </data>
+  <data name="Graphical_OverlapAcceptChecked" xml:space="preserve">
+    <value>Accept Checked Overlaps</value>
+  </data>
+  <data name="Graphical_OverlapAcceptingAll" xml:space="preserve">
+    <value>Accepting all overlaps</value>
+  </data>
+  <data name="Graphical_OverlapComplete" xml:space="preserve">
+    <value>Overlap search complete.</value>
+  </data>
+  <data name="Graphical_OverlapLoading" xml:space="preserve">
+    <value>Overlap Information is loading...</value>
+  </data>
+  <data name="Graphical_OverlapNone" xml:space="preserve">
+    <value>No overlaps found.</value>
+  </data>
+  <data name="Graphical_OverlapRecommendations" xml:space="preserve">
+    <value>Overlap Recommendations</value>
+  </data>
+  <data name="Graphical_OverlapRejectAll" xml:space="preserve">
+    <value>Reject All Overlaps</value>
+  </data>
+  <data name="Graphical_OverlapsAcceptedProgress" xml:space="preserve">
+    <value>Overlaps accepted.</value>
+  </data>
+  <data name="Graphical_OverlapsCheckedAccepted" xml:space="preserve">
+    <value>Accepted checked overlaps.</value>
+  </data>
+  <data name="Graphical_OverlapSearching" xml:space="preserve">
+    <value>Searching for overlaps</value>
+  </data>
+  <data name="Graphical_PaintOptions" xml:space="preserve">
+    <value>Paint Options</value>
+  </data>
+  <data name="Graphical_PartAdded" xml:space="preserve">
+    <value>Part added.</value>
+  </data>
+  <data name="Graphical_RepairOptions" xml:space="preserve">
+    <value>Repair Options</value>
+  </data>
+  <data name="Graphical_RepairTime" xml:space="preserve">
+    <value>Repair Time</value>
+  </data>
+  <data name="Graphical_SelectPartSource" xml:space="preserve">
+    <value>Select Part and Source</value>
+  </data>
+  <data name="Graphical_SelectPartsSection" xml:space="preserve">
+    <value>Please select a parts section</value>
+  </data>
+  <data name="Graphical_UseManual" xml:space="preserve">
+    <value>Part info not found, you will have to use manual entry.</value>
+  </data>
+  <data name="Graphical_VendorInfoLoading" xml:space="preserve">
+    <value>Vendor information is loading</value>
+  </data>
+  <data name="HoursAbreviation" xml:space="preserve">
+    <value>Hrs.</value>
+  </data>
+  <data name="InspectionDate" xml:space="preserve">
+    <value>Inspection Date</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading</value>
+  </data>
+  <data name="Nontaxed" xml:space="preserve">
+    <value>Nontaxed</value>
+  </data>
+  <data name="OpenEstimate_Filter_ClosedRepairOrders" xml:space="preserve">
+    <value>Closed Repair Orders</value>
+  </data>
+  <data name="OperationType_Align" xml:space="preserve">
+    <value>Align</value>
+  </data>
+  <data name="OperationType_Blend" xml:space="preserve">
+    <value>Blend</value>
+  </data>
+  <data name="OperationType_Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="OperationType_Overhaul" xml:space="preserve">
+    <value>Overhaul</value>
+  </data>
+  <data name="OperationType_Refinish" xml:space="preserve">
+    <value>Refinish</value>
+  </data>
+  <data name="OperationType_Repair" xml:space="preserve">
+    <value>Repair</value>
+  </data>
+  <data name="OperationType_Replace" xml:space="preserve">
+    <value>Replace</value>
+  </data>
+  <data name="OperationType_RI" xml:space="preserve">
+    <value>R&amp;I</value>
+  </data>
+  <data name="OperationType_RR" xml:space="preserve">
+    <value>R&amp;R</value>
+  </data>
+  <data name="Refinish" xml:space="preserve">
+    <value>Refinish</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="RepairFacility" xml:space="preserve">
+    <value>Repair Facility</value>
+  </data>
+  <data name="Select" xml:space="preserve">
+    <value>Select</value>
+  </data>
+  <data name="Side" xml:space="preserve">
+    <value>Side</value>
+  </data>
+  <data name="StarRequiredField" xml:space="preserve">
+    <value>* Indicates Required Field</value>
+  </data>
+  <data name="Storage" xml:space="preserve">
+    <value>Storage</value>
+  </data>
+  <data name="Taxed" xml:space="preserve">
+    <value>Taxed</value>
+  </data>
+  <data name="ApplyCreditCardFee" xml:space="preserve">
+    <value>Apply Credit Card Fee</value>
+  </data>
+  <data name="ThirdParty" xml:space="preserve">
+    <value>Third Party</value>
+  </data>
+  <data name="TimeZone_Central" xml:space="preserve">
+    <value>Central</value>
+  </data>
+  <data name="TimeZone_Eastern" xml:space="preserve">
+    <value>Eastern</value>
+  </data>
+  <data name="TimeZone_Mountain" xml:space="preserve">
+    <value>Mountain</value>
+  </data>
+  <data name="TimeZone_Pacific" xml:space="preserve">
+    <value>Pacific</value>
+  </data>
+  <data name="Towing" xml:space="preserve">
+    <value>Towing</value>
+  </data>
+  <data name="AcceptQuestion" xml:space="preserve">
+    <value>Accept?</value>
+  </data>
+  <data name="AccountNum" xml:space="preserve">
+    <value>Account #</value>
+  </data>
+  <data name="Adjacent" xml:space="preserve">
+    <value>Adjacent</value>
+  </data>
+  <data name="AllOperations" xml:space="preserve">
+    <value>All Operations</value>
+  </data>
+  <data name="Amount" xml:space="preserve">
+    <value>Amount</value>
+  </data>
+  <data name="Billing_AccountBilling" xml:space="preserve">
+    <value>Account Billing</value>
+  </data>
+  <data name="Billing_AutoPayInfo" xml:space="preserve">
+    <value>Auto Pay Information</value>
+  </data>
+  <data name="Billing_Contract" xml:space="preserve">
+    <value>Contract</value>
+  </data>
+  <data name="Billing_MakeAPayment" xml:space="preserve">
+    <value>Make a Payment</value>
+  </data>
+  <data name="Billing_MakePayment" xml:space="preserve">
+    <value>Make Payment</value>
+  </data>
+  <data name="Billing_NoContract" xml:space="preserve">
+    <value>You do not have an active contract.</value>
+  </data>
+  <data name="Billing_UpToDate" xml:space="preserve">
+    <value>You are up to date.</value>
+  </data>
+  <data name="ByPounds" xml:space="preserve">
+    <value>By Pounds</value>
+  </data>
+  <data name="CCCharge_AdminContact" xml:space="preserve">
+    <value>Administration: (813) 854-9900</value>
+  </data>
+  <data name="CCCharge_AllowAutoPay" xml:space="preserve">
+    <value>Auto-Pay</value>
+  </data>
+  <data name="CCCharge_AutoPayDescription" xml:space="preserve">
+    <value>Auto-pay is a convenient way to pay your invoices.
+When auto-pay is selected, we will automatically bill
+your credit card each month until your subscription is fully paid.</value>
+  </data>
+  <data name="CCCharge_AutoPayRequired" xml:space="preserve">
+    <value>Note: Auto-Pay is required for this plan selection</value>
+  </data>
+  <data name="CCCharge_ExpirationDate" xml:space="preserve">
+    <value>Expiration Date</value>
+  </data>
+  <data name="CCCharge_Hours" xml:space="preserve">
+    <value>Hours: 8:30 AM - 5:30 PM M-F</value>
+  </data>
+  <data name="CCCharge_Last4" xml:space="preserve">
+    <value>Last 4</value>
+  </data>
+  <data name="CCCharge_PaymentAmount" xml:space="preserve">
+    <value>Payment Amount</value>
+  </data>
+  <data name="CCCharge_SavedInfo" xml:space="preserve">
+    <value>Saved credit card info</value>
+  </data>
+  <data name="CCCharge_TechSupport" xml:space="preserve">
+    <value>Tech Support: (888) 932-3780 Ext. 203</value>
+  </data>
+  <data name="CCCharge_Title" xml:space="preserve">
+    <value>Credit Card Payment</value>
+  </data>
+  <data name="CCharge_PayWithSaved" xml:space="preserve">
+    <value>Pay With Saved Info</value>
+  </data>
+  <data name="ChangeContract" xml:space="preserve">
+    <value>Change Contract</value>
+  </data>
+  <data name="Charges" xml:space="preserve">
+    <value>Charges</value>
+  </data>
+  <data name="CheckNumber" xml:space="preserve">
+    <value>Check Number</value>
+  </data>
+  <data name="ClearForm" xml:space="preserve">
+    <value>Clear Form</value>
+  </data>
+  <data name="CloseEstimate" xml:space="preserve">
+    <value>Close Estimate</value>
+  </data>
+  <data name="CloseMenu" xml:space="preserve">
+    <value>Close Menu</value>
+  </data>
+  <data name="CompanyProfile_BarNumber" xml:space="preserve">
+    <value>Bar Number</value>
+  </data>
+  <data name="CompanyProfile_CheckPrintNote" xml:space="preserve">
+    <value>Check "Print" to display field in all estimate reports.</value>
+  </data>
+  <data name="CompanyProfile_CompanyAddress" xml:space="preserve">
+    <value>Company Address</value>
+  </data>
+  <data name="CompanyProfile_CompanyContactInfo" xml:space="preserve">
+    <value>Company Contact Info</value>
+  </data>
+  <data name="CompanyProfile_CompanyID" xml:space="preserve">
+    <value>CompanyID</value>
+  </data>
+  <data name="CompanyProfile_CompanyIDCode" xml:space="preserve">
+    <value>Company ID Code</value>
+  </data>
+  <data name="CompanyProfile_CompanyName" xml:space="preserve">
+    <value>Company Name</value>
+  </data>
+  <data name="CompanyProfile_CompanyType" xml:space="preserve">
+    <value>Company Type</value>
+  </data>
+  <data name="CompanyProfile_FederalTaxID" xml:space="preserve">
+    <value>Federal Tax ID</value>
+  </data>
+  <data name="CompanyProfile_LicenseNumber" xml:space="preserve">
+    <value>License Number</value>
+  </data>
+  <data name="CompanyProfile_RegistrationNumber" xml:space="preserve">
+    <value>Registration Number</value>
+  </data>
+  <data name="CompanyProfile_RemoveCustomIcon" xml:space="preserve">
+    <value>Remove Custom Icon</value>
+  </data>
+  <data name="CompanyProfile_UserTinCheckbox" xml:space="preserve">
+    <value>Use TIN?</value>
+  </data>
+  <data name="Continue" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="CurrentEstimate" xml:space="preserve">
+    <value>Current Estimate</value>
+  </data>
+  <data name="CustomMessage" xml:space="preserve">
+    <value>Custom Message</value>
+  </data>
+  <data name="Date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="DefaultPresets" xml:space="preserve">
+    <value>Default Presets</value>
+  </data>
+  <data name="DeleteCardInfo" xml:space="preserve">
+    <value>Delete Card Info</value>
+  </data>
+  <data name="DiscountOrMarkup" xml:space="preserve">
+    <value>Discount / Markup</value>
+  </data>
+  <data name="ECheck_AccountNumber" xml:space="preserve">
+    <value>Bank Account Number</value>
+  </data>
+  <data name="ECheck_Address" xml:space="preserve">
+    <value>Account Holder Address</value>
+  </data>
+  <data name="ECheck_BankName" xml:space="preserve">
+    <value>Bank Name</value>
+  </data>
+  <data name="ECheck_CheckNumber" xml:space="preserve">
+    <value>Check Number</value>
+  </data>
+  <data name="ECheck_CityStateZip" xml:space="preserve">
+    <value>Account Holder City, St, Zip</value>
+  </data>
+  <data name="ECheck_Description" xml:space="preserve">
+    <value>An electronic check is an online version of an actual check from your checkbook.&lt;br&gt;                                    Below, please enter the information from your physical check.</value>
+  </data>
+  <data name="ECheck_ECheckPayment" xml:space="preserve">
+    <value>Electronic Check Payment</value>
+  </data>
+  <data name="ECheck_FullName" xml:space="preserve">
+    <value>Full Name of Account Holder</value>
+  </data>
+  <data name="ECheck_Routing" xml:space="preserve">
+    <value>Bank Routing Number</value>
+  </data>
+  <data name="EditRateProfile" xml:space="preserve">
+    <value>Edit Rate Profile</value>
+  </data>
+  <data name="EffectiveDate" xml:space="preserve">
+    <value>Effective Date</value>
+  </data>
+  <data name="EmailTechSupport" xml:space="preserve">
+    <value>Email Tech Support</value>
+  </data>
+  <data name="EstimateMenu" xml:space="preserve">
+    <value>Estimate Menu</value>
+  </data>
+  <data name="EstimateTotal" xml:space="preserve">
+    <value>Estimate Total</value>
+  </data>
+  <data name="Estimators" xml:space="preserve">
+    <value>Estimators</value>
+  </data>
+  <data name="Exit" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="Fax" xml:space="preserve">
+    <value>Fax</value>
+  </data>
+  <data name="FlatRate" xml:space="preserve">
+    <value>Flat Rate</value>
+  </data>
+  <data name="Graphical" xml:space="preserve">
+    <value>Graphical</value>
+  </data>
+  <data name="High" xml:space="preserve">
+    <value>High</value>
+  </data>
+  <data name="Info" xml:space="preserve">
+    <value>Info</value>
+  </data>
+  <data name="InvoiceID" xml:space="preserve">
+    <value>Invoice ID</value>
+  </data>
+  <data name="InvoiceNum" xml:space="preserve">
+    <value>Invoice #</value>
+  </data>
+  <data name="InvoiceType" xml:space="preserve">
+    <value>Invoice Type</value>
+  </data>
+  <data name="Invoice_Amount" xml:space="preserve">
+    <value>Amount</value>
+  </data>
+  <data name="Invoice_DueDate" xml:space="preserve">
+    <value>Due Date</value>
+  </data>
+  <data name="Invoice_InvoiceNum" xml:space="preserve">
+    <value>Invoice #</value>
+  </data>
+  <data name="Invoice_Late" xml:space="preserve">
+    <value>LATE INVOICE</value>
+  </data>
+  <data name="Invoice_Message" xml:space="preserve">
+    <value>All payments are processed within 24 business hours.
+        This receipt is valid only if the credit card or checking account
+        used allows for your payment to be processed and paid by the institution.</value>
+  </data>
+  <data name="Invoice_PayWithCard" xml:space="preserve">
+    <value>Pay with Card</value>
+  </data>
+  <data name="Invoice_PayWithECheck" xml:space="preserve">
+    <value>Pay with ECheck</value>
+  </data>
+  <data name="Invoice_SalesTax" xml:space="preserve">
+    <value>Sales Tax</value>
+  </data>
+  <data name="Invoice_ThankYou" xml:space="preserve">
+    <value>Thank you for your business!</value>
+  </data>
+  <data name="Invoice_TotalPayment" xml:space="preserve">
+    <value>Total Payment</value>
+  </data>
+  <data name="Item" xml:space="preserve">
+    <value>Item</value>
+  </data>
+  <data name="LoginInfo_ContactInformation" xml:space="preserve">
+    <value>Contact Information</value>
+  </data>
+  <data name="Logo" xml:space="preserve">
+    <value>Logo</value>
+  </data>
+  <data name="Lookup" xml:space="preserve">
+    <value>Lookup</value>
+  </data>
+  <data name="Low" xml:space="preserve">
+    <value>Low</value>
+  </data>
+  <data name="MajorPanels" xml:space="preserve">
+    <value>1st Panel</value>
+  </data>
+  <data name="Manual" xml:space="preserve">
+    <value>Manual</value>
+  </data>
+  <data name="Medium" xml:space="preserve">
+    <value>Medium</value>
+  </data>
+  <data name="Memo" xml:space="preserve">
+    <value>Memo</value>
+  </data>
+  <data name="Message_CannotSaveLockedEstimate" xml:space="preserve">
+    <value>Cannot save a locked estimate.</value>
+  </data>
+  <data name="Message_DefaultRatePresetChanged" xml:space="preserve">
+    <value>Default rate preset changed.</value>
+  </data>
+  <data name="Message_DefaultRateProfileChanged" xml:space="preserve">
+    <value>Default rate profile changed.</value>
+  </data>
+  <data name="Message_EnterPartNumber" xml:space="preserve">
+    <value>Enter a part number or description</value>
+  </data>
+  <data name="Message_EntryDataSaved" xml:space="preserve">
+    <value>Entry data saved.</value>
+  </data>
+  <data name="Message_ErrorAcceptingOverlaps" xml:space="preserve">
+    <value>Error accepting overlaps</value>
+  </data>
+  <data name="Message_ErrorGettingPartInfo" xml:space="preserve">
+    <value>Error getting part info</value>
+  </data>
+  <data name="Message_ErrorLockedEstimate" xml:space="preserve">
+    <value>Items cannot be added to a locked estimate.</value>
+  </data>
+  <data name="Message_ErrorSettingDefaultPreset" xml:space="preserve">
+    <value>Error setting default preset ID</value>
+  </data>
+  <data name="Message_ErrorSettingDefaultProfileID" xml:space="preserve">
+    <value>Error setting default profile ID</value>
+  </data>
+  <data name="Message_ErrorUpdatingLineItem" xml:space="preserve">
+    <value>Error updating line item</value>
+  </data>
+  <data name="Message_EstimateCommitted" xml:space="preserve">
+    <value>Estimate committed.</value>
+  </data>
+  <data name="Message_FillOutBothPassword" xml:space="preserve">
+    <value>Please fill out both password fields.</value>
+  </data>
+  <data name="Message_InvalidProfileID" xml:space="preserve">
+    <value>Invalid profile ID, nothing is changed.</value>
+  </data>
+  <data name="Message_NoEstimateWithVin" xml:space="preserve">
+    <value>No estimates found with that VIN</value>
+  </data>
+  <data name="Message_NoResults" xml:space="preserve">
+    <value>No results found</value>
+  </data>
+  <data name="Message_PasswordChanged" xml:space="preserve">
+    <value>Password successfully changed.</value>
+  </data>
+  <data name="Message_PasswordMinLength" xml:space="preserve">
+    <value>Your password must be at least 6 characters long.</value>
+  </data>
+  <data name="Message_PasswordMismatch" xml:space="preserve">
+    <value>Password fields do not match.</value>
+  </data>
+  <data name="Message_SelectEstimate" xml:space="preserve">
+    <value>Please select an estimate first.</value>
+  </data>
+  <data name="Message_SelectYearMakeModel" xml:space="preserve">
+    <value>Select a year / make / model</value>
+  </data>
+  <data name="MinLabor" xml:space="preserve">
+    <value>Min.&lt;br&gt;Labor</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="NextInvoiceAmount" xml:space="preserve">
+    <value>Next Invoice Amount</value>
+  </data>
+  <data name="NextInvoiceDueDate" xml:space="preserve">
+    <value>Next Invoice Due Date</value>
+  </data>
+  <data name="NonAdjacent" xml:space="preserve">
+    <value>Non-Adjacent</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="OverlapAmount" xml:space="preserve">
+    <value>Overlap&lt;br&gt;Amount</value>
+  </data>
+  <data name="PageTitles_PrintingOptions" xml:space="preserve">
+    <value>Printing Options</value>
+  </data>
+  <data name="PageTitle_AccountPreferences" xml:space="preserve">
+    <value>Account Preferences</value>
+  </data>
+  <data name="PageTitle_AddParts" xml:space="preserve">
+    <value>Add Parts</value>
+  </data>
+  <data name="PageTitle_AddPartsGraphically" xml:space="preserve">
+    <value>Add Parts Graphically</value>
+  </data>
+  <data name="PageTitle_Billing" xml:space="preserve">
+    <value>Billing</value>
+  </data>
+  <data name="PageTitle_CCCharge" xml:space="preserve">
+    <value>Credit Card Charge</value>
+  </data>
+  <data name="PageTitle_ChangePassword" xml:space="preserve">
+    <value>Change Password</value>
+  </data>
+  <data name="PageTitle_CompanyProfile" xml:space="preserve">
+    <value>Company Profile</value>
+  </data>
+  <data name="PageTitle_CopyEstimate" xml:space="preserve">
+    <value>Copy Estimate</value>
+  </data>
+  <data name="PageTitle_Customer" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="PageTitle_CustomerInvoice" xml:space="preserve">
+    <value>Customer Invoice</value>
+  </data>
+  <data name="PageTitle_Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="PageTitle_ECheck" xml:space="preserve">
+    <value>ECheck</value>
+  </data>
+  <data name="PageTitle_FrameData" xml:space="preserve">
+    <value>Frame Data</value>
+  </data>
+  <data name="PageTitle_Images" xml:space="preserve">
+    <value>Images</value>
+  </data>
+  <data name="PageTitle_Insurance" xml:space="preserve">
+    <value>Insurance</value>
+  </data>
+  <data name="PageTitle_Invoice" xml:space="preserve">
+    <value>Invoice</value>
+  </data>
+  <data name="PageTitle_Login" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="PageTitle_LoginInformation" xml:space="preserve">
+    <value>Login Information</value>
+  </data>
+  <data name="PageTitle_OpenEstimate" xml:space="preserve">
+    <value>Open Estimate</value>
+  </data>
+  <data name="PageTitle_PaintFinish" xml:space="preserve">
+    <value>Paint Finish</value>
+  </data>
+  <data name="PageTitle_PartsLookup" xml:space="preserve">
+    <value>Parts Lookup</value>
+  </data>
+  <data name="PageTitle_PaymentInfo" xml:space="preserve">
+    <value>Payment Info</value>
+  </data>
+  <data name="PageTitle_PresetCharges" xml:space="preserve">
+    <value>Preset Charges</value>
+  </data>
+  <data name="PageTitle_Printing" xml:space="preserve">
+    <value>Printing</value>
+  </data>
+  <data name="PageTitle_RateProfileList" xml:space="preserve">
+    <value>Rate Profile List</value>
+  </data>
+  <data name="PageTitle_RenewSubscription" xml:space="preserve">
+    <value>Renew Subscription</value>
+  </data>
+  <data name="PageTitle_SignAgreement" xml:space="preserve">
+    <value>Sign Agreement</value>
+  </data>
+  <data name="PageTitle_SubscriptionConfirm" xml:space="preserve">
+    <value>Subscription Confirmation</value>
+  </data>
+  <data name="Paint" xml:space="preserve">
+    <value>Paint</value>
+  </data>
+  <data name="Part1" xml:space="preserve">
+    <value>Part 1</value>
+  </data>
+  <data name="Part2" xml:space="preserve">
+    <value>Part 2</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="PayInvoice" xml:space="preserve">
+    <value>Pay Invoice</value>
+  </data>
+  <data name="Payment_PayeeName" xml:space="preserve">
+    <value>Payee Name</value>
+  </data>
+  <data name="Payment_Type" xml:space="preserve">
+    <value>Payment Type</value>
+  </data>
+  <data name="Payment_WhoPays" xml:space="preserve">
+    <value>Who Pays</value>
+  </data>
+  <data name="Plan" xml:space="preserve">
+    <value>Plan</value>
+  </data>
+  <data name="PleaseChoose" xml:space="preserve">
+    <value>Please Choose</value>
+  </data>
+  <data name="PrintQuestion" xml:space="preserve">
+    <value>Print?</value>
+  </data>
+  <data name="PurchasePrice" xml:space="preserve">
+    <value>Purchase Price</value>
+  </data>
+  <data name="RateProfilesButton" xml:space="preserve">
+    <value>Rate Profiles</value>
+  </data>
+  <data name="RateProfile_2ndTaxBegins" xml:space="preserve">
+    <value>Amount 2nd Tax Rate Begins.</value>
+  </data>
+  <data name="RateProfile_2ndTaxRate" xml:space="preserve">
+    <value>2nd Tax Rate</value>
+  </data>
+  <data name="RateProfile_Add2Stage" xml:space="preserve">
+    <value>Add for 2 Stage</value>
+  </data>
+  <data name="RateProfile_Add2Tone" xml:space="preserve">
+    <value>Add for 2 Tone</value>
+  </data>
+  <data name="RateProfile_Add3Stage" xml:space="preserve">
+    <value>Add for 3 Stage</value>
+  </data>
+  <data name="RateProfile_AddForBlend" xml:space="preserve">
+    <value>Add for Blend</value>
+  </data>
+  <data name="RateProfile_AddForEdging" xml:space="preserve">
+    <value>Add for Edging</value>
+  </data>
+  <data name="RateProfile_AddForUnderside" xml:space="preserve">
+    <value>Add for Underside</value>
+  </data>
+  <data name="RateProfile_AdditionalOptions" xml:space="preserve">
+    <value>Additional Options</value>
+  </data>
+  <data name="RateProfile_AdditionalTaxLevels" xml:space="preserve">
+    <value>Additional Tax Levels</value>
+  </data>
+  <data name="RateProfile_AllowDeductions" xml:space="preserve">
+    <value>Allow Deductions</value>
+  </data>
+  <data name="RateProfile_AllowEdging" xml:space="preserve">
+    <value>Allow the Adding of Edging and Interior Surface times</value>
+  </data>
+  <data name="RateProfile_AllowPaintOverlap" xml:space="preserve">
+    <value>Show Paint Options Box when Replacing Parts</value>
+  </data>
+  <data name="RateProfile_AllRates" xml:space="preserve">
+    <value>All Rates</value>
+  </data>
+  <data name="RateProfile_CapAmount" xml:space="preserve">
+    <value>Cap Amount</value>
+  </data>
+  <data name="RateProfile_CapNote" xml:space="preserve">
+    <value>Apply caps</value>
+  </data>
+  <data name="RateProfile_CapType" xml:space="preserve">
+    <value>Cap Type?</value>
+  </data>
+  <data name="RateProfile_ChangeNote" xml:space="preserve">
+    <value>Changes will affect all Estimates that use this Rate Profile unless the Estimates profile information has already changed.</value>
+  </data>
+  <data name="RateProfile_ContactInfoPrint" xml:space="preserve">
+    <value>Contact Info Print View</value>
+  </data>
+  <data name="RateProfile_CopyFromDefault" xml:space="preserve">
+    <value>Copy From Default</value>
+  </data>
+  <data name="RateProfile_CreateNew" xml:space="preserve">
+    <value>Create New</value>
+  </data>
+  <data name="RateProfile_DefaultNote" xml:space="preserve">
+    <value>Use this profile's preset charges in all profiles.</value>
+  </data>
+  <data name="RateProfile_DefaultProfile" xml:space="preserve">
+    <value>Default Profile</value>
+  </data>
+  <data name="RateProfile_DisableDefault" xml:space="preserve">
+    <value>Do not use default profile</value>
+  </data>
+  <data name="RateProfile_EdgesAndLockPillars" xml:space="preserve">
+    <value>Edges and Lock Pillars</value>
+  </data>
+  <data name="RateProfile_EnableDefault" xml:space="preserve">
+    <value>Enable default profile</value>
+  </data>
+  <data name="RateProfile_EstimateReportNotes" xml:space="preserve">
+    <value>Estimate Report Notes</value>
+  </data>
+  <data name="RateProfile_EstimateReportOptions" xml:space="preserve">
+    <value>Estimate Report Options</value>
+  </data>
+  <data name="RateProfile_ExternalNotes" xml:space="preserve">
+    <value>External Notes</value>
+  </data>
+  <data name="RateProfile_FooterNotes" xml:space="preserve">
+    <value>Enter notes to display in report footer.  (Max. 4000 Characters)</value>
+  </data>
+  <data name="RateProfile_GrayBars" xml:space="preserve">
+    <value>Print alternating gray bars on report.</value>
+  </data>
+  <data name="RateProfile_InnerPanels" xml:space="preserve">
+    <value>Inner Panels</value>
+  </data>
+  <data name="RateProfile_InternalNotes" xml:space="preserve">
+    <value>Internal Notes Only. "Internal Use Only" will appear on report</value>
+  </data>
+  <data name="RateProfile_LabelFormat" xml:space="preserve">
+    <value>Label Format</value>
+  </data>
+  <data name="RateProfile_LargeFonts" xml:space="preserve">
+    <value>User Larger Fonts</value>
+  </data>
+  <data name="RateProfile_LineFormat" xml:space="preserve">
+    <value>Line Format</value>
+  </data>
+  <data name="RateProfile_LockedEstimate" xml:space="preserve">
+    <value>Rate Information cannot be edited on a locked estimate.</value>
+  </data>
+  <data name="RateProfile_NoHeaderLogo" xml:space="preserve">
+    <value>No Header Logo</value>
+  </data>
+  <data name="RateProfile_NoInsuranceSection" xml:space="preserve">
+    <value>No Insurance Section</value>
+  </data>
+  <data name="RateProfile_NoPhotoPage" xml:space="preserve">
+    <value>No Photo Page</value>
+  </data>
+  <data name="RateProfile_OverlapPanel" xml:space="preserve">
+    <value>Overlap Panel Deduction Times</value>
+  </data>
+  <data name="RateProfile_PaintAndFinish" xml:space="preserve">
+    <value>Paint and Finish</value>
+  </data>
+  <data name="RateProfile_PaintFinishSetup" xml:space="preserve">
+    <value>Paint and Finish Setup</value>
+  </data>
+  <data name="RateProfile_PresetChargesNote" xml:space="preserve">
+    <value>Changes will affect all Estimates that use this Rate Profile unless the Estimates profile information has already changed.</value>
+  </data>
+  <data name="RateProfile_PrintEstimateNumber" xml:space="preserve">
+    <value>Print Estimate Number (Est#)</value>
+  </data>
+  <data name="RateProfile_PrintEstimator" xml:space="preserve">
+    <value>Print Estimator / Appraiser</value>
+  </data>
+  <data name="RateProfile_PrintID" xml:space="preserve">
+    <value>Print ID (ID#)</value>
+  </data>
+  <data name="RateProfile_Printing" xml:space="preserve">
+    <value>Printing</value>
+  </data>
+  <data name="RateProfile_PrintingNote" xml:space="preserve">
+    <value>Changes will affect all Estimates that use this Rate Profile unless the Estimates profile information has already changed.</value>
+  </data>
+  <data name="RateProfile_PrintPaymentInfo" xml:space="preserve">
+    <value>Print Payment Info</value>
+  </data>
+  <data name="RateProfile_ProfileName" xml:space="preserve">
+    <value>Profile Name</value>
+  </data>
+  <data name="RateProfile_ProfileRates" xml:space="preserve">
+    <value>Profile Rates</value>
+  </data>
+  <data name="RateProfile_Rate" xml:space="preserve">
+    <value>Rate</value>
+  </data>
+  <data name="RateProfile_RatesChangesNote" xml:space="preserve">
+    <value>Changes will affect all Estimates that use this Rate Profile unless the Estimates profile information has already changed.</value>
+  </data>
+  <data name="RateProfile_RateTableNote" xml:space="preserve">
+    <value>Select other category to include in</value>
+  </data>
+  <data name="RateProfile_Select" xml:space="preserve">
+    <value>Select Rate Profile</value>
+  </data>
+  <data name="RateProfile_SelectContactInfoDisplay" xml:space="preserve">
+    <value>Select how "Contact Information" displays in report.</value>
+  </data>
+  <data name="RateProfile_SelectImageQuality" xml:space="preserve">
+    <value>Select the Image Quality</value>
+  </data>
+  <data name="RateProfile_UndersidesAndInterior" xml:space="preserve">
+    <value>Undersides and Interior Surfaces</value>
+  </data>
+  <data name="RateProfile_UseDollarsInsteadOfLaborTime" xml:space="preserve">
+    <value>Print report using dollars instead of labor time</value>
+  </data>
+  <data name="RateProfile_UsePresetChargesAll" xml:space="preserve">
+    <value>Use this profile's preset charges in all profiles.</value>
+  </data>
+  <data name="RateProfile_UsePrestChargesInAll" xml:space="preserve">
+    <value>Use this profile's preset charges in all profiles.</value>
+  </data>
+  <data name="RenewSubscription_AnnualUpdateFee" xml:space="preserve">
+    <value>Annual Update Fee</value>
+  </data>
+  <data name="RenewSubscription_AutoWithdrawn" xml:space="preserve">
+    <value>Payments will be automatically withdrawn</value>
+  </data>
+  <data name="RenewSubscription_EMSDescription" xml:space="preserve">
+    <value>The Estimating Management System (EMS) is the Collision Industry’s standard for importing your estimate data into another software program electronically.
+This is often used for part procurement programs, shop management systems, accounting software, etc.
+Enabling this function allows the Web-Est customer to convert the estimate data to a binary format,
+the Web-Est user is still able to create an image for printing, saving or emailing as the normal operations of the Web-Est software.</value>
+  </data>
+  <data name="RenewSubscription_EMSQuestion" xml:space="preserve">
+    <value>Would you like to add the EMS Communications Package to your subscription?</value>
+  </data>
+  <data name="RenewSubscription_FLTax" xml:space="preserve">
+    <value>Plus FL sales tax, if applicable</value>
+  </data>
+  <data name="RenewSubscription_FrameDataQuestion" xml:space="preserve">
+    <value>Would you like to add Frame Data to your subscription?</value>
+  </data>
+  <data name="RenewSubscription_MonthlyPaymentsOf" xml:space="preserve">
+    <value>Monthly payments of</value>
+  </data>
+  <data name="RenewSubscription_NoSubscription" xml:space="preserve">
+    <value>At this time, you do not have an active Web-Est subscription.  In order to continue using Web-Est, you must create a new subscription.  Please call our office at (888) 932-3780 with any questions or concerns.
+
+Select the subscription plan that best fits your needs:</value>
+  </data>
+  <data name="RenewSubscription_NoThankyou" xml:space="preserve">
+    <value>No, thank you</value>
+  </data>
+  <data name="RenewSubscription_PaymentOf" xml:space="preserve">
+    <value>Payment of</value>
+  </data>
+  <data name="RenewSubscription_Title" xml:space="preserve">
+    <value>Subscription Renewal</value>
+  </data>
+  <data name="RepairsOnly" xml:space="preserve">
+    <value>Repairs Only</value>
+  </data>
+  <data name="RepeatPassword" xml:space="preserve">
+    <value>Repeat Password</value>
+  </data>
+  <data name="Reports_AuthorizationLetter" xml:space="preserve">
+    <value>Authorization Letter</value>
+  </data>
+  <data name="Reports_CustomerLetter" xml:space="preserve">
+    <value>Customer Letter</value>
+  </data>
+  <data name="Reports_DealerLetter" xml:space="preserve">
+    <value>Dealer Letter </value>
+  </data>
+  <data name="Reports_DirectionOfPaymentLetter" xml:space="preserve">
+    <value>Direction of Payment Letter</value>
+  </data>
+  <data name="Reports_EstimateApproval" xml:space="preserve">
+    <value>Estimate Approval</value>
+  </data>
+  <data name="Reports_FinalReport" xml:space="preserve">
+    <value>Final Report</value>
+  </data>
+  <data name="Reports_FollowUpLetter" xml:space="preserve">
+    <value>Follow Up Letter</value>
+  </data>
+  <data name="Reports_NeedMore" xml:space="preserve">
+    <value>Need more letters? Email us your request. Include as much detail about the letter as you can.</value>
+  </data>
+  <data name="Reports_OtherReports" xml:space="preserve">
+    <value>Other Reports</value>
+  </data>
+  <data name="Reports_PartsOrder" xml:space="preserve">
+    <value>Parts Order</value>
+  </data>
+  <data name="Reports_ThankYouLetter" xml:space="preserve">
+    <value>Thank You Letter</value>
+  </data>
+  <data name="Reports_WorkOrders" xml:space="preserve">
+    <value>Work Orders</value>
+  </data>
+  <data name="Retail" xml:space="preserve">
+    <value>Retail</value>
+  </data>
+  <data name="SalesTax" xml:space="preserve">
+    <value>Sales Tax</value>
+  </data>
+  <data name="SelectExistingCustomer" xml:space="preserve">
+    <value>Select Existing Customer</value>
+  </data>
+  <data name="SelectInsuranceCompanies" xml:space="preserve">
+    <value>Select Insurance Companies</value>
+  </data>
+  <data name="SelectPOI" xml:space="preserve">
+    <value>Select POI</value>
+  </data>
+  <data name="SelectState" xml:space="preserve">
+    <value>Select State</value>
+  </data>
+  <data name="Settings_EstReportPreference" xml:space="preserve">
+    <value>Estimate Report Preference</value>
+  </data>
+  <data name="Settings_GraphicalSize" xml:space="preserve">
+    <value>What size for the graphical viewer?</value>
+  </data>
+  <data name="Settings_ImageOnEstimate" xml:space="preserve">
+    <value>Image on Printed Estimate</value>
+  </data>
+  <data name="Settings_KeepOldPrintouts" xml:space="preserve">
+    <value>Keep old printouts so I can print them later</value>
+  </data>
+  <data name="Settings_LanguagePreference" xml:space="preserve">
+    <value>Language Preference</value>
+  </data>
+  <data name="Settings_LargeFonts" xml:space="preserve">
+    <value>Large Fonts</value>
+  </data>
+  <data name="Settings_OnContactInfoPage" xml:space="preserve">
+    <value>On contact information page</value>
+  </data>
+  <data name="Settings_OnlyRecent" xml:space="preserve">
+    <value>I only need the most recent printout</value>
+  </data>
+  <data name="Settings_OnOwnPage" xml:space="preserve">
+    <value>On own page</value>
+  </data>
+  <data name="Settings_ProgramPreferences" xml:space="preserve">
+    <value>Program Preferences</value>
+  </data>
+  <data name="Settings_ReportPreferences" xml:space="preserve">
+    <value>Report Preferences</value>
+  </data>
+  <data name="Settings_ShowAppraiserInstead" xml:space="preserve">
+    <value>Show Appraiser instead of Estimator</value>
+  </data>
+  <data name="Settings_ShowLaborTime" xml:space="preserve">
+    <value>Show Labor Times on Work Orders</value>
+  </data>
+  <data name="Settings_ShowRepairProfiles" xml:space="preserve">
+    <value>Show Repair Profiles</value>
+  </data>
+  <data name="Settings_SmallFonts" xml:space="preserve">
+    <value>Small Fonts</value>
+  </data>
+  <data name="Settings_WhereEstInfo" xml:space="preserve">
+    <value>Where do you want estimate information?</value>
+  </data>
+  <data name="SignAgreement_Header" xml:space="preserve">
+    <value>Please sign the Web-Est End User License Agreement to regain access to your account.</value>
+  </data>
+  <data name="SignAgreement_SaveAndContinue" xml:space="preserve">
+    <value>Save and Continue to Agreement</value>
+  </data>
+  <data name="SignAgreement_Text" xml:space="preserve">
+    <value>As part of Web-Est's data license agreement with Mitchell International (our data provider), an annual agreement must be executed by all user accounts.
+The agreement is predominately for the purpose of protecting the Mitchell data from missuse or its unauthorized re-sell.
+Signing the user agreement is a requirement in order to continue to have access to your Web-Est account.
+Please click the "Sign Agreement" button below to view and sign the user agreement.</value>
+  </data>
+  <data name="SignAgreement_Verify" xml:space="preserve">
+    <value>Before signing your agreement, please verify that the information below is correct.
+Make any necessary changes, and then click the "Save and Continue" button below.</value>
+  </data>
+  <data name="Small" xml:space="preserve">
+    <value>Small</value>
+  </data>
+  <data name="Submit" xml:space="preserve">
+    <value>Submit</value>
+  </data>
+  <data name="SubscriptionConfirmation_DetailsBelow" xml:space="preserve">
+    <value>Your subscription details and payment schedule are below</value>
+  </data>
+  <data name="SubscriptionConfirmation_EMSInvoices" xml:space="preserve">
+    <value>EMS Invoices</value>
+  </data>
+  <data name="SubscriptionConfirmation_FrameDataInvoices" xml:space="preserve">
+    <value>Frame Data Invoices</value>
+  </data>
+  <data name="Supplies" xml:space="preserve">
+    <value>Supplies</value>
+  </data>
+  <data name="Support_CreateReports" xml:space="preserve">
+    <value>Create Reports</value>
+  </data>
+  <data name="Support_FrameData" xml:space="preserve">
+    <value>Using Frame Data</value>
+  </data>
+  <data name="Support_MobileTablet" xml:space="preserve">
+    <value>ProEstimator Mobile and Tablet</value>
+  </data>
+  <data name="Support_NewEstimate" xml:space="preserve">
+    <value>Create a New Estimate</value>
+  </data>
+  <data name="Support_Note" xml:space="preserve">
+    <value>Watch the videos below to learn more about ProEstimator.</value>
+  </data>
+  <data name="Support_PartSearch" xml:space="preserve">
+    <value>Search For Parts</value>
+  </data>
+  <data name="Support_ProEIntro" xml:space="preserve">
+    <value>ProEstimator Introduction</value>
+  </data>
+  <data name="Support_SelectVendors" xml:space="preserve">
+    <value>Select Vendors</value>
+  </data>
+  <data name="Support_SendEstimate" xml:space="preserve">
+    <value>Send an Estimate</value>
+  </data>
+  <data name="Support_Settings" xml:space="preserve">
+    <value>Set ProEstimator Settings</value>
+  </data>
+  <data name="Support_ShopWorkflow" xml:space="preserve">
+    <value>Manage Shop Work Flow</value>
+  </data>
+  <data name="Support_Title" xml:space="preserve">
+    <value>ProEstimator Training and Support</value>
+  </data>
+  <data name="Tax" xml:space="preserve">
+    <value>Tax</value>
+  </data>
+  <data name="Taxable" xml:space="preserve">
+    <value>Taxable</value>
+  </data>
+  <data name="Taxes" xml:space="preserve">
+    <value>Taxes</value>
+  </data>
+  <data name="Taxes_AirConditioning" xml:space="preserve">
+    <value>Air Conditioning Coolant Refilling?</value>
+  </data>
+  <data name="Taxes_ChargeForSupplies" xml:space="preserve">
+    <value>Charge for supplies on</value>
+  </data>
+  <data name="Taxes_RadiatorCoolant" xml:space="preserve">
+    <value>Radiator Coolant Refilling?</value>
+  </data>
+  <data name="TaxRate" xml:space="preserve">
+    <value>Tax Rate</value>
+  </data>
+  <data name="Tax_AimHeadlightsRequired" xml:space="preserve">
+    <value>Aiming of Headlights is required</value>
+  </data>
+  <data name="Tax_AutomaticCharges" xml:space="preserve">
+    <value>Automatic Charges</value>
+  </data>
+  <data name="Tax_PowerUnitsRequired" xml:space="preserve">
+    <value>Power Units are Required</value>
+  </data>
+  <data name="Tax_RefrigerantRecoverRequired" xml:space="preserve">
+    <value>Refrigerant Recovery is Required</value>
+  </data>
+  <data name="Tax_SuppressAddRelatedPrompt" xml:space="preserve">
+    <value>Suppress the "Add Related Operations" prompt</value>
+  </data>
+  <data name="Tax_TextForLKQ" xml:space="preserve">
+    <value>Text to use for LKQ part numbers</value>
+  </data>
+  <data name="Tax_TotalLossPercentage" xml:space="preserve">
+    <value>Total Loss Percentage</value>
+  </data>
+  <data name="TechSupport" xml:space="preserve">
+    <value>Tech Support</value>
+  </data>
+  <data name="ThankYou" xml:space="preserve">
+    <value>Thank You!</value>
+  </data>
+  <data name="Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="TotalPaid" xml:space="preserve">
+    <value>Total Paid</value>
+  </data>
+  <data name="TotalRemaining" xml:space="preserve">
+    <value>Total Remaining</value>
+  </data>
+  <data name="Vehicle_Country" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="Vehicle_ManualEntry" xml:space="preserve">
+    <value>Manual Entry</value>
+  </data>
+  <data name="Vehicle_ManualEntryNote" xml:space="preserve">
+    <value>Note: You will have to use Manual Entry to create an estimate, the graphical page is not available for manually entered vehicles.</value>
+  </data>
+  <data name="Vehicle_Manufacturer" xml:space="preserve">
+    <value>Manufacturer</value>
+  </data>
+  <data name="VendorName" xml:space="preserve">
+    <value>Vendor Name</value>
+  </data>
+  <data name="VendorPartNumber" xml:space="preserve">
+    <value>Vendor Part #</value>
+  </data>
+  <data name="Vendors_CanBeSeenByAll" xml:space="preserve">
+    <value>Can be seen by all users</value>
+  </data>
+  <data name="Vendors_CheckBoxNote" xml:space="preserve">
+    <value>Check the box next to the vendors you would like to include in your price lists.
+They will also appear in your vendor address lists when selected.</value>
+  </data>
+  <data name="Vendors_CreateNewVendor" xml:space="preserve">
+    <value>Create New Vendor</value>
+  </data>
+  <data name="Vendors_DeleteVendorInfo" xml:space="preserve">
+    <value>Delete Vendor Info</value>
+  </data>
+  <data name="Vendors_Note" xml:space="preserve">
+    <value>Don't see a vendor that you want to use?
+Ask them to send us their price files and address information to help@web-est.com.
+They can call Tech Support 888-932-3780 x 203 if they have any problems or need more information.</value>
+  </data>
+  <data name="Vendors_Save" xml:space="preserve">
+    <value>Save Vendor Info</value>
+  </data>
+  <data name="View" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="VinSearch_InvalidPlateState" xml:space="preserve">
+    <value>Invalid Plate/State</value>
+  </data>
+  <data name="VinSearch_InvalidVin" xml:space="preserve">
+    <value>Invalid VIN</value>
+  </data>
+  <data name="VinSearch_LookupFromLicense" xml:space="preserve">
+    <value>Lookup VIN from License</value>
+  </data>
+  <data name="VinSearch_NoMatches" xml:space="preserve">
+    <value>No matches for this VIN.  &lt;br /&gt;Please manually choose the vehicle from the drop-downs in Section 1, below.</value>
+  </data>
+  <data name="WebEstAddress1" xml:space="preserve">
+    <value>3905 Tampa Road #1517</value>
+  </data>
+  <data name="WebEstAddress2" xml:space="preserve">
+    <value>Oldsmar, FL 34677</value>
+  </data>
+  <data name="WebEstInvoices" xml:space="preserve">
+    <value>Web-Est Invoices</value>
+  </data>
+  <data name="WhatsThis" xml:space="preserve">
+    <value>What's this?</value>
+  </data>
+  <data name="ImageDataSaved" xml:space="preserve">
+    <value>Image data saved.</value>
+  </data>
+  <data name="TotalLoss" xml:space="preserve">
+    <value>Total Loss</value>
+  </data>
+  <data name="Internal" xml:space="preserve">
+    <value>Internal</value>
+  </data>
+  <data name="Recipients" xml:space="preserve">
+    <value>Recipients</value>
+  </data>
+  <data name="Vendor" xml:space="preserve">
+    <value>Vendor</value>
+  </data>
+  <data name="SelectVendor" xml:space="preserve">
+    <value>Select Vendor</value>
+  </data>
+  <data name="RateProfile_Cap" xml:space="preserve">
+    <value>Cap?</value>
+  </data>
+  <data name="Support_ImportantLinks" xml:space="preserve">
+    <value>Important Links</value>
+  </data>
+  <data name="BettermentType" xml:space="preserve">
+    <value>Betterment Type</value>
+  </data>
+  <data name="BettermentTypeNone" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="BettermentTypePercent" xml:space="preserve">
+    <value>%</value>
+  </data>
+  <data name="BettermentTypeValue" xml:space="preserve">
+    <value>$</value>
+  </data>
+  <data name="BettermentLabor" xml:space="preserve">
+    <value>Labor</value>
+  </data>
+  <data name="BettermentMaterials" xml:space="preserve">
+    <value>Paint Materials</value>
+  </data>
+  <data name="BettermentPaint" xml:space="preserve">
+    <value>Paint Labor</value>
+  </data>
+  <data name="BettermentParts" xml:space="preserve">
+    <value>Parts</value>
+  </data>
+  <data name="Invoice_PaymentNum" xml:space="preserve">
+    <value>Payment #</value>
+  </data>
+  <data name="Billing_SelectContract" xml:space="preserve">
+    <value>Select Contract</value>
+  </data>
+  <data name="Graphical_AddManual" xml:space="preserve">
+    <value>Add Manual</value>
+  </data>
+  <data name="SendSMS_EnterPhoneNumbers" xml:space="preserve">
+    <value>Please enter at least one phone number.</value>
+  </data>
+  <data name="SendSMS_Success" xml:space="preserve">
+    <value>SMS Sent</value>
+  </data>
+  <data name="TimeStamp" xml:space="preserve">
+    <value>Time Stamp</value>
+  </data>
+  <data name="PayByAccountNote" xml:space="preserve">
+    <value>Note: Paying with a saved bank account adds an additional fee of #1#</value>
+  </data>
+  <data name="PromoCode_Invalid" xml:space="preserve">
+    <value>Invalid promo code</value>
+  </data>
+  <data name="Billing_ChangeContract" xml:space="preserve">
+    <value>Change Contract</value>
+  </data>
+  <data name="Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="ButtonAdd" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="ButtonUpdate" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="NoInvoicesDue" xml:space="preserve">
+    <value>There are no invoices due at this time.</value>
+  </data>
+  <data name="SendEstimate_AttachPDF" xml:space="preserve">
+    <value>Attach PDF in SMS</value>
+  </data>
+  <data name="SendEMS_Success" xml:space="preserve">
+    <value>EMS Queued for processing</value>
+  </data>
+  <data name="Link_AddEMS" xml:space="preserve">
+    <value>Add EMS Contract</value>
+  </data>
+  <data name="SearchDescOrNumber" xml:space="preserve">
+    <value>Part Number or Description</value>
+  </data>
+  <data name="CompanyProfileLocked" xml:space="preserve">
+    <value>The company profile is locked.  To edit this information please contact support.</value>
+  </data>
+  <data name="Message_AutoPayForcedOn" xml:space="preserve">
+    <value>Auto pay is locked on because of the contract terms.</value>
+  </data>
+  <data name="InvalidLoginCode" xml:space="preserve">
+    <value>Invalid login code.</value>
+  </data>
+  <data name="ProductionYear" xml:space="preserve">
+    <value>Production Year</value>
+  </data>
+  <data name="Subject" xml:space="preserve">
+    <value>Subject</value>
+  </data>
+  <data name="RateProfile_AddForThreeTwoBlend" xml:space="preserve">
+    <value>Add For 3 Stage / 2 Tone Blend</value>
+  </data>
+  <data name="VehicleAccessoriesHeader" xml:space="preserve">
+    <value>Accessories</value>
+  </data>
+  <data name="PDR" xml:space="preserve">
+    <value>PDR</value>
+  </data>
+  <data name="ProductionMonth" xml:space="preserve">
+    <value>Production Month</value>
+  </data>
+  <data name="IncludeImagesInPDF" xml:space="preserve">
+    <value>Include Images In PDF</value>
+  </data>
+  <data name="ProductionDate" xml:space="preserve">
+    <value>Production Date</value>
+  </data>
+  <data name="SaveInsuranceProfile" xml:space="preserve">
+    <value>Save Insurance Profile</value>
+  </data>
+  <data name="ForgotPassword" xml:space="preserve">
+    <value>Forgot password?</value>
+  </data>
+  <data name="ForgotPasswordNotFound" xml:space="preserve">
+    <value>No account was found for the submitted e-mail address.</value>
+  </data>
+  <data name="ForgotPasswordEmailBody" xml:space="preserve">
+    <value>Hello,
+
+Your ProEstimator password is: #password#
+
+If you have any issues logging in please contact tech support at (888) 932-3780 x203
+
+Thank you.</value>
+  </data>
+  <data name="ForgotPasswordEmailSubject" xml:space="preserve">
+    <value>ProEstimator Password Recovery</value>
+  </data>
+  <data name="ForgotPasswordSuccessMessage" xml:space="preserve">
+    <value>Your password was sent to the entered email address.</value>
+  </data>
+  <data name="RateProfile_Multipliers" xml:space="preserve">
+    <value>Multipliers</value>
+  </data>
+  <data name="RenewSubscription_PDRDescription" xml:space="preserve">
+    <value>This is a description of PDR</value>
+  </data>
+  <data name="RenewSubscription_PDRQuestion" xml:space="preserve">
+    <value>Would you like to add PDR to your subscription?</value>
+  </data>
+  <data name="AddContract" xml:space="preserve">
+    <value>Add Contract</value>
+  </data>
+  <data name="SubscriptionConfirmation_PDRInvoices" xml:space="preserve">
+    <value>PDR Invoices</value>
+  </data>
+  <data name="Status_Paid" xml:space="preserve">
+    <value>Paid</value>
+  </data>
+  <data name="EditPDRRateProfile" xml:space="preserve">
+    <value>Edit PDR Rate Profile</value>
+  </data>
+  <data name="AdditionalPanels" xml:space="preserve">
+    <value>Additional Panels</value>
+  </data>
+  <data name="SaveAndClose" xml:space="preserve">
+    <value>Save &amp; Close</value>
+  </data>
+  <data name="Survey" xml:space="preserve">
+    <value>Renewal Survey</value>
+  </data>
+  <data name="Survey_Comments" xml:space="preserve">
+    <value>Comments</value>
+  </data>
+  <data name="Survey_DontLike" xml:space="preserve">
+    <value>I do not like the software.</value>
+  </data>
+  <data name="Survey_DRP" xml:space="preserve">
+    <value>I'm moving to a Direct Repair Program and must change software.</value>
+  </data>
+  <data name="Survey_Other" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="Survey_Skip" xml:space="preserve">
+    <value>Skip for now</value>
+  </data>
+  <data name="Survey_Slow" xml:space="preserve">
+    <value>Slow or closing business.</value>
+  </data>
+  <data name="Survey_Undecided" xml:space="preserve">
+    <value>I am undecided.</value>
+  </data>
+  <data name="Survey_WillNotRenew" xml:space="preserve">
+    <value>I do not plan on renewing.</value>
+  </data>
+  <data name="Survey_WillRenew" xml:space="preserve">
+    <value>I plan on renewing.</value>
+  </data>
+  <data name="RateProfile_After" xml:space="preserve">
+    <value>after</value>
+  </data>
+  <data name="RateProfile_Before" xml:space="preserve">
+    <value>before</value>
+  </data>
+  <data name="RateProfile_CapNote_End" xml:space="preserve">
+    <value>being included.</value>
+  </data>
+  <data name="RateProfile_MarkupNote" xml:space="preserve">
+    <value>For Discount/Markup, enter 10 for 10% markup, -10 for 10% discount.</value>
+  </data>
+  <data name="PartsNow" xml:space="preserve">
+    <value>Order Parts from PartsNow</value>
+  </data>
+  <data name="RepairOrderNumber" xml:space="preserve">
+    <value>Repair Order #</value>
+  </data>
+  <data name="PurchaseOrderNumber" xml:space="preserve">
+    <value>Purchase Order Number</value>
+  </data>
+  <data name="StockNumber" xml:space="preserve">
+    <value>Stock Number</value>
+  </data>
+  <data name="ViewDeletedProfiles" xml:space="preserve">
+    <value>View Deleted Profiles</value>
+  </data>
+  <data name="RestoreSelected" xml:space="preserve">
+    <value>Restore Selected</value>
+  </data>
+  <data name="OpenEstimate_Filter_Deleted" xml:space="preserve">
+    <value>Deleted</value>
+  </data>
+  <data name="EstimateStatus_Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="EstimateStatus_Deleted" xml:space="preserve">
+    <value>Deleted</value>
+  </data>
+  <data name="ProfileMessage_Estimate" xml:space="preserve">
+    <value>This rate profile belongs to the current estimate.  Changes here apply only to the current estimate, not the global profile.  To edit a global profile select the Rates section from the main menu.</value>
+  </data>
+  <data name="ProfileMessage_Global" xml:space="preserve">
+    <value>This is a global rate profile, changes here will not effect current estimates which each have their own copy of a rate profile.</value>
+  </data>
+  <data name="Message_GlobalProfileUneditable" xml:space="preserve">
+    <value>Global rate profiles cannot be edited while an estimate is open.</value>
+  </data>
+  <data name="MessageChangeImageSize" xml:space="preserve">
+    <value>Caution:  Changing this setting may result in the file being too large to email</value>
+  </data>
+  <data name="Restore" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="CardHasErrorMessage" xml:space="preserve">
+    <value>There was an error the last time we tried to process your card.  Please address the issue or change card information.  No more payment attempts will be made until you clear the error with the button below.</value>
+  </data>
+  <data name="RateProfile_PrintVendors" xml:space="preserve">
+    <value>Print Vendors</value>
+  </data>
+  <data name="RenewSubscription_MultiUserQuestion" xml:space="preserve">
+    <value>Would you like to add Multi User to your subscription?</value>
+  </data>
+  <data name="RenewSubscription_MUDescription" xml:space="preserve">
+    <value />
+  </data>
+  <data name="SubscriptionConfirmation_MUInvoices" xml:space="preserve">
+    <value>Multi User Invoices</value>
+  </data>
+  <data name="Advanced" xml:space="preserve">
+    <value>Advanced</value>
+  </data>
+  <data name="EmailCC" xml:space="preserve">
+    <value>CC</value>
+  </data>
+  <data name="EmailTo" xml:space="preserve">
+    <value>To</value>
+  </data>
+  <data name="EMS" xml:space="preserve">
+    <value>EMS</value>
+  </data>
+  <data name="SMS" xml:space="preserve">
+    <value>SMS</value>
+  </data>
+  <data name="Reports_Estimate" xml:space="preserve">
+    <value>Estimate</value>
+  </data>
+  <data name="Details_SupplementHeader" xml:space="preserve">
+    <value>Supplement</value>
+  </data>
+  <data name="Details_SupplementNote" xml:space="preserve">
+    <value>Click Create Supplement to lock current estimate and begin a new supplement.</value>
+  </data>
+  <data name="Database" xml:space="preserve">
+    <value>Database</value>
+  </data>
+  <data name="PageTitle_CustomReports" xml:space="preserve">
+    <value>Custom Reports</value>
+  </data>
+  <data name="PageTitle_CustomerSearch" xml:space="preserve">
+    <value>Customer Search</value>
+  </data>
+  <data name="CopyEstimate_BlankCustomer" xml:space="preserve">
+    <value>Create New Customer</value>
+  </data>
+  <data name="Reports_CustomReports" xml:space="preserve">
+    <value>Custom Reports</value>
+  </data>
+  <data name="SavedCustomerList" xml:space="preserve">
+    <value>Saved Customer List</value>
+  </data>
+  <data name="RenewSubscription_QBExporterQuestion" xml:space="preserve">
+    <value>Would you like to add the QB Exporter to your subscription?</value>
+  </data>
+  <data name="PageTitle_ContactWebEst" xml:space="preserve">
+    <value>Contact</value>
+  </data>
+  <data name="ClearSearch" xml:space="preserve">
+    <value>Clear Search</value>
+  </data>
+  <data name="CreateNewEstimate" xml:space="preserve">
+    <value>Create New Estimate</value>
+  </data>
+  <data name="Customer" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="DeleteSelectedCustomers" xml:space="preserve">
+    <value>Delete Selected Customers</value>
+  </data>
+  <data name="DeleteSelectedEstimates" xml:space="preserve">
+    <value>Delete Selected Estimates</value>
+  </data>
+  <data name="EstimateID" xml:space="preserve">
+    <value>Estimate ID</value>
+  </data>
+  <data name="PickContract" xml:space="preserve">
+    <value>Pick Contract</value>
+  </data>
+  <data name="RestoreSelectedCustomers" xml:space="preserve">
+    <value>Restore Selected Customers</value>
+  </data>
+  <data name="RestoreSelectedEstimates" xml:space="preserve">
+    <value>Restore Selected Estimates</value>
+  </data>
+  <data name="RONumber" xml:space="preserve">
+    <value>R/O #</value>
+  </data>
+  <data name="SaveCustomer" xml:space="preserve">
+    <value>Save Customer</value>
+  </data>
+  <data name="SearchForExistingCustomer" xml:space="preserve">
+    <value>Search for an existing customer</value>
+  </data>
+  <data name="SecondaryEmail" xml:space="preserve">
+    <value>Secondary Email</value>
+  </data>
+  <data name="ShowHideGridColumn" xml:space="preserve">
+    <value>Show/Hide Grid Column</value>
+  </data>
+  <data name="ViewDetails" xml:space="preserve">
+    <value>View Details</value>
+  </data>
+  <data name="ViewEstimates" xml:space="preserve">
+    <value>View Estimates</value>
+  </data>
+  <data name="Address" xml:space="preserve">
+    <value>Address</value>
+  </data>
+  <data name="EmailAddress" xml:space="preserve">
+    <value>Email Address</value>
+  </data>
+  <data name="Import" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="LastView" xml:space="preserve">
+    <value>Last View</value>
+  </data>
+  <data name="MakePayment" xml:space="preserve">
+    <value>Make Payment</value>
+  </data>
+  <data name="Open" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="PhoneNumber" xml:space="preserve">
+    <value>Phone Number</value>
+  </data>
+  <data name="SearchCustomers" xml:space="preserve">
+    <value>Search For Customers</value>
+  </data>
+  <data name="ZipCode" xml:space="preserve">
+    <value>Zip Code</value>
+  </data>
+  <data name="DigitalSignatureSignContractMessage" xml:space="preserve">
+    <value>Please agree to the Terms Of Service by entering your FULL name and today's date and pressing Submit</value>
+  </data>
+  <data name="EnterYourName" xml:space="preserve">
+    <value>Please enter your name</value>
+  </data>
+  <data name="InvalidEstimateNumber" xml:space="preserve">
+    <value>Invalid estimate number</value>
+  </data>
+  <data name="Feedback" xml:space="preserve">
+    <value>Feedback</value>
+  </data>
+  <data name="MobileNo" xml:space="preserve">
+    <value>Mobile No.</value>
+  </data>
+  <data name="Module" xml:space="preserve">
+    <value>Module</value>
+  </data>
+  <data name="PageTitle_GetFeedback" xml:space="preserve">
+    <value>GetFeedback</value>
+  </data>
+  <data name="SubModule" xml:space="preserve">
+    <value>Sub Module</value>
+  </data>
+  <data name="SuccessfullyAdded" xml:space="preserve">
+    <value>Successfully Added</value>
+  </data>
+  <data name="URL" xml:space="preserve">
+    <value>URL</value>
+  </data>
+  <data name="NewBlankCustomer" xml:space="preserve">
+    <value>New Blank Customer</value>
+  </data>
+  <data name="CreateSupplement" xml:space="preserve">
+    <value>Create Supplement</value>
+  </data>
+  <data name="CustomNote" xml:space="preserve">
+    <value>Custom Note:</value>
+  </data>
+  <data name="ImageTag" xml:space="preserve">
+    <value>Image Tag:</value>
+  </data>
+  <data name="RotateImage" xml:space="preserve">
+    <value>Rotate Image:</value>
+  </data>
+  <data name="SupplementVersion" xml:space="preserve">
+    <value>Supplement Version:</value>
+  </data>
+  <data name="ChangeLog" xml:space="preserve">
+    <value>Change Log</value>
+  </data>
+  <data name="DeleteProfileAlertMessage" xml:space="preserve">
+    <value>Are you sure, you want to delete this profile?</value>
+  </data>
+  <data name="FrameDataContractDeactivated" xml:space="preserve">
+    <value>Your Frame Data contract is currently deactivated</value>
+  </data>
+  <data name="Messages" xml:space="preserve">
+    <value>Messages</value>
+  </data>
+  <data name="SiteChangeLog" xml:space="preserve">
+    <value>Site Change Log</value>
+  </data>
+  <data name="CreateReportTemplate" xml:space="preserve">
+    <value>Create Report Template</value>
+  </data>
+  <data name="QBExport" xml:space="preserve">
+    <value>QB Export</value>
+  </data>
+  <data name="EditYourRateProfile" xml:space="preserve">
+    <value>How to Edit your Rate Profile</value>
+  </data>
+  <data name="MoreInstructions" xml:space="preserve">
+    <value>More Instructions</value>
+  </data>
+  <data name="PDRInstructions" xml:space="preserve">
+    <value>PDR Instructions</value>
+  </data>
+  <data name="RateProfileCreatePresetChanges" xml:space="preserve">
+    <value>Rate Profile:  How to Create Preset Charges</value>
+  </data>
+  <data name="RateProfileInstructions" xml:space="preserve">
+    <value>Rate Profile Instructions</value>
+  </data>
+  <data name="InsuranceCompany" xml:space="preserve">
+    <value>Insurance Company</value>
+  </data>
+  <data name="InsuranceInformation" xml:space="preserve">
+    <value>Insurance Information</value>
+  </data>
+  <data name="NoMoreAddonContractNotAssociatedWithActiveContract" xml:space="preserve">
+    <value>There are no more add on contracts that aren't already associated with the active contract.</value>
+  </data>
+  <data name="SavedAdjusters" xml:space="preserve">
+    <value>Saved Adjusters</value>
+  </data>
+  <data name="SavedClaimReps" xml:space="preserve">
+    <value>Saved Claim Reps</value>
+  </data>
+  <data name="InvalidContractID" xml:space="preserve">
+    <value>Invalid Contract ID</value>
+  </data>
+  <data name="NumberOfPayments" xml:space="preserve">
+    <value>Number Of Payments</value>
+  </data>
+  <data name="PaymentAmount" xml:space="preserve">
+    <value>Payment Amount</value>
+  </data>
+  <data name="Summary" xml:space="preserve">
+    <value>Summary</value>
+  </data>
+  <data name="TermDescription" xml:space="preserve">
+    <value>Term Description</value>
+  </data>
+  <data name="TermTotal" xml:space="preserve">
+    <value>Term Total</value>
+  </data>
+  <data name="ClickHere" xml:space="preserve">
+    <value>Click here</value>
+  </data>
+  <data name="DueInvoices" xml:space="preserve">
+    <value>Due Invoices</value>
+  </data>
+  <data name="InvoiceAmount" xml:space="preserve">
+    <value>Invoice Amount</value>
+  </data>
+  <data name="InvoiceTotal" xml:space="preserve">
+    <value>Invoice Total</value>
+  </data>
+  <data name="NoPaymentAssociatedWithAccount" xml:space="preserve">
+    <value>There is currently no payment information associated with your account.</value>
+  </data>
+  <data name="PastDue" xml:space="preserve">
+    <value>Past Due</value>
+  </data>
+  <data name="PaymentTotal" xml:space="preserve">
+    <value>Payment Total</value>
+  </data>
+  <data name="SaveCard" xml:space="preserve">
+    <value>Save Card</value>
+  </data>
+  <data name="ToReturnOnPreviousScreen" xml:space="preserve">
+    <value>to return on previous screen.</value>
+  </data>
+  <data name="WebEst" xml:space="preserve">
+    <value>Web Est</value>
+  </data>
+  <data name="WebEstPaymentInformation" xml:space="preserve">
+    <value>Web Est payment information</value>
+  </data>
+  <data name="AddOnContracts" xml:space="preserve">
+    <value>Add On Contracts</value>
+  </data>
+  <data name="Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="AutoPay" xml:space="preserve">
+    <value>Auto Pay</value>
+  </data>
+  <data name="Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="ContinueWithAlreadySelected" xml:space="preserve">
+    <value>continue with already selected</value>
+  </data>
+  <data name="DateRange" xml:space="preserve">
+    <value>Date Range</value>
+  </data>
+  <data name="DepositAmount" xml:space="preserve">
+    <value>Deposit Amount</value>
+  </data>
+  <data name="PromoAmount" xml:space="preserve">
+    <value>Promo Amount</value>
+  </data>
+  <data name="PromoCode" xml:space="preserve">
+    <value>Promo Code</value>
+  </data>
+  <data name="SelectAddOnContracts" xml:space="preserve">
+    <value>Select Add On Contracts</value>
+  </data>
+  <data name="SelectContractTerms" xml:space="preserve">
+    <value>Select Contract Terms</value>
+  </data>
+  <data name="SelectedContract" xml:space="preserve">
+    <value>Selected Contract</value>
+  </data>
+  <data name="SignAgreement" xml:space="preserve">
+    <value>Sign Agreement</value>
+  </data>
+  <data name="SubscriptionConfirmation" xml:space="preserve">
+    <value>Subscription Confirmation</value>
+  </data>
+  <data name="AccountEmail" xml:space="preserve">
+    <value>Account Email</value>
+  </data>
+  <data name="RememberLoginNameOrganization" xml:space="preserve">
+    <value>Remember my User Name</value>
+  </data>
+  <data name="BrowserBlockedSite" xml:space="preserve">
+    <value>Your browser blocked the site from opening a new tab, please allow popups for this site</value>
+  </data>
+  <data name="GenerateReport" xml:space="preserve">
+    <value>Generate Report</value>
+  </data>
+  <data name="InvalidProfileID" xml:space="preserve">
+    <value>Invalid profile ID</value>
+  </data>
+  <data name="InvalidReportID" xml:space="preserve">
+    <value>Invalid report ID</value>
+  </data>
+  <data name="MultiplierAdded" xml:space="preserve">
+    <value>Multiplier Added</value>
+  </data>
+  <data name="MultiplierDeleted" xml:space="preserve">
+    <value>Multiplier deleted</value>
+  </data>
+  <data name="NewMultiplier" xml:space="preserve">
+    <value>New Multiplier</value>
+  </data>
+  <data name="Report" xml:space="preserve">
+    <value>Report</value>
+  </data>
+  <data name="ShowDeletedReports" xml:space="preserve">
+    <value>show deleted reports</value>
+  </data>
+  <data name="ClosedRODate" xml:space="preserve">
+    <value>Closed RO Date</value>
+  </data>
+  <data name="CustomerName" xml:space="preserve">
+    <value>Customer Name</value>
+  </data>
+  <data name="ExportedOn" xml:space="preserve">
+    <value>Exported On</value>
+  </data>
+  <data name="ExportRows" xml:space="preserve">
+    <value>Export Rows</value>
+  </data>
+  <data name="InsuranceClaimDetails" xml:space="preserve">
+    <value>Ins Claim Details</value>
+  </data>
+  <data name="NoEstimatesSelectedExportCheckbox" xml:space="preserve">
+    <value>No estimates are selected to export.  Check the box on the left of all estimates to be included in the export.</value>
+  </data>
+  <data name="QBExport_Header" xml:space="preserve">
+    <value>QB Export</value>
+  </data>
+  <data name="Download" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="EndDate" xml:space="preserve">
+    <value>End Date</value>
+  </data>
+  <data name="EstimateCount" xml:space="preserve">
+    <value>Estimate Count</value>
+  </data>
+  <data name="ExportData" xml:space="preserve">
+    <value>Export Data</value>
+  </data>
+  <data name="ExportHistory" xml:space="preserve">
+    <value>Export History</value>
+  </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>Start Date</value>
+  </data>
+  <data name="PartsTaxRate" xml:space="preserve">
+    <value>Parts Tax Rate</value>
+  </data>
+  <data name="ViewHelpVideo" xml:space="preserve">
+    <value>View Help Video</value>
+  </data>
+  <data name="EMSContractDeacivated" xml:space="preserve">
+    <value>Your EMS contract is currently deactivated</value>
+  </data>
+  <data name="Sent" xml:space="preserve">
+    <value>Sent</value>
+  </data>
+  <data name="AccountProfileLockedMessage" xml:space="preserve">
+    <value>Your account profile is locked, please contact tech support to set it for you.</value>
+  </data>
+  <data name="AccountProfileNotLockedMessagePart1" xml:space="preserve">
+    <value>You can change your account's email address on the</value>
+  </data>
+  <data name="AccountProfileNotLockedMessagePart2" xml:space="preserve">
+    <value>settings</value>
+  </data>
+  <data name="AccountProfileNotLockedMessagePart3" xml:space="preserve">
+    <value>page.</value>
+  </data>
+  <data name="AddReportAttachments" xml:space="preserve">
+    <value>Add Report Attachments</value>
+  </data>
+  <data name="Compose" xml:space="preserve">
+    <value>Compose</value>
+  </data>
+  <data name="ConfigureEmailAddressMessage" xml:space="preserve">
+    <value>To send emails you must have an email address configured for your account.</value>
+  </data>
+  <data name="EmsFilesGeneratedPrintPage" xml:space="preserve">
+    <value>EMS files are now generated on the Print Page</value>
+  </data>
+  <data name="Errors" xml:space="preserve">
+    <value>Errors</value>
+  </data>
+  <data name="NoAttachmentSendEmailAnyway" xml:space="preserve">
+    <value>There are no attachments, do you want to send the e-mail anyway?</value>
+  </data>
+  <data name="NoAttachmentsMessagePart1" xml:space="preserve">
+    <value>No attachments</value>
+  </data>
+  <data name="NoAttachmentsMessagePart2" xml:space="preserve">
+    <value>select a report type from the list below, then click Add to generate and attach the report.</value>
+  </data>
+  <data name="SentEstimateHistory" xml:space="preserve">
+    <value>Sent Estimate History</value>
+  </data>
+  <data name="CompanyName" xml:space="preserve">
+    <value>Company Name</value>
+  </data>
+  <data name="GlobalVendorCannotBeEdited" xml:space="preserve">
+    <value>This is a global vendor and cannot be edited.</value>
+  </data>
+  <data name="HelpWebEstEmail" xml:space="preserve">
+    <value>help@web-est.com</value>
+  </data>
+  <data name="IDCode" xml:space="preserve">
+    <value>ID Code</value>
+  </data>
+  <data name="Private" xml:space="preserve">
+    <value>Private</value>
+  </data>
+  <data name="SaveVendorInfo" xml:space="preserve">
+    <value>Save Vendor Info</value>
+  </data>
+  <data name="CustomerLoyaltyProgram" xml:space="preserve">
+    <value>Customer Loyalty Program</value>
+  </data>
+  <data name="LiveSupportChat" xml:space="preserve">
+    <value>Live Support Chat</value>
+  </data>
+  <data name="OfferExpireRenew" xml:space="preserve">
+    <value>This offer will expire 30 days from contract end date, Renew now and save.</value>
+  </data>
+  <data name="RenewEarlyGet50Credit" xml:space="preserve">
+    <value>Renew early and get $50 credit.</value>
+  </data>
+  <data name="String1" xml:space="preserve">
+    <value>Messages</value>
+  </data>
+  <data name="Updates" xml:space="preserve">
+    <value>Updates</value>
+  </data>
+  <data name="Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="BettermentAmount" xml:space="preserve">
+    <value>Betterment $</value>
+  </data>
+  <data name="Included" xml:space="preserve">
+    <value>Included</value>
+  </data>
+  <data name="Minimum" xml:space="preserve">
+    <value>Minimum</value>
+  </data>
+  <data name="NoSections" xml:space="preserve">
+    <value>No Sections</value>
+  </data>
+  <data name="OtherChargeMessage" xml:space="preserve">
+    <value>An "Other Type" must be selected for the other charges value to post to the line item.</value>
+  </data>
+  <data name="OverlapsWith" xml:space="preserve">
+    <value>Overlaps With</value>
+  </data>
+  <data name="PleaseWait" xml:space="preserve">
+    <value>Please Wait</value>
+  </data>
+  <data name="CustomCharge" xml:space="preserve">
+    <value>Custom Charge</value>
+  </data>
+  <data name="Dents" xml:space="preserve">
+    <value>Dents</value>
+  </data>
+  <data name="Generate" xml:space="preserve">
+    <value>Generate</value>
+  </data>
+  <data name="Multiplier" xml:space="preserve">
+    <value>Multiplier</value>
+  </data>
+  <data name="OnlyCheckedImages" xml:space="preserve">
+    <value>Only Selected Images</value>
+  </data>
+  <data name="Oversized" xml:space="preserve">
+    <value>Oversized</value>
+  </data>
+  <data name="OversizedDents" xml:space="preserve">
+    <value>Oversized Dents</value>
+  </data>
+  <data name="Saving" xml:space="preserve">
+    <value>Saving</value>
+  </data>
+  <data name="SelectedSupplement" xml:space="preserve">
+    <value>Only From Selected Supplement</value>
+  </data>
+  <data name="SelectImageSize" xml:space="preserve">
+    <value>Select Image Size</value>
+  </data>
+  <data name="SelectLaborType" xml:space="preserve">
+    <value>Select Labor Type</value>
+  </data>
+  <data name="String2" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ChangeCard" xml:space="preserve">
+    <value>Change Card</value>
+  </data>
+  <data name="ClearError" xml:space="preserve">
+    <value>Clear Error</value>
+  </data>
+  <data name="Contracts" xml:space="preserve">
+    <value>Contracts</value>
+  </data>
+  <data name="DatePaid" xml:space="preserve">
+    <value>Date Paid</value>
+  </data>
+  <data name="EstimateHeaderContact" xml:space="preserve">
+    <value>Estimate Header Contact</value>
+  </data>
+  <data name="ExpirationDate" xml:space="preserve">
+    <value>Expiration Date</value>
+  </data>
+  <data name="IsActive" xml:space="preserve">
+    <value>Is Active</value>
+  </data>
+  <data name="LineItems" xml:space="preserve">
+    <value>Line Items</value>
+  </data>
+  <data name="MultiUser" xml:space="preserve">
+    <value>Multi User</value>
+  </data>
+  <data name="PickAddOnContract" xml:space="preserve">
+    <value>Pick Add On Contract</value>
+  </data>
+  <data name="RenewContract" xml:space="preserve">
+    <value>Renew Contract</value>
+  </data>
+  <data name="ReportFontSizes" xml:space="preserve">
+    <value>Report Font Sizes</value>
+  </data>
+  <data name="TableHeaders" xml:space="preserve">
+    <value>Table Headers</value>
+  </data>
+  <data name="Titles" xml:space="preserve">
+    <value>Titles</value>
+  </data>
+  <data name="TopInformation" xml:space="preserve">
+    <value>Top Information</value>
+  </data>
+  <data name="TopShopDetails" xml:space="preserve">
+    <value>Top Shop Details</value>
+  </data>
+  <data name="TotalLines" xml:space="preserve">
+    <value>Total Lines</value>
+  </data>
+  <data name="VehicleOptionsFooter" xml:space="preserve">
+    <value>Show Vehicle Options In Footer</value>
+  </data>
+  <data name="ViewContract" xml:space="preserve">
+    <value>View Contract</value>
+  </data>
+  <data name="InvoiceReminder_DueOnDate" xml:space="preserve">
+    <value>Your next scheduled payment of {0} is due on {1}.</value>
+  </data>
+  <data name="InvoiceReminder_DueToday" xml:space="preserve">
+    <value>Your next scheduled payment of {0} is due today.</value>
+  </data>
+  <data name="InvoiceReminder_Overdue" xml:space="preserve">
+    <value>Your next scheduled payment of {0} is overdue.</value>
+  </data>
+  <data name="CheckedCustomersDeleteMessage" xml:space="preserve">
+    <value>Are you sure you want to delete the checked customers?</value>
+  </data>
+  <data name="CheckedEstimatesDeleteMessage" xml:space="preserve">
+    <value>Are you sure you want to delete the checked estimates?</value>
+  </data>
+  <data name="CustomerDataSaved" xml:space="preserve">
+    <value>Customer data saved</value>
+  </data>
+  <data name="DeleteCustomerMessage" xml:space="preserve">
+    <value>Are you sure you want to delete this customer?</value>
+  </data>
+  <data name="DeleteEstimateMessage" xml:space="preserve">
+    <value>Are you sure you want to delete this estimate?</value>
+  </data>
+  <data name="ErrorOccured" xml:space="preserve">
+    <value>Error occured</value>
+  </data>
+  <data name="HideDetails" xml:space="preserve">
+    <value>Hide Details</value>
+  </data>
+  <data name="HideEstimates" xml:space="preserve">
+    <value>Hide Estimates</value>
+  </data>
+  <data name="SaveAndSelect" xml:space="preserve">
+    <value>Save And Select</value>
+  </data>
+  <data name="ShowEstimates" xml:space="preserve">
+    <value>Show Estimates</value>
+  </data>
+  <data name="Committing" xml:space="preserve">
+    <value>Committing</value>
+  </data>
+  <data name="LockEstimateCreateSupplement" xml:space="preserve">
+    <value>Are you sure you want to lock this estimate and create a supplement?</value>
+  </data>
+  <data name="DeleteImageAlertMessage" xml:space="preserve">
+    <value>Are you sure you want to delete this image?</value>
+  </data>
+  <data name="ErrorDecodingVINImage" xml:space="preserve">
+    <value>Error decoding VIN image</value>
+  </data>
+  <data name="UploadingImage" xml:space="preserve">
+    <value>Uploading image</value>
+  </data>
+  <data name="VINDecoded" xml:space="preserve">
+    <value>VIN Decoded</value>
+  </data>
+  <data name="ContactSupportUseDefaultProfile" xml:space="preserve">
+    <value>Error updating 'use default profile' value, please contact support</value>
+  </data>
+  <data name="DefaultProfleDefaultRequiredAlertMessage" xml:space="preserve">
+    <value>You are trying to delete a rate profile that is default for {0}. Prior to delete this, please select another {0} as default!</value>
+  </data>
+  <data name="SelectSavedCategoryItem" xml:space="preserve">
+    <value>--Select Saved {0}--</value>
+  </data>
+  <data name="SelectInvoiceToPay" xml:space="preserve">
+    <value>You must select at least one invoice to pay by checking the box on the right of the grid.</value>
+  </data>
+  <data name="String3" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NewPreset" xml:space="preserve">
+    <value>New Preset</value>
+  </data>
+  <data name="AutoPayTurned" xml:space="preserve">
+    <value>Auto-Pay turned {0}.</value>
+  </data>
+  <data name="CreationDate" xml:space="preserve">
+    <value>Creation Date</value>
+  </data>
+  <data name="HowTo" xml:space="preserve">
+    <value>How To</value>
+  </data>
+  <data name="MessageSent" xml:space="preserve">
+    <value>Message sent</value>
+  </data>
+  <data name="MessageSentOn" xml:space="preserve">
+    <value>This message was sent on {0}</value>
+  </data>
+  <data name="ReopenLockedEstimate" xml:space="preserve">
+    <value>The estimate is locked, to edit the estimate you must first re-open it on the details page</value>
+  </data>
+  <data name="SavingData" xml:space="preserve">
+    <value>Saving data</value>
+  </data>
+  <data name="AddVendorInfo" xml:space="preserve">
+    <value>Add Vendor Info</value>
+  </data>
+  <data name="EnterCompanyName" xml:space="preserve">
+    <value>Please enter Company Name</value>
+  </data>
+  <data name="VendorDeleteAlertMessage" xml:space="preserve">
+    <value>Please select a vendor to delete</value>
+  </data>
+  <data name="VendorDeleteConfirmMessage" xml:space="preserve">
+    <value>Are you sure you want to delete this vendor?</value>
+  </data>
+  <data name="VendorDeleted" xml:space="preserve">
+    <value>Vendor deleted</value>
+  </data>
+  <data name="VendorInformationSaved" xml:space="preserve">
+    <value>Vendor information saved</value>
+  </data>
+  <data name="EstimatorDataSaved" xml:space="preserve">
+    <value>Estimator Data Saved</value>
+  </data>
+  <data name="EstimatorDeleteAlertMessage" xml:space="preserve">
+    <value>Are you sure you want to delete this Estimator?</value>
+  </data>
+  <data name="BadEstimate" xml:space="preserve">
+    <value>Bad Estimate</value>
+  </data>
+  <data name="BadLogin" xml:space="preserve">
+    <value>Bad Login</value>
+  </data>
+  <data name="ContactWebEstToAddFeatureTrialAccount" xml:space="preserve">
+    <value>Please contact Web-Est to add this feature to your trial account</value>
+  </data>
+  <data name="ContractExpiredOn" xml:space="preserve">
+    <value>Your &lt;b&gt; {0} &lt;/b&gt; contract expired on {1}</value>
+  </data>
+  <data name="CurrentContractWillExpireOn" xml:space="preserve">
+    <value>Your current &lt;b&gt; {0} &lt;/b&gt; contract will expire on {1}</value>
+  </data>
+  <data name="ErroDeletingImage" xml:space="preserve">
+    <value>Error deleting image:</value>
+  </data>
+  <data name="ErrorDeletingContract" xml:space="preserve">
+    <value>Error deleting contract: {0}</value>
+  </data>
+  <data name="ErrorDeletingRestoreEstimate" xml:space="preserve">
+    <value>Error {0} estimate: {1}</value>
+  </data>
+  <data name="ErrorProcessingPayment" xml:space="preserve">
+    <value>Error processing payment: {0}</value>
+  </data>
+  <data name="EstimateNotBelongToAccountCannotDeleteRestore" xml:space="preserve">
+    <value>Estimate {0} does not belong to this account, cannot {1}.</value>
+  </data>
+  <data name="EstimateNotFound" xml:space="preserve">
+    <value>Estimate {0} not found.</value>
+  </data>
+  <data name="ImageNotBelongToEstimate" xml:space="preserve">
+    <value>Image does not belong to estimate</value>
+  </data>
+  <data name="ImageNotFoundCannotSave" xml:space="preserve">
+    <value>Image not found, cannot save.</value>
+  </data>
+  <data name="InvalidCustomer" xml:space="preserve">
+    <value>Invalid customer</value>
+  </data>
+  <data name="InvalidData" xml:space="preserve">
+    <value>Invalid data.</value>
+  </data>
+  <data name="LoginCustomerIdNotSaved" xml:space="preserve">
+    <value>Invalid login or customer ID, data not saved.</value>
+  </data>
+  <data name="MustSelectInvoiceByCheckingtheBox" xml:space="preserve">
+    <value>You must select at least one invoice to pay by checking the box on the right of the grid.</value>
+  </data>
+  <data name="NoInProgressContractFound" xml:space="preserve">
+    <value>Error: No in progress contract found.</value>
+  </data>
+  <data name="NoRecordInExcelToDisplay" xml:space="preserve">
+    <value>No data was found for the passed date range.</value>
+  </data>
+  <data name="PickContractRunsBetween" xml:space="preserve">
+    <value>Pick add ons for the contract that runs from {0} to {1}</value>
+  </data>
+  <data name="PleaseMakeSelection" xml:space="preserve">
+    <value>Please make a selection.</value>
+  </data>
+  <data name="SomethingWentWrongOpenGenerateReport" xml:space="preserve">
+    <value>Something went wrong..! Please  open/generate report again.</value>
+  </data>
+  <data name="TrialExpiredOn" xml:space="preserve">
+    <value>Your trial expired on {0}</value>
+  </data>
+  <data name="UnauthorizedDeleteCustomerRequest" xml:space="preserve">
+    <value>Unauthorized Delete Customer Request</value>
+  </data>
+  <data name="UnauthorizedLoginID" xml:space="preserve">
+    <value>Unauthorized login ID</value>
+  </data>
+  <data name="UnauthorizedRestoreCustomerRequest" xml:space="preserve">
+    <value>Unauthorized Restore Customer Request</value>
+  </data>
+  <data name="BadHash" xml:space="preserve">
+    <value>Bad Hash</value>
+  </data>
+  <data name="CannotDeleteDefaultProfilePreset" xml:space="preserve">
+    <value>Cannot delete default profile or preset.</value>
+  </data>
+  <data name="CannotDeleteOnlyProfile" xml:space="preserve">
+    <value>Cannot delete the only profile.</value>
+  </data>
+  <data name="CannotEditLockedEstimate" xml:space="preserve">
+    <value>Cannot edit a locked estimate.</value>
+  </data>
+  <data name="CouldNotFindEMSDownloadTryAgain" xml:space="preserve">
+    <value>Could not find EMS download.  Please try again.</value>
+  </data>
+  <data name="CouldNotFindFindTryAgain" xml:space="preserve">
+    <value>Could not find file.  Please try again.</value>
+  </data>
+  <data name="DescriptionPresetDataSaved" xml:space="preserve">
+    <value>Description preset data saved.</value>
+  </data>
+  <data name="EMSQueueRecordNotFound" xml:space="preserve">
+    <value>EMS Queue record not found.</value>
+  </data>
+  <data name="ErrorDeletingOverziedDent" xml:space="preserve">
+    <value>Error deleting oversized dent.</value>
+  </data>
+  <data name="ErrorDeletingReportInvalidReportID" xml:space="preserve">
+    <value>Error deleting report: Invalid report ID '{0}'</value>
+  </data>
+  <data name="ErrorReportNotFoundToDelete" xml:space="preserve">
+    <value>Error: report not found to delete</value>
+  </data>
+  <data name="ExportDoesnotMatchLoginID" xml:space="preserve">
+    <value>Export log does not match login ID.</value>
+  </data>
+  <data name="InvalidEstimateID" xml:space="preserve">
+    <value>Invalid Estimate ID</value>
+  </data>
+  <data name="InvalidExportID" xml:space="preserve">
+    <value>Invalid export ID</value>
+  </data>
+  <data name="InvalidImpersonateToken" xml:space="preserve">
+    <value>Invalid impersonate token</value>
+  </data>
+  <data name="InvalidLoginIDEstimateID" xml:space="preserve">
+    <value>Invalid loginID or estimatorID</value>
+  </data>
+  <data name="InvalidMultiplierCannotDelete" xml:space="preserve">
+    <value>Invalid multiplier, cannot delete.</value>
+  </data>
+  <data name="InvalidPresetCannotDelete" xml:space="preserve">
+    <value>Invalid preset, cannot delete.</value>
+  </data>
+  <data name="InvalidPresetData" xml:space="preserve">
+    <value>Invalid preset data.</value>
+  </data>
+  <data name="InvalidProfileCannotAddMultiplier" xml:space="preserve">
+    <value>Invalid profile, cannot add multiplier</value>
+  </data>
+  <data name="InvalidRateProfile" xml:space="preserve">
+    <value>Invalid rate profile.</value>
+  </data>
+  <data name="KickedActivations" xml:space="preserve">
+    <value>Kicked {0} activations.</value>
+  </data>
+  <data name="LoginNotFound" xml:space="preserve">
+    <value>Login {0} not found.</value>
+  </data>
+  <data name="MultiplierDataSaved" xml:space="preserve">
+    <value>Multiplier data saved.</value>
+  </data>
+  <data name="NoRateFoundForProfile" xml:space="preserve">
+    <value>No rates found for the profile.</value>
+  </data>
+  <data name="NoResultFromReportGenerator" xml:space="preserve">
+    <value>No result from report generator.</value>
+  </data>
+  <data name="PanelNotFound" xml:space="preserve">
+    <value>Panel data not found.</value>
+  </data>
+  <data name="ProfileNotFound" xml:space="preserve">
+    <value>Profile not found.</value>
+  </data>
+  <data name="TrialWillExpireOn" xml:space="preserve">
+    <value>Your trial will expire on {0}</value>
+  </data>
+  <data name="UnauthorizedLogin" xml:space="preserve">
+    <value>Unauthorized login.</value>
+  </data>
+  <data name="ZipFileNotFound" xml:space="preserve">
+    <value>Zip file not found.</value>
+  </data>
+  <data name="AttachEstimateToDifferentCustomer" xml:space="preserve">
+    <value>Attach Estimate To Different Customer</value>
+  </data>
+  <data name="TrialNoteEMS" xml:space="preserve">
+    <value>Note: the EMS Export feature is available for evaluation in a trial period.  However it is not part of the base contract and requires the purchase of an add on  to use once your trial has expired.</value>
+  </data>
+  <data name="TrialNoteFrame" xml:space="preserve">
+    <value>Note: the Frame Data feature is available for evaluation in a trial period.  However it is not part of the base contract and requires the purchase of an add on  to use once your trial has expired.</value>
+  </data>
+  <data name="EmailAutoCcOn" xml:space="preserve">
+    <value>Auto-CC On</value>
+  </data>
+  <data name="QuickBooks" xml:space="preserve">
+    <value>QuickBooks</value>
+  </data>
+  <data name="CloseRatioReport" xml:space="preserve">
+    <value>Close Ratio Report</value>
+  </data>
+  <data name="PageTitle_AddOns" xml:space="preserve">
+    <value>Add Ons</value>
+  </data>
+  <data name="PdrOnly" xml:space="preserve">
+    <value>PDR Only</value>
+  </data>
+  <data name="Details_UncommitSupplementNote" xml:space="preserve">
+    <value>Undo empty supplement</value>
+  </data>
+  <data name="Message_EstimateSupplementUncommitted" xml:space="preserve">
+    <value>Estimate's current supplement uncommitted.</value>
+  </data>
+  <data name="UndoSupplement" xml:space="preserve">
+    <value>Undo Supplement</value>
+  </data>
+  <data name="Uncommitting" xml:space="preserve">
+    <value>Uncommitting</value>
+  </data>
+  <data name="UnlockEstimateSupplement" xml:space="preserve">
+    <value>Are you sure you want to unlock this estimate for current supplement?</value>
+  </data>
+  <data name="ActiveWebEstContract" xml:space="preserve">
+    <value>You currently have an active Web-Est contract, please contact support to get your contract moved from Web-Est to ProEstimator.</value>
+  </data>
+  <data name="CustomerBusinessName" xml:space="preserve">
+    <value>Customer's Business Name</value>
+  </data>
+  <data name="IncludePartNotesOnPdfLineEntry" xml:space="preserve">
+    <value>Include Part Notes on PDF Line Entry</value>
+  </data>
+  <data name="PrintPnLNotes" xml:space="preserve">
+    <value>Print Parts &amp; Labor Notes</value>
+  </data>
+  <data name="FullEstimateDiscountMarkup" xml:space="preserve">
+    <value>Full Estimate Discount/Markup</value>
+  </data>
+  <data name="Settings_ContractAutoRenew" xml:space="preserve">
+    <value>Contract Auto Renew</value>
+  </data>
+  <data name="Settings_ContractAutoRenew_Expires_Description" xml:space="preserve">
+    <value>Auto Renew is currently ON.  Your contract will automatically renew on the day it expires.</value>
+  </data>
+  <data name="Settings_ContractAutoRenew_Manual_Description" xml:space="preserve">
+    <value>Auto Renew is currently OFF.  When your contract expires you will have to manually renew.</value>
+  </data>
+  <data name="Settings_EmailPreferences" xml:space="preserve">
+    <value>Email Preferences</value>
+  </data>
+  <data name="Settings_TurnOffAutoRenew" xml:space="preserve">
+    <value>Turn Off Auto Renew</value>
+  </data>
+  <data name="Settings_TurnOnAutoRenew" xml:space="preserve">
+    <value>Turn On Auto Renew</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="Large" xml:space="preserve">
+    <value>Large</value>
+  </data>
+  <data name="MaxYear" xml:space="preserve">
+    <value>Max Year</value>
+  </data>
+  <data name="MinYear" xml:space="preserve">
+    <value>Min Year</value>
+  </data>
+  <data name="Part" xml:space="preserve">
+    <value>Part</value>
+  </data>
+  <data name="Settings_LanguagePreferences" xml:space="preserve">
+    <value>Language Preferences</value>
+  </data>
+  <data name="Subcategory" xml:space="preserve">
+    <value>Subcategory</value>
+  </data>
+  <data name="TotalVehicles" xml:space="preserve">
+    <value>Total Vehicles</value>
+  </data>
+  <data name="AftermarketParts" xml:space="preserve">
+    <value>Aftermarket Parts</value>
+  </data>
+  <data name="BodySupplies" xml:space="preserve">
+    <value>Body Supplies</value>
+  </data>
+  <data name="CleanupLabor" xml:space="preserve">
+    <value>Cleanup Labor</value>
+  </data>
+  <data name="ClearcoatLabor" xml:space="preserve">
+    <value>Clearcoat Labor</value>
+  </data>
+  <data name="ClearcoatSupplies" xml:space="preserve">
+    <value>Clearcoat Supplies</value>
+  </data>
+  <data name="DetailLabor" xml:space="preserve">
+    <value>Detail Labor</value>
+  </data>
+  <data name="ElectricalLabor" xml:space="preserve">
+    <value>Electrical Labor</value>
+  </data>
+  <data name="FinishLabor" xml:space="preserve">
+    <value>Finish Labor</value>
+  </data>
+  <data name="FinishSupplies" xml:space="preserve">
+    <value>Finish Supplies</value>
+  </data>
+  <data name="FrameLabor" xml:space="preserve">
+    <value>Frame Labor</value>
+  </data>
+  <data name="GlassLabor" xml:space="preserve">
+    <value>Glass Labor</value>
+  </data>
+  <data name="LKQParts" xml:space="preserve">
+    <value>LKQ Parts</value>
+  </data>
+  <data name="MechanicalLabor" xml:space="preserve">
+    <value>Mechanical Labor</value>
+  </data>
+  <data name="NAGSGlassParts" xml:space="preserve">
+    <value>NAGS Glass Parts</value>
+  </data>
+  <data name="OEMGlassParts" xml:space="preserve">
+    <value>OEM Glass Parts</value>
+  </data>
+  <data name="OEMParts" xml:space="preserve">
+    <value>OEM Parts</value>
+  </data>
+  <data name="OtherLabor" xml:space="preserve">
+    <value>Other Labor</value>
+  </data>
+  <data name="OtherParts" xml:space="preserve">
+    <value>Other Parts</value>
+  </data>
+  <data name="PaintLabor" xml:space="preserve">
+    <value>Paint Labor</value>
+  </data>
+  <data name="PaintSupplies" xml:space="preserve">
+    <value>Paint Supplies</value>
+  </data>
+  <data name="RemanufacturedParts" xml:space="preserve">
+    <value>Remanufactured Parts</value>
+  </data>
+  <data name="StructureLabor" xml:space="preserve">
+    <value>Structure Labor</value>
+  </data>
+  <data name="TaxLaborPartsSeparately" xml:space="preserve">
+    <value>Tax labor and parts separately</value>
+  </data>
+  <data name="Reports_EMS" xml:space="preserve">
+    <value>EMS</value>
+  </data>
+  <data name="Reports_WorkOrderReport" xml:space="preserve">
+    <value>Work Order Report</value>
+  </data>
+  <data name="ChangeJobStatus" xml:space="preserve">
+    <value>Change Job Status</value>
+  </data>
+  <data name="HideCustomerData" xml:space="preserve">
+    <value>Hide Customer Data</value>
+  </data>
+  <data name="SelectAppraiser" xml:space="preserve">
+    <value>Select Appraiser</value>
+  </data>
+  <data name="MakeSectionSelection" xml:space="preserve">
+    <value>Make a Section Selection</value>
+  </data>
+  <data name="ShowAllYears" xml:space="preserve">
+    <value>Show all years</value>
+  </data>
+  <data name="AddAdjuster" xml:space="preserve">
+    <value>Add Adjuster</value>
+  </data>
+  <data name="AddClaimRep" xml:space="preserve">
+    <value>Add Claim Rep</value>
+  </data>
+  <data name="AddInsurance" xml:space="preserve">
+    <value>Add Insurance</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Custom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="Label" xml:space="preserve">
+    <value>Label</value>
+  </data>
+  <data name="ManageInsurance" xml:space="preserve">
+    <value>Manage Insurance</value>
+  </data>
+  <data name="ShowDeletedAdjusters" xml:space="preserve">
+    <value>Show Deleted Adjusters</value>
+  </data>
+  <data name="ShowDeletedClaimReps" xml:space="preserve">
+    <value>Show Deleted ClaimReps</value>
+  </data>
+  <data name="ShowDeletedInsuranceCompanies" xml:space="preserve">
+    <value>Show Deleted Insurance Companies</value>
+  </data>
+  <data name="Customers" xml:space="preserve">
+    <value>Customers</value>
+  </data>
+  <data name="Estimates" xml:space="preserve">
+    <value>Estimates</value>
+  </data>
+  <data name="PrintInspectionDate" xml:space="preserve">
+    <value>Print Inspection Date</value>
+  </data>
+  <data name="RateProfile_NoFooterDateTimeStamp" xml:space="preserve">
+    <value>No Footer Date/Time Stamp</value>
+  </data>
+  <data name="RenewSubscription_AddOnsQuestion" xml:space="preserve">
+    <value>Would you like to add Pro Advisor to your contract?</value>
+  </data>
+  <data name="RateProfile_SelectAddOn" xml:space="preserve">
+    <value>Select Add On profile</value>
+  </data>
+  <data name="AddOnRateProfile" xml:space="preserve">
+    <value>ProAdvisor Rate Profile</value>
+  </data>
+  <data name="PrintShopInfo" xml:space="preserve">
+    <value>Print Shop Info</value>
+  </data>
+  <data name="VINBadCharacterMessage" xml:space="preserve">
+    <value>VIN numbers do not contain special characters or the letters O, I, or Q</value>
+  </data>
+  <data name="SelectTag" xml:space="preserve">
+    <value>Select Tag</value>
+  </data>
+  <data name="Estimate" xml:space="preserve">
+    <value>Estimate</value>
+  </data>
+  <data name="Login_UserName" xml:space="preserve">
+    <value>User Name</value>
+  </data>
+  <data name="PDRRateProfiles" xml:space="preserve">
+    <value>PDR Rate Profiles</value>
+  </data>
+  <data name="QBExportAddOnContract" xml:space="preserve">
+    <value>Get QB Export Add On Contract</value>
+  </data>
+  <data name="RateProfile_AddOnProfiles" xml:space="preserve">
+    <value>Pro Advisor Profiles</value>
+  </data>
+  <data name="RateProfile_Deleted" xml:space="preserve">
+    <value>Deleted</value>
+  </data>
+  <data name="IncludeClosedDeletedRO" xml:space="preserve">
+    <value>Include Deleted R/O's</value>
+  </data>
+  <data name="SelectPage" xml:space="preserve">
+    <value>Select Page</value>
+  </data>
+  <data name="Login_NewCredentials" xml:space="preserve">
+    <value>Enter a user name and password to create an Administrator user for your account</value>
+  </data>
+  <data name="Login_NewPassword" xml:space="preserve">
+    <value>New Password</value>
+  </data>
+  <data name="Login_NewPassword2" xml:space="preserve">
+    <value>Repeat New Password</value>
+  </data>
+  <data name="Login_NewUserName" xml:space="preserve">
+    <value>New User Name</value>
+  </data>
+  <data name="Login_OldCredentials" xml:space="preserve">
+    <value>Enter your old login credentials</value>
+  </data>
+  <data name="IncludeDeletedCustomers" xml:space="preserve">
+    <value>Include Deleted Customers</value>
+  </data>
+  <data name="PrintInsured" xml:space="preserve">
+    <value>Print Insured</value>
+  </data>
+  <data name="AttachImageWithEmail" xml:space="preserve">
+    <value>Attach Images to Email/SMS</value>
+  </data>
+  <data name="Login_Error_AccountDisabled" xml:space="preserve">
+    <value>Account disabled, please contact customer service</value>
+  </data>
+  <data name="PageTitle_Users" xml:space="preserve">
+    <value>User Accounts</value>
+  </data>
+  <data name="OldPassword" xml:space="preserve">
+    <value>Old Password</value>
+  </data>
+  <data name="EstimateNotesHeader" xml:space="preserve">
+    <value>Repair Notes</value>
+  </data>
+  <data name="NotesText" xml:space="preserve">
+    <value>Notes Text</value>
+  </data>
+  <data name="Estimate_Navigation_EstimateNotesHeader" xml:space="preserve">
+    <value>Repair Notes</value>
+  </data>
+  <data name="NotesHistory" xml:space="preserve">
+    <value>Notes History</value>
+  </data>
+  <data name="EstimateNotesPageButton" xml:space="preserve">
+    <value>Repair Notes &gt;&gt;</value>
+  </data>
+  <data name="EstimateNotesBackButton" xml:space="preserve">
+    <value>&lt;&lt; Repair Notes</value>
+  </data>
+  <data name="ShowDeletedNotes" xml:space="preserve">
+    <value>Show Deleted Notes</value>
+  </data>
+  <data name="ProAdvisor" xml:space="preserve">
+    <value>Pro Advisor</value>
+  </data>
+  <data name="Disable" xml:space="preserve">
+    <value>Disable</value>
+  </data>
+  <data name="String4" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NoImageFound" xml:space="preserve">
+    <value>No image found.</value>
+  </data>
+  <data name="PrintSupplementPhotosOnly" xml:space="preserve">
+    <value>Print Supplement Photos Only</value>
+  </data>
+  <data name="Technicians" xml:space="preserve">
+    <value>Technicians</value>
+  </data>
+  <data name="TechnicianDataSaved" xml:space="preserve">
+    <value>Technician Data Saved</value>
+  </data>
+  <data name="TechnicianDeleteAlertMessage" xml:space="preserve">
+    <value>Are you sure you want to delete this Technician?</value>
+  </data>
+  <data name="PrintLaborHours" xml:space="preserve">
+    <value>Print Labor Hours</value>
+  </data>
+  <data name="ShowDeletedTechnicians" xml:space="preserve">
+    <value>Show Deleted Technicians</value>
+  </data>
+  <data name="PrintHeaderInfo" xml:space="preserve">
+    <value>Print Header Information</value>
+  </data>
+  <data name="PrintHeaderInfoOnEstimateReport" xml:space="preserve">
+    <value>Print Header Info On Estimate Report</value>
+  </data>
+  <data name="EditImage" xml:space="preserve">
+    <value>Edit Image:</value>
+  </data>
+  <data name="LoadImageAlertMessage" xml:space="preserve">
+    <value>Are you sure? This will ignore the edit on the current image and load the clicked image.</value>
+  </data>
+  <data name="OriginalImageAlertMessage" xml:space="preserve">
+    <value>Are you sure you want to restore the original image and lose all edits?</value>
+  </data>
+  <data name="SaveAsCopy" xml:space="preserve">
+    <value>Save As Copy</value>
+  </data>
+  <data name="CancelImageAlertMessage" xml:space="preserve">
+    <value>Are you sure? This will ignore all the edits on the current image and go back to the image.</value>
+  </data>
+  <data name="DeselectAllYears" xml:space="preserve">
+    <value>Deselect to Show Specific Year Only</value>
+  </data>
+  <data name="Settings_AddPartsPage" xml:space="preserve">
+    <value>Add Parts Page Preferences</value>
+  </data>
+  <data name="CreatedTimeStamp" xml:space="preserve">
+    <value>Created Time Stamp</value>
+  </data>
+  <data name="ReportFormat" xml:space="preserve">
+    <value>Report Format</value>
+  </data>
+  <data name="SaveReportsHistory" xml:space="preserve">
+    <value>Save Reports History</value>
+  </data>
+  <data name="SelectReportType" xml:space="preserve">
+    <value>Select Report Type</value>
+  </data>
+  <data name="ShowAllReportTypes" xml:space="preserve">
+    <value>Show All Report Types</value>
+  </data>
+  <data name="SelectReportFooter" xml:space="preserve">
+    <value>Select Report Footer</value>
+  </data>
+  <data name="PreviewReport" xml:space="preserve">
+    <value>Preview Report</value>
+  </data>
+  <data name="CreateFooterTemplate" xml:space="preserve">
+    <value>Create Footer Template</value>
+  </data>
+  <data name="CreateHeaderTemplate" xml:space="preserve">
+    <value>Create Header Template</value>
+  </data>
+  <data name="CreateNewReportTemplate" xml:space="preserve">
+    <value>Create New Report Template</value>
+  </data>
+  <data name="ShowDeleted" xml:space="preserve">
+    <value>Show Deleted</value>
+  </data>
+  <data name="IsSystemReport" xml:space="preserve">
+    <value>Is System Report</value>
+  </data>
+  <data name="ReportDescription2" xml:space="preserve">
+    <value>Report Description</value>
+  </data>
+  <data name="ReportFooter" xml:space="preserve">
+    <value>Footer</value>
+  </data>
+  <data name="ReportHeader" xml:space="preserve">
+    <value>Header</value>
+  </data>
+  <data name="ReportName" xml:space="preserve">
+    <value>Report Name</value>
+  </data>
+  <data name="Modified" xml:space="preserve">
+    <value>Modified</value>
+  </data>
+  <data name="RenewSubscription_CustomReportsQuestion" xml:space="preserve">
+    <value>Would you like to add Custom Reports to your subscription?</value>
+  </data>
+  <data name="QBInvoiceID" xml:space="preserve">
+    <value>QB Invoice ID</value>
+  </data>
+  <data name="Attach" xml:space="preserve">
+    <value>Attach</value>
+  </data>
+  <data name="DaysToRepair" xml:space="preserve">
+    <value>Repair Days</value>
+  </data>
+  <data name="PrintDaysToRepair" xml:space="preserve">
+    <value>Print Days To Repair</value>
+  </data>
+  <data name="Reports_RepairNotesReport" xml:space="preserve">
+    <value>Repair Notes Report</value>
+  </data>
+  <data name="RepairHours" xml:space="preserve">
+    <value>Repair Hours Per Day</value>
+  </data>
+  <data name="Reports_PDRWorkOrderReport" xml:space="preserve">
+    <value>PDR Work Order Report</value>
+  </data>
+  <data name="ProAdvisorEnabled" xml:space="preserve">
+    <value>Pro Advisor Enabled</value>
+  </data>
+  <data name="FacilityRepairInvoice" xml:space="preserve">
+    <value>Facility Repair Invoice</value>
+  </data>
+  <data name="FacilityRepairOrder" xml:space="preserve">
+    <value>Facility Repair Order</value>
+  </data>
+  <data name="DownloadPreferences" xml:space="preserve">
+    <value>PDF Download Preferences</value>
+  </data>
+  <data name="File" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="NewTab" xml:space="preserve">
+    <value>Open In New Tab</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="DeleteQBExportHistory" xml:space="preserve">
+    <value>Delete QB Export History</value>
+  </data>
+  <data name="RestoreQBExportHistory" xml:space="preserve">
+    <value>Restore QB Export History</value>
+  </data>
+  <data name="ShowDeletedQBExportHistory" xml:space="preserve">
+    <value>Show Deleted QB Export History</value>
+  </data>
+  <data name="ViewSentEstimateHistory" xml:space="preserve">
+    <value>View sent estimate history</value>
+  </data>
+  <data name="ViewReportHistoryTable" xml:space="preserve">
+    <value>View report history table</value>
+  </data>
+  <data name="ShowChatIconDesktop" xml:space="preserve">
+    <value>Show Chat Icon Desktop</value>
+  </data>
+  <data name="ShowChatIconMobile" xml:space="preserve">
+    <value>Show Chat Icon Mobile</value>
+  </data>
+  <data name="CreditCardFeePercentage" xml:space="preserve">
+    <value>Credit Card Fee %</value>
+  </data>
+  <data name="FeedbackTextLabel" xml:space="preserve">
+    <value>Please provide your feedback:</value>
+  </data>
+  <data name="FeedbackImagesLabel" xml:space="preserve">
+    <value>Select any images you would like to add with your feedback:</value>
+  </data>
+  <data name="FeedbackSubmittedMessage" xml:space="preserve">
+    <value>Your feedback has been successfully submitted</value>
+  </data>
+  <data name="FeedbackWelcomeMessage" xml:space="preserve">
+    <value>We value your Feedback.  Please let us know if you've found any bugs or have any suggestions.  The more details you provide the better.</value>
+  </data>
+  <data name="Financing" xml:space="preserve">
+    <value>Financing</value>
+  </data>
+  <data name="Financing_SignUpNow" xml:space="preserve">
+    <value>Sign up now</value>
+  </data>
+  <data name="Financing_Page_SubTitle" xml:space="preserve">
+    <value>Wisetack Consumer Financing</value>
+  </data>
+  <data name="Financing_Page_Paragraph1_Title" xml:space="preserve">
+    <value>Start winning more (and bigger) jobs in just 5 minutes</value>
+  </data>
+  <data name="Financing_Page_Paragraph1_Text_Pre" xml:space="preserve">
+    <value>We’ve partnered with Wisetack to make offering your customers consumer-friendly financing fast and easy. Once enabled, the option to pay over time will appear on estimates you send between</value>
+  </data>
+  <data name="Financing_Page_Paragraph1_Text_BetweenAmount" xml:space="preserve">
+    <value>$500 and $15,000</value>
+  </data>
+  <data name="Financing_Page_Paragraph1_Text_Post" xml:space="preserve">
+    <value>. You get paid in full as soon as the repair is complete, while your customer pays over time.</value>
+  </data>
+  <data name="Financing_Page_Paragraph2_Title" xml:space="preserve">
+    <value>Compete and close</value>
+  </data>
+  <data name="Financing_Page_Paragraph2_Text" xml:space="preserve">
+    <value>Stand out from the competition by giving your customers an easy way to access consumer-friendly financing. Win more jobs and boost your average job size, especially in competitive pricing situations. Give your customers the option to finance their deductibles!</value>
+  </data>
+  <data name="Financing_Page_Paragraph3_Title" xml:space="preserve">
+    <value>Make it easy</value>
+  </data>
+  <data name="Financing_Page_Paragraph3_Text" xml:space="preserve">
+    <value>Your customers can skip the paperwork, apply on the privacy of their own mobile device and get an approval decision within seconds, all without affecting their credit scores. If approved, they can choose to pay over 3 to 24 months with APRs as low as 0%*.</value>
+  </data>
+  <data name="Financing_Page_Paragraph4_Title" xml:space="preserve">
+    <value>Get paid, worry-free</value>
+  </data>
+  <data name="Financing_Page_Paragraph4_Text1_Pre" xml:space="preserve">
+    <value>Let your customers pay over time so they can get the work they want, while you get paid as soon as the job is done.</value>
+  </data>
+  <data name="Financing_Page_Paragraph4_Text1_Mid" xml:space="preserve">
+    <value>The cost to you is only 2.9% per transaction</value>
+  </data>
+  <data name="Financing_Page_Paragraph4_Text1_Post" xml:space="preserve">
+    <value>, and your customers get to choose the rates and payment terms that work for them.</value>
+  </data>
+  <data name="Financing_Page_Paragraph4_Text2_Pre" xml:space="preserve">
+    <value>Once enabled, financing will be available on estimates between </value>
+  </data>
+  <data name="Financing_Page_Paragraph4_Text2_Amount" xml:space="preserve">
+    <value>$500 and $15,000</value>
+  </data>
+  <data name="Financing_Page_Paragraph4_Text2_Post" xml:space="preserve">
+    <value>.</value>
+  </data>
+  <data name="Financing_Page_Paragraph4_Text3_Part1" xml:space="preserve">
+    <value>Questions? Contact the Wisetack support team at 1-833-927-0333 (Mon-Fri 9am-8pm ET, Sat 9am-6pm ET), email </value>
+  </data>
+  <data name="Financing_Page_Paragraph4_Text3_Part2" xml:space="preserve">
+    <value>, or see </value>
+  </data>
+  <data name="Financing_Page_Approved_Header_Part1" xml:space="preserve">
+    <value>Questions? Contact the Wisetack support team at 1-833-927-0333 (Mon-Fri 9am-8pm ET, Sat 9am-6pm ET), email </value>
+  </data>
+  <data name="Financing_Page_Approved_Header_Part2" xml:space="preserve">
+    <value>, or see </value>
+  </data>
+  <data name="Financing_Page_Footer_Part1" xml:space="preserve">
+    <value>*All financing is subject to credit approval. Terms may vary. Payment options through Wisetack are provided by our </value>
+  </data>
+  <data name="Financing_Page_Footer_Part2" xml:space="preserve">
+    <value>. For example, a $1,000 purchase could cost $45.18 a month for 24 months, based on a 7.9% APR, or $333.33 a month for 3 months, based on a 0% APR. See additional terms at</value>
+  </data>
+  <data name="Financing_MerchantSignupStatus_Pending" xml:space="preserve">
+    <value>Status: Incomplete</value>
+  </data>
+  <data name="Financing_MerchantSignupStatus_InitiantorAdded" xml:space="preserve">
+    <value>Status: Incomplete</value>
+  </data>
+  <data name="Financing_MerchantSignupStatus_BusinessAdded" xml:space="preserve">
+    <value>Status: Incomplete</value>
+  </data>
+  <data name="Financing_MerchantSignupStatus_OwnersAdded" xml:space="preserve">
+    <value>Status: Incomplete</value>
+  </data>
+  <data name="Financing_MerchantSignupStatus_ExecutiveAdded" xml:space="preserve">
+    <value>Status: Incomplete</value>
+  </data>
+  <data name="Financing_MerchantSignupStatus_ApplicationSubmitted" xml:space="preserve">
+    <value>Application has been submitted.</value>
+  </data>
+  <data name="Financing_MerchantSignupStatus_ApplicationDeclined_Info1" xml:space="preserve">
+    <value>Thank you for taking the time to apply for Wisetack consumer financing. Unfortunately, your business does not meet Wisetack's qualifications at this time.</value>
+  </data>
+  <data name="Financing_MerchantSignupStatus_ApplicationDeclined_Info2" xml:space="preserve">
+    <value>Wisetack will keep your application on file and encourage you to check back if your qualifications change, or if it appears they have reached this decisiion in error. Please check your email for more information regarding your application.</value>
+  </data>
+  <data name="Financing_MerchantSignupStatus_ApplicationSubmitted_Info1" xml:space="preserve">
+    <value>Please keep an eye on the email account submitted in your application for requests for additional information from the Wisetack underwriting team. For more information, please contact the Wisetack support team at 1 (833) 927-0333 (Mon-Fri 9am-8pm ET, Sat 9am-6pm ET), email</value>
+  </data>
+  <data name="Financing_MerchantSignupStatus_ApplicationSubmitted_Info2" xml:space="preserve">
+    <value>, or see</value>
+  </data>
+  <data name="Financing_MerchantSignupStatus_ApplicationApproved" xml:space="preserve">
+    <value>Congratulations! You have been approved for financing with Wisetack.</value>
+  </data>
+  <data name="Financing_MerchantSignupStatus_ApplicationDenied" xml:space="preserve">
+    <value>Sorry, your application for financing was not approved.</value>
+  </data>
+  <data name="Financing_SignUpNow_Continue" xml:space="preserve">
+    <value>Continue Application</value>
+  </data>
+  <data name="RemoteSupport" xml:space="preserve">
+    <value>Remote Support</value>
+  </data>
+  <data name="Mitchell_P_Pages" xml:space="preserve">
+    <value>Mitchell P Pages</value>
+  </data>
+  <data name="FinancingCustomerName" xml:space="preserve">
+    <value>Customer Name</value>
+  </data>
+  <data name="FinancingMaximumAmount" xml:space="preserve">
+    <value>Max Approved Amount</value>
+  </data>
+  <data name="FinancingRequestedLoanAmount" xml:space="preserve">
+    <value>Requested Financing Amount</value>
+  </data>
+  <data name="FinancingApprovedLoanAmount" xml:space="preserve">
+    <value>Approved Financing Amount</value>
+  </data>
+  <data name="FinancingLoanApplicationLink" xml:space="preserve">
+    <value>Financing Application Link</value>
+  </data>
+  <data name="FinancingLoanApplicationStatus" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="FinancingApplicationStartDate" xml:space="preserve">
+    <value>Application Start Date</value>
+  </data>
+  <data name="FinancingDateOfLastUpdate" xml:space="preserve">
+    <value>Last Update</value>
+  </data>
+  <data name="FinancingLoanAppExpirationDate" xml:space="preserve">
+    <value>Expiration Date</value>
+  </data>
+  <data name="FinancingEstimateLink" xml:space="preserve">
+    <value>Estimate</value>
+  </data>
+  <data name="FinancingLoanApplicationHowTo" xml:space="preserve">
+    <value>How to send an application:</value>
+  </data>
+  <data name="FinancingLoanApplicationEasyStepsTitle" xml:space="preserve">
+    <value>Financing Application Process in 3 Easy Steps:</value>
+  </data>
+  <data name="FinancingLoanApplicationEasyStep1" xml:space="preserve">
+    <value>Send a financing application to your customer (no fee to you or impact to their credit score)</value>
+  </data>
+  <data name="FinancingLoanApplicationEasyStep2" xml:space="preserve">
+    <value>Customer completes application and is shown whether they are approved and for how much</value>
+  </data>
+  <data name="FinancingLoanApplicationEasyStep3" xml:space="preserve">
+    <value>Finalize the job and get paid!</value>
+  </data>
+  <data name="FinancingLoanApplicationStepsForCustomerTitle" xml:space="preserve">
+    <value>Your customer's steps:</value>
+  </data>
+  <data name="FinancingLoanApplicationStepsForCustomerTextStep1" xml:space="preserve">
+    <value>They'll receive a text message with a link to the application</value>
+  </data>
+  <data name="FinancingLoanApplicationStepsForCustomerTextStep2" xml:space="preserve">
+    <value>In less than 60 seconds, they'll see if they're approved and for how much</value>
+  </data>
+  <data name="FinancingLoanApplicationStepsForCustomerTextStep3" xml:space="preserve">
+    <value>Accept and e-sign the offer, then mark the work as complete</value>
+  </data>
+  <data name="FinancingLoanApplicationTransactionAmountLabel" xml:space="preserve">
+    <value>Total Amount to Finance</value>
+  </data>
+  <data name="FinancingLoanApplicationCompletionDateLabel" xml:space="preserve">
+    <value>Estimated Date of Repair Completion</value>
+  </data>
+  <data name="FinancingLoanApplicationMobileNumberLabel" xml:space="preserve">
+    <value>Customer's Mobile/Cell Number</value>
+  </data>
+  <data name="FinancingLoanApplicationSendAppButtonLabel" xml:space="preserve">
+    <value>Send Financing Application</value>
+  </data>
+  <data name="FinancingLoanApplicationResendAppButtonLabel" xml:space="preserve">
+    <value>Resend Financing Application</value>
+  </data>
+  <data name="FinancingLoanApplicationFooterText_Pre" xml:space="preserve">
+    <value>*All financing is subject to credit approval. Terms may vary. Payment options through Wisetack are provided by our</value>
+  </data>
+  <data name="FinancingLoanApplicationFooterText_Post" xml:space="preserve">
+    <value>. For example, a $1,000 purchase could cost $45.18 a month for 24 months, based on a 7.9% APR, or $333.33 a month for 3 months, based on a 0% APR. See additional terms at </value>
+  </data>
+  <data name="FinancingLoanApplicationCTATitle" xml:space="preserve">
+    <value>Win bigger jobs by offering financing</value>
+  </data>
+  <data name="FinancingLoanApplicationCTAText" xml:space="preserve">
+    <value>Send this customer an application and see how much they qualify for.</value>
+  </data>
+  <data name="FinancingLoanApplicationCTALearnMore" xml:space="preserve">
+    <value>LEARN MORE</value>
+  </data>
+  <data name="FinancingLoanApplicationCTAAsLowAsPrefix" xml:space="preserve">
+    <value>Pitch the repair for as low as </value>
+  </data>
+  <data name="FinancingLoanApplicationCTAAsLowAsPostfix" xml:space="preserve">
+    <value>/month*</value>
+  </data>
+  <data name="FinancingLoanApplicationIncludePaymentLink" xml:space="preserve">
+    <value>Insert Financing Application Link in Email</value>
+  </data>
+  <data name="FinancingLoanApplicationIncludePaymentLinkPDFOption" xml:space="preserve">
+    <value>Include Financing Application Link</value>
+  </data>
+  <data name="FinancingLoanApplicationStatusIncomplete" xml:space="preserve">
+    <value>INCOMPLETE</value>
+  </data>
+  <data name="FinancingLoanApplicationStatusApproved" xml:space="preserve">
+    <value>APPROVED BUT INCOMPLETE</value>
+  </data>
+  <data name="FinancingLoanApplicationStatusPaid" xml:space="preserve">
+    <value>PAID</value>
+  </data>
+  <data name="FinancingLoanApplicationStatusDeclined" xml:space="preserve">
+    <value>DECLINED</value>
+  </data>
+  <data name="FinancingLoanApplicationStatusExpired" xml:space="preserve">
+    <value>EXPIRED</value>
+  </data>
+  <data name="FinancingLoanApplicationStatusCanceled" xml:space="preserve">
+    <value>CANCELED</value>
+  </data>
+  <data name="FinancingLoanApplicationStatusRefunded" xml:space="preserve">
+    <value>REFUNDED</value>
+  </data>
+  <data name="FinancingLoanApplicationErrorMessageNoMerchant" xml:space="preserve">
+    <value>There is no wisetack financing data associated with this user</value>
+  </data>
+  <data name="FinancingLoanApplicationErrorMessageInvalidAmount" xml:space="preserve">
+    <value>Transaction amount is required and must be at least $500.00 and no more than $15,000</value>
+  </data>
+  <data name="FinancingLoanApplicationErrorMessageInvalidDate" xml:space="preserve">
+    <value>The date of completion entered is not a valid date</value>
+  </data>
+  <data name="FinancingLoanApplicationErrorMessageDateTooFar" xml:space="preserve">
+    <value>The date of completion must be within the next 30 days</value>
+  </data>
+  <data name="FinancingLoanApplicationErrorMessageInvalidMobileNumber" xml:space="preserve">
+    <value>The mobile number is required and in the format (555) 555-5555</value>
+  </data>
+  <data name="FinancingLoanApplicationStatusExpired_Descriptive" xml:space="preserve">
+    <value>The application ([LOAN_APP_LINK]) which was sent to [LOAN_APP_MOBILE_NUMBER] expired on [LOAN_APP_EXPIRE_DATE].</value>
+  </data>
+  <data name="FinancingLoanApplicationStatusDeclined_Descriptive" xml:space="preserve">
+    <value>The application ([LOAN_APP_LINK]) which was sent to [LOAN_APP_MOBILE_NUMBER] has been declined.</value>
+  </data>
+  <data name="FinancingLoanApplicationStatusRefunded_Descriptive" xml:space="preserve">
+    <value>The application ([LOAN_APP_LINK]) which was sent to [LOAN_APP_MOBILE_NUMBER] has been refunded.</value>
+  </data>
+  <data name="FinancingLoanApplicationStatusCanceled_Descriptive" xml:space="preserve">
+    <value>The application ([LOAN_APP_LINK]) which was sent to [LOAN_APP_MOBILE_NUMBER] has been canceled.</value>
+  </data>
+  <data name="FinancingLoanApplicationStatusGeneralWithoutNumber_Descriptive" xml:space="preserve">
+    <value>The application ([LOAN_APP_LINK]) was provided to the customer for the requested financing amount of $[LOAN_APP_FINANCE_AMOUNT]</value>
+  </data>
+  <data name="FinancingLoanApplicationStatusGeneralWithNumber_Descriptive" xml:space="preserve">
+    <value>The application ([LOAN_APP_LINK]) was sent to [LOAN_APP_MOBILE_NUMBER] for the requested financing amount of $[LOAN_APP_FINANCE_AMOUNT]</value>
+  </data>
+  <data name="FinancingLoanApplicationStatusGeneralApprovedFor_Descriptive" xml:space="preserve">
+    <value> and has been approved for [LOAN_APP_APPROVED_FOR_AMOUNT]. </value>
+  </data>
+  <data name="FinancingLoanApplicationStatusGeneralExpiresOn_Descriptive" xml:space="preserve">
+    <value>Expires on [LOAN_APP_EXPIRE_DATE]. </value>
+  </data>
+  <data name="FinancingLoanApplicationStatusGeneralCurrentStatus_Descriptive" xml:space="preserve">
+    <value>Current Status</value>
+  </data>
+  <data name="FinancingLoanApplicationStatusSettled_Descriptive" xml:space="preserve">
+    <value>Settled</value>
+  </data>
+  <data name="FinancingLoanApplicationStatusAutorized_Descriptive" xml:space="preserve">
+    <value>The financing application has been approved and is now waiting for the customer to accept the financing terms</value>
+  </data>
+  <data name="FinancingLoanApplicationStatusInitiated_Descriptive" xml:space="preserve">
+    <value>Customer has intiated the financing application process</value>
+  </data>
+  <data name="FinancingLoanApplicationStatusActionsRequired_Descriptive" xml:space="preserve">
+    <value>Customer needs to supply required information in order to complete the financing application</value>
+  </data>
+  <data name="FinancingLoanApplicationStatusLoanTermsAccepted_Descriptive" xml:space="preserve">
+    <value>The financing application has been approved with financing terms accepted, but payment has not yet been released. Once the job is complete, your customer can release funds via the financing application</value>
+  </data>
+  <data name="FinancingLoanApplicationStatusLoanConfirmed_Descriptive" xml:space="preserve">
+    <value>The financing application has been approved with financing terms accepted and payment has been released</value>
+  </data>
+  <data name="InvoiceReminder_AutoPay" xml:space="preserve">
+    <value>An automatic payment of {0} will be made in {1} days.</value>
+  </data>
+  <data name="PrintEmailAddressInHeader" xml:space="preserve">
+    <value>Print Email Address In Header</value>
+  </data>
+  <data name="DefaultEstimator" xml:space="preserve">
+    <value>Default Estimator</value>
+  </data>
+  <data name="Estimator_Select" xml:space="preserve">
+    <value>Select Estimator</value>
+  </data>
+  <data name="DefaultEstimatorAbbrv" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="EmailTemplates" xml:space="preserve">
+    <value>Email Templates</value>
+  </data>
+  <data name="IsDefault" xml:space="preserve">
+    <value>Is Default</value>
+  </data>
+  <data name="TemplateDataSaved" xml:space="preserve">
+    <value>Template Data Saved</value>
+  </data>
+  <data name="CustomEmailTemplateDeleteAlertMessage" xml:space="preserve">
+    <value>Are you sure you want to delete this Email Template?</value>
+  </data>
+  <data name="CustomEmailTemplatesShowDeleted" xml:space="preserve">
+    <value>Include Deleted Email Templates</value>
+  </data>
+  <data name="IsDefaultAbbrv" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="BasicEstimateCreationOverview" xml:space="preserve">
+    <value>Basic Estimate Creation Overview</value>
+  </data>
+  <data name="DetailsSupplementsPage" xml:space="preserve">
+    <value>Details Supplements page</value>
+  </data>
+  <data name="HowToCreateOrRemoveSupplements" xml:space="preserve">
+    <value>How to Create or Remove Supplements</value>
+  </data>
+  <data name="HowToOpenAndCloseRepairOrders" xml:space="preserve">
+    <value>How to Open and Close Repair Orders</value>
+  </data>
+  <data name="FinancingInstructions" xml:space="preserve">
+    <value>Financing Instructions</value>
+  </data>
+  <data name="UploadLicensePlatePhoto_LinkTitle" xml:space="preserve">
+    <value>Upload picture of the license plate</value>
+  </data>
+  <data name="UploadLicensePlatePhoto_LowConfidenceReading" xml:space="preserve">
+    <value>The image provided resulted in a low confidence rating. Please confirm the plate number and state are correct.</value>
+  </data>
+  <data name="UploadLicensePlatePhoto_InvalidPlateInfo" xml:space="preserve">
+    <value>The plate number and state could not be decoded to determine the Vin. Please confirm the plate information is correct.</value>
+  </data>
+  <data name="UploadLicensePlatePhoto_ReadFailure" xml:space="preserve">
+    <value>The image could not be read. Please retake, positioning the license plate close and in the center.</value>
+  </data>
+  <data name="EstimateVechicleMustRemoveParts" xml:space="preserve">
+    <value>Sorry, changes cannot be made to Year/Make/Model information while there are Parts added to the Estimate. Please remove all Parts before changing this information.</value>
+  </data>
+  <data name="TodaysDate" xml:space="preserve">
+    <value>Today's Date</value>
+  </data>
+  <data name="SignContract_AlreadySigned" xml:space="preserve">
+    <value>Contract has already been signed.</value>
+  </data>
+  <data name="SignContract_Date" xml:space="preserve">
+    <value>Please enter Valid Today's Date.</value>
+  </data>
+  <data name="SignContract_NoName" xml:space="preserve">
+    <value>Please enter your first and last name.</value>
+  </data>
+  <data name="EnterTodayDate" xml:space="preserve">
+    <value>Please enter Today's Date.</value>
+  </data>
+  <data name="AllowEstimateVehicleModsWithLineItemsLabel" xml:space="preserve">
+    <value>Allow Vehicle changes on Estimates with Parts already added</value>
+  </data>
+  <data name="EstimateVechicleMustRemovePartsConfirm" xml:space="preserve">
+    <value>You are changing the vehicle database on an estimate with existing line entries. All existing line entries must be manually updated after changing the vehicle. Are you sure you want to make this change?</value>
+  </data>
+  <data name="AccessVehicleDatabaseBodyType" xml:space="preserve">
+    <value>Access to the database for this vehicle requires the selection of the Body Type on the Vehicle Info page.</value>
+  </data>
+  <data name="RequiredVehicleDatabase" xml:space="preserve">
+    <value>Required to Access Vehicle Database</value>
+  </data>
+  <data name="QBExporterMessage" xml:space="preserve">
+    <value>Note: Currently the QB Exporter only works on Windows</value>
+  </data>
+  <data name="PartnerNetwork" xml:space="preserve">
+    <value>Partner Network</value>
+  </data>
+  <data name="Settings_AutoPay_TurnOn_Description" xml:space="preserve">
+    <value>Auto Pay will be turned on when the contract is auto renewed.</value>
+  </data>
+  <data name="SelectToShowAllYears" xml:space="preserve">
+    <value>Select to Show All Years</value>
+  </data>
+  <data name="Mitchell_P_Pages_Document_Path" xml:space="preserve">
+    <value>https://static.mymitchell.com/static/Webhelp/ppages/ceg/1033/index.htm</value>
+  </data>
+  <data name="VehicleMandatoryFields" xml:space="preserve">
+    <value>All mandatory fields in Section 1 must be selected to access the vehicles parts database</value>
+  </data>
+  <data name="VehicleMandatoryFieldsHeader" xml:space="preserve">
+    <value>Mandatory Fields</value>
+  </data>
+  <data name="PrintTechnicians" xml:space="preserve">
+    <value>Print Technicians</value>
+  </data>
+  <data name="AssignRepairTechniciansBodyMessage" xml:space="preserve">
+    <value>Are you sure to assign repair technicians in work order report tab?</value>
+  </data>
+  <data name="AssignRepairTechniciansHeaderMessage" xml:space="preserve">
+    <value>Assign Repair Technicians</value>
+  </data>
+  <data name="FeedbackWelcomeMessage2" xml:space="preserve">
+    <value>The Feedback page is not continually monitored.  If you need assistance with a particular issue with an estimate, or your account, please use the Live Chat feature or call Support at 888-932-3780 x 203</value>
+  </data>
+  <data name="AlertUploadFromCloud" xml:space="preserve">
+    <value>You are attempting to upload a link to cloud-stored images.  You must download the image from the cloud and then upload the image(s) to this page.</value>
+  </data>
+  <data name="UseLegacyPartsSectionDropdown" xml:space="preserve">
+    <value>Use Legacy Parts Section Dropdown</value>
+  </data>
+  <data name="TimeZone_Alaska" xml:space="preserve">
+    <value>Alaska</value>
+  </data>
+  <data name="TimeZone_Hawaii" xml:space="preserve">
+    <value>Hawaii</value>
+  </data>
+  <data name="UseLegacyPartsSectionDropdown2" xml:space="preserve">
+    <value>Use Legacy Parts Section Dropdown</value>
+  </data>
+  <data name="IncludeCustomerInfo" xml:space="preserve">
+    <value>Include Owner Information</value>
+  </data>
+  <data name="ManualNotes" xml:space="preserve">
+    <value>Manual Notes?</value>
+  </data>
+  <data name="Cancel_Purchase" xml:space="preserve">
+    <value>Cancel Purchase</value>
+  </data>
+  <data name="Confirm_Purchase" xml:space="preserve">
+    <value>Confirm Purchase</value>
+  </data>
+  <data name="PrintLaborDiscount" xml:space="preserve">
+    <value>Print Labor Hours Discount In Totals</value>
+  </data>
+  <data name="RateProfileCapSelection" xml:space="preserve">
+    <value>You are about to limit the amount of charges due to selecting to "Cap" charge categories.</value>
+  </data>
+  <data name="RateProfileCapSelectionButtonCancel" xml:space="preserve">
+    <value>Click Cancel will remove Cap selection.</value>
+  </data>
+  <data name="RateProfileCapSelectionButtonOK" xml:space="preserve">
+    <value>Click OK will save current changed selection.</value>
+  </data>
+  <data name="PayWithCreditCardButtonLabel" xml:space="preserve">
+    <value>Pay with IntelliPay</value>
+  </data>
+  <data name="CreditCardPaymentTabLabel" xml:space="preserve">
+    <value>IntelliPay</value>
+  </data>
+  <data name="CreditCardPaymentApprovedPageTitle" xml:space="preserve">
+    <value>IntelliPay</value>
+  </data>
+  <data name="CreditCardPaymentNotApprovedPageTitle" xml:space="preserve">
+    <value>IntelliPay</value>
+  </data>
+  <data name="CreditCardPaymentEstimateLink" xml:space="preserve">
+    <value>Estimate</value>
+  </data>
+  <data name="CreditCardPaymentCreatedDate" xml:space="preserve">
+    <value>Payment Date</value>
+  </data>
+  <data name="CreditCardPaymentCustomerName" xml:space="preserve">
+    <value>Customer</value>
+  </data>
+  <data name="CreditCardPaymentAuthCode" xml:space="preserve">
+    <value>Auth Code</value>
+  </data>
+  <data name="CreditCardPaymentAmount" xml:space="preserve">
+    <value>Amount</value>
+  </data>
+  <data name="CreditCardPaymentFee" xml:space="preserve">
+    <value>Fee</value>
+  </data>
+  <data name="CreditCardPaymentTotal" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="CreditCardPaymentCardNum" xml:space="preserve">
+    <value>Card Number</value>
+  </data>
+  <data name="CreditCardPaymentNameOnCard" xml:space="preserve">
+    <value>Name on Card</value>
+  </data>
+  <data name="CreditCardPaymentResponse" xml:space="preserve">
+    <value>Response</value>
+  </data>
+</root>

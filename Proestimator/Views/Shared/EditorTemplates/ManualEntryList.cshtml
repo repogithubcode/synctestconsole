@@ -1,0 +1,494 @@
+﻿@model ProEstimatorData.Models.EditorTemplateModel.ManualEntryList
+
+@using ProEstimatorData.Models.EditorTemplateModel;
+
+<style>
+
+    .hide-small {
+    }
+
+    .hide-med {
+    }
+
+    .hide-column {
+        display: none;
+    }
+
+    .partname-column {
+    }
+
+    .ui-sortable {
+        cursor: pointer;
+    }
+
+    @@media screen and (max-width:700px) {
+        .hide-small {
+            display: none;
+        }
+
+        .partname-column {
+            width: 35%
+        }
+
+        lumn {
+            width: 35%
+        }
+    }
+
+    @@media screen and (max-width:900px) {
+
+        .hide-small {
+            display: none;
+        }
+
+        .partname-column {
+            width: 35%
+        }
+
+        .op-column {
+            width: 35%
+        }
+    }
+
+    .EditME:hover {
+        cursor: pointer;
+    }
+
+    .EditPDR:hover {
+        cursor: pointer;
+    }
+
+    .EditPDR:hover {
+        cursor: pointer;
+    }
+
+    .DeleteME:hover {
+        cursor: pointer;
+    }
+
+    .DeletePDR:hover {
+        cursor: pointer;
+    }
+    .DeleteMatrixPDR:hover {
+        cursor: pointer;
+    }
+
+    .DeleteMatrixPDR:hover {
+        cursor: pointer;
+    }
+</style>
+
+<script type="text/javascript">
+
+    var estimateID = @Model.ItemID;
+    var _delete = [];
+    var delayMillisec = 1000;
+
+    var graphicalPage = @((Model.MEMode == "Graphical").ToString().ToLower());
+
+    $("#loading").dialog({
+        hide: 'slide',
+        show: 'slide',
+        autoOpen: false
+    });
+
+    function GetEstimateListParameters() {
+
+        var result =
+        {
+              userID: @ViewBag.UserID
+            , estimateID: '@Model.ItemID'
+            , meMode: '@Model.MEMode'
+        };
+        return result;
+    }
+
+    @* Get a list of details from the server, create a small and large table to display the data, and inject them into the page. *@
+    function LoadEstimateLineItemList() {
+
+        var grid = $("#manualentrylistitem-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+    }
+
+    function SetEstimateListRowStatus(locked, modified) {
+        var status = '';
+        if (locked)
+        {
+            status += '<span style="font-family:WebDings;">Ï</span>';
+        }
+
+        try {
+            if (modified > -1) {
+                status += ' (' + modified+ ')';
+            }
+        }
+        catch (error) {
+        }
+
+        return status;
+    }
+
+    function MakeEditButton(itemID, op, group, modified) {
+
+        var buttonClass = 'ME';
+        if (op == 'PDR Matrix')
+        {
+            buttonClass = 'PDR';
+            op = "PDR";
+        }
+
+        var editButton = '<input type="button" data-id="' + itemID + '" class="Edit' + buttonClass + ' hide-when-locked table-button" value=@Proestimator.Resources.ProStrings.Edit />';
+        if (group == 'PDR')
+        {
+            editButton = '<a href="/PDR/Matrix#' + itemID + '" class="table-button hide-when-locked">@Proestimator.Resources.ProStrings.Edit</a>';
+        }
+
+        if (graphicalPage == true && modified > -1)
+        {
+            editButton = "";
+            //'<td class="firstColumn"></td>';
+        }
+
+        return editButton;
+    }
+
+    function MakeDeleteButton(itemID, op) {
+
+        var buttonClass = 'ME';
+        if (op == 'PDR') {
+            buttonClass = 'PDR';
+        }
+        else if (op == 'PDR Matrix') {
+
+            buttonClass = 'MatrixPDR';
+        }
+
+        var deleteButton = '<input type="button" data-id="' + itemID + '" class="Delete' + buttonClass + ' table-button hide-when-locked" value= @Proestimator.Resources.ProStrings.Delete />';
+
+        return deleteButton;
+    } 
+
+    function RemoveMatrix(op) {
+
+        var opData = op;
+        if (op == 'PDR Matrix') {
+            opData = 'PDR';
+        }
+        return opData;
+    }
+
+    var sectionSortingHdrChkBoxVal = false;
+    var prevSortFieldName = '';
+
+    function ManualEntryListItemGridDataChanged(arg)
+    {
+        @if (Model.EstimateIsLocked)
+        {
+            <text>$(".hide-when-locked").hide();</text>
+        }
+
+        if(arg.sender.dataSource._sort != undefined)
+        {
+            if(arg.sender.dataSource._sort[0] != undefined)
+            {
+                prevSortFieldName = arg.sender.dataSource._sort[0].field;
+
+                if(prevSortFieldName != "LineNumberCalculated")
+                {
+                    $('#SectionSortingHeaderCheckbox').prop('checked', false);
+                }
+            }
+        }
+    }
+
+    function SectionSortingHdrChkbox_OnClick() {
+        var grid = $("#manualentrylistitem-grid").data("kendoGrid");
+
+        //sort Grid's dataSource
+        sectionSortingHdrChkBoxVal = $("#SectionSortingHeaderCheckbox").is(":checked")
+        console.log('sectionSortingHdrChkBoxVal = ' + sectionSortingHdrChkBoxVal);
+
+        if(sectionSortingHdrChkBoxVal)
+        {
+            grid.dataSource.sort({field: "LineNumberCalculated", dir: "asc"});
+        }
+        else
+        {
+            grid.dataSource.sort({field: "LineNumber", dir: "dsc"});
+        }
+    }
+
+    function DeletePanelData(panelObj) {
+        @if (!Model.EstimateIsLocked) {
+         <text>
+            var sTime = new Date().getTime();
+            _delete.push(sTime);
+            var panelDataID = $(panelObj).attr('data-id');
+            $(panelObj).closest("tr").remove();
+
+            $.getJSON('@Url.Action("DeleteME", "RateProfile")', { userID: @ViewBag.UserID, estimateID: @ViewBag.EstimateID, lineID: panelDataID, meMode: '@Model.MEMode' }, function (data) {
+
+                if (typeof RefreshPartInfoCache !== 'undefined') {
+                    RefreshPartInfoCache();
+                }
+                setTimeout(function () {
+                    if (refresh(sTime)) {
+                        RefreshHeaderInfo(@ViewBag.EstimateID);
+                        LoadEstimateLineItemList();
+                    }
+                }, delayMillisec);
+            });
+        </text>
+        }
+    }
+
+    function DeletePanelPDRData(panelObj) {
+        @if (!Model.EstimateIsLocked) {
+         <text>
+            var sTime = new Date().getTime();
+            _delete.push(sTime);
+            var panelDataID = $(panelObj).attr('data-id');
+            $(panelObj).closest("tr").remove();
+
+            $.getJSON('@Url.Action("DeletePDR", "PDR")', { userID: @ViewBag.UserID, estimateID: @ViewBag.EstimateID, ID: panelDataID }, function (data) {
+
+                if (typeof RefreshPartInfoCache !== 'undefined') {
+                    RefreshPartInfoCache();
+                }
+                setTimeout(function () {
+                    if (refresh(sTime)) {
+                        RefreshHeaderInfo(@ViewBag.EstimateID);
+                        LoadEstimateLineItemList();
+                    }
+                }, delayMillisec);
+            });
+        </text>
+        }
+    }
+
+    function refresh(start) {
+        var b = true;
+        _delete.forEach(function (cTime) {
+            if (start < cTime && cTime <= new Date().getTime()) {
+                b = false;
+            }
+        })
+        return b;
+    }
+
+    function displayValueIfGreaterZero(value) {
+        
+        if (value > 0) {
+            return "$" + value.toFixed(2);
+        }
+        else {
+            return "";
+        }
+    }
+
+    $(document).ready(function () {
+        //LoadEstimateLineItemList();
+
+        if (graphicalPage) {
+            $("#MEDetails").hide();
+        }
+
+        @if (ViewBag.EstimateID != null && !Model.EstimateIsLocked)
+        {
+        <text>
+        $(document).on("click", ".DeleteME", function () {
+            var sTime = new Date().getTime();
+            _delete.push(sTime);
+            var id = $(this).attr('data-id');
+
+            if (id > 0)
+            {
+                $(this).attr("data-id", 0);
+
+                if (_supplement == 0)
+                {
+                    $("#lineItemLg" + id).hide();
+                    $("#lineItemSm" + id).hide();
+                }
+
+                var row = $(this).closest("tr");
+                row.remove();
+
+                $.getJSON('@Url.Action("DeleteME", "RateProfile")', { userID: @ViewBag.UserID, estimateID: @ViewBag.EstimateID, lineID: id, meMode: '@Model.MEMode' }, function (data) {
+                    if (typeof RefreshPartInfoCache !== 'undefined')
+                    {
+                        RefreshPartInfoCache();
+                    }
+
+                    setTimeout(function () {
+                        if (refresh(sTime)) {
+                            RefreshHeaderInfo(@ViewBag.EstimateID);
+                            LoadEstimateLineItemList();
+                        }
+                    }, delayMillisec);
+                });
+            }
+        });
+        </text>
+        }
+
+        $(document).on("click", ".DeletePDR", function () {
+            DeletePanelData(this);
+        });
+
+        $(document).on("click", ".DeleteMatrixPDR", function () {
+            DeletePanelPDRData(this);
+        });
+
+        @* This wires up the Edit click in the entry list.  *@
+        $(document).on("click", ".EditME", function () {
+            var id = $(this).attr('data-id');
+            EditLineItem(id);
+            $('html').scrollTop($("#workDesk").offset().top);
+        });
+
+        $(document).on("click", ".EditPDR", function () {
+
+            var id = $(this).attr('data-id');
+            console.log(id);
+
+            clearFields();
+
+            @if (ViewBag.IsMobileDevice)
+            {
+                <text>ShowPDRRowDetailsMobile(id);</text>
+            }
+            else
+            {
+                <text>ShowPDRPopup();</text>
+            }
+        });
+
+        @if (Model.EstimateIsLocked)
+        {
+            <text>$(".hide-when-locked").hide();</text>
+        }
+
+        @if (@Model.MEMode == "Preset") {
+            <text>
+            $("tbody").sortable({
+                items: "> tr",
+                appendTo: "parent",
+                tolerance: "move",
+                helper: "clone",
+                out: function (event, ui) {
+                    console.log("Sortable done");
+                    var data = [];
+                    $("tbody tr").each(function (i, val) {
+                        data[i] = $(val).find("td:first").html();
+                    });
+                    $.ajax({
+                        url: "/RateProfile/ReOrderCustomerProfilePresets",
+                        type: "POST",
+                        processData: true,
+                        // contentType: false,
+                        data: { data: data, profileID: @ViewBag.ProfileID, meMode: '@Model.MEMode' },
+                        success: function (response) {
+                        }
+                    });
+                }
+            }).disableSelection();
+            </text>
+        }
+
+        @if (@Model.MEMode == "Manual" && !Model.HasSupplement) {
+            <text>
+            $("tbody").sortable({
+                items: "> tr",
+                appendTo: "parent",
+                tolerance: "move",
+                helper: "clone",
+                out: function (event, ui) {
+                    console.log("Sortable done");
+                    var data = [];
+                    $("#manualentrylistitem-grid tbody tr").each(function (i, val) {
+                        data[i] = $(val).find("td:first").html();
+                    });
+                    $.ajax({
+                        url: "/Estimate/ReOrderEstimateLineItems",
+                        type: "POST",
+                        processData: true,
+                        // contentType: false,
+                        data: { data: data, estimateID: @ViewBag.EstimateID },
+                        success: function (response) {
+                            if (response === "True") {
+                                $("#manualentrylistitem-grid tbody tr").each(function (i, val) {
+                                    // update the ui to reflect the changed line numbers
+                                    $(val).find("td[id='lineItemLineNumber']").html(data.length - i);
+                                });
+                            }
+                        }
+                    });
+                }
+            }).disableSelection();
+            </text>
+        }
+    });
+
+
+</script>
+
+@* Table place holders for the large and small tables.  These are filled with data by calling loadList in ManualEntry.cshtml *@
+<div id="estimateDetailList" class="datagrid">
+    <div style="margin: 0px; width:100%">
+
+        @(
+            Html.Kendo().Grid<ManualEntryListItem>()
+            .Name("manualentrylistitem-grid")
+            .Columns(columns =>
+            {
+                columns.Bound(item => item.ID).HtmlAttributes(new { @id = "lineItemLg" }).Hidden();
+                columns.Bound(item => item.ID).Hidden();
+                columns.Bound(item => item.Locked).Hidden();
+                columns.Bound(item => item.Modified).Hidden();
+
+                columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("#= MakeEditButton(ID, OP, Group, Modified) #").HeaderTemplate(@<text><input type="checkbox" id="SectionSortingHeaderCheckbox" onclick="SectionSortingHdrChkbox_OnClick()" style="display: none;" /></text>).Width(20).Sortable(false);
+                columns.Bound(item => item.LineNumber).HtmlAttributes(new { @id = "lineItemLineNumber" }).Title(@Proestimator.Resources.ProStrings.LineNumber);
+
+                columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("#= SetEstimateListRowStatus(Locked, Modified) #").HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.Status);
+
+                columns.Bound(item => item.Group).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.Group);
+                columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("#= RemoveMatrix(OP) #").HeaderHtmlAttributes(new { @class = "op-column" }).Title(@Proestimator.Resources.ProStrings.Op);
+                columns.Bound(item => item.OPDescription).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.OpDescription);
+                columns.Bound(item => item.PartName).Encoded(false).HeaderHtmlAttributes(new { @class = "partname-column" }).HtmlAttributes(new { @class = "partname-column" }).Title(@Proestimator.Resources.ProStrings.PartName);
+                columns.Bound(item => item.PartNumber).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.PartNo);
+                columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("#= kendo.toString(PartPrice, 'c') #").Title(@Proestimator.Resources.ProStrings.PartPrice);
+                columns.Bound(item => item.Quantity).Sortable(false).Title(@Proestimator.Resources.ProStrings.Quantity);
+                columns.Bound(item => item.PartSource).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.Source);
+                columns.Bound(item => item.Overhaul).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.OverhaulHeader);
+                columns.Bound(item => item.LaborItems).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(100).Title(@Proestimator.Resources.ProStrings.LaborTime).Width(300);
+                columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("# if (HasManualNotes) { #" + "<img src='/images/checkmark.png' />" + "# } #").HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(100).Title(@Proestimator.Resources.ProStrings.ManualNotes).Width(100);
+                columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("#= MakeDeleteButton(ID, OP) #");
+            })
+            .Sortable()
+            .Events(events => events
+                .DataBound("ManualEntryListItemGridDataChanged")
+            )
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .ServerOperation(false)
+                .Read(read => read.Action("GetManualEntryList", "Estimate").Data("GetEstimateListParameters"))
+                .Sort(sort => sort.Add("LineNumber").Descending())
+            )
+
+        )
+
+    </div>
+
+</div>
+
+<div id="dialog" title="Parts Now" style="display:none;">
+    <p>Your Parts Now enrollment has been initiated. Please check your email for user access credentials.</p>
+</div>
+<div id="loading" title="Parts Now" style="display:none;">
+    <p>Please wait...</p>
+</div>
+

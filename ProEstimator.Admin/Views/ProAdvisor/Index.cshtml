@@ -1,0 +1,618 @@
+﻿@model ProEstimator.Admin.ViewModel.ProAdvisor.ProAdvisorPageVM
+
+@using ProEstimator.Admin.ViewModel.LinkRules;
+
+@{
+    ViewBag.Title = "Administration - Pro Advisor";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<script>
+
+    var _fadeSpeed = 250;
+    var _panelID = 0;
+
+    $(document).ready(function () {
+        LoadPanelsList();
+
+        $("#PresetsUnassigned").find("select, input").change(function () {
+            LoadUnassignedPresetsGrid();
+        });
+
+        $("#PresetsAssigned").find("select, input").change(function () {
+            LoadAssignedPresetsGrid();
+        });
+
+        $("#PresetListOperationType").change(function () {
+            LoadRulePresets();
+        });
+
+        $("#btnAddPreset").click(function () {
+            AddSelectedPresets();
+        });
+
+        $("#btnRemovePreset").click(function () {
+            RemoveSelectedPresets();
+        });
+    });
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    /// Panels Grid stuff
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+
+    function LoadPanelsList() {
+        var grid = $("#panels-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+    }
+
+    function PanelsGridDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#panels-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+    }
+
+    function PanelsGridLineSelectionChanged(arg) {
+
+        // Get the selected item and call the ClickedItem event
+        var row = $("#panels-grid").find(".k-state-selected").first();
+        var panelID = row.find("td").first().html();
+
+        LoadPanel(panelID, true);
+    }
+
+    function GetPanelsSearchParams() {
+        var result =
+        {
+
+        };
+        return result;
+    }
+
+    function LoadPanel(panelID, hideDetails) {
+
+        _panelID = panelID;
+
+        var elements = $(".panel-selected-details").length;
+        $(".panel-selected-details").fadeOut(_fadeSpeed, function () {
+
+            if (--elements == 0) {
+
+                $.getJSON("/LinkRules/GetPanelDetails", { panelID: panelID }, function (data) {
+                    if (data.Success == true) {
+                        $(".panel-selected-details").fadeIn(_fadeSpeed);
+
+                        LoadRulePresets();
+                    }
+                    else {
+                        alert(data.ErrorMessage);
+                    }
+
+                });
+            }
+        });
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    /// The Presets assigmnet grids
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+
+    function LoadRulePresets() {
+        LoadUnassignedPresetsGrid();
+        //LoadAssignedPresetsGrid();
+    }
+
+    function LoadUnassignedPresetsGrid() {
+        _selectedUnassigned = "";
+
+        var grid = $("#presets-unassigned-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+    }
+
+    function LoadAssignedPresetsGrid() {
+        _selectedAssigned = "";
+
+        var grid = $("#presets-assigned-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+    }
+
+    function SetFilterWidths(gridName) {
+        if ($(".match-details").css("display") == "none") {
+            return;
+        }
+
+        var section = $("#" + gridName);
+
+        var nameWidth = section.find('[data-title=Name]').width();
+        var operationWidth = section.find('[data-title=OperationType]').width();
+        var laborWidth = section.find('[data-title=LaborType]').width();
+        var subletWidth = section.find('[data-title=Sublet]').width();
+
+        section.find(".name-container").css("width", nameWidth + 20);
+        section.find(".operation-type-container").css("width", operationWidth + 20);
+        section.find(".labor-type-container").css("width", laborWidth + 20);
+        section.find(".sublet-container").css("width", subletWidth + 20);
+    }
+
+    function GetUnassignedPresetsSearchParams() {
+        return GetPresetsSearchParams(false, "PresetsUnassigned");
+    }
+
+    function GetAssignedPresetsSearchParams() {
+        return GetPresetsSearchParams(true, "PresetsAssigned");
+    }
+
+    function GetPresetsSearchParams(assigned, gridName) {
+        var section = $("#" + gridName);
+
+        var result =
+        {
+              panelID: _panelID
+            , addAction: $("#PresetListOperationType").val()
+            , assigned: assigned
+            , name: section.find(".filter-name").val()
+            , operationType: section.find(".filter-operation-type").val()
+            , laborType: section.find(".filter-labor-type").val()
+            , sublet: section.find(".filter-sublet").is(":checked")
+        };
+        return result;
+    }
+
+    function UnassignedPresetsGridDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#unassigned-presets-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+
+        SetFilterWidths("PresetsUnassigned");
+
+
+        LoadAssignedPresetsGrid();
+    }
+
+    function UnassignedPresetsGridLineSelectionChanged(e) {
+        _selectedUnassigned = $.map(this.select(), function (item) {
+            return $(item).find('td:first-child').html();
+        }).join(", ");
+    }
+
+    function AssignedPresetsGridDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#assigned-presets-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+
+        SetFilterWidths("PresetsAssigned");
+    }
+
+    function AssignedPresetsGridLineSelectionChanged(e) {
+        _selectedAssigned = $.map(this.select(), function (item) {
+            return $(item).find('td:first-child').html();
+        }).join(", ");
+    }
+
+
+    function TogglePreset(row) {
+        $(row).toggleClass("preset-selected");
+    }
+
+    function AddSelectedPresets() {
+        $.getJSON("/ProAdvisor/AssignPresets", { panelID: _panelID, addAction: $("#PresetListOperationType").val(), ids: _selectedUnassigned }, function (data) {
+            LoadRulePresets();
+        });
+    }
+
+    function RemoveSelectedPresets() {
+        $.getJSON("/ProAdvisor/UnassignPresets", { panelID: _panelID, addAction: $("#PresetListOperationType").val(), ids: _selectedAssigned }, function (data) {
+            LoadRulePresets();
+        });
+    }
+
+</script>
+
+<style>
+    #ContentWrapper {
+        position: relative;
+    }
+
+    .admin-container {
+        max-width: 90%;
+    }
+
+    .left-side {
+        width: 550px;
+        padding-top: 5px;
+        height: 100%;
+        float: left;
+    }
+
+    .right-side {
+        float: left;
+        width: 100%;
+        padding-top: 5px;
+        padding-left: 10px;
+        width: calc(100% - 550px);
+    }
+
+    .section-details {
+        height: 400px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        
+    }
+
+    .section-details-half {
+        width: calc(50% - 3px);
+        float: left;
+    }
+
+    .short-dropdown {
+        width: 165px !important;
+        float: left;
+        margin-right: 10px;
+    }
+
+    .medium-dropdown {
+        width: 250px !important;
+        float: left;
+        margin-right: 10px;
+    }
+
+    .match-text-input {
+        width: 200px;
+        float: left;
+    }
+
+    .list-block {
+        list-style: none;
+        padding-left: 0;
+        cursor: pointer;
+    }
+
+    .rule-selected {
+        font-weight: bold;
+    }
+
+    .panel-default {
+        margin-top: 10px;
+    }
+
+    .panel-selected-details {
+        display: none;
+    }
+
+    .preset-details {
+        display: none;
+    }
+
+    .match-type-dropdown {
+        width: 200px;
+    }
+
+    .form-row {
+        clear: both;
+        padding-top: 10px;
+    }
+
+        .form-row input {
+            width: 400px;
+        }
+
+    .section-outline {
+        border: 1px solid black;
+        border-radius: 10px;
+        padding: 5px;
+        cursor: pointer;
+    }
+
+    .section-outline-selected {
+        background-color: aliceblue;
+    }
+
+    .presets-link-left {
+        width: calc(50% - 5px);
+        float: left;
+    }
+
+    .presets-link-right {
+        width: calc(50% - 5px);
+        margin-left: 10px;
+        float: left;
+    }
+
+    .presets-link-list {
+        height: 300px;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .preset-selected {
+        background-color: #008cba;
+    }
+
+    #presets-link-container p {
+        margin: 0px;
+        padding: 5px;
+    }
+
+    #detailsWorkingOverlay {
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        background-color: white;
+        z-index: 10;
+        opacity: 0.8;
+        text-align: center;
+        padding-top: 50px;
+        display: none;
+    }
+
+    .not-include {
+        text-decoration: line-through;
+    }
+
+    .btn-remove, .btn-disable, .btn-up, .btn-down {
+        margin-left: 10px;
+    }
+
+    .btn-indent {
+        float: left;
+        margin-right: 10px;
+    }
+
+    .indented {
+        margin-left: 55px;
+    }
+
+    .presets-grid-filters-wrapper {
+        height: 49px;
+        width: 100%;
+    }
+
+    .presets-grid-filters-section {
+        padding: 5px;
+        float: left;
+        width: 33%;
+    }
+
+        .presets-grid-filters-section input {
+            height: 39px;
+            width: 100%;
+        }
+
+    .datagrid {
+        cursor: pointer;
+    }
+
+    a {
+        cursor: pointer;
+    }
+
+    .link-title {
+        float: left;
+        width: 200px;
+        font-weight: bold;
+    }
+</style>
+
+
+<div id="ContentWrapper">
+
+    <div class="left-side">
+
+        @*-----------------------------------------------------------------------------------------------------------------------------------------------*@
+        @* The Panels Grid *@
+        @*-----------------------------------------------------------------------------------------------------------------------------------------------*@
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Panels</h4>
+            </div>
+
+            <div class="panel-body">
+                <div class="section-details datagrid">
+                    @(Html.Kendo().Grid<PanelsGridRowVM>()
+                        .Name("panels-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.PanelID).Title("ID").Hidden();
+                            columns.Bound(item => item.PanelName).Title("Panel Name");
+                        })
+                        .Selectable()
+                        .Events(events => events
+                            .DataBound("PanelsGridDataChanged")
+                            .Change("PanelsGridLineSelectionChanged")
+                        )
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Read(read => read.Action("GetPanelsForGrid", "LinkRules").Data("GetPanelsSearchParams"))
+                        )
+                    )
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="right-side">
+        @*-----------------------------------------------------------------------------------------------------------------------------------------------*@
+        @* The Presets linking block *@
+        @*-----------------------------------------------------------------------------------------------------------------------------------------------*@
+        <div class="panel panel-default panel-selected-details">
+            <div class="panel-heading" style=" height: 61px;">
+                <h4 style="float: left;">Linked Presets</h4>
+                <select id="PresetListOperationType" class="match-type-dropdown form-control pull-right">
+                    <option value="Align">Align</option>
+                    <option value="Blend">Blend</option>
+                    <option value="RI">R&amp;I</option>
+                    <option value="Refinish">Refinish</option>
+                    <option value="Repair">Repair</option>
+                    <option value="Replace">Replace</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div id="presets-link-container" class="panel-body" style="clear: both;">
+                <div class="presets-link-left">
+                    <div style="clear: both; margin-bottom: 10px;">
+                        <input type="button" id="btnAddPreset" class="btn btn-default" value=">>>">
+                    </div>
+
+                    <div id="PresetsUnassigned" style="clear: both;">
+                        <div class="presets-grid-filters-wrapper">
+                            <div class="presets-grid-filters-section name-container">
+                                <input type="text" class="filter-name" />
+                            </div>
+                            <div class="presets-grid-filters-section operation-type-container">
+                                <select class="filter-operation-type form-control">
+                                    <option value="All">--All--</option>
+                                    <option value="Align">Align</option>
+                                    <option value="Replace">Replace</option>
+                                    <option value="Repair">Repair</option>
+                                    <option value="RI">R&I</option>
+                                    <option value="Refinish">Refinish</option>
+                                    <option value="Blend">Blend</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="presets-grid-filters-section labor-type-container">
+                                <select class="filter-labor-type form-control">
+                                    <option value="All">--All--</option>
+                                    <option value="Body">Body</option>
+                                    <option value="Frame">Frame</option>
+                                    <option value="Mechanical">Mechanical</option>
+                                    <option value="Refinish">Refinish</option>
+                                    <option value="NA">N/A</option>
+                                </select>
+                            </div>
+                            <div class="presets-grid-filters-section sublet-container">
+                                <input type="checkbox" class="filter-sublet form-control" />
+                            </div>
+                        </div>
+                        <div class="section-details datagrid" style="clear: both;">
+                            @(Html.Kendo().Grid<PresetGridRowVM>()
+                                .Name("presets-unassigned-grid")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(item => item.ID).Title("ID").Hidden();
+                                    columns.Bound(item => item.Name).Title("Name");
+                                    columns.Bound(item => item.OperationType).Title("OperationType");
+                                    columns.Bound(item => item.LaborType).Title("LaborType");
+                                    columns.Template(@<text></text>).ClientTemplate("  " + "# if (Sublet) { #" + "<img src=\"/Images/checkmark.png\" style=\"max-width: 30px!important; \" />" + "# } #").HeaderHtmlAttributes(new { @style = "text-align: center;" }).HtmlAttributes(new { @style = "text-align: center;" }).Title("Sublet");
+                                })
+                                .Selectable(selectable => selectable
+                                    .Mode(GridSelectionMode.Multiple))
+                                .Sortable()
+                                .Events(events => events
+                                    .DataBound("UnassignedPresetsGridDataChanged")
+                                    .Change("UnassignedPresetsGridLineSelectionChanged")
+                                )
+                                .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .ServerOperation(false)
+                                    .Read(read => read.Action("GetPresetsForPanel", "ProAdvisor").Data("GetUnassignedPresetsSearchParams"))
+                                )
+                            )
+                        </div>
+
+                    </div>
+                </div>
+                <div class="presets-link-right">
+                    <div style="clear: both; margin-bottom: 10px;">
+                        <input type="button" id="btnRemovePreset" class="btn btn-default" value="<<<">
+                    </div>
+
+                    <div id="PresetsAssigned" style="clear: both;">
+                        <div class="presets-grid-filters-wrapper">
+                            <div class="presets-grid-filters-section name-container">
+                                <input type="text" class="filter-name" />
+                            </div>
+                            <div class="presets-grid-filters-section operation-type-container">
+                                <select class="filter-operation-type form-control">
+                                    <option value="All">--All--</option>
+                                    <option value="Align">Align</option>
+                                    <option value="RI">R&I</option>
+                                    <option value="Refinish">Refinish</option>
+                                    <option value="Repair">Repair</option>
+                                    <option value="Replace">Replace</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="presets-grid-filters-section labor-type-container">
+                                <select class="filter-labor-type form-control">
+                                    <option value="All">--All--</option>
+                                    <option value="Body">Body</option>
+                                    <option value="Frame">Frame</option>
+                                    <option value="Mechanical">Mechanical</option>
+                                    <option value="Refinish">Refinish</option>
+                                    <option value="NA">N/A</option>
+                                </select>
+                            </div>
+                            <div class="presets-grid-filters-section sublet-container">
+                                <input type="checkbox" class="filter-sublet form-control" />
+                            </div>
+                        </div>
+                        <div class="section-details datagrid" style="clear: both;">
+                            @(Html.Kendo().Grid<PresetGridRowVM>()
+                                .Name("presets-assigned-grid")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(item => item.ID).Title("ID").Hidden();
+                                    columns.Bound(item => item.Name).Title("Name");
+                                    columns.Bound(item => item.OperationType).Title("OperationType");
+                                    columns.Bound(item => item.LaborType).Title("LaborType");
+                                    columns.Template(@<text></text>).ClientTemplate("  " + "# if (Sublet) { #" + "<img src=\"/Images/checkmark.png\" style=\"max-width: 30px!important; \" />" + "# } #").HeaderHtmlAttributes(new { @style = "text-align: center;" }).HtmlAttributes(new { @style = "text-align: center;" }).Title("Sublet");
+                                })
+                                .Selectable(selectable => selectable
+                                    .Mode(GridSelectionMode.Multiple))
+                                .Sortable()
+                                .Events(events => events
+                                .DataBound("AssignedPresetsGridDataChanged")
+                                .Change("AssignedPresetsGridLineSelectionChanged")
+                                )
+                                .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .ServerOperation(false)
+                                    .Read(read => read.Action("GetPresetsForPanel", "ProAdvisor").Data("GetAssignedPresetsSearchParams"))
+                                )
+                            )
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-footer" style=" min-height: 60px;">
+                <p class="pull-left">
+                </p>
+            </div>
+        </div>
+
+    </div>
+</div>

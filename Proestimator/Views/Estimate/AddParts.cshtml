@@ -1,0 +1,221 @@
+﻿@model Proestimator.ViewModel.AddPartsVM
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_AddParts;
+}
+
+<style>
+    #content-area
+    {
+        right: 0;
+        bottom: 0;
+        width : auto;
+    }
+
+    #lgRowPreset {
+        margin-top: 0px !important;
+    }
+
+    .form-container {
+        padding-top: 20px !important;
+    }
+
+    #matrix-large-top-header {
+        top: 5px !important;
+        right: 27px !important;
+    }
+
+    #matrix-large-bottom {
+        top: 4px !important;
+    }
+
+    .me-form-header {
+        display: none;
+    }
+</style>
+
+<script src="~/Scripts/PaintCalculations.js?18"></script>
+
+<script>
+
+    var _supplement = @Model.Supplement;
+    var _estimateIsLocked = @Model.EstimateIsLocked.ToString().ToLower();
+
+    function BeforeRedirect() {
+        if ($(".matrix-wrapper").is(":visible")) {
+            SavePDR(false);
+        }
+        if ($(".pdr-mobile-details").is(":visible")) {
+            $("#detailsPopupSave").click();
+        }
+    }
+
+    // Load the passed part ID into the details form for editing.
+    function EditLineItem(partID) {
+        $.getJSON('@Url.Action("EditME", "RateProfile")', { userID: @ViewBag.UserID, estimateID: @Model.EstimateID, lineID: partID, meMode: "Manual" }, function (data) {
+            loadDetails(data.detail, false);
+        });
+    }
+
+    $(document).ready(function () {
+        $(".form-container").css("bottom", "0px");
+        applyLoading();
+
+        // Set up the draggable split bar
+        var bottomElem = $(".resizable-bottom");
+        var bottomElemOriginalHeight = bottomElem.height();
+        $(".resizable-top").resizable({
+            handles: 's',
+            resize: function (event, ui) {
+                var bottomHeight = bottomElemOriginalHeight - (ui.element.outerHeight() - ui.originalSize.height);
+
+                // Ensure the height of the line preview section is not less than 30px
+                var overLimitAmount = bottomHeight - 30;
+                if (overLimitAmount < 0) {
+                    bottomHeight += overLimitAmount * -1;
+                    ui.element.outerHeight(ui.element.outerHeight() + overLimitAmount);
+                }
+
+                bottomElem.height(bottomHeight);
+
+                // If the Manual Entry form is showing, we need to manually set the bottom position of the form-container div
+                $(".form-container").css("bottom", (bottomHeight) + "px");
+
+                bottomHeightPct = ($(".resizable-bottom").height() / ($(".resizable-bottom").height() + $(".resizable-top").height())) * 100;
+            },
+            stop: function (event, ui) {
+                bottomElemOriginalHeight = bottomElem.height();
+            }
+        });
+
+        bottomHeightPct = ($(".resizable-bottom").height() / ($(".resizable-bottom").height() + $(".resizable-top").height())) * 100;
+        var bottomHeight = $(".resizable-bottom").height();
+        $(".form-container").css("bottom", bottomHeight + "px");
+
+        $("#btnPDR").click(function () {
+            ShowPDRPopup();
+        });
+
+        $(".pdrHeader").hide();
+
+        @if (Model.PDRAutoOpen)
+        {
+            <text>
+            ShowPDRPopup();
+            </text>
+        }
+    });
+
+    $(window).load(function () {
+        removeLoading();
+    });
+
+    function ShowPDRPopup() {
+
+        $("#formHeaderRegular").fadeOut(300);
+
+        $("#MEDetails").fadeOut(300, function () {
+            $("#PDRMatrixContainer").fadeIn(300);
+            $("#formHeaderPDR").fadeIn(300);
+        });
+    }
+
+    function HidePDR()
+    {
+        $("#PDRMatrixContainer").fadeOut(300);
+        $("#formHeaderPDR").fadeOut(300, function () {
+            $("#MEDetails").fadeIn(300);
+            $("#formHeaderRegular").fadeIn(300);
+        });
+    }
+</script>
+
+<div id="workDesk" class="page-container">
+
+    @using (Html.BeginForm("AddParts", "Estimate", FormMethod.Post, new { @class = "container" }))
+    {
+        
+        @Html.ValidationSummary(false)
+        
+        <input type="hidden" id="redirectData" name="redirectDataField" />
+
+        <div id="estimateFormHeader">
+
+            <div id="formHeader-back">
+                <a class="button nav-btn" data-link-id="Vehicle-Back" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/estimate/@Model.EstimateID/vehicle');">@Proestimator.Resources.ProStrings.VehicleBackButton</a>
+            </div>
+
+            <div id="formHeader-center">
+
+                <div id="formHeaderRegular">
+                    <input type="button" class="button nav-btn btnAdd do-not-disable" value=@Proestimator.Resources.ProStrings.AddButton />
+                    <input type="button" class="button nav-btn btnClear do-not-disable" value="@Proestimator.Resources.ProStrings.ClearForm">
+
+                    @if (Model.HasPDRContract)
+                    {
+                        if (Model.PDREnabled)
+                        {
+                            <input type="button" id="btnPDR" class="button nav-btn do-not-disable" style="min-width: 120px;" value="@Proestimator.Resources.ProStrings.PDR">
+                        }
+                        else
+                        {
+                            @Html.ActionLink(Proestimator.Resources.ProStrings.PDR, "ProfileSelect", "PDR", new { errorMessage = "PDR" }, new { @class = "button nav-btn", @style = "min-width: 120px;" })
+                        }
+                    }
+                </div>
+                
+                <div id="formHeaderPDR" style="display: none;">
+                    <input type="button" class="button nav-btn do-not-disable" value="Rate Profile" onclick="SubmitAndRedirect('/@ViewBag.UserID/pdr-rates/@(Model.PDRMatrix != null ? Model.PDRMatrix.ProfileID : Model.PDRMatrixMobile.ProfileID)')" />
+                    <input type="button" class="button nav-btn do-not-disable" id="btnSubmit" value="@Proestimator.Resources.ProStrings.Save" />
+                    <input type="button" class="button nav-btn do-not-disable" id="btnPDRClose" value="@Proestimator.Resources.ProStrings.Close" />
+                </div>
+                
+                @if (Model.EstimateIsLocked)
+                {
+                    <p class="error-message">@Proestimator.Resources.ProStrings.Estimate_Message_LockedNoEdit</p>
+                }
+                
+                <div class="message-container error-message">
+                </div>
+            </div>
+
+            <div id="formHeader-next">
+                <a class="button nav-btn" data-link-id="Insurance-Next" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/estimate/@Model.EstimateID/insurance');">@Proestimator.Resources.ProStrings.InsurancePageButton </a>
+            </div>
+
+        </div>
+        
+        <div class="graphical-container" style="top: 75px;">
+            <div class="resizable resizable-top">
+                <div id="MEDetails" style="height: 100%; overflow: auto;">
+                    @Html.EditorFor(model => model.ManualEntry.Details)
+                </div>
+
+                @* The PDR Matrix form. *@
+                @if (Model.HasPDRContract && Model.PDREnabled)
+                {
+                    <div id="PDRMatrixContainer" style="display: none; height: 100%; overflow: auto;">
+                        @if (Model.PDRMatrix != null)
+                        {
+                            @Html.EditorFor(model => model.PDRMatrix)
+                        }
+
+                        @if (Model.PDRMatrixMobile != null)
+                        {
+                            @Html.EditorFor(model => model.PDRMatrixMobile)
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="resizable resizable-bottom">
+                <div class="graphical-footer">
+                    <div id="MEList">
+                        @Html.EditorFor(model => model.ManualEntry.List)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    }
+</div>

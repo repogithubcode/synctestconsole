@@ -1,0 +1,661 @@
+﻿@model ProEstimator.Admin.ViewModel.TrialReportVM
+
+@using ProEstimator.Admin.ViewModel;
+
+@{
+    ViewBag.Title = "Administration - Trial Report";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<style>
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .padd-top {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    .k-grid td {
+        white-space: normal;
+    }
+
+    .stackem {
+        margin-bottom: 15px;
+    }
+
+    .fund {
+        background-color: rgba(0,0,0,.06);
+        border-radius: 4px;
+        margin: 0 0 4%;
+        padding: 2.5% 3.5%;
+    }
+
+    .fund:last-child {
+        margin-bottom: 4%;
+    }
+
+    .progress {
+        background-color: #bdd3fb;
+        border-radius: 4px;
+        box-shadow: 0 1px 1px rgba(0,0,0,.15) inset;
+        height: 27px;
+        margin-bottom: 2%;
+        overflow: hidden;
+    }
+
+    .bar {
+        background-color: #427ae3;
+        box-shadow: 0 -1px 1px rgba(0,0,0,.15) inset;
+        color: #fff;
+        float: left;
+        height: 100%;
+        position: relative;
+        text-align: left;
+    }
+
+    .bar > .percent {
+        font-size: .9rem;
+        left: 8px;
+        position: absolute;
+        top: 3px;
+    }
+
+    .goal {
+        color: 000000;
+    }
+
+    .donate {
+        color: #fff;
+        float: right;
+        font-weight: 400;
+        text-decoration: none;
+    }
+
+    .donate:hover {
+        text-decoration: underline;
+    }
+
+    .panel-custom {
+        padding-top:5px;
+        padding-bottom:5px;
+    }
+
+</style>
+
+<script>
+
+    var totalWeTrialsDetailData;
+    var totalActiveWeTrialsDetailData;
+    var totalWeTrialsConvertedDetailData;
+
+    function GetReportDeatailsSearchParameters() {
+        return {
+            fromDate: $("#startDate").val(), toDate: $("#endDate").val(), repId: $("#SalesRepDDL").val()
+        };
+    }
+
+    function SalesRepDDL_SelectedIndexChanged()
+    {
+        GetTotalTrialsAndCharts();
+
+        // Refresh the trialsreportbydate grid
+        var grid = $("#trialsreportbydate-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+    }
+
+    $(document).ready(function () {
+
+        // Set up calendar controls
+        $("#startDate").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        // Set up calendar controls
+        $("#endDate").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        var currentDate = new Date();
+        var dateChange = new Date();
+        dateChange.setDate(currentDate.getDate() - 10)
+
+        // startDate
+        var startDate = GetDayMonthYear(dateChange);
+        $("#startDate").val(startDate);
+
+        // endDate
+        dateChange = new Date();
+        var endDate = GetDayMonthYear(dateChange);
+        $("#endDate").val(endDate);
+
+        function GetDayMonthYear(dateChange) {
+            var d = dateChange.getDate();
+            var day = (d < 10) ? '0' + d : d;
+            var m = dateChange.getMonth() + 1;
+            var month = (m < 10) ? '0' + m : m;
+            var yy = dateChange.getYear();
+            var year = (yy < 1000) ? yy + 1900 : yy;
+
+            var dateRange = month + "/" + day + "/" + year;
+
+            return dateRange;
+        }
+
+        $("#btnExcelExport").click(function () {
+
+            var fromDateFilter = $("#startDate").val();
+            var toDateFilter = $("#endDate").val()
+            var repId = $("#SalesRepDDL").val();
+
+            var win = window.open("/TrialReport/DownloadData/?fromDate=" + fromDateFilter + "&toDate=" + toDateFilter + "&repId=" + repId, "_blank");
+
+            if (win) {
+                //Browser has allowed it to be opened
+                win.focus();
+            } else {
+                //Browser has blocked it
+                alert("Your browser blocked the site from opening a new tab, please allow popups for this site.");
+            }
+        });
+
+        // Do the acount id search
+        $("#btnSearch").click(function () {
+
+            GetTotalTrialsAndCharts();
+
+            // Refresh the trialsreportbydate grid
+            var grid = $("#trialsreportbydate-grid").data("kendoGrid");
+
+            if (grid) {
+                grid.dataSource.read();
+            }
+        });
+
+        $("#filter").on("input", function (e) {
+
+            var grid = $("#trialsreportbydate-grid").data("kendoGrid");
+            var valuetoFilter = e.target.value;
+
+            var filter = KendogridSearchFilter(grid, valuetoFilter);
+
+            grid.dataSource.filter(filter);
+        });
+
+        GetTotalTrialsAndCharts();
+    });
+
+    function GetTotalTrialsAndCharts() {
+
+        $.getJSON("/TrialReport/GetTotalTrialsAndCharts", { fromDate: $("#startDate").val(), toDate: $("#endDate").val(), repId: $("#SalesRepDDL").val() }, function (result) {
+
+            if (result.Success === true) {
+                $('#totalWeTrialsBox').text(result.TrialReportVMObject.TotalWeTrials);
+                $('#totalActiveWeTrialsBox').text(result.TrialReportVMObject.TotalActiveWeTrials);
+                $('#totalWeTrialsConvertedBox').text(result.TrialReportVMObject.TotalWeTrialsConverted);
+
+                totalWeTrialsDetailData = result.TrialReportVMObject.TotalWeTrialDetail;
+                totalActiveWeTrialsDetailData = result.TrialReportVMObject.TotalActiveWeTrialDetail;
+                totalWeTrialsConvertedDetailData = result.TrialReportVMObject.TotalWeTrialsConvertedDetail;
+
+                console.log(result.TrialReportVMObject.GraphData);
+
+                PlotTrialAllUsersChart(result.TrialReportVMObject.GraphData);
+                PlotTrialSalesRepChart(result.TrialReportVMObject.SingleRepGraphData);
+            }
+        });
+    }
+
+    function PlotTrialAllUsersChart(graphData) {
+        var xPts = [];
+        var yPts = [];
+
+        var len = graphData.Xaxis.length;
+
+        for (var i = 0; i < len; i++) {
+
+            xPts.push(graphData.Xaxis[i]);
+
+            yPts.push({
+                y: parseFloat(graphData.Yaxis[i])
+            });
+        }
+
+        var ctx = document.getElementById("trialAllUsersChart").getContext("2d");
+        window.myLine = new Chart(ctx, {
+            type: 'line',
+            height: "180px",
+            width: "300px",
+            data: {
+                labels: xPts,
+                datasets: [{
+                    data: yPts,
+                    fill: true,
+                }]
+            },
+            options: {
+                events: ['click'],
+                scaleShowValues: true,
+                legend: {
+                    display: false
+                },
+                scales: {
+                    xAxes: [{
+                        display: true,
+                        time: {
+                            parser: 'MMM/DD/YYYY HH:mm',
+                            unit: 'day',
+                            unitStepSize: 1,
+                            displayFormats: {
+                                'day': 'MMM/DD/YYYY'
+                            }
+                        },
+                        ticks: {
+                            autoSkip: false
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: false
+                        }
+                    }]
+                }
+            }
+        });
+    }
+
+    function PlotTrialSalesRepChart(singleRepGraphData) {
+        var xPts = [];
+        var yPts = [];
+
+        var len = singleRepGraphData.Xaxis.length;
+
+        for (var i = 0; i < len; i++) {
+
+            xPts.push(singleRepGraphData.Xaxis[i]);
+
+            yPts.push({
+                y: parseFloat(singleRepGraphData.Yaxis[i])
+            });
+        }
+
+        var ctx = document.getElementById("trialSalesRepChart").getContext("2d");
+        window.myLine = new Chart(ctx, {
+            type: 'line',
+            height: "180px",
+            width: "300px",
+            data: {
+                labels: xPts,
+                datasets: [{
+                    data: yPts,
+                    fill: true,
+                }]
+            },
+            options: {
+                events: ['click'],
+                scaleShowValues: true,
+                legend: {
+                    display: false
+                },
+                scales: {
+                    xAxes: [{
+                        display: true,
+                        time: {
+                            parser: 'MM/DD/YYYY HH:mm',
+                            unit: 'day',
+                            unitStepSize: 1,
+                            displayFormats: {
+                                'day': 'MM/DD/YYYY'
+                            }
+                        },
+                        ticks: {
+                            autoSkip: false
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: false
+                        }
+                    }]
+                }
+            }
+        });
+    }
+
+    $(function () {
+        $("#DivTotalWeTrialsDetail").dialog({
+            modal: true,
+            autoOpen: false,
+            title: "Total WE Trials",
+            width: 900,
+            height: 550
+        });
+        $("#totalWeTrialsBox").click(function () {
+
+            // Refresh the totalwetrials grid
+            grid = $("#totalwetrialsdetail-grid").getKendoGrid();
+
+            if (grid) {
+                grid.dataSource.data(totalWeTrialsDetailData);
+                grid.refresh();
+            }
+
+            $('#DivTotalWeTrialsDetail').dialog('open');
+        });
+    });
+
+    $(function () {
+        $("#DivTotalActiveWeTrialsDetail").dialog({
+            modal: true,
+            autoOpen: false,
+            title: "Total Active WE Trials",
+            width: 900,
+            height: 550
+        });
+        $("#totalActiveWeTrialsBox").click(function () {
+
+            // Refresh the totalwetrials grid
+            grid = $("#totalactivewetrialsdetail-grid").getKendoGrid();
+
+            if (grid) {
+                grid.dataSource.data(totalActiveWeTrialsDetailData);
+                grid.refresh();
+            }
+
+            $('#DivTotalActiveWeTrialsDetail').dialog('open');
+        });
+    });
+
+    $(function () {
+        $("#DivTotalWeTrialsConvertedDetail").dialog({
+            modal: true,
+            autoOpen: false,
+            title: "Total WE Trials Converted",
+            width: 900,
+            height: 550
+        });
+        $("#totalWeTrialsConvertedBox").click(function () {
+
+            // Refresh the totalwetrials grid
+            grid = $("#totalwetrialsconverteddetail-grid").getKendoGrid();
+
+            if (grid) {
+                grid.dataSource.data(totalWeTrialsConvertedDetailData);
+                grid.refresh();
+            }
+
+            $('#DivTotalWeTrialsConvertedDetail').dialog('open');
+        });
+    });
+
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.js"></script>
+
+<div class="row padd-top">
+    <div class="col-lg-8 col-md-7 col-sm-6">
+        <h3>
+            Trial Report - <i class="fa fa-user" aria-hidden="true"></i> @Model.SalesRepName
+        </h3>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 col-sm-12">
+            <div class="panel panel-default">
+                <div class="panel-heading panel-custom">Trials All Users</div>
+                <div class="panel-body">
+                    <canvas id="trialAllUsersChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-sm-12">
+            <div class="panel panel-default">
+                <div class="panel-heading panel-custom">
+                    Trials
+                    @Html.DropDownListFor(model => model.SelectedSalesRep, Model.SalesRepDDL, new { @id = "SalesRepDDL", style = "width: 185px;height:22px", onchange = "SalesRepDDL_SelectedIndexChanged()" })
+                </div>
+                <div class="panel-body">
+                    <canvas id="trialSalesRepChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Total WE Trials</h4>
+            </div>
+            <div class="panel-body text-center">
+                <h1 id="totalWeTrialsBox"></h1>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Total Active WE Trials</h4>
+            </div>
+            <div class="panel-body text-center">
+                <h1 id="totalActiveWeTrialsBox"></h1>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Total WE Trials Converted</h4>
+            </div>
+            <div class="panel-body text-center">
+                <h1 style="font-weight: bold; color: dodgerblue;" id="totalWeTrialsConvertedBox"></h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Search Criteria</h4>
+            </div>
+            <div class="panel-body">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="input-group">
+                                <span class="input-group-addon">Start Date</span>
+                                <input type="text" class="input-group-addon" placeholder="Start Date" aria-describedby="startDate" id="startDate" readonly="true" />
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="input-group">
+                                <span class="input-group-addon">End Date</span>
+                                <input type="text" class="input-group-addon" placeholder="End Date" aria-describedby="endDate" id="endDate" readonly="true" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-footer">
+                <div class="col-lg-10 pull-left">
+
+                </div>
+                <div class="col-lg-2 pull-left">
+                    <a class="btn btn-default pull-right" href="javascript:void(0);" style="width:95% !important" id="btnSearch" role="button">Search</a>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4>Trials by date</h4>
+    </div>
+    <div class="col-lg-8 col-md-7 col-sm-6" style="margin-top:5px;">
+        <div class="dt-buttons ui basic buttons"><button id="btnExcelExport" name="btnExcelExport" class="ui button buttons-excel buttons-html5" tabindex="0" aria-controls="cc-wei-table"><span class="ui-button-text">Excel</span></button></div>
+    </div>
+    <div style="text-align: right;margin-top:5px;">
+        Search: <input type="text" id="filter" />
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div id="yeartodatesalesboardreport-grid-container" class="datagrid">
+                @(Html.Kendo().Grid<TrialRecordVM>()
+                                .Name("trialsreportbydate-grid")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(item => item.Id).Title("Login Id");
+                                    columns.Bound(item => item.CompanyName).Title("Company Name");
+                                    columns.Bound(item => item.Name).Title("Sales Rep");
+                                    columns.Bound(item => item.ContractID).Title("Contract ID");
+                                    columns.Bound(item => item.TrialStartDate).Title("Trial Start Date");
+                                    columns.Bound(item => item.TrialEndDate).Title("Trial End Date");
+                                    columns.Bound(item => item.EstimateCount).Title("Estimate Count");
+                                    columns.Bound(item => item.ContractType).Title("Contract Type");
+                                    columns.Bound(item => item.HasConverted).Title("Has Converted");
+                                })
+                                .Sortable()
+                                .Pageable(pageable => pageable
+                                    .Refresh(false)
+                                )
+                                .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .ServerOperation(false)
+                                    .Read(read => read.Action("GetTrialsByDates", "TrialReport").Data("GetReportDeatailsSearchParameters"))
+                                    .PageSize(25)
+                                ))
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-default" id="DivTotalWeTrialsDetail">
+    @*<div class="panel-heading">
+        <h4>Total WE Trials</h4>
+    </div>
+    <br />*@
+    <div class="row">
+        <div class="col-md-12">
+            <div id="totalwetrialsdetail-grid-container" class="datagrid">
+                @(Html.Kendo().Grid<TrialRecordVM>()
+                                .Name("totalwetrialsdetail-grid")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(item => item.Id).Title("Login Id");
+                                    columns.Bound(item => item.CompanyName).Title("Company Name");
+                                    columns.Bound(item => item.Name).Title("Sales Rep");
+                                    columns.Bound(item => item.ContractID).Title("Contract ID");
+                                    columns.Bound(item => item.TrialStartDate).Title("Trial Start Date");
+                                    columns.Bound(item => item.TrialEndDate).Title("Trial End Date");
+                                    columns.Bound(item => item.EstimateCount).Title("Estimate Count");
+                                    columns.Bound(item => item.ContractType).Title("Contract Type");
+                                    columns.Bound(item => item.HasConverted).Title("Has Converted");
+                                })
+                                .Sortable()
+                                .Pageable(pageable => pageable
+                                    .Refresh(false)
+                                )
+                                .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .ServerOperation(false)
+                                    //.Read(read => read.Action("GetTotalWeTrialDetail", "TrialReport"))
+                                    .PageSize(25)
+                                ))
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-default" id="DivTotalActiveWeTrialsDetail">
+    @*<div class="panel-heading">
+        <h4>Total Active WE Trials</h4>
+    </div>
+    <br />*@
+    <div class="row">
+        <div class="col-md-12">
+            <div id="totalactivewetrialsdetail-grid-container" class="datagrid">
+                @(Html.Kendo().Grid<TrialRecordVM>()
+                                .Name("totalactivewetrialsdetail-grid")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(item => item.Id).Title("Login Id");
+                                    columns.Bound(item => item.CompanyName).Title("Company Name");
+                                    columns.Bound(item => item.Name).Title("Sales Rep");
+                                    columns.Bound(item => item.ContractID).Title("Contract ID");
+                                    columns.Bound(item => item.TrialStartDate).Title("Trial Start Date");
+                                    columns.Bound(item => item.TrialEndDate).Title("Trial End Date");
+                                    columns.Bound(item => item.EstimateCount).Title("Estimate Count");
+                                    columns.Bound(item => item.ContractType).Title("Contract Type");
+                                    columns.Bound(item => item.HasConverted).Title("Has Converted");
+                                })
+                                .Sortable()
+                                .Pageable(pageable => pageable
+                                    .Refresh(false)
+                                )
+                                .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .ServerOperation(false)
+                                    //.Read(read => read.Action("GetTotalActiveWeTrialDetail", "TrialReport"))
+                                    .PageSize(25)
+                                ))
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-default" id="DivTotalWeTrialsConvertedDetail">
+    @*<div class="panel-heading">
+        <h4>Total WE Trials Converted</h4>
+    </div>
+    <br />*@
+    <div class="row">
+        <div class="col-md-12">
+            <div id="totalwetrialsconverteddetail-grid-container" class="datagrid">
+                @(Html.Kendo().Grid<TrialRecordVM>()
+                                .Name("totalwetrialsconverteddetail-grid")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(item => item.Id).Title("Login Id");
+                                    columns.Bound(item => item.CompanyName).Title("Company Name");
+                                    columns.Bound(item => item.Name).Title("Sales Rep");
+                                    columns.Bound(item => item.ContractID).Title("Contract ID");
+                                    columns.Bound(item => item.TrialStartDate).Title("Trial Start Date");
+                                    columns.Bound(item => item.TrialEndDate).Title("Trial End Date");
+                                    columns.Bound(item => item.EstimateCount).Title("Estimate Count");
+                                    columns.Bound(item => item.ContractType).Title("Contract Type");
+                                    columns.Bound(item => item.HasConverted).Title("Has Converted");
+                                })
+                                .Sortable()
+                                .Pageable(pageable => pageable
+                                    .Refresh(false)
+                                )
+                                .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .ServerOperation(false)
+                                    //.Read(read => read.Action("GetTotalWeTrialsConvertedDetail", "TrialReport"))
+                                    .PageSize(25)
+                                ))
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

@@ -1,0 +1,346 @@
+﻿@model Proestimator.ViewModel.PDR.RateMatrixVM
+
+@using Proestimator.ViewModel.PDR
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.RateProfile_ProfileRates;
+
+}
+
+<link href="@Url.Content("~/Content/css/PDR_RateProfiles.css?id=2")" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/css/PDR_Matrix.css?id=13")" rel="stylesheet" type="text/css" />
+
+<script src="@Url.Content("~/Scripts/jquery.validate.min.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")" type="text/javascript"></script>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("input[type=text]").on("focus", function (e) {
+            $(this)
+                .one("mouseup", function () {
+                    $(this).select();
+                    return false;
+                })
+                .select();
+        });
+
+        $("input[type=text]").on("click", function (e) {
+            // Don't select the row when an input is clicked
+            return false;
+        });
+
+        $("input[type=text]").on("keypress", function (e) {
+            if (e.which == 13) {
+                $(this).blur();
+                return false;
+            }
+        });
+
+        $("input[type=text]").on("blur", function (e) {
+            var newValue = this.value.replace(/[^0-9\.]/g, "");
+            this.value = newValue;
+
+            var clickIndex = parseInt($(this).closest("div").attr("data-index"));
+
+            // Copy new value to input in same column of all selected rows
+            $(".panel-row").each(function (index) {
+                if ($(this).hasClass("panel-row-selected")) {
+                    var columnWrapper = $(this).find("[data-index=" + clickIndex + "]");
+                    var input = columnWrapper.find("input");
+
+                    input.val(newValue);
+                }
+            });
+        });
+
+        $(".panel-row").on("click", function (e) {
+            var rowIndex = parseInt($(this).attr("data-index"));
+
+            if (e.ctrlKey) {
+                // Control is pressed - toggle the line's selection
+                if ($(this).hasClass("panel-row-selected")) {
+                    $(this).removeClass("panel-row-selected");
+                }
+                else {
+                    $(this).addClass("panel-row-selected");
+                }
+            }
+
+            else if (e.shiftKey) {
+                // Shift key is pressed, select all rows between this and the last click
+                var lowIndex = rowIndex < _lastClickedIndex ? rowIndex : _lastClickedIndex;
+                var highIndex = rowIndex < _lastClickedIndex ? _lastClickedIndex : rowIndex;
+
+                $(".panel-row").each(function (index) {
+                    var index = $(this).attr("data-index");
+                    if (index >= lowIndex && index <= highIndex) {
+                        $(this).addClass("panel-row-selected");
+                    }
+                });
+            }
+
+            else {
+                // Nothing is pressed, start a new selection
+                DeselectAllRows();
+                $(this).addClass("panel-row-selected");
+            }
+
+            _lastClickedIndex = rowIndex;
+        });
+    });
+
+    function DeselectAllRows() {
+        $(".panel-row-selected").removeClass("panel-row-selected");
+    }
+
+    var _lastClickedIndex = -1;
+
+</script>
+
+<style>
+    input[type="text"]
+    {
+        height: 21px;
+        font-size: 12px;
+        background-color: white;
+        z-index: 20;
+        opacity: 0.85;
+    }
+
+    .pdr-matrix-panel {
+        padding: 3px;
+        font-size: 0.8em;
+    }
+
+    .panel-row {
+        cursor: pointer;
+        user-select: none; /* CSS3 (little to no support) */
+        -ms-user-select: none; /* IE 10+ */
+        -moz-user-select: none; /* Gecko (Firefox) */
+        -webkit-user-select: none; /* Webkit (Safari, Chrome) */
+    }
+
+    .panel-row-selected {
+        background-color: #1d69a6;
+    }
+
+    .pdr-matrix-dent-container {
+        width: calc(100% - 151px);
+    }
+
+    .pdr-matrix-table {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        min-width: 850px;
+    }
+</style>
+
+<div class="page-container">
+
+    @using (Html.BeginForm("RateMatrix", "PDRRateProfile", FormMethod.Post))
+    {
+        <input type="hidden" id="redirectData" name="redirectDataField" />
+
+        @Html.ValidationSummary(false)
+        @Html.HiddenFor(model => model.LoginID)
+        @Html.HiddenFor(model => model.ProfileID)
+
+        if (Model.GoodData)
+        {
+            @Html.Partial("TopMenu", Model.ProfileID)
+
+            <div class="tabcontent container">
+
+                @* The first main section of panel costs *@
+                <div class="pdr-matrix-table main-table">
+
+                    <div>
+                        <div id="large-header-1" class="pdr-matrix-table-header">
+                            <div class="pdr-matrix-panel"></div>
+                            <div class="pdr-matrix-dent-container">
+                                <div class="pdr-matrix-dent-section-header">
+                                    <p>1 - 5 @Proestimator.Resources.ProStrings.Dents</p>
+                                </div>
+                                <div class="pdr-matrix-dent-section-header">
+                                    <p>6 - 15 @Proestimator.Resources.ProStrings.Dents</p>
+                                </div>
+                                <div class="pdr-matrix-dent-section-header">
+                                    <p>16 - 30 @Proestimator.Resources.ProStrings.Dents</p>
+                                </div>
+                                <div class="pdr-matrix-dent-section-header" style="border-right: 2px solid black;">
+                                    <p>31 - 50 @Proestimator.Resources.ProStrings.Dents</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pdr-matrix-table-sub-header">
+                            <div class="pdr-matrix-panel"></div>
+                            <div class="pdr-matrix-dent-container">
+                                <div class="pdr-matrix-dent-section">
+                                    <div class="pdr-matrix-dent-size"><p>DIME</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>NKL</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>QTR</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>HALF</p></div>
+                                </div>
+                                <div class="pdr-matrix-dent-section">
+                                    <div class="pdr-matrix-dent-size"><p>DIME</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>NKL</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>QTR</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>HALF</p></div>
+                                </div>
+                                <div class="pdr-matrix-dent-section">
+                                    <div class="pdr-matrix-dent-size"><p>DIME</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>NKL</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>QTR</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>HALF</p></div>
+                                </div>
+                                <div class="pdr-matrix-dent-section pdr-matrix-dent-section-last">
+                                    <div class="pdr-matrix-dent-size"><p>DIME</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>NKL</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>QTR</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>HALF</p></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        @for (int panelIndex = 0; panelIndex < Model.Panels.Count; panelIndex++)
+                        {
+                            @Html.HiddenFor(o => Model.Panels[panelIndex].PanelID)
+                            @Html.HiddenFor(o => Model.Panels[panelIndex].PanelName)
+                            {
+                                int columnIndex = 0;
+
+                                <div class="pdr-matrix-table-sub-header panel-row" data-panel-id="@Model.Panels[panelIndex].PanelID" data-index="@panelIndex">
+                                    <div class="pdr-matrix-panel">@Model.Panels[panelIndex].PanelName</div>
+                                    <div class="pdr-matrix-dent-container">
+
+                                        @for (int quantityIndex = 0; quantityIndex < 4; quantityIndex++)
+                                        {
+                                            @Html.HiddenFor(o => Model.Panels[panelIndex].QuantityWrappers[quantityIndex].QuantityID)
+
+                                            <div class="pdr-matrix-dent-section">
+
+                                                @for (int rateIndex = 0; rateIndex < Model.Panels[panelIndex].QuantityWrappers[quantityIndex].Rates.Count; rateIndex++)
+                                                {
+                                                    @Html.HiddenFor(o => Model.Panels[panelIndex].QuantityWrappers[quantityIndex].Rates[rateIndex].ID)
+                                                    @Html.HiddenFor(o => Model.Panels[panelIndex].QuantityWrappers[quantityIndex].Rates[rateIndex].SizeID)
+
+                                                    <div class="pdr-matrix-dent-size" data-index="@(columnIndex++)">@Html.TextBoxFor(o => Model.Panels[panelIndex].QuantityWrappers[quantityIndex].Rates[rateIndex].Amount)</div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                            }
+                        }
+                    </div>
+                </div>
+
+                @* The second section of panel costs *@
+                <div class="pdr-matrix-table main-table">
+
+                    <div>
+                        <div id="large-header-1" class="pdr-matrix-table-header">
+                            <div class="pdr-matrix-panel"></div>
+                            <div class="pdr-matrix-dent-container">
+                                <div class="pdr-matrix-dent-section-header five-wide">
+                                    <p>51 - 75 @Proestimator.Resources.ProStrings.Dents</p>
+                                </div>
+                                <div class="pdr-matrix-dent-section-header five-wide">
+                                    <p>76 - 100 @Proestimator.Resources.ProStrings.Dents</p>
+                                </div>
+                                <div class="pdr-matrix-dent-section-header five-wide">
+                                    <p>101 - 150 @Proestimator.Resources.ProStrings.Dents</p>
+                                </div>
+                                <div class="pdr-matrix-dent-section-header five-wide">
+                                    <p>151 - 200 @Proestimator.Resources.ProStrings.Dents</p>
+                                </div>
+                                <div class="pdr-matrix-dent-section-header five-wide" style="border-right: 2px solid black;">
+                                    <p>201 - 300 @Proestimator.Resources.ProStrings.Dents</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pdr-matrix-table-sub-header">
+                            <div class="pdr-matrix-panel"></div>
+                            <div class="pdr-matrix-dent-container">
+                                <div class="pdr-matrix-dent-section five-wide">
+                                    <div class="pdr-matrix-dent-size"><p>DIME</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>NKL</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>QTR</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>HALF</p></div>
+                                </div>
+                                <div class="pdr-matrix-dent-section five-wide">
+                                    <div class="pdr-matrix-dent-size"><p>DIME</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>NKL</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>QTR</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>HALF</p></div>
+                                </div>
+                                <div class="pdr-matrix-dent-section five-wide">
+                                    <div class="pdr-matrix-dent-size"><p>DIME</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>NKL</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>QTR</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>HALF</p></div>
+                                </div>
+                                <div class="pdr-matrix-dent-section five-wide">
+                                    <div class="pdr-matrix-dent-size"><p>DIME</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>NKL</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>QTR</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>HALF</p></div>
+                                </div>
+                                <div class="pdr-matrix-dent-section five-wide pdr-matrix-dent-section-last">
+                                    <div class="pdr-matrix-dent-size"><p>DIME</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>NKL</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>QTR</p></div>
+                                    <div class="pdr-matrix-dent-size"><p>HALF</p></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        @for (int panelIndex = 0; panelIndex < Model.Panels.Count; panelIndex++)
+                        {
+                            @Html.HiddenFor(o => Model.Panels[panelIndex].PanelID)
+                            @Html.HiddenFor(o => Model.Panels[panelIndex].PanelName)
+                            {
+                                int columnIndex = 0;
+
+                                <div class="pdr-matrix-table-sub-header panel-row" data-panel-id="@Model.Panels[panelIndex].PanelID" data-index="@panelIndex">
+                                    <div class="pdr-matrix-panel">@Model.Panels[panelIndex].PanelName</div>
+                                    <div class="pdr-matrix-dent-container">
+
+                                        @for (int quantityIndex = 4; quantityIndex < 9; quantityIndex++)
+                                        {
+                                            @Html.HiddenFor(o => Model.Panels[panelIndex].QuantityWrappers[quantityIndex].QuantityID)
+
+                                            <div class="pdr-matrix-dent-section five-wide">
+
+                                                @for (int rateIndex = 0; rateIndex < Model.Panels[panelIndex].QuantityWrappers[quantityIndex].Rates.Count; rateIndex++)
+                                                {
+                                                    @Html.HiddenFor(o => Model.Panels[panelIndex].QuantityWrappers[quantityIndex].Rates[rateIndex].ID)
+                                                    @Html.HiddenFor(o => Model.Panels[panelIndex].QuantityWrappers[quantityIndex].Rates[rateIndex].SizeID)
+
+                                                    <div class="pdr-matrix-dent-size" data-index="@(columnIndex++)">@Html.TextBoxFor(o => Model.Panels[panelIndex].QuantityWrappers[quantityIndex].Rates[rateIndex].Amount)</div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                            }
+                        }
+                    </div>
+                </div>
+
+                <input id="submitButton" type="submit" value="Save" class="button nav-btn" />
+                @Model.Message
+            </div>
+        }
+        else
+        {
+            <h1>@Proestimator.Resources.ProStrings.InvalidProfileID</h1>
+        }
+
+    }
+
+</div>

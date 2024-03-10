@@ -1,0 +1,184 @@
+﻿@model ProEstimator.Admin.ViewModel.WebEstImportReport.ImportLineItemVM
+
+@using ProEstimator.Admin.ViewModel.WebEstImportReport;
+
+@{
+    ViewBag.Title = "Administration - WebEst Import Report";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<style>
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .padd-top {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    .k-grid td {
+        white-space: normal;
+    }
+</style>
+
+<script>
+
+    function GetSearchParameters() {
+        return {
+            startDateFilter: $("#startDate").val(), endDateFilter: $("#endDate").val()
+        };
+    }
+
+    $(document).ready(function () {
+
+        // Set up calendar controls
+        $("#startDate").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        // Set up calendar controls
+        $("#endDate").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        // Do the acount id search
+        $("#btnSearchWebEstImportReport").click(function () {
+
+            // Refresh the history grid
+            var grid = $("#webestimportreport-grid").data("kendoGrid");
+
+            if (grid) {
+                grid.dataSource.read();
+            }
+        });
+
+        var currentDate = new Date();
+        var dateChange = new Date();
+        dateChange.setDate(currentDate.getDate() - 7)
+
+        // startDate
+        var startDate = GetDayMonthYear(dateChange);
+        $("#startDate").val(startDate);
+
+        // endDate
+        dateChange = new Date();
+        var endDate = GetDayMonthYear(dateChange);
+        $("#endDate").val(endDate);
+
+        function GetDayMonthYear(dateChange) {
+            var d = dateChange.getDate();
+            var day = (d < 10) ? '0' + d : d;
+            var m = dateChange.getMonth() + 1;
+            var month = (m < 10) ? '0' + m : m;
+            var yy = dateChange.getYear();
+            var year = (yy < 1000) ? yy + 1900 : yy;
+
+            var dateRange = month + "/" + day + "/" + year;
+
+            return dateRange;
+        }
+    });
+
+</script>
+
+<div class="row padd-top">
+    <div class="col-lg-8 col-md-7 col-sm-6">
+        <h3>
+            WE Import Report
+        </h3>
+    </div>
+    <form>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>Search Criteria</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Start Date</span>
+                                        <input type="text" class="input-group-addon" placeholder="Start Date" aria-describedby="startDate" id="startDate" readonly="true" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">End Date</span>
+                                        <input type="text" class="input-group-addon" placeholder="End Date" aria-describedby="endDate" id="endDate" readonly="true" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-footer">
+                        <div class="col-lg-10 pull-left">
+
+                        </div>
+                        <div class="col-lg-2 pull-left">
+                            <a class="btn btn-default pull-right" href="javascript:void(0);" style="width:95% !important" id="btnSearchWebEstImportReport" role="button">Search</a>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>WE Imports</h4>
+            </div>
+            <br />
+            <div class="col-lg-8 col-md-7 col-sm-6">
+                <div class="dt-buttons ui basic buttons"><button class="ui button buttons-copy buttons-html5" tabindex="0" aria-controls="cc-wei-table"><span class="ui-button-text">Copy</span></button><button class="ui button buttons-excel buttons-html5" tabindex="0" aria-controls="cc-wei-table"><span class="ui-button-text">Excel</span></button><button class="ui button buttons-csv buttons-html5" tabindex="0" aria-controls="cc-wei-table"><span class="ui-button-text">CSV</span></button><button class="ui button buttons-print" tabindex="0" aria-controls="cc-wei-table"><span class="ui-button-text">Print</span></button></div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="webestimportreport-grid-container" class="datagrid">
+                        @(Html.Kendo().Grid<ImportLineItemVM>()
+                                .Name("webestimportreport-grid")
+                                .ToolBar(tools => tools.Excel())
+                                .Excel(excel => excel
+                                    .AllPages(true)
+                                )
+                                .ToolBar(tools => tools.Pdf())
+                                .Pdf(pdf => pdf
+                                    .AllPages()
+                                )
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(item => item.LoginId).Title("Login Id");
+                                    columns.Bound(item => item.LoginMoved).Title("Login Moved");
+                                    columns.Bound(item => item.SalesRep).Title("Sales Rep");
+                                    columns.Bound(item => item.CompanyName).Title("Company Name");
+                                    columns.Bound(item => item.MovedBy).Title("Moved By");
+                                    columns.Bound(item => item.SelfImport).Title("Self Import");
+                                    columns.Bound(item => item.ConversionComplete).Title("Conversion Complete");
+                                })
+                                .Sortable()
+                                .Pageable(pageable => pageable
+                                    .Refresh(false)
+                                )
+                                .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .ServerOperation(false)
+                                    .Read(read => read.Action("GetWebEstImportReport", "WebEstImportReport").Data("GetSearchParameters"))
+                                    .PageSize(25)
+                                ))
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+

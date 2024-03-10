@@ -1,0 +1,173 @@
+﻿@model Proestimator.ViewModel.SelectRateProfileVM
+
+@using Proestimator.ViewModel;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.RateProfile_Select;
+}
+
+<script>
+    $(document).ready(function () {
+
+        @if (!Model.ShowAddOnProfiles)
+        {
+            <text>
+            $(".half-container").removeClass("half-container");
+        $("#submitButton").hide();
+            </text>
+        }
+
+        if ('@Model.UseDefaultRateProfile' == 'True') {
+            $('#chkToggleUseDefaultRateProfile').prop('checked', true);
+        }
+        else {
+            $('#chkToggleUseDefaultRateProfile').prop('checked', false);
+        }
+
+    });
+
+    $(window).load(function () {
+        ShowHideDefaultColumn('@Model.UseDefaultRateProfile');
+    });
+
+    function ShowHideDefaultColumn(useDefaultRateProfile) {
+        var grid = $("#rate-profile-info-grid").data("kendoGrid");
+
+        var columns = grid.columns;
+
+        jQuery.each(columns, function (index) {
+
+            if (this.title == "Default") {
+                console.log(useDefaultRateProfile);
+                if ('@Model.UseDefaultRateProfile' == 'True' || useDefaultRateProfile == true) {
+                    grid.showColumn(this);
+                }
+                else {
+                    grid.hideColumn(this);
+                }
+            }
+        });
+    }
+
+    function GetSearchParameters()
+    {
+        var result = { userID: @Model.UserID, estimateID: @Model.EstimateID };
+        return result
+    }
+
+    function SelectProfile(id)
+    {
+        $("#SelectedProfileID").val(id);
+
+        @if (!Model.ShowAddOnProfiles)
+        {
+            <text>
+            $("#submitButton").click();
+            </text>
+        }
+        else
+        {
+            <text>
+            $("#ProfileContainer").find(".button").show();
+            $("#ProfileContainer").find(".selected-row").removeClass("selected-row");
+
+            var selectedButton = $("#ProfileContainer").find(".button[data-id='" + id + "']");
+            var parentRow = selectedButton.closest("tr");
+            selectedButton.hide();
+            parentRow.find(".profile-description").addClass("selected-row");
+            </text>
+        }
+    }
+
+    function SelectAddOnProfile(id)
+    {
+        $("#SelectedAddOnProfileID").val(id);
+        $("#AddOnProfileContainer").find(".button").show();
+        $("#AddOnProfileContainer").find(".selected-row").removeClass("selected-row");
+
+        var selectedButton = $("#AddOnProfileContainer").find(".button[data-id='" + id + "']");
+        var parentRow = selectedButton.closest("tr");
+        selectedButton.hide();
+        parentRow.find(".profile-description").addClass("selected-row");
+    }
+
+    function rdoDefaultProfileOnChange(isDefaultCheckBox,profileIDValue) {
+        $("#rate-profile-info-grid").find(".rdoDefaultProfile").each(function (index, obj) {
+            this.checked = false;
+        });
+
+        $.getJSON("/RateProfile/SetDefaultRateProfile", { userID: @ViewBag.UserID, profileID: profileIDValue }, function (data) {
+            isDefaultCheckBox.checked = true;
+            ShowUserMessage(data.ErrorMessage, !data.Success, 3000);
+        });
+    }
+
+    function ToggleUseDefaultRateProfile(defaultRateProfileCheckbox) {
+
+        $.getJSON("/RateProfile/ToggleUseDefaultProfile", { userID: @ViewBag.UserID }, function (data) {
+            if (data.Success)
+            {
+                ShowHideDefaultColumn(defaultRateProfileCheckbox.checked);
+            }
+            else
+            {
+                ShowUserMessage("@Proestimator.Resources.ProStrings.ContactSupportUseDefaultProfile.", true, 5000);
+            }
+        });
+    }
+
+</script>
+
+<style>
+    .selected-row {
+        font-weight: bold;
+    }
+</style>
+
+<div id="workDesk" class="page-container">
+
+    @using (Html.BeginForm("SelectRateProfile", "Estimate", FormMethod.Post, new { @class = "container" }))
+    {
+
+        @Html.HiddenFor(o => o.UserID)
+        @Html.HiddenFor(o => o.LoginID)
+        @Html.HiddenFor(o => o.EstimateID)
+
+        <div id="formHeader">
+
+            @* The title and header area *@
+            <div id="formHeadline" class="container">
+                <h2>@Proestimator.Resources.ProStrings.RateProfile_Select</h2>
+                <div class="inlineNote container">
+                </div>
+            </div>
+
+        </div>
+        <div id="rate-profile-info-grid-container" class="datagrid" style="width:50%;margin-left:25%">
+            <div>
+                <label class="switch">
+                    <input type="checkbox" id="chkToggleUseDefaultRateProfile" onchange="ToggleUseDefaultRateProfile(this);">
+                    <span class="slider round"></span>
+                </label>
+                <span style="margin-left: 10px;vertical-align: -webkit-baseline-middle;"><b>Toggle Default Profile</b></span>
+            </div>
+
+            @(Html.Kendo().Grid<RateProfileInfo>()
+                .Name("rate-profile-info-grid")
+                    .Columns(columns =>
+                    {
+                        columns.Bound("").Template(@<text></text>).ClientTemplate("<input type='radio' class='rdoDefaultProfile' onchange='rdoDefaultProfileOnChange(this,#= ID#)' # if (IsDefault) { #" + "checked" + "# } # />").Title("Default").Width("5%");
+                        columns.Bound(item => item.ID).Title("ID").Hidden();
+                        columns.Bound(item => item.Description).Title("Rate Profile Description").Width("77%");
+                        columns.Bound("").Template(@<text></text>).ClientTemplate("<a class='button open-button' href='/" + @Model.UserID + "/estimate/" + @Model.EstimateID + "/select-rate-profile/#= ID#'>Select</a>").Title("").Width("13%");
+                    })
+                    .Selectable()
+                    .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .ServerOperation(false)
+                        .Read(read => read.Action("GetRateProfileList", "Estimate").Data("GetSearchParameters"))
+                    ))
+        </div>
+
+    }
+</div>

@@ -1,0 +1,61 @@
+﻿@{
+    ViewBag.Title = "Administration - Succcess Box";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<script>
+
+    $(document).ready(function () {
+
+        $("#txtLoginID").keypress(function(e){
+            var key = e.which;
+
+            if(key == 13)  // the enter key code
+            {
+                $("#btnManualSync").click();
+                return false;
+            }
+        });
+
+        // Do the acount id search
+        $("#btnManualSync").click(function() {
+
+            $("#lblManualSyncMessage").text("");
+
+            $.ajax({
+                url: '@Url.Action("DoManualSync", "SuccessBox")',
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({
+                    "loginID": $("#txtLoginID").val()
+                }),
+                success: function (result) {
+
+                    $("#lblManualSyncMessage").text(result.Message);
+
+                    if (result.Success == true) {
+                        $("#lblManualSyncMessage").css("color", 'green');
+                    }
+                    else
+                    {
+                        $("#lblManualSyncMessage").css("color", 'red');
+                    }
+                }
+            });
+        });
+    });
+
+</script>
+
+<div id="ContentWrapper">
+
+    <div>
+        <div style="float: left;">
+            <input type="text" id="txtLoginID" placeholder="Login ID" />
+            <input type="button" id="btnManualSync" value="Manual Sync" />
+            <span id="lblManualSyncMessage" style="color: red;" />
+        </div>
+    </div>
+
+</div>

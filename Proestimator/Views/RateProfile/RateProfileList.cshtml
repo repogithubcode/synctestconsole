@@ -1,0 +1,841 @@
+﻿@model Proestimator.ViewModel.Profiles.RateProfileListVM
+
+@using ProEstimatorData.DataModel.PDR;
+@using ProEstimatorData.DataModel.Profiles;
+@using Proestimator.ViewModel.Profiles;
+@using ProEstimatorData.DataModel;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_RateProfileList;
+}
+
+<style>
+    .section-outline {
+        border: 1px solid black;
+        margin-top: 20px;
+        padding-bottom: 20px;
+    }
+
+    .hide-h {
+        display: none;
+    }
+
+    .new-link a {
+        color: black;
+        text-decoration: underline;
+    }
+
+        .new-link a:hover {
+            color: white;
+        }
+    #detailsContainer {
+        display: none;
+        border: 1px solid #349ad8;
+        padding: 5px;
+    }
+</style>
+
+<script>
+
+    var _detailsPopupContainer;
+    var _detailsPopupController;
+    var _detailsPopupID;
+
+    function Initialize(container, controller)
+    {
+        container.find(".UseDefaultsToggle").click(function ()
+        {
+            $.getJSON("/" + controller + "/ToggleUseDefaultProfile", { userID: @ViewBag.UserID }, function (data) {
+                if (data.Success)
+                {
+                    RefreshUseDefaultSettings(container, data.UseDefaultProfile);
+                }
+                else
+                {
+                    ShowUserMessage("@Proestimator.Resources.ProStrings.ContactSupportUseDefaultProfile.", true, 5000);
+                }
+            });
+        });
+
+        container.find(".RadioActiveOrDeleted").change(function ()
+        {
+            var isChecked = container.find(".radio-deleted").is(":checked");
+            RefreshProfilesGrid(container);
+            UpdateDeletedRadio(container, isChecked);
+        });
+
+        UpdateDeletedRadio(container, container.find(".radio-deleted").is(":checked"));
+    }
+
+    $(document).ready(function () {
+
+        Initialize($("#RateProfilesContainer"), "RateProfile");
+
+        @if (Model.ShowPDR)
+        {
+            <text>
+            Initialize($("#PDRProfilesContainer"), "PDRRateProfile");
+            </text>
+        }
+
+        @if (Model.ShowAddOns)
+        {
+            <text>
+            Initialize($("#AddOnProfilesContainer"), "ProAdvisorProfile");
+            </text>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <text>
+            ShowUserMessage("@Model.ErrorMessage", true, 5000);
+            </text>
+        }
+
+        $("#GridPopupOptions").mousedown(function() {
+            return false;
+        });
+
+        $(document).mousedown(function() {
+            $("#GridPopupOptions").hide();
+        });
+
+        $("#restore-button");
+
+        var tabID = getParameterByName("t");
+        if (tabID == 2) {
+            ShowPDRProfiles();
+        }
+        else {
+            ShowRateProfiles();
+        }
+
+        var rateProfileSelectedTab = '@TempData["rateProfileSelectedTab"]';
+        console.log(rateProfileSelectedTab);
+        if(rateProfileSelectedTab === "pro-advisor-profiles") {
+            '@TempData.Remove("rateProfileSelectedTab")';
+            ShowAddOnProfiles();
+        }
+        else if(rateProfileSelectedTab === "pdr-rate-profiles") {
+            '@TempData.Remove("rateProfileSelectedTab")';
+            ShowPDRProfiles();
+        }
+
+    });
+
+    function RefreshUseDefaultSettings(container, useDefault) {
+        var buttonText = "@Proestimator.Resources.ProStrings.RateProfile_EnableDefault";
+        if (useDefault) {
+            buttonText = "@Proestimator.Resources.ProStrings.RateProfile_DisableDefault";
+        }
+
+        container.find(".UseDefaultsToggle").text(buttonText);
+
+        var defaultColumnIndex = -1;
+        if (container.attr("ID") == "RateProfilesContainer")
+        {
+            defaultColumnIndex = 4;
+        }
+        else if (container.attr("ID") == "PDRProfilesContainer")
+        {
+            defaultColumnIndex = 3;
+        }
+        else if (container.attr("ID") == "AddOnProfilesContainer")
+        {
+            defaultColumnIndex = 3;
+        }
+
+        var grid = container.find(".k-grid").data("kendoGrid");
+
+        if (useDefault)
+        {
+            grid.showColumn(defaultColumnIndex);
+            container.find(".CopyDefault").show();
+        }
+        else
+        {
+            grid.hideColumn(defaultColumnIndex);
+            container.find(".CopyDefault").hide();
+        }
+    }
+
+    function UpdateDeletedRadio(container, showDeleted)
+    {
+        container.find(".restore-button").toggle(showDeleted);
+        container.find(".delete-button").toggle(!showDeleted);
+    }
+
+    function ShowRateProfiles() {
+        $("#tabButtonRates").addClass("active");
+        $("#tabButtonPDR").removeClass("active");
+        $("#tabButtonAddOn").removeClass("active");
+
+        $("#RateProfilesContainer").show();
+        $("#PDRProfilesContainer").hide();
+        $("#AddOnProfilesContainer").hide();
+
+        $("#detailsContainer").hide();
+    }
+
+    function ShowPDRProfiles() {
+        $("#tabButtonRates").removeClass("active");
+        $("#tabButtonPDR").addClass("active");
+        $("#tabButtonAddOn").removeClass("active");
+
+        $("#RateProfilesContainer").hide();
+        $("#PDRProfilesContainer").show();
+        $("#AddOnProfilesContainer").hide();
+
+        $("#detailsContainer").hide();
+    }
+
+    function ShowAddOnProfiles() {
+        $("#tabButtonRates").removeClass("active");
+        $("#tabButtonPDR").removeClass("active");
+        $("#tabButtonAddOn").addClass("active");
+
+        $("#RateProfilesContainer").hide();
+        $("#PDRProfilesContainer").hide();
+        $("#AddOnProfilesContainer").show();
+
+        $("#detailsContainer").hide();
+    }
+
+    function GetProfilesParameters() {
+        var result =
+        {
+            userID: @ViewBag.UserID, showDeleted: $("#RateProfilesContainer").find(".radio-deleted").is(":checked")
+        };
+        return result;
+    }
+
+    function GetPDRProfilesParameters() {
+        var result =
+        {
+            userID: @ViewBag.UserID, showDeleted: $("#PDRProfilesContainer").find(".radio-deleted").is(":checked")
+        };
+        return result;
+    }
+
+    function GetAddOnProfilesParameters() {
+        var result =
+        {
+            userID: @ViewBag.UserID, showDeleted: $("#AddOnProfilesContainer").find(".radio-deleted").is(":checked")
+        };
+        return result;
+    }
+
+    function RefreshGrid(container) {
+        container.find(".k-grid").find("table").css("opacity", 0.4);
+
+        var grid = container.find(".k-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+            grid.dataSource.page(1);
+        }
+    }
+
+    function RateProfilesGridDataChanged(arg)
+    {
+        var container = $("#RateProfilesContainer");
+        GridDataChanged(container, "RateProfile");
+    }
+
+    function PDRProfilesGridDataChanged(arg)
+    {
+        var container = $("#PDRProfilesContainer");
+        GridDataChanged(container, "PDRRateProfile");
+    }
+
+    function AddOnProfilesGridDataChanged(arg)
+    {
+        var container = $("#AddOnProfilesContainer");
+        GridDataChanged(container, "ProAdvisorProfile");
+    }
+
+    function GridDataChanged(container, controller)
+    {
+        container.find("table").css("opacity", 1);
+
+        var grid = container.find(".k-grid").data("kendoGrid");
+        var dataSource = grid.dataSource;
+        var profilesTotal = dataSource.total();
+
+        // Wire up hilighting the row when hovering.
+        container.find(".k-grid").find("tbody tr").hover(
+            function () {
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+
+        container.find(".rdoDefaultProfile").click(function () {
+            var value = $(this).val();
+
+            $.getJSON("/" + controller + "/SetDefaultRateProfile", { userID: @ViewBag.UserID, profileID: value }, function (data) {
+                ShowUserMessage(data.ErrorMessage, !data.Success, 3000);
+            });
+        });
+
+        container.find(".chkDefaultPreset").click(function () {
+            var value = $(this).val();
+
+            $.getJSON("/" + controller + "/SetDefaultRatePreset", { userID: @ViewBag.UserID, profileID: value }, function (data) {
+                ShowUserMessage(data.ErrorMessage, !data.Success, 3000);
+            });
+        });
+
+        var useDefault = false;
+
+        if (controller == "RateProfile")
+        {
+            useDefault = @Model.UseDefaultProfile.ToString().ToLower();
+        }
+        else if (controller == "PDRRateProfile")
+        {
+            useDefault = @Model.UsePDRDefaultProfile.ToString().ToLower();
+        }
+        else if (controller == "ProAdvisorProfile")
+        {
+            useDefault = @Model.UseDefaultAddOnProfile.ToString().ToLower();
+        }
+
+        RefreshUseDefaultSettings(container, useDefault);
+    }
+
+    function ShowRatesRowPopup(button, profileID) {
+        _detailsPopupID = profileID;
+        _detailsPopupContainer = $(button).closest(".tabcontent");
+        _detailsPopupController = _detailsPopupContainer.attr("data-controller");
+
+        $("#GridPopupCopy").attr("href", "/" + _detailsPopupController + "/CopyRateProfile?userID=@ViewBag.UserID&profileID=" + profileID);
+
+        var controlLeft = $(button).parent().offset().left;
+        var controlTop = $(button).parent().offset().top;
+
+        var pageContainer = $("#PageContainer");
+        var containerLeft = pageContainer.offset().left;
+        var containerTop = pageContainer.offset().top;
+
+        var optionsPopup = $("#GridPopupOptions");
+
+        optionsPopup.css("left", (controlLeft - containerLeft - (IsMobile() === true ? 30 : 0)) + "px");
+        optionsPopup.css("top", (controlTop - (IsMobile() === true ? 0 : containerTop)) + "px");
+        optionsPopup.show();
+
+        if (_detailsPopupContainer.find(".radio-deleted").is(":checked"))
+        {
+            $("#GridPopupRestore").show();
+            $("#GridPopupDelete").hide();
+        }
+        else
+        {
+            $("#GridPopupRestore").hide();
+            $("#GridPopupDelete").show();
+        }
+    }
+
+    function RestoreRateProfile()
+    {
+        $("#GridPopupOptions").hide();
+
+        $.getJSON("/" + _detailsPopupController + "/RestoreRateProfile", { userID: @ViewBag.UserID, profileID: _detailsPopupID }, function (data) {
+            if (data.Success)
+            {
+                RefreshProfilesGrid(_detailsPopupContainer);
+            }
+            else
+            {
+                ShowUserMessage(data.ErrorMessage, false, 5000);
+            }
+        });
+    }
+
+    function DeleteRateProfile()
+    {
+        $("#GridPopupOptions").hide();
+
+        $.getJSON("/" + _detailsPopupController + "/DeleteRateProfile", { userID: @ViewBag.UserID, profileID: _detailsPopupID }, function (data) {
+            if (data.Success)
+            {
+                RefreshProfilesGrid(_detailsPopupContainer);
+            }
+            else
+            {
+                ShowUserMessage(data.ErrorMessage, false, 5000);
+            }
+        });
+    }
+
+    function RefreshProfilesGrid(container) {
+        $("#detailsContainer").hide();
+        container.find(".k-grid").find("table").css("opacity", 0.4);
+
+        var grid = container.find(".k-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+            grid.dataSource.page(1);
+        }
+    }
+
+    var _rateProfile = "";
+    var _id = 0;
+    var _changeLogID = 0;
+    function RateProfileHistory(id) {
+        _rateProfile = "rateProfile";
+        _id = id;
+        RefreshDetails();
+    }
+
+    function PdrProfileHistory(id) {
+        _rateProfile = "pdrProfile";
+        _id = id;
+        RefreshDetails();
+    }
+
+    function AddOnProfileHistory(id) {
+        _rateProfile = "addonProfile";
+        _id = id;
+        RefreshDetails();
+    }
+
+    function RefreshDetails() {
+        RefreshProfilesGrid($("#logContainer"));
+        $("#detailsContainer").show();
+        _changeLogID = 0;
+        RefreshDetailsGrid();
+        $("#lblTimeStamp").html("");
+        $("#lblName").html("");
+        $("#lblEmail").html("");
+        $("#lblBrowser").html("");
+        $("#lblDevice").html("");
+        $("#lblComputerKey").html("");
+    }
+
+    function GetSearchParameters() {
+        var result =
+        {
+            userID: @ViewBag.UserID, rateProfile: _rateProfile, id: _id
+        };
+        return result;
+    }
+
+    function LogGridDataChanged(arg) {
+        $("#logContainer").find("table").css("opacity", 1);
+        // Wire up hilighting the row when hovering.
+        $("#log-grid tbody tr").hover(
+            function () {
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+    }
+
+    function LogGridLineSelectionChanged(arg) {
+
+        // Get the selected item and call the ClickedItem event
+        var row = $("#log-grid").find(".k-state-selected").first();
+        _changeLogID = row.find("td").first().html();
+
+        console.log(_changeLogID);
+
+        if (_changeLogID > 0) {
+            RefreshDetailsGrid();
+
+            $.getJSON("/RateProfile/GetChangeLogDetails", { changeLogID: _changeLogID }, function (data) {
+                $("#lblTimeStamp").html(data.TimeStamp);
+                $("#lblName").html(data.SiteUser);
+                $("#lblEmail").html(data.EmailAddress);
+                $("#lblBrowser").html(data.Browser);
+                $("#lblDevice").html(data.Device);
+                $("#lblComputerKey").html(data.ComputerKey);
+
+                console.log(data);
+            });
+        }
+    }
+
+    function GetDetailSearchParameters() {
+        return {
+            changeLogID: _changeLogID
+        };
+    }
+
+    function RefreshDetailsGrid() {
+        var grid = $("#details-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+    }
+
+</script>
+
+<style>
+    table {
+        width: 100%;
+    }
+
+    .hide-small {
+    }
+
+    .above-grid {
+        min-height: 40px;
+        font-size: small;
+    }
+
+    .above-grid-left {
+        float: left;
+    }
+
+    .above-grid-right {
+        float: right;
+        margin-top: 9px;
+    }
+
+    @@media (max-width: 700px) {
+        .hide-small {
+            display: none;
+        }
+
+        .above-grid {
+            margin-bottom: 30px;
+        }
+
+        .above-grid-left {
+            float: none;
+        }
+
+        .above-grid-right {
+            float: none;
+        }
+    }
+
+    #GridPopupOptions {
+        padding: 7px;
+        width: 100px;
+        border-radius: 7px;
+        position: absolute;
+        background-color: #349ad8;
+        left: 0;
+        top: 0;
+        z-index: 2000;
+        display: none;
+    }
+
+        #GridPopupOptions a {
+            display: block;
+            width: 100%;
+        }
+</style>
+
+<div id="GridPopupOptions">
+    <a id="GridPopupCopy" class="button actionbutton do-not-disable" href="">@Proestimator.Resources.ProStrings.Copy</a>
+    <a id="GridPopupRestore" class="button restore-button actionbutton do-not-disable" onclick="RestoreRateProfile()">@Proestimator.Resources.ProStrings.Restore</a>
+    <a id="GridPopupDelete" class="button delete-button do-not-disable" onclick="DeleteRateProfile()">@Proestimator.Resources.ProStrings.Delete</a>
+</div>
+
+<div id="workDesk" class="page-container">
+    @using (Html.BeginForm("RateProfileList", "Home", FormMethod.Post, new { @ID = "PageContainer", @class = "container" }))
+    {
+        <ul class="tab" style="margin-top: 20px;">
+            <li id="tabButtonRates"><a href="javascript:void(0)" class="button" onclick="ShowRateProfiles()">@Proestimator.Resources.ProStrings.RateProfile</a></li>
+            <li id="tabButtonPDR"><a href="javascript:void(0)" class="button" onclick="ShowPDRProfiles()">@Proestimator.Resources.ProStrings.PDRRateProfiles</a></li>
+            @if (Model.ShowAddOns)
+            {
+                <li id="tabButtonAddOn"><a href="javascript:void(0)" class="button" onclick="ShowAddOnProfiles()">@Proestimator.Resources.ProStrings.RateProfile_AddOnProfiles</a></li>
+            }
+        </ul>
+
+        <div id="RateProfilesContainer" class="container tabcontent" data-controller="RateProfile">
+
+            <div class="above-grid">
+                <div class="above-grid-left">
+                    <table style="font-size: 1em; height: 40px; margin: 0px;">
+                        <tr>
+                            <td style="text-align: right;">
+                                <label>
+                                    <input class="RadioActiveOrDeleted" name="RateProfileActiveOrDelete" type="radio" checked="checked">
+                                    @Proestimator.Resources.ProStrings.Active
+                                </label>
+                            </td>
+                            <td width="5" />
+                            <td>
+                                <label>
+                                    <input class="RadioActiveOrDeleted radio-deleted" name="RateProfileActiveOrDelete" type="radio">
+                                    @Proestimator.Resources.ProStrings.RateProfile_Deleted
+                                </label>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="above-grid-right">
+                    <a class="button nav-btn CopyDefault" href="@Url.Action("CopyFromDefault", "RateProfile", new { userID = @ViewBag.UserID })">@Proestimator.Resources.ProStrings.RateProfile_CopyFromDefault</a>
+                    <a class="button nav-btn" href="@Url.Action("CreateRateProfile", "RateProfile", new { userID = @ViewBag.UserID })">@Proestimator.Resources.ProStrings.RateProfile_CreateNew</a>
+                    <a class="button nav-btn UseDefaultsToggle" href="#"></a>
+                </div>
+            </div>
+
+            <div class="datagrid">
+                @(Html.Kendo().Grid<RateProfileGridRow>()
+                    .Name("rate-profiles-grid")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(item => item.ID).Hidden();
+
+                        columns.Bound(item => item.ID).Template(@<text></text>).ClientTemplate("<a class='button open-button' href='/" + ViewBag.UserID + "/rates/#= ID#'>#=ID#</a>").Title(@Proestimator.Resources.ProStrings.Open).Width(125);
+                        columns.Bound(item => item.Name).MinScreenWidth(200).HeaderHtmlAttributes(new { @class = "customer-column" }).HtmlAttributes(new { @class = "customer-column" }).Title(@Proestimator.Resources.ProStrings.Name);
+                        columns.Bound(item => item.Description).MinScreenWidth(250).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.Description);
+                        columns.Bound(item => item.DefaultProfile).Template(@<text></text>).ClientTemplate("<input class='rdoDefaultProfile' name='DefaultProfileID' type='radio' value='#= ID#' # if (DefaultProfile) { #" + "checked" + "# } #>").Title(@Proestimator.Resources.ProStrings.Default);
+                        columns.Bound(item => item.DefaultPreset).Template(@<text></text>).ClientTemplate("<input class='chkDefaultPreset' type='checkbox' # if (DefaultPreset) { #" + "checked='checked'" + "# } #  value='#= ID#'>").Title("Default Presets");
+                        columns.Bound(item => item.Created).Format("{0:MM/dd/yyyy}").HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.Created);
+                        columns.Bound(item => item.History).Template(@<text></text>).ClientTemplate("<a id=\"btnHistory\" onclick=\"RateProfileHistory(#=ID#)\"" + "#if (!History) {#" + " class='hide-h'" + "#}#" +">View Changes</a>").HeaderHtmlAttributes(new { @class = "hide-small new-link" }).HtmlAttributes(new { @class = "hide-small new-link" }).Width(100).Title("");
+                        columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<a class='button import-hide' onclick='ShowRatesRowPopup(this, #= ID#)'>...</a>").Title("").Width(25);
+                    })
+                    .Sortable()
+                    .Pageable(pageable => pageable
+                        .Refresh(false)
+                        .ButtonCount(8)
+                    )
+                    .Events(events => events
+                        .DataBound("RateProfilesGridDataChanged")
+                    )
+                    .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .ServerOperation(false)
+                        .Read(read => read.Action("GetRateProfiles", "RateProfile").Data("GetProfilesParameters"))
+                        .PageSize(30)
+                    )
+                )
+            </div>
+        </div>
+
+        if (Model.ShowPDR)
+        {
+            <div id="PDRProfilesContainer" class="container tabcontent" data-controller="PDRRateProfile">
+
+                <div class="above-grid">
+                    <div class="above-grid-left">
+                        <table style="font-size: 1em; height: 40px; margin: 0px;">
+                            <tr>
+                                <td style="text-align: right;">
+                                    <label>
+                                        <input class="RadioActiveOrDeleted" name="PDRProfileActiveOrDelete" type="radio" checked="checked">
+                                        @Proestimator.Resources.ProStrings.Active
+                                    </label>
+                                </td>
+                                <td width="5" />
+                                <td>
+                                    <label>
+                                        <input class="RadioActiveOrDeleted radio-deleted" name="PDRProfileActiveOrDelete" type="radio">
+                                        @Proestimator.Resources.ProStrings.RateProfile_Deleted
+                                    </label>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="above-grid-right">
+                        <a class="button nav-btn CopyDefault" href="@Url.Action("CopyFromDefault", "PDRRateProfile", new { userID = @ViewBag.UserID })">@Proestimator.Resources.ProStrings.RateProfile_CopyFromDefault</a>
+                        <a class="button nav-btn" href="@Url.Action("CreateRateProfile", "PDRRateProfile", new { userID = @ViewBag.UserID })">@Proestimator.Resources.ProStrings.RateProfile_CreateNew</a>
+                        <a class="button nav-btn UseDefaultsToggle" href="#"></a>
+                        <a class="button nav-btn" href="@("javascript:SubmitAndRedirect('/" + ViewBag.UserID + "/pdr-rates/presets')");" )">Presets</a>
+                    </div>
+                </div>
+
+                <div class="datagrid">
+                    @(Html.Kendo().Grid<RateProfileGridRow>()
+                        .Name("pdr-profiles-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.ID).Hidden();
+                            columns.Bound(item => item.ID).Template(@<text></text>).ClientTemplate("<a class='button open-button' href='/" + ViewBag.UserID + "/pdr-rates/#= ID#'>#=ID#</a>").Title(@Proestimator.Resources.ProStrings.Open).Width(125);
+                            columns.Bound(item => item.Name).Title(@Proestimator.Resources.ProStrings.Name);
+                            columns.Bound(item => item.DefaultProfile).Template(@<text></text>).ClientTemplate("<input class='rdoDefaultProfile' name='PDRDefaultProfileID' type='radio' value='#= ID#' # if (DefaultProfile) { #" + "checked" + "# } #>").Title(@Proestimator.Resources.ProStrings.Default);
+                            columns.Bound(item => item.Created).Format("{0:MM/dd/yyyy}").HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.Created);
+                            columns.Bound(item => item.History).Template(@<text></text>).ClientTemplate("<a id=\"btnHistory\" onclick=\"PdrProfileHistory(#=ID#)\"" + "#if (!History) {#" + " class='hide-h'" + "#}#" +">View Changes</a>").HeaderHtmlAttributes(new { @class = "hide-small new-link" }).HtmlAttributes(new { @class = "hide-small new-link" }).Width(100).Title("");
+                            columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<a class='button import-hide' onclick='ShowRatesRowPopup(this, #= ID#)'>...</a>").Title("").Width(25);
+                        })
+                        .Sortable()
+                        .Pageable(pageable => pageable
+                            .Refresh(false)
+                            .ButtonCount(8)
+                        )
+                        .Events(events => events
+                            .DataBound("PDRProfilesGridDataChanged")
+                        )
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Read(read => read.Action("GetPDRRateProfiles", "RateProfile").Data("GetPDRProfilesParameters"))
+                            .PageSize(30)
+                        )
+                    )
+                </div>
+
+            </div>
+        }
+
+        if (Model.ShowAddOns)
+        {
+            <div id="AddOnProfilesContainer" class="container tabcontent" data-controller="ProAdvisorProfile">
+
+                <div class="above-grid">
+                    <div class="above-grid-left">
+                        <table style="font-size: 1em; height: 40px; margin: 0px;">
+                            <tr>
+                                <td style="text-align: right;">
+                                    <label>
+                                        <input class="RadioActiveOrDeleted" name="AddOnProfileActiveOrDelete" type="radio" checked="checked">
+                                        Active
+                                    </label>
+                                </td>
+                                <td width="5" />
+                                <td>
+                                    <label>
+                                        <input class="RadioActiveOrDeleted radio-deleted" name="AddOnProfileActiveOrDelete" type="radio">
+                                        Deleted
+                                    </label>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="above-grid-right">
+                        <a class="button nav-btn CopyDefault" href="@Url.Action("CopyFromDefault", "ProAdvisorProfile", new { userID = @ViewBag.UserID })">@Proestimator.Resources.ProStrings.RateProfile_CopyFromDefault</a>
+                        <a class="button nav-btn" href="@Url.Action("CreateRateProfile", "ProAdvisorProfile", new { userID = @ViewBag.UserID })">@Proestimator.Resources.ProStrings.RateProfile_CreateNew</a>
+                        <a class="button nav-btn UseDefaultsToggle" href="#"></a>
+                    </div>
+                </div>
+
+                <div class="datagrid">
+                    @(Html.Kendo().Grid<RateProfileGridRow>()
+                        .Name("addon-profiles-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.ID).Hidden();
+                            columns.Bound(item => item.ID).Template(@<text></text>).ClientTemplate("<a class='button open-button' href='/" + ViewBag.UserID + "/pro-advisor/#= ID#'>#=ID#</a>").Title(@Proestimator.Resources.ProStrings.Open).Width(125);
+                            columns.Bound(item => item.Name);
+                            columns.Bound(item => item.DefaultProfile).Template(@<text></text>).ClientTemplate("<input class='rdoDefaultProfile' name='AddOnDefaultProfileID' type='radio' value='#= ID#' # if (DefaultProfile) { #" + "checked" + "# } #>").Title(@Proestimator.Resources.ProStrings.Default);
+                            columns.Bound(item => item.Created).Format("{0:MM/dd/yyyy}").HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.Created);
+                            columns.Bound(item => item.History).Template(@<text></text>).ClientTemplate("<a id=\"btnHistory\" onclick=\"AddOnProfileHistory(#=ID#)\"" + "#if (!History) {#" + " class='hide-h'" + "#}#" +">View Changes</a>").HeaderHtmlAttributes(new { @class = "hide-small new-link" }).HtmlAttributes(new { @class = "hide-small new-link" }).Width(100).Title("");
+                            columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<a class='button import-hide' onclick='ShowRatesRowPopup(this, #= ID#)'>...</a>").Title("").Width(25);
+                        })
+                    .Sortable()
+                    .Pageable(pageable => pageable
+                        .Refresh(false)
+                        .ButtonCount(8)
+                    )
+                    .Events(events => events
+                    .DataBound("AddOnProfilesGridDataChanged")
+                    )
+                    .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .ServerOperation(false)
+                        .Read(read => read.Action("GetProfiles", "ProAdvisorProfile").Data("GetAddOnProfilesParameters"))
+                        .PageSize(30)
+                    )
+                    )
+                </div>
+
+            </div>
+        }
+
+        <div id="detailsContainer" class="container">
+            <h4 style="float: left;">Change History</h4>
+            <div id="logContainer" class="container">
+                <div class="datagrid">
+                    @(Html.Kendo().Grid<ChangeLogRowSummary>()
+                        .Name("log-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.ID).Title("ID").Hidden();
+                            columns.Bound(item => item.LoginID).Title("LoginID").Hidden();
+                            columns.Bound(item => item.TimeStamp).ClientTemplate("#= kendo.toString(kendo.parseDate(TimeStamp), 'M/d/yyyy h:mm:ss tt') #").Title("Time Stamp");
+                            columns.Bound(item => item.ItemType).Title("Item Type");
+                            columns.Bound(item => item.Name).Title("Item Name");
+                            columns.Bound(item => item.ItemID).Title("ItemID");
+                            columns.Bound(item => item.UserEmailAddress).Title("User");
+                            columns.Bound(item => item.ChangeCount).Title("Changes");
+                        })
+                        .Sortable()
+                        .Selectable()
+                        
+                        .Events(events => events
+                            .DataBound("LogGridDataChanged")
+                            .Change("LogGridLineSelectionChanged")
+                        )
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Read(read => read.Action("GetHistoryReport", "RateProfile").Data("GetSearchParameters"))
+                        )
+                    )
+                </div>
+            </div>
+            <div class="container">
+                <table style="width: 100%; margin-top: 20px">
+                    <tr>
+                        <td style="width: 40%;">
+                            <table style="font-size: 1em">
+                                <tr>
+                                    <td width="150"><p>Time Stamp:</p></td>
+                                    <td><p id="lblTimeStamp"></p></td>
+                                </tr>
+
+                                <tr>
+                                    <td><p>Site User:</p></td>
+                                    <td><p id="lblName"></p></td>
+                                </tr>
+
+                                <tr>
+                                    <td><p>Email Address:</p></td>
+                                    <td><p id="lblEmail"></p></td>
+                                </tr>
+
+                                <tr>
+                                    <td><p>Browser:</p></td>
+                                    <td><p id="lblBrowser"></p></td>
+                                </tr>
+
+                                <tr>
+                                    <td><p>Device:</p></td>
+                                    <td><p id="lblDevice"></p></td>
+                                </tr>
+
+                                <tr>
+                                    <td><p>Computer Key:</p></td>
+                                    <td><p id="lblComputerKey"></p></td>
+                                </tr>
+                            </table>
+                        </td>
+
+                        <td style="width: 60%; vertical-align:top;">
+                            <div class="datagrid">
+                                @(Html.Kendo().Grid<ChangeLogItem>()
+                                            .Name("details-grid")
+                                            .Columns(columns =>
+                                            {
+                                                columns.Bound(item => item.FieldName).Title("Field Name");
+                                                columns.Bound(item => item.Before).Title("Before");
+                                                columns.Bound(item => item.After).Title("After");
+                                            })
+                                            .Sortable()
+                                            .Selectable()
+                                            .DataSource(dataSource => dataSource
+                                                .Ajax()
+                                                .ServerOperation(false)
+                                                .Read(read => read.Action("GetChangeLogDetailsGrid", "RateProfile").Data("GetDetailSearchParameters"))
+                                            )
+                                        )
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    }
+</div>

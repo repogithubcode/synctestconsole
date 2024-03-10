@@ -1,0 +1,326 @@
+﻿@model ProEstimator.Admin.ViewModel.Import.ImportVM
+
+@using ProEstimator.Admin.ViewModel.Import;
+
+@{
+    ViewBag.Title = "Administration - Importer";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<style>
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .padd-top {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+</style>
+
+<script>
+
+    $(document).ready(function () {
+        $("#btnImportContract").prop('disabled',true);
+        $("#btnImportEstimate").prop('disabled',true);        
+    });
+
+    // GetLoginInfo
+    function search() {
+        $.ajax({
+            url: '@Url.Action("GetLoginInfo", "Importer")',
+            type: "POST",
+            dataType: "json",
+            //contentType: "application/json; charset=utf-8", // commenting it because of server side not accepting object; that accepts individual values only
+            data: {
+                loginId: $('#loginId').val(), message: ""
+            },
+            success: function (result) {
+
+                $('#lblLoginText').text(result.LoginID);
+                $('#lblOrganizationText').text(result.LoginName);
+                $('#lblLoginIsImportedText').text(result.LoginImported);
+                $('#lblTotalEstimatesText').text(result.SourceEstimates);
+                $('#lblUnimportedEstimatesText').text(result.UnimportedEstimates);
+
+                if(result.LoginName == '')
+                {
+                    $("#btnImportContract").prop('disabled',true);
+                    $("#btnImportEstimate").prop('disabled',true);
+                }
+                else {
+                    $("#btnImportContract").prop('disabled',false);
+                    $("#btnImportEstimate").prop('disabled',false);
+                }
+            },
+            error: function (error) {
+                alert('Search yielded no results.');
+            }
+        });
+    }
+
+    // ImportLogin
+    function importLogin() {
+
+        var _salesRepID = @Model.SessionSalesRepID;
+
+        $.ajax({
+            url: '@Url.Action("ImportLogin", "Importer")',
+            type: "POST",
+            dataType: "json",
+            //contentType: "application/json; charset=utf-8", // commenting it because of server side not accepting object; that accepts individual values only
+            data: {
+                loginId: $('#loginId').val(), salesRepId: _salesRepID
+            },
+            success: function (result) {
+                alert(result.Message);
+            },
+            error: function (error) {
+                failure(error);
+            }
+        });
+    }
+
+    function deleteLogin(result) {
+
+        var message = "Are you sure that you want to remove login: " + $('#loginId').val() + " ?";
+        var proceed = confirm(message);
+
+        if(proceed)
+        {
+            $.ajax({
+                url: '@Url.Action("DeleteLogin", "Importer")',
+                type: "POST",
+                dataType: "json",
+                //contentType: "application/json; charset=utf-8", // commenting it because of server side not accepting object; that accepts individual values only
+                data: {
+                    loginId: $('#loginId').val()
+                },
+                success: function (result) {
+                    alert(result.Message);
+                },
+                error: function (error) {
+                    failure(error);
+                }
+            });
+        }
+    }
+
+    // importContract
+    function importContract() {
+
+        $.ajax({
+            url: '@Url.Action("ImportContracts", "Importer")',
+            type: "POST",
+            dataType: "json",
+            //contentType: "application/json; charset=utf-8", // commenting it because of server side not accepting object; that accepts individual values only
+            data: {
+                estimateId: $('#estimateID').val(), loginId: $('#loginId').val()
+            },
+            success: function (result) {
+                successImport(result);
+            },
+            error: function (error) {
+                failure(error);
+            }
+        });
+    }
+
+    // importEstimate
+    function importEstimate() {
+
+        $.ajax({
+            url: '@Url.Action("ImportEstimate", "Importer")',
+            type: "POST",
+            dataType: "json",
+            //contentType: "application/json; charset=utf-8", // commenting it because of server side not accepting object; that accepts individual values only
+            data: {
+                estimateId: $('#estimateID').val(), loginId: $('#loginId').val()
+            },
+            success: function (result) {
+                successImport(result);
+            },
+            error: function (error) {
+                failure(error);
+            }
+        });
+    }
+
+    // completeConversion
+    function completeConversion() {
+
+        $.ajax({
+            url: '@Url.Action("ConversionComplete", "Importer")',
+            type: "POST",
+            dataType: "json",
+            //contentType: "application/json; charset=utf-8", // commenting it because of server side not accepting object; that accepts individual values only
+            data: {
+                estimateId: $('#estimateID').val(), loginId: $('#loginId').val()
+            },
+            success: function (result) {
+                successImport(result);
+            },
+            error: function (error) {
+                failure(error);
+            }
+        });
+    }
+
+    function successImport(res) {
+        if (res.Success) {
+            alert(res.Message);
+            if (res.HasNextEstimate) {
+                importEstimate();
+            }
+        } else {
+            if (res.HasNextEstimate) {
+                importEstimate();
+            } else {
+                alert(res.ErrorMessage);
+            }
+        }
+    }
+
+    function failure(res) {
+        if (res.HasNextEstimate) {
+            importEstimate();
+        } else {
+            alert(res.ErrorMessage);
+        }
+    }
+
+</script>
+
+<form id="ImportMaint" name="ImportMaint">
+    <br />
+    <h4>Estimate Importer</h4>
+    <br />
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="form-group">
+                <label class="col-lg-12 control-label" for="loginId">Login ID</label>
+                <div class="col-lg-12">
+                    <div class="input-group">
+                        <input type="text"
+                               class="form-control"
+                               placeholder="Login ID"
+                               aria-describedby="loginId"
+                               id="loginId" />
+                    </div>
+                    <div class="checkbox">
+                        <button class="btn btn-default" type="button" onclick="search();">Search</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(Model.SessionSalesRepID, "ImportEstimate"))
+            {
+                <div class="form-group">
+                    <label class="col-lg-12 control-label" for="loginId">Estimate ID (optional). If left blank it will import all estimates, one at a time</label>
+                    <div class="col-lg-12">
+                        <div class="input-group">
+                            <input type="text"
+                                   class="form-control"
+                                   placeholder="Estimate ID"
+                                   aria-describedby="EstimateID"
+                                   id="estimateID" />
+                        </div>
+                        <div class="checkbox">
+                            <button class="btn btn-default" type="button" id="btnImportContract" onclick="importContract()">Import Contract</button>
+                            <button class="btn btn-default" type="button" id="btnImportEstimate" onclick="importEstimate()">Import Estimate</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Account Details</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="col-lg-12">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label class="col-lg-5 control-label" id="lblLoginId">Login ID:</label>
+                                    <label class="col-lg-7 control-label" id="lblLoginText"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label class="col-lg-5 control-label" id="lblOrganizationName">Organization Name:</label>
+                                    <label class="col-lg-7 control-label" id="lblOrganizationText"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label class="col-lg-5 control-label" id="lblLoginIsImported">Login Is Imported:</label>
+                                    <label class="col-lg-7 control-label" id="lblLoginIsImportedText"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label class="col-lg-5 control-label" for="lblTotalEstimates">Total Estimates:</label>
+                                    <label class="col-lg-7 control-label" id="lblTotalEstimatesText"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label class="col-lg-5 control-label" for="lblUnimportedEstimates">Unimported Estimates:</label>
+                                    <label class="col-lg-7 control-label" id="lblUnimportedEstimatesText"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label class="col-lg-7 control-label" id="lblTimingMessageText"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="form-group">
+                <div class="checkbox">
+                    <button class="btn btn-default" type="button" id="btnImportLogin" onclick="importLogin();">Import login</button>
+                    <button class="btn btn-default" type="button" id="btnDeleteLogin" onclick="deleteLogin();">Delete login</button>
+                    @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(Model.SessionSalesRepID, "ImportEstimate"))
+                    {
+                        <button class="btn btn-default" type="button" id="btnCompleteConversion" onclick="completeConversion();">Complete Conversion</button>
+                    }
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+

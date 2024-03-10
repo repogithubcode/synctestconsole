@@ -1,0 +1,159 @@
+﻿@model Proestimator.ViewModel.SelectRateProfileVM
+
+@using Proestimator.ViewModel;
+@using Proestimator.ViewModel.Profiles;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.RateProfile_Select;
+}
+
+<script>
+    $(document).ready(function () {
+
+        if ('@Model.UseDefaultAddOnProfile' == 'True') {
+            $('#chkToggleUseDefaultAddOnProfile').prop('checked', true);
+        }
+        else {
+            $('#chkToggleUseDefaultAddOnProfile').prop('checked', false);
+        }
+
+    });
+
+    $(window).load(function () {
+        ShowHideDefaultColumn('@Model.UseDefaultAddOnProfile');
+    });
+
+    function ShowHideDefaultColumn(useDefaultAddOnProfile) {
+        var grid = $("#addon-profile-info-grid").data("kendoGrid");
+
+        var columns = grid.columns;
+
+        jQuery.each(columns, function (index) {
+
+            if (this.title == "Default") {
+                console.log(useDefaultAddOnProfile);
+                if ('@Model.UseDefaultAddOnProfile' == 'True' || useDefaultAddOnProfile == true) {
+                    grid.showColumn(this);
+                }
+                else {
+                    grid.hideColumn(this);
+                }
+            }
+        });
+    }
+
+    function GetSearchParameters()
+    {
+        var result = { userID: @ViewBag.UserID, estimateID: @Model.EstimateID };
+        return result
+    }
+
+    function SelectProfile(id)
+    {
+        $("#SelectedProfileID").val(id);
+
+        @if (!Model.ShowAddOnProfiles)
+        {
+            <text>
+            $("#submitButton").click();
+            </text>
+        }
+        else
+        {
+            <text>
+            $("#ProfileContainer").find(".button").show();
+            $("#ProfileContainer").find(".selected-row").removeClass("selected-row");
+
+            var selectedButton = $("#ProfileContainer").find(".button[data-id='" + id + "']");
+            var parentRow = selectedButton.closest("tr");
+            selectedButton.hide();
+            parentRow.find(".profile-description").addClass("selected-row");
+            </text>
+        }
+    }
+
+    function SelectAddOnProfile(id)
+    {
+        $("#SelectedAddOnProfileID").val(id);
+        $("#AddOnProfileContainer").find(".button").show();
+        $("#AddOnProfileContainer").find(".selected-row").removeClass("selected-row");
+
+        var selectedButton = $("#AddOnProfileContainer").find(".button[data-id='" + id + "']");
+        var parentRow = selectedButton.closest("tr");
+        selectedButton.hide();
+        parentRow.find(".profile-description").addClass("selected-row");
+    }
+
+    function rdoDefaultProfileOnChange(isDefaultCheckBox,profileIDValue) {
+        $("#addon-profile-info-grid").find(".rdoDefaultProfile").each(function (index, obj) {
+            this.checked = false;
+        });
+
+        $.getJSON("/ProAdvisorProfile/SetDefaultRateProfile", { userID: @ViewBag.UserID, profileID: profileIDValue }, function (data) {
+            isDefaultCheckBox.checked = true;
+            ShowUserMessage(data.ErrorMessage, !data.Success, 3000);
+        });
+    }
+
+    function ToggleUseDefaultAddOnProfile(defaultAddOnProfileCheckbox) {
+
+        $.getJSON("/ProAdvisorProfile/ToggleUseDefaultProfile", { userID: @ViewBag.UserID }, function (data) {
+            if (data.Success)
+            {
+                ShowHideDefaultColumn(defaultAddOnProfileCheckbox.checked);
+            }
+            else
+            {
+                ShowUserMessage("@Proestimator.Resources.ProStrings.ContactSupportUseDefaultProfile.", true, 5000);
+            }
+        });
+
+    }
+
+</script>
+
+<div id="workDesk" class="page-container">
+
+    @using (Html.BeginForm("SelectAddOnProfile", "Estimate", FormMethod.Post, new { @class = "container" }))
+    {
+
+        @Html.HiddenFor(o => o.LoginID)
+        @Html.HiddenFor(o => o.EstimateID)
+
+        <div id="formHeader">
+
+            @* The title and header area *@
+            <div id="formHeadline" class="container">
+                <h2>@Proestimator.Resources.ProStrings.Select @Proestimator.Resources.ProStrings.AddOnRateProfile</h2>
+                <div class="inlineNote container">
+                </div>
+            </div>
+
+        </div>
+
+        <div id="add-on-profile-info-grid-container" class="datagrid" style="width:50%;margin-left:25%">
+            <div>
+                <label class="switch">
+                    <input type="checkbox" id="chkToggleUseDefaultAddOnProfile" onchange="ToggleUseDefaultAddOnProfile(this);">
+                    <span class="slider round"></span>
+                </label>
+                <span style="margin-left: 10px;vertical-align: -webkit-baseline-middle;"><b>Toggle Default Profile</b></span>
+            </div>
+            @(Html.Kendo().Grid<RateProfileInfo>()
+                .Name("addon-profile-info-grid")
+                    .Columns(columns =>
+                    {
+                        columns.Bound("").Template(@<text></text>).ClientTemplate("<input type='radio' class='checkbox-isdefault' onchange='rdoDefaultProfileOnChange(this,#= ID#)' # if (IsDefault) { #" + "checked" + "# } # />").Title("Default").Width("5%");
+                        columns.Bound(item => item.ID).Title("ID").Hidden();
+                        columns.Bound(item => item.Description).Title("Rate Profile Description").Width("77%");
+                        columns.Bound("").Template(@<text></text>).ClientTemplate("<a class='button open-button' href='/" + @ViewBag.UserID + "/estimate/" + @Model.EstimateID + "/select-add-on-profile/#= ID#'>Select</a>").Title("").Width("13%");
+                    })
+                    .Selectable()
+                    .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .ServerOperation(false)
+                        .Read(read => read.Action("GetAddOnProfileList", "Estimate").Data("GetSearchParameters"))
+                    ))
+        </div>
+    }
+</div>

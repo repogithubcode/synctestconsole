@@ -1,0 +1,200 @@
+﻿@model Proestimator.ViewModel.SMSLandingPageVM
+
+@using Proestimator.ViewModel;
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale = 1.0, user-scalable = no">
+    <script src="@Url.Content("~/Scripts/jquery-1.10.2.min.js")" type="text/javascript"></script>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <script type="text/javascript">
+        function DownloadReport(reportID) {
+            var win = window.open("/SMS/download-pdf/@ViewBag.UniqueID/" + reportID, "_blank");
+            if (win) {
+                //Browser has allowed it to be opened
+                win.focus();
+            } else {
+                //Browser has blocked it
+                alert("@Proestimator.Resources.ProStrings.BrowserBlockedSite.");
+            }
+        }
+
+        function DownloadReportImage(reportID) {
+            var win = window.open("/SMS/download-image/@ViewBag.UniqueID/" + reportID, "_blank");
+            if (win) {
+                //Browser has allowed it to be opened
+                win.focus();
+            } else {
+                //Browser has blocked it
+                alert("@Proestimator.Resources.ProStrings.BrowserBlockedSite.");
+            }
+        }
+    </script>
+
+    <style>
+
+        body{
+            height: 100%;
+            padding: 0px;
+            margin: 0px;
+        }
+
+        .page-container {
+            overflow: hidden;
+            height: 100%;
+            margin: 5px;
+        }        
+
+        .page-header {
+            border: 1px solid #349ad8;
+            background-color: #f5f9fb;
+            margin: 10px;
+        }
+
+        .page-header p {
+            margin: 0px;
+            padding: 10px;
+        }
+
+        .header-text {
+            font-weight: bold;
+            font-size: 1.2em;
+            text-align: center;
+        }
+
+        .content-container {
+            padding: 10px;
+        }
+
+        .button-container {
+            margin: 0px;
+            margin-bottom: 15px;
+            height: 40px;
+            
+        }
+
+        .button-left {
+            background-color: #1d69a6;
+            border: 1px solid #1d69a6;
+            border-radius: 10px;
+            height: 100%;
+            width: calc(100% - 46px);
+            float: left;
+        }
+
+        .button-right {
+            width: 40px;
+            height: 100%;
+            float: left;
+            margin-left: 2px;
+            background-color: #1d69a6;
+            border: 1px solid #1d69a6;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .button-container p {
+            margin: 0px;
+            padding: 11px;
+            color: white;
+        }
+
+        .main-label {
+            float: left;
+            width: calc(100% - 125px);
+            overflow: hidden;
+        }
+
+        .button-container a {
+            text-decoration: none;
+            color: white;
+        }
+
+        .button-left img {
+            width: 25px;
+            height: 25px;
+            float: right;
+            padding-top: 8px;
+            padding-right: 5px;
+            filter: invert(1);
+        }
+
+        .button-right img {
+            width: 25px;
+            height: 25px;
+            padding-top: 8px;
+            filter: invert(1);
+        }
+
+        .image-container {
+            margin-bottom: 15px;
+            width: 100%;
+            min-height: 100px;
+        }
+
+        .image-container img {
+            width: 100%;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="page-container">
+
+        @if (Model.IsGood)
+        {
+            <div class="page-header">
+                <p class="header-text">@Model.Subject</p>
+                <p>@Html.Raw(Model.MessageBody)</p>
+            </div>
+
+            <div class="content-container">
+                @foreach (MessageAttachmentMappingVM attachment in Model.Attachments)
+                {
+                <div class="button-container">
+                    <div class="button-left" onclick="DownloadReport(@attachment.ReportID);">
+                        <p class="main-label"><a href="#">@(attachment.ReportType + attachment.FileExtension)</a></p>
+                        <img src="~/Images/pdf-icon.png" />
+                        <p style="float: right;">@((attachment.FileSize / 1000).ToString("N0")) kb</p>
+                    </div>
+                    <div class="button-right" onclick="DownloadReportImage(@attachment.ReportID);">
+                        <img src="~/Images/image-icon.png" />
+                    </div>
+                </div>
+                
+                }
+
+                @if (Model.Images.Count > 0)
+                {
+                    foreach(ImageAttachmentVM image in Model.Images)
+                    {
+                        <div class="image-container">
+                            <a href="@image.Path">
+                                <img src="@image.Path" />
+                            </a>
+                        </div>
+                    }
+                }
+            </div>
+           
+        }
+        else
+        {
+            <p> @Model.ErrorMessage</p>
+        }
+
+    </div>
+
+</body>
+</html>

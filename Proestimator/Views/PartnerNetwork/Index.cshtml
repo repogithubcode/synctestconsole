@@ -1,0 +1,84 @@
+﻿@model Proestimator.ViewModel.PartnerNetwork.PartnerNetworkPageVM
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_FrameData;
+}
+
+@using ProEstimatorData.DataModel;
+
+<style>
+    .list-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: normal;
+    }
+
+    .list-item {
+        width: calc(33.33% - 10px); /* 33.33% width for 3 columns with some spacing */
+        margin: 5px; /* Add some spacing between items */
+        padding: 10px;
+        box-sizing: border-box;
+        padding-top: 20px;
+    }
+
+    .description {
+        padding: 15px 0;
+        margin: 15px 0 25px 0;
+        border-bottom: 1px solid #ddd;
+        border-top: 1px solid #ddd;
+        height: 150px;
+    }
+
+    .link-button {
+        box-shadow: 0 20px 38px rgba(0,0,0,0.16) !important;
+        background-color: #6ab744 !important;
+        -webkit-border-radius: 4px !important;
+        font-family: 'Open Sans';
+        font-weight: 600;
+        position: relative;
+        top: 0;
+        margin-bottom: 10px;
+        text-decoration: none;
+        padding: 10px;
+    }
+</style>
+
+<script>
+    //LogClick(int userID, int partnerID)
+    function LogClick(partnerID) {
+        $.ajax({
+            type: 'POST',
+            url: '/PartnerNetwork/LogClick',
+            data: {
+                userID: @ViewBag.UserID,
+                partnerID: partnerID
+            }
+        });
+    }
+</script>
+
+<div id="workDesk" class="page-container" style="padding-top: 20px;">
+
+    @using (Html.BeginForm("Index", "PartnerNetwork", FormMethod.Post, new { @class = "container" }))
+    {
+        <h1>@Proestimator.Resources.ProStrings.PartnerNetwork</h1>
+
+        <div class="list-container">
+
+            @foreach (PartnerNetwork partnerNetwork in Model.Partners)
+            {
+            <div class="list-item">
+
+                <img src="@System.Configuration.ConfigurationManager.AppSettings["BaseURL"]Images/PartnerNetworkLogos/@(partnerNetwork.ID).png">
+
+                <h4>@partnerNetwork.Tagline</h4>
+
+                <p class="description">@partnerNetwork.Summary</p>
+
+                <a class="link-button" href="@partnerNetwork.Link" onclick="LogClick(@partnerNetwork.ID)" target="_blank">LEARN MORE</a>
+            </div>
+            }
+        </div>
+    }
+
+</div> 

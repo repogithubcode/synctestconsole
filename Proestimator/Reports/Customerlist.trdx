@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report Width="11in" Name="FinalReport.trdx" xmlns="http://schemas.telerik.com/reporting/2012/3.8">
+  <DataSources>
+    <SqlDataSource ConnectionString="ProEstimator" SelectCommand="dbo.GetCustomerList" SelectCommandType="StoredProcedure" Name="ReportData" ParameterValues="{&quot;@LoginsID&quot;:&quot;47736&quot;,&quot;@StartDate&quot;:&quot;1/1/2017&quot;,&quot;@EndDate&quot;:&quot;4/5/2020&quot;}">
+      <Parameters>
+        <SqlDataSourceParameter DbType="Int32" Name="@LoginsID">
+          <Value>
+            <String>= Parameters.LoginID.Value</String>
+          </Value>
+        </SqlDataSourceParameter>
+        <SqlDataSourceParameter DbType="DateTime" Name="@StartDate">
+          <Value>
+            <String>= Parameters.StartDate.Value</String>
+          </Value>
+        </SqlDataSourceParameter>
+        <SqlDataSourceParameter DbType="DateTime" Name="@EndDate">
+          <Value>
+            <String>= Parameters.EndDate.Value</String>
+          </Value>
+        </SqlDataSourceParameter>
+        <SqlDataSourceParameter DbType="Boolean" Name="@IncludeClosedDeleted">
+          <Value>
+            <String>= Parameters.IncludeClosedDeleted.Value</String>
+          </Value>
+        </SqlDataSourceParameter>
+      </Parameters>
+    </SqlDataSource>
+  </DataSources>
+  <Items>
+    <PageHeaderSection PrintOnLastPage="True" Height="0.799999872843424in" Name="pageHeaderSection1">
+      <Items>
+        <TextBox Width="2.40000025431316in" Height="0.400000015894572in" Left="0.300000031789144in" Top="0.200000047683716in" Value="Customer List" Name="textBox25">
+          <Style>
+            <Font Size="20pt" Bold="True" />
+          </Style>
+        </TextBox>
+        <HtmlTextBox Width="2.66249585151672in" Height="0.39999994635582in" Left="7.920836130778in" Top="0.200000127156576in" Value="&lt;p&gt;&lt;span style=&quot;font-size: 8pt&quot;&gt;&lt;strong&gt;Report Range:&lt;/strong&gt; {Parameters.StartDate.Value.ToString(&quot;M/d/yyyy&quot;)} - {Parameters.EndDate.Value.ToString(&quot;M/d/yyyy&quot;)}&lt;/span&gt;&lt;br /&gt;&lt;span style=&quot;font-size: 8pt&quot;&gt;&lt;strong&gt;Print Date:&lt;/strong&gt;&amp;nbsp; {Now().ToString(&quot;M/d/yyyy&quot;)}&lt;/span&gt;&lt;/p&gt;" Name="htmlTextBox2">
+          <Style TextAlign="Right">
+            <Font Size="8pt" />
+          </Style>
+        </HtmlTextBox>
+      </Items>
+    </PageHeaderSection>
+    <DetailSection Height="1.10000006357834in" Name="detailSection1">
+      <Style>
+        <BorderStyle Top="None" Bottom="None" Left="None" Right="None" />
+        <BorderColor Top="Black" Bottom="Black" Left="Black" Right="Black" />
+        <BorderWidth Top="1pt" Bottom="1pt" Left="1pt" Right="1pt" />
+      </Style>
+      <Items>
+        <Table DataSourceName="ReportData" Width="10.1016462576361in" Height="0.600000029802214in" Left="0.300000031789144in" Top="0.100000063578288in" Name="table1" StyleName="Normal.TableNormal">
+          <Body>
+            <Cells>
+              <TableCell RowIndex="0" ColumnIndex="0" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="1.53289386261944in" Height="0.2in" Left="0in" Top="0in" Value="= Fields.Name" Name="textBox6" StyleName="Normal.TableBody">
+                    <Style TextAlign="Left">
+                      <BorderStyle Default="None" />
+                      <Font Size="8pt" />
+                    </Style>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="0" ColumnIndex="1" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="1.53289386261944in" Height="0.2in" Left="0in" Top="0in" Value="= Fields.EmailAddress" Name="textBox16" StyleName="Normal.TableBody">
+                    <Style TextAlign="Left">
+                      <BorderStyle Default="None" />
+                      <Font Size="8pt" />
+                    </Style>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="0" ColumnIndex="2" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="1.53289386261944in" Height="0.2in" Left="0in" Top="0in" Value="= Fields.PhoneNumber" Name="textBox17" StyleName="Normal.TableBody">
+                    <Style TextAlign="Left">
+                      <BorderStyle Default="None" />
+                      <Font Size="8pt" />
+                    </Style>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="0" ColumnIndex="3" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="1.93289386261944in" Height="0.200000017881366in" Left="0in" Top="0in" Value="= Fields.Vehicle" Name="textBox7" StyleName="Normal.TableBody">
+                    <Style TextAlign="Left">
+                      <BorderStyle Default="None" />
+                      <Font Size="8pt" />
+                    </Style>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="0" ColumnIndex="4" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="2.47039338470853in" Height="0.200000005960424in" Left="0in" Top="0in" Value="= Fields.Address" Name="textBox8" StyleName="Normal.TableBody">
+                    <Style TextAlign="Left">
+                      <BorderStyle Default="None" />
+                      <Font Size="8pt" />
+                    </Style>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="0" ColumnIndex="5" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="1.09967594121077in" Height="0.200000011920925in" Left="0in" Top="0in" Value="= Fields.Total" Format="{0:C2}" Name="textBox10" StyleName="Normal.TableBody">
+                    <Style TextAlign="Left">
+                      <BorderStyle Default="None" />
+                      <Font Size="8pt" />
+                    </Style>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="1" ColumnIndex="0" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="1.53289386261944in" Height="0.2in" Left="0in" Top="0in" Name="textBox11" StyleName="Normal.TableBody">
+                    <Style TextAlign="Center">
+                      <BorderStyle Default="None" />
+                    </Style>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="1" ColumnIndex="1" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="1.53289386261944in" Height="0.2in" Left="0in" Top="0in" Name="textBox11" StyleName="Normal.TableBody">
+                    <Style TextAlign="Center">
+                      <BorderStyle Default="None" />
+                    </Style>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="1" ColumnIndex="2" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="1.53289386261944in" Height="0.2in" Left="0in" Top="0in" Name="textBox11" StyleName="Normal.TableBody">
+                    <Style TextAlign="Center">
+                      <BorderStyle Default="None" />
+                    </Style>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="1" ColumnIndex="3" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="1.93289386261944in" Height="0.200000017881366in" Left="0in" Top="0in" Name="textBox12" StyleName="Normal.TableBody">
+                    <Style TextAlign="Center">
+                      <BorderStyle Default="None" />
+                    </Style>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="1" ColumnIndex="4" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="2.47039338470853in" Height="0.200000005960424in" Left="0in" Top="0in" Name="textBox13" StyleName="Normal.TableBody">
+                    <Style TextAlign="Center">
+                      <BorderStyle Default="None" />
+                    </Style>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+              <TableCell RowIndex="1" ColumnIndex="5" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <TextBox Width="1.09967594121077in" Height="0.200000011920925in" Left="0in" Top="0in" Value="= Sum(Fields.Total)" Format="{0:C2}" Name="textBox15" StyleName="Normal.TableBody">
+                    <Style TextAlign="Left">
+                      <BorderStyle Default="None" Top="Solid" />
+                      <Font Size="8pt" />
+                    </Style>
+                  </TextBox>
+                </ReportItem>
+              </TableCell>
+            </Cells>
+            <Columns>
+              <Column Width="1.53289379432794in" />
+              <Column Width="1.53289454695923in" />
+              <Column Width="1.53289454695923in" />
+              <Column Width="1.93289384607746in" />
+              <Column Width="2.47039331351084in" />
+              <Column Width="1.09967583348572in" />
+            </Columns>
+            <Rows>
+              <Row Height="0.200000015894536in" />
+              <Row Height="0.200000015894536in" />
+            </Rows>
+          </Body>
+          <Corner />
+          <Style>
+            <BorderStyle Default="None" />
+          </Style>
+          <RowGroups>
+            <TableGroup Name="Detail">
+              <Groupings>
+                <Grouping />
+              </Groupings>
+            </TableGroup>
+            <TableGroup Name="group" />
+          </RowGroups>
+          <ColumnGroups>
+            <TableGroup>
+              <ReportItem>
+                <TextBox Width="1.53289386261944in" Height="0.2in" Left="0in" Top="0in" Value="Name" Name="textBox1" StyleName="Normal.TableHeader">
+                  <Style TextAlign="Left">
+                    <BorderStyle Default="None" Bottom="Solid" />
+                    <Font Size="8pt" Bold="True" />
+                  </Style>
+                </TextBox>
+              </ReportItem>
+            </TableGroup>
+            <TableGroup>
+              <ReportItem>
+                <TextBox Width="1.53289386261944in" Height="0.2in" Left="0in" Top="0in" Value="Email" Name="textBox18" StyleName="Normal.TableHeader">
+                  <Style TextAlign="Left">
+                    <BorderStyle Default="None" Bottom="Solid" />
+                    <Font Size="8pt" Bold="True" />
+                  </Style>
+                </TextBox>
+              </ReportItem>
+            </TableGroup>
+            <TableGroup>
+              <ReportItem>
+                <TextBox Width="1.53289386261944in" Height="0.2in" Left="0in" Top="0in" Value="Phone" Name="textBox19" StyleName="Normal.TableHeader">
+                  <Style TextAlign="Left">
+                    <BorderStyle Default="None" Bottom="Solid" />
+                    <Font Size="8pt" Bold="True" />
+                  </Style>
+                </TextBox>
+              </ReportItem>
+            </TableGroup>
+            <TableGroup>
+              <ReportItem>
+                <TextBox Width="1.93289386261944in" Height="0.200000017881366in" Left="0in" Top="0in" Value="Vehicle" Name="textBox2" StyleName="Normal.TableHeader">
+                  <Style TextAlign="Left">
+                    <BorderStyle Default="None" Bottom="Solid" />
+                    <Font Size="8pt" Bold="True" />
+                  </Style>
+                </TextBox>
+              </ReportItem>
+            </TableGroup>
+            <TableGroup>
+              <ReportItem>
+                <TextBox Width="2.47039338470853in" Height="0.200000005960424in" Left="0in" Top="0in" Value="Address" Name="textBox3" StyleName="Normal.TableHeader">
+                  <Style TextAlign="Left">
+                    <BorderStyle Default="None" Bottom="Solid" />
+                    <Font Size="8pt" Bold="True" />
+                  </Style>
+                </TextBox>
+              </ReportItem>
+            </TableGroup>
+            <TableGroup>
+              <ReportItem>
+                <TextBox Width="1.09967594121077in" Height="0.200000011920925in" Left="0in" Top="0in" Value="Total" Name="textBox5" StyleName="Normal.TableHeader">
+                  <Style TextAlign="Left">
+                    <BorderStyle Default="None" Bottom="Solid" />
+                    <Font Size="8pt" Bold="True" />
+                  </Style>
+                </TextBox>
+              </ReportItem>
+            </TableGroup>
+          </ColumnGroups>
+        </Table>
+      </Items>
+    </DetailSection>
+  </Items>
+  <StyleSheet>
+    <StyleRule>
+      <Style>
+        <Padding Left="2pt" Right="2pt" />
+      </Style>
+      <Selectors>
+        <TypeSelector Type="TextItemBase" />
+        <TypeSelector Type="HtmlTextBox" />
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style Color="Black">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Georgia" Size="9pt" />
+      </Style>
+      <Selectors>
+        <StyleSelector Type="Table" StyleName="Civic.TableNormal" />
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style>
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Georgia" Size="9pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Civic.TableBody" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style BackgroundColor="140, 174, 173" Color="228, 238, 243" VerticalAlign="Middle">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Georgia" Size="10pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Civic.TableHeader" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style Color="Black">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Book Antiqua" Size="9pt" />
+      </Style>
+      <Selectors>
+        <StyleSelector Type="Table" StyleName="Apex.TableNormal" />
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style>
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Book Antiqua" Size="9pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Apex.TableBody" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style BackgroundColor="105, 103, 109" Color="206, 185, 102" VerticalAlign="Middle">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Book Antiqua" Size="10pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Apex.TableHeader" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style BackgroundColor="236, 236, 237">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Book Antiqua" Size="9pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Apex.TableGroup" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style Color="Black">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Tahoma" Size="9pt" />
+      </Style>
+      <Selectors>
+        <StyleSelector Type="Table" StyleName="Normal.TableNormal" />
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style>
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Tahoma" Size="9pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Normal.TableBody" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+    <StyleRule>
+      <Style VerticalAlign="Middle">
+        <BorderStyle Default="Solid" />
+        <BorderColor Default="Black" />
+        <BorderWidth Default="1px" />
+        <Font Name="Tahoma" Size="10pt" />
+      </Style>
+      <Selectors>
+        <DescendantSelector>
+          <Selectors>
+            <TypeSelector Type="Table" />
+            <StyleSelector Type="ReportItem" StyleName="Normal.TableHeader" />
+          </Selectors>
+        </DescendantSelector>
+      </Selectors>
+    </StyleRule>
+  </StyleSheet>
+  <PageSettings>
+    <PageSettings PaperKind="Letter" Landscape="True">
+      <Margins>
+        <MarginsU Left="0in" Right="0in" Top="0in" Bottom="0in" />
+      </Margins>
+    </PageSettings>
+  </PageSettings>
+  <ReportParameters>
+    <ReportParameter Name="LoginID" Type="Integer" Text="47736" AllowBlank="False">
+      <Value>
+        <String>47736</String>
+      </Value>
+    </ReportParameter>
+    <ReportParameter Name="StartDate" Type="DateTime" Text="1/1/2017">
+      <Value>
+        <String>1/1/2017</String>
+      </Value>
+    </ReportParameter>
+    <ReportParameter Name="EndDate" Type="DateTime" Text="3/5/2017">
+      <Value>
+        <String>5/5/2017</String>
+      </Value>
+    </ReportParameter>
+    <ReportParameter Name="IncludeClosedDeleted" Type="Boolean">
+      <Value>
+        <String>0</String>
+      </Value>
+    </ReportParameter>
+  </ReportParameters>
+</Report>

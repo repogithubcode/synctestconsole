@@ -1,0 +1,74 @@
+﻿@model Proestimator.ViewModel.ChangeLogPageVM
+
+@using Proestimator.ViewModel;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.ChangeLog;
+}
+
+<style>
+    .date-container {
+        padding-bottom: 15px;
+    }
+
+    .date-side {
+        float: left;
+        width: 300px;
+    }
+
+    .date-side h1 {
+        font-size: 1.2em;
+        text-align: right;
+        margin-right: 10px;
+    }
+
+    .detail-side {
+        margin-left: 300px;
+    }
+
+    .detail-side p {
+        margin: 0px;
+        padding-bottom: 5px;
+    }
+
+    @@media (max-width: 700px) {
+        .date-side {
+            float: none;
+            width: 100%;
+        }
+
+        .date-side h1 {
+            text-align: left;
+        }
+
+        .detail-side {
+            margin-left: 0px;
+        }
+    }
+
+</style>
+
+<div id="workDesk" class="page-container">
+    @using (Html.BeginForm("ChangeLog", "Home", FormMethod.Post, new { @class = "container" }))
+    {
+        <h1 style="padding-top: 15px;">@Proestimator.Resources.ProStrings.SiteChangeLog</h1>
+        
+        foreach (ChangeLogDateVM dateVM in Model.DateGroups)
+        {
+            <div class="date-container">
+                <div class="date-side">
+                    <h1>@dateVM.Date.ToShortDateString()</h1>
+                </div>
+
+                <div class="detail-side">
+                    <ul>
+                        @foreach(ChangeLogItemVM itemVM in dateVM.Items)
+                        {
+                            <li><p>@itemVM.ShortNote</p></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
+    }
+</div> 

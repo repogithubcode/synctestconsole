@@ -1,0 +1,276 @@
+﻿@model ProEstimator.Business.Model.Financing.WisetackFinancingApprovedVM
+@using ProEstimator.Business.Model.Financing
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.Financing;
+}
+<style>
+    .finTopSection {
+        border: 1px solid #d3d3d3;
+        padding: 20px;
+        overflow: auto;
+    }
+
+    .finTitle {
+        float: left;
+        font-size: 32px;
+        font-weight: bold;
+        margin-top: 5px;
+        margin-right: 100px;
+    }
+
+    .finTitleRight {
+        padding-top: 14px;
+        float: inline-end;
+    }
+
+    .finBottomSection {
+    }
+
+    .finParagraph {
+        text-align: right;
+        font-weight: bold;
+    }
+
+        .finParagraph a:link, a:hover, a:visited, a:active {
+            color: #349ad8;
+            text-decoration: underline;
+        }
+
+    .finBottomSectionInfo a:link, a:hover, a:visited, a:active {
+        color: #349ad8;
+        text-decoration: underline;
+    }
+
+    .customer-details-wrapper {
+        display: none;
+        height: 1px;
+    }
+
+    .hide-column {
+        display: none;
+    }
+
+    .imported-true {
+        display: none !important;
+    }
+
+    .estimate-id-label {
+        display: none;
+    }
+
+    @@media (max-width: 1400px) {
+        .hide-med {
+            display: none;
+        }
+    }
+
+    @@media (max-width: 700px) {
+        .save-buttons {
+            width: 100%;
+        }
+
+        .hide-small {
+            display: none;
+        }
+    }
+
+    .ToggleGridColumn {
+        cursor: pointer;
+        background-color: #1d69a6;
+        color: #FFF;
+        padding: 2px;
+        border-radius: 3px;
+        width: 150px;
+    }
+
+    #GridPopupOptions {
+        padding: 7px;
+        width: 100px;
+        border-radius: 7px;
+        position: absolute;
+        background-color: #349ad8;
+        left: 0;
+        top: 0;
+        z-index: 2000;
+        display: none;
+    }
+
+        #GridPopupOptions a {
+            display: block;
+            width: 100%;
+        }
+
+    colgroup {
+        display: none;
+    }
+
+    .k-grid .k-alt td {
+        background-color: #dfdfdf;
+    }
+
+    .finBottomSectionInfo {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    @@media (min-width: 701px) {
+        .datagrid-fit-content {
+            width: fit-content;
+        }
+    }
+
+    @@media (max-width: 700px) {
+        .datagrid-fit-content {
+        }
+    }
+
+    .finOptions li {
+        margin-bottom: 6px;
+    }
+
+    .loanAppListFilterSearchContainer {
+        padding: 3px;
+        overflow: hidden;
+    }
+
+    .loanAppListFilterSearchCol1 {
+        float: left;
+        font-size: 12px;
+        margin-right: 100px;
+        white-space: nowrap;
+        margin-top: 11px;
+    }
+
+    .loanAppListFilterSearchCol2 {
+        float: right;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+</style>
+<script>
+    function GetSearchParameters() {
+        return {
+            userID: @Model.UserID,
+            merchantID: '@Model.MerchantID'
+            , includeAllLoanApplications: $('#chkShowAllLoanApps').is(":checked")
+        };
+    }
+
+    function RefreshGrid() {
+        var grid = $("#loan-apps-grid").data("kendoGrid");
+        if (grid) {
+            grid.dataSource.read();
+            grid.refresh();
+            grid.dataSource.page(1);
+        }
+    }
+
+    $(document).ready(function () {
+        $("#loanAppFilter").on("input", function (e) {
+            var grid = $("#loan-apps-grid").data("kendoGrid");
+            var valuetoFilter = e.target.value;
+            var filter = KendogridSearchFilter(grid, valuetoFilter);
+            grid.dataSource.filter(filter);
+        });
+
+        $("#chkShowAllLoanApps").change(function () {
+            RefreshGrid();
+        });
+    });
+</script>
+<div id="workDesk" class="col dt1 sm_4_4 md_8_8 lg_10_12 xl_12_14">
+    <div id="lgRow1" class="container" style="margin-top: 20px;">
+        <div id="wisetackSignupDiv" title="Wisetack Financing"></div>
+        <div class="finTopSection">
+            <div class="finTitle">@Proestimator.Resources.ProStrings.Financing</div>
+            <div class="finTitleRight">
+                <div class="finParagraph">@Proestimator.Resources.ProStrings.Financing_Page_Approved_Header_Part1 <a href="mailto:support@wisetack.com">support@wisetack.com</a>@Proestimator.Resources.ProStrings.Financing_Page_Approved_Header_Part2 <a href="http://wisetack.com/faqs" class="finLink" target="_blank">wisetack.com/faqs</a>.</div>
+            </div>
+        </div>
+        <div class="finBottomSection">
+            <br />
+
+            <div class="finBottomSectionInfo">
+                @if (Model.IsDeclinedButWasPreviouslyApproved)
+                {
+                    <p style="font-size: 24px; color: red;">
+                        <br />
+                        <b>Wisetack has disabled your account. Please contact Wisetack for assistance at 1-833-927-0333 (Mon-Fri 9am-8pm ET, Sat 9am-6pm ET).</b>
+                        <br /><br /><br />
+                    </p>
+                }
+                else
+                {
+                    <b><a href="~/Files/Instructions/Wisetack Shop Instructions.pdf" target="_blank">Financing Instructions</a></b>
+                    <br /><br />
+
+                    <b>How to get started using Wisetack in Web-Est!</b>
+                    <br />
+                    <p>
+                        Once you've decided the final price and are ready to start the work, you send your customer a <b>financing application link</b>.
+                        This can be done three ways.
+                    </p>
+                    <div class="finOptions">
+                        <ul>
+                            <li><b>Option 1:</b> On the Estimate - Payment Info page, click 'Send Financing Application' and enter the customer's mobile number, the estimated date of repair completion, and the amount to finance.</li>
+                            <li><b>Option 2:</b> On the Estimate - Send Estimate page, click 'Insert Financing Application Link in Email' to insert the link into the body of the email.</li>
+                            <li><b>Option 3:</b> On the Estimate - Send Estimate page, under the 'Add Report Attachments' section, select the option for 'Include Financing Application Link' and the link will be included on the Estimate PDF.</li>
+                        </ul>
+                    </div>
+                    <p>Click here to see how to get started: <a href="https://www.wisetack.com/getting-started/webest" target="_blank">@Proestimator.Resources.ProStrings.FinancingLoanApplicationCTALearnMore</a></p>
+                    <b><a href="financing">View Wisetack Overview</a></b><br />
+                    <p>The list below shows the financing applications associated with your customers and their estimates.</p>
+                }
+            </div>
+
+            <div>
+                <div class="datagrid datagrid-fit-content">
+                    <div class="loanAppListFilterSearchContainer">
+                        <div class="loanAppListFilterSearchCol1">
+                            <label><input type="checkbox" id="chkShowAllLoanApps" />Include all loan appliations</label>
+                        </div>
+
+                        <div class="loanAppListFilterSearchCol2">
+                            Search: <input type="text" id="loanAppFilter" name="loanAppFilter" style="min-width: 250px; max-width: 350px;" />
+                        </div>
+                    </div>
+
+
+                    @(Html.Kendo().Grid<WisetackLoanApplicationInfoVM>()
+                        .Name("loan-apps-grid")
+                        .Columns(columns =>
+                        {
+                        columns.Bound(item => item.TransactionID).Hidden();
+                        columns.Bound(item => item.AdminInfoID).Hidden();
+                        columns.Bound("").Template(@<text></text>).ClientTemplate("<a class='button open-button' style='color:white; text-decoration: none;' href='/" + ViewBag.UserID + "/estimate/#= AdminInfoID#/payment-info'>#=AdminInfoID#</a>").Title(@Proestimator.Resources.ProStrings.FinancingEstimateLink);
+                        columns.Bound(item => item.CustomerName).MinScreenWidth(200).HeaderHtmlAttributes(new { @class = "customer-column" }).HtmlAttributes(new { @class = "customer-column" }).Title(@Proestimator.Resources.ProStrings.FinancingCustomerName);
+                        columns.Bound(item => item.MaximumAmount).MinScreenWidth(200).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(50).Title(@Proestimator.Resources.ProStrings.FinancingMaximumAmount);
+                        columns.Bound(item => item.RequestedLoanAmount).MinScreenWidth(200).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(50).Title(@Proestimator.Resources.ProStrings.FinancingRequestedLoanAmount);
+                        columns.Bound(item => item.ApprovedLoanAmount).MinScreenWidth(200).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(50).Title(@Proestimator.Resources.ProStrings.FinancingApprovedLoanAmount);
+
+                        columns.Bound(item => item.LoanApplicationLink).MinScreenWidth(200).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(80).Title(@Proestimator.Resources.ProStrings.FinancingLoanApplicationLink);
+
+                        columns.Bound(item => item.LoanApplicationStatus).MinScreenWidth(200).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(80).Title(@Proestimator.Resources.ProStrings.FinancingLoanApplicationStatus);
+                        columns.Bound(item => item.ApplicationStartDate).Format("{0:M/d/yyyy}").MinScreenWidth(200).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(50).Title(@Proestimator.Resources.ProStrings.FinancingApplicationStartDate);
+                        columns.Bound(item => item.DateOfLastUpdate).Format("{0:M/d/yyyy}").MinScreenWidth(200).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(50).Title(@Proestimator.Resources.ProStrings.FinancingDateOfLastUpdate);
+                        columns.Bound(item => item.ExpirationDate).Format("{0:M/d/yyyy}").MinScreenWidth(200).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Width(50).Title(@Proestimator.Resources.ProStrings.FinancingLoanAppExpirationDate);
+                        })
+                        .Pageable(pageable => pageable
+                            .Refresh(true)
+                            .ButtonCount(8)
+                        )
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Sort(sort => sort.Add("DateOfLastUpdate").Descending())
+                            .Read(read => read.Action("GetMerchantLoanApplications", "Financing").Data("GetSearchParameters"))
+                            .PageSize(20)
+                        )
+                        )
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

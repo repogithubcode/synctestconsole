@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/ProEstimator.Business.Model" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/ProEstimator.Business.Model" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="QueueImportRequest">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:ImportRequest">
+        <xs:sequence />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="QueueImportRequest" nillable="true" type="tns:QueueImportRequest" />
+  <xs:complexType name="ImportRequest">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Content" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="DequeueDate" nillable="true" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="EmailAdddress" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="EnqueueDate" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="Filter" type="tns:ImportFilter" />
+      <xs:element minOccurs="0" name="Id" type="xs:int" />
+      <xs:element minOccurs="0" name="LoginId" type="xs:int" />
+      <xs:element minOccurs="0" name="PeEstimates" type="xs:int" />
+      <xs:element minOccurs="0" name="Priority" type="tns:Priority" />
+      <xs:element minOccurs="0" name="Source" type="tns:ImportSource" />
+      <xs:element minOccurs="0" name="Status" type="tns:ImportStatus" />
+      <xs:element minOccurs="0" name="StrStatus" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Type" type="tns:ImportType" />
+      <xs:element minOccurs="0" name="WeEstimates" type="xs:int" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ImportRequest" nillable="true" type="tns:ImportRequest" />
+  <xs:simpleType name="ImportFilter">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Last3Years" />
+      <xs:enumeration value="All" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="ImportFilter" nillable="true" type="tns:ImportFilter" />
+  <xs:simpleType name="Priority">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Standard" />
+      <xs:enumeration value="Priority" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="Priority" nillable="true" type="tns:Priority" />
+  <xs:simpleType name="ImportSource">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Admin" />
+      <xs:enumeration value="WebEst" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="ImportSource" nillable="true" type="tns:ImportSource" />
+  <xs:simpleType name="ImportStatus">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="None" />
+      <xs:enumeration value="Waiting" />
+      <xs:enumeration value="Pending" />
+      <xs:enumeration value="Complete" />
+      <xs:enumeration value="Error" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="ImportStatus" nillable="true" type="tns:ImportStatus" />
+  <xs:simpleType name="ImportType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Contracts" />
+      <xs:enumeration value="Estimates" />
+      <xs:enumeration value="All" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="ImportType" nillable="true" type="tns:ImportType" />
+  <xs:complexType name="QueueImportResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Success" type="xs:boolean" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="QueueImportResponse" nillable="true" type="tns:QueueImportResponse" />
+  <xs:complexType name="QueueSizeRequest">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="QueueName" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="QueueSizeRequest" nillable="true" type="tns:QueueSizeRequest" />
+  <xs:complexType name="QueueSizeResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Size" type="xs:int" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="QueueSizeResponse" nillable="true" type="tns:QueueSizeResponse" />
+  <xs:complexType name="QueueQueryRequest">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="QueueName" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="QueueQueryRequest" nillable="true" type="tns:QueueQueryRequest" />
+  <xs:complexType name="QueueQueryReponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Imports" nillable="true" type="tns:ArrayOfImport" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="QueueQueryReponse" nillable="true" type="tns:QueueQueryReponse" />
+  <xs:complexType name="ArrayOfImport">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="Import" nillable="true" type="tns:Import" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfImport" nillable="true" type="tns:ArrayOfImport" />
+  <xs:complexType name="Import">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:ImportRequest">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="PEEstCount" type="xs:int" />
+          <xs:element minOccurs="0" name="TimeRemaining" nillable="true" type="xs:string" />
+          <xs:element minOccurs="0" name="WebEstEstCount" type="xs:int" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Import" nillable="true" type="tns:Import" />
+  <xs:complexType name="QueueProgressRequest">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="LoginId" type="xs:int" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="QueueProgressRequest" nillable="true" type="tns:QueueProgressRequest" />
+  <xs:complexType name="QueueProgressResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="ImportProgressItem" nillable="true" type="tns:ImportProgressItem" />
+      <xs:element minOccurs="0" name="LoginId" type="xs:int" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="QueueProgressResponse" nillable="true" type="tns:QueueProgressResponse" />
+  <xs:complexType name="ImportProgressItem">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="ProEstimatorEstimates" type="xs:int" />
+      <xs:element minOccurs="0" name="WebBestEstimates" type="xs:int" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ImportProgressItem" nillable="true" type="tns:ImportProgressItem" />
+</xs:schema>

@@ -1,0 +1,1879 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report DataSourceName="EstimateHeader" Width="8.42847442626953in" Name="Estimate.trdx" ShowSnapGrid="True" xmlns="http://schemas.telerik.com/reporting/2012/3.8">
+	<DataSources>
+		<SqlDataSource ConnectionString="ProEstimator" SelectCommand="dbo.EstimateReport_GetHeader" SelectCommandType="StoredProcedure" Name="EstimateHeader" ParameterValues="{&quot;@AdminInfoID&quot;:&quot;3466889&quot;,&quot;@ContentDirectory&quot;:&quot;c:\\&quot;}">
+			<Parameters>
+				<SqlDataSourceParameter DbType="Int32" Name="@AdminInfoID">
+					<Value>
+						<String>= Parameters.AdminInfoID.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="AnsiString" Name="@ContentDirectory">
+					<Value>
+						<String>= Parameters.ContentDirectory.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="Boolean" Name="@IncludeVehicleOptions">
+					<Value>
+						<String>= Not Parameters.VehicleOptionsInFooter.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="Boolean" Name="@HideCustomerData">
+					<Value>
+						<String>= False</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="Boolean" Name="@HideVendorFBLRInfo">
+					<Value>
+						<String>= False</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="Int32" Name="@PrintInspectionDate">
+					<Value>
+						<String>= Parameters.PrintInspectionDate.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="Int32" Name="@PrintDaysToRepair">
+					<Value>
+						<String>= Parameters.PrintRepairDays.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="Int32" Name="@SupplementVersion">
+					<Value>
+						<String>= Parameters.Supplement.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="AnsiString" Name="@SelectedTechnicians">
+					<Value>
+						<String>= Parameters.SelectedTechnicians.Value</String>
+					</Value>
+				</SqlDataSourceParameter>				
+			</Parameters>
+		</SqlDataSource>
+		<SqlDataSource ConnectionString="ProEstimator" SelectCommand="dbo.EstimateReport_GetSubTotals" SelectCommandType="StoredProcedure" Name="SubTotals" ParameterValues="{&quot;@AdminInfoID&quot;:&quot;6797024  &quot;,&quot;@SupplementVersion&quot;:&quot;1&quot;,&quot;@EOR&quot;:&quot;True&quot;}">
+			<Parameters>
+				<SqlDataSourceParameter DbType="Int32" Name="@AdminInfoID">
+					<Value>
+						<String>= Parameters.AdminInfoID.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="Byte" Name="@SupplementVersion">
+					<Value>
+						<String>= Parameters.Supplement.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="Boolean" Name="@EOR">
+					<Value>
+						<String>= True</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="AnsiString" Name="@ImageDirectory">
+					<Value>
+						<String>= Parameters.ImageDirectory.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="Int32" Name="@PdrOnly">
+					<Value>
+						<String>= Parameters.PdrOnly.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+			</Parameters>
+		</SqlDataSource>
+		<SqlDataSource ConnectionString="ProEstimator" SelectCommand="dbo.EstimateReport_GetTotals" SelectCommandType="StoredProcedure" Name="Totals" ParameterValues="{&quot;@AdminInfoID&quot;:&quot;6797024  &quot;,&quot;@SupplementVersion&quot;:&quot;1&quot;,&quot;@ForEOR&quot;:&quot;True&quot;}">
+			<Parameters>
+				<SqlDataSourceParameter DbType="Int32" Name="@AdminInfoID">
+					<Value>
+						<String>= Parameters.AdminInfoID.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="Int32" Name="@SupplementVersion">
+					<Value>
+						<String>= Parameters.Supplement.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="Boolean" Name="@ForEOR">
+					<Value>
+						<String>= True</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="Int32" Name="@PdrOnly">
+					<Value>
+						<String>= Parameters.PdrOnly.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+			</Parameters>
+		</SqlDataSource>
+		<SqlDataSource ConnectionString="ProEstimator" SelectCommand="dbo.GetPaymentInfo" SelectCommandType="StoredProcedure" Name="PaymentInfo" ParameterValues="{&quot;@AdminInfoID&quot;:&quot;3466918&quot;}">
+			<Parameters>
+				<SqlDataSourceParameter DbType="Int32" Name="@AdminInfoID">
+					<Value>
+						<String>= Parameters.AdminInfoID.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+			</Parameters>
+		</SqlDataSource>
+		<SqlDataSource ConnectionString="ProEstimator" SelectCommand="dbo.EstimateReport_GetLineItems_Supplement" SelectCommandType="StoredProcedure" Name="LineItems_Supplement" ParameterValues="{&quot;@AdminInfoID&quot;:&quot;6797092&quot;,&quot;@SupplementVersion&quot;:&quot;1&quot;}">
+			<Parameters>
+				<SqlDataSourceParameter DbType="Int32" Name="@AdminInfoID">
+					<Value>
+						<String>= Parameters.AdminInfoID.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="AnsiString" Name="@ImageDirectory">
+					<Value>
+						<String>= Parameters.ImageDirectory.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="Int32" Name="@SupplementVersion">
+					<Value>
+						<String>= Parameters.Supplement.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="Int32" Name="@PdrOnly">
+					<Value>
+						<String>= Parameters.PdrOnly.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+			</Parameters>
+		</SqlDataSource>
+		<SqlDataSource ConnectionString="ProEstimator" SelectCommand="dbo.EstimateReport_GetSubTotals" SelectCommandType="StoredProcedure" Name="SubTotalsSupplement" ParameterValues="{&quot;@AdminInfoID&quot;:&quot;6797024&quot;,&quot;@SupplementVersion&quot;:&quot;1&quot;,&quot;@EOR&quot;:&quot;False&quot;}">
+			<Parameters>
+				<SqlDataSourceParameter DbType="Int32" Name="@AdminInfoID">
+					<Value>
+						<String>= Parameters.AdminInfoID.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="Byte" Name="@SupplementVersion">
+					<Value>
+						<String>= Parameters.Supplement.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="Boolean" Name="@EOR">
+					<Value>
+						<String>= False</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="AnsiString" Name="@ImageDirectory">
+					<Value>
+						<String>= Parameters.ImageDirectory.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="Int32" Name="@PdrOnly">
+					<Value>
+						<String>= Parameters.PdrOnly.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+			</Parameters>
+		</SqlDataSource>
+		<SqlDataSource ConnectionString="ProEstimator" SelectCommand="dbo.EstimateReport_GetTotals" SelectCommandType="StoredProcedure" Name="TotalsSupplement" ParameterValues="{&quot;@AdminInfoID&quot;:&quot;6797024&quot;,&quot;@SupplementVersion&quot;:&quot;1&quot;,&quot;@ForEOR&quot;:&quot;False&quot;}">
+			<Parameters>
+				<SqlDataSourceParameter DbType="Int32" Name="@AdminInfoID">
+					<Value>
+						<String>= Parameters.AdminInfoID.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="Int32" Name="@SupplementVersion">
+					<Value>
+						<String>= Parameters.Supplement.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="Boolean" Name="@ForEOR">
+					<Value>
+						<String>= False</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="Int32" Name="@PdrOnly">
+					<Value>
+						<String>= Parameters.PdrOnly.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+			</Parameters>
+		</SqlDataSource>
+		<SqlDataSource ConnectionString="ProEstimator" SelectCommand="dbo.EstimateReport_GetCumulativeEffects" SelectCommandType="StoredProcedure" Name="CumulativeEffects" ParameterValues="{&quot;@AdminInfoID&quot;:&quot;4576833&quot;,&quot;@Supplement&quot;:&quot;2&quot;}">
+			<Parameters>
+				<SqlDataSourceParameter DbType="Int32" Name="@AdminInfoID">
+					<Value>
+						<String>= Parameters.AdminInfoID.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+				<SqlDataSourceParameter DbType="Int32" Name="@Supplement">
+					<Value>
+						<String>= Parameters.Supplement.Value</String>
+					</Value>
+				</SqlDataSourceParameter>
+			</Parameters>
+		</SqlDataSource>
+	</DataSources>
+	<Items>
+		<PageHeaderSection PrintOnLastPage="True" Height="0.800000111262004in" Name="pageHeaderSection1">
+			<Style Visible="True" BackgroundColor="Transparent" />
+			<Items>
+				<TextBox Width="0.950157682100932in" Height="0.199999809265137in" Left="1.24976348876953in" Top="0.500000238418579in" Value="Customer:" Name="textBox118">
+					<Style TextAlign="Right">
+						<Font Bold="True" Underline="False" />
+					</Style>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style>
+								<Font Size="8pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeHeaders.Value" Operator="Equal" Value="=1" />
+							</Filters>
+						</FormattingRule>
+						<FormattingRule>
+							<Style>
+								<Font Size="12pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeHeaders.Value" Operator="Equal" Value="=3" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</TextBox>
+				<TextBox Width="0.950157701969147in" Height="0.199999809265137in" Left="5.4996395111084in" Top="0.5in" Value="= IIf(IsNull(Fields.EstimateNumber, 0) &gt; 0 And Parameters.ShowEstimateNumber.Value = True, 'Estimate #: ','')" Name="textBox124">
+					<Style TextAlign="Right">
+						<Font Bold="True" Underline="False" />
+					</Style>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style>
+								<Font Size="8pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeHeaders.Value" Operator="Equal" Value="=1" />
+							</Filters>
+						</FormattingRule>
+						<FormattingRule>
+							<Style>
+								<Font Size="12pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeHeaders.Value" Operator="Equal" Value="=3" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</TextBox>
+				<TextBox Width="1.49374961853027in" Height="0.200000047683716in" Left="6.48958396911621in" Top="0.500000238418579in" Value="= IIf(IsNull(Fields.EstimateNumber, 0) &gt; 0 And Parameters.ShowEstimateNumber.Value = True, CStr(Fields.EstimateNumber), '')" Name="textBox125">
+					<Style>
+						<Font Bold="True" />
+					</Style>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style>
+								<Font Size="8pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeHeaders.Value" Operator="Equal" Value="=1" />
+							</Filters>
+						</FormattingRule>
+						<FormattingRule>
+							<Style>
+								<Font Size="12pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeHeaders.Value" Operator="Equal" Value="=3" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</TextBox>
+				<Shape Width="7.52195692062378in" Height="0.0996061936020851in" Left="0.489583343267441in" Top="0.699999968210856in" Name="shape8">
+					<ShapeType>
+						<LineShape Direction="EW" />
+					</ShapeType>
+				</Shape>
+				<HtmlTextBox Width="3.29956086476644in" Height="0.199921290079753in" Left="2.20000012715658in" Top="0.5in" Value="= Fields.Owner" Name="htmlTextBox15">
+					<Style>
+						<Font Bold="True" />
+					</Style>
+				</HtmlTextBox>
+			</Items>
+			<ConditionalFormatting>
+				<FormattingRule>
+					<Style Visible="False" />
+					<Filters>
+						<Filter Expression="= PageNumber" Operator="Equal" Value="=1" />
+					</Filters>
+				</FormattingRule>
+			</ConditionalFormatting>
+		</PageHeaderSection>
+		<DetailSection KeepTogether="False" Height="3.04269536336263in" Name="detailSection1">
+			<Style BackgroundColor="Transparent">
+				<BorderStyle Top="None" Bottom="None" Left="None" Right="None" />
+				<BorderColor Top="Black" Bottom="Black" Left="Black" Right="Black" />
+				<BorderWidth Top="1pt" Bottom="1pt" Left="1pt" Right="1pt" />
+				<Padding Bottom="0in" />
+			</Style>
+			<Items>
+				<SubReport Width="8.40920321146647in" Height="0.304168065388994in" Left="0.00003941853841146in" Top="0in" KeepTogether="False" Name="Estimate_EOR">
+					<Style BackgroundColor="Transparent" />
+					<ReportSource>
+						<UriReportSource Uri="Estimate_EOR.trdx">
+							<Parameters>
+								<Parameter Name="AdminInfoID">
+									<Value>
+										<String>= Parameters.AdminInfoID.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="ImageDirectory">
+									<Value>
+										<String>= Parameters.ImageDirectory.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="Supplement">
+									<Value>
+										<String>= Parameters.Supplement.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="ShowExternalNotes">
+									<Value>
+										<String>= Parameters.ShowExternalNotes.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="HideHours">
+									<Value>
+										<String>= Parameters.HideHours.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="FontSizeLines">
+									<Value>
+										<String>= Parameters.FontSizeLines.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="FontSizeTableHeaders">
+									<Value>
+										<String>= Parameters.FontSizeTableHeaders.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="FontSizeTotals">
+									<Value>
+										<String>= Parameters.FontSizeTotals.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="FontSizeHeaders">
+									<Value>
+										<String>= Parameters.FontSizeHeaders.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="PdrOnly">
+									<Value>
+										<String>= Parameters.PdrOnly.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="PrintPnLNotes">
+									<Value>
+										<String>= Parameters.PrintPnLNotes.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="IncludeLoanApplicationLink">
+									<Value>
+										<String>= Parameters.IncludeLoanApplicationLink.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="FinancingAsLowAsMonthlyAmount">
+									<Value>
+										<String>= Parameters.FinancingAsLowAsMonthlyAmount.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="FinancingLoanApplicationLink">
+									<Value>
+										<String>= Parameters.FinancingLoanApplicationLink.Value</String>
+									</Value>
+								</Parameter>
+							</Parameters>
+						</UriReportSource>
+					</ReportSource>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style Visible="False" />
+							<Filters>
+								<Filter Expression="= Parameters.SupplementOnly.Value" Operator="Equal" Value="= True" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</SubReport>
+				<SubReport Width="8.40920321146647in" Height="0.277471542358395in" Left="0.00003941853841146in" Top="0.304168065388997in" Name="Estimate_PaymentDetails">
+					<Style BackgroundColor="Transparent" />
+					<ReportSource>
+						<UriReportSource Uri="Estimate_PaymentDetails.trdx">
+							<Parameters>
+								<Parameter Name="AdminInfoID">
+									<Value>
+										<String>= Parameters.AdminInfoID.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="FontSizeTotals">
+									<Value>
+										<String>= Parameters.FontSizeTotals.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="FontSizeTableHeaders">
+									<Value>
+										<String>= Parameters.FontSizeTableHeaders.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="FontSizeHeaders">
+									<Value>
+										<String>= Parameters.FontSizeHeaders.Value</String>
+									</Value>
+								</Parameter>
+							</Parameters>
+						</UriReportSource>
+					</ReportSource>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style Visible="False" />
+							<Filters>
+								<Filter Expression="= Parameters.SupplementOnly.Value" Operator="Equal" Value="= True" />
+							</Filters>
+						</FormattingRule>
+						<FormattingRule>
+							<Style Visible="False" />
+							<Filters>
+								<Filter Expression="= Parameters.ShowPaymentInfo.Value" Operator="Equal" Value="=False" />
+							</Filters>
+						</FormattingRule>
+						<FormattingRule>
+							<Style Visible="False" />
+							<Filters>
+								<Filter Expression="= Fields.PaymentRecords" Operator="Equal" Value="=0" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</SubReport>
+				<SubReport Width="8.40924263000488in" Height="0.299999872843427in" Left="0in" Top="0.604168574015299in" KeepTogether="True" Name="Estimage_Supplement">
+					<Style BackgroundColor="Transparent" />
+					<ReportSource>
+						<UriReportSource Uri="Estimate_Supplement.trdx">
+							<Parameters>
+								<Parameter Name="AdminInfoID">
+									<Value>
+										<String>= Parameters.AdminInfoID.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="ShowExternalNotes">
+									<Value>
+										<String>= Parameters.ShowExternalNotes.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="ImageDirectory">
+									<Value>
+										<String>= Parameters.ImageDirectory.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="Supplement">
+									<Value>
+										<String>= Parameters.Supplement.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="HideHours">
+									<Value>
+										<String>= Parameters.HideHours.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="FontSizeHeaders">
+									<Value>
+										<String>= Parameters.FontSizeHeaders.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="FontSizeLines">
+									<Value>
+										<String>= Parameters.FontSizeLines.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="FontSizeTableHeaders">
+									<Value>
+										<String>= Parameters.FontSizeTableHeaders.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="FontSizeTotals">
+									<Value>
+										<String>= Parameters.FontSizeTotals.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="PdrOnly">
+									<Value>
+										<String>= Parameters.PdrOnly.Value</String>
+									</Value>
+								</Parameter>
+							</Parameters>
+						</UriReportSource>
+					</ReportSource>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style Visible="False" />
+							<Filters>
+								<Filter Expression="= Parameters.Supplement.Value" Operator="Equal" Value="= 0" />
+							</Filters>
+						</FormattingRule>
+						<FormattingRule>
+							<Style Visible="False" />
+							<Filters>
+								<Filter Expression="= Parameters.EOROnly.Value" Operator="Equal" Value="= True" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</SubReport>
+				<Panel Width="7.8576701482137in" Height="0.626672108968099in" Left="0.299999952316284in" Top="0.921864827473958in" Name="panel2">
+					<Style BackgroundColor="Transparent" />
+					<Items>
+						<Shape Width="7.52191734313964in" Height="0.0996061936020851in" Left="0.161375045776367in" Top="0.0598767598470052in" Name="shape6">
+							<ShapeType>
+								<LineShape Direction="EW" />
+							</ShapeType>
+						</Shape>
+						<Shape Width="7.52191734313964in" Height="0.0996061936020851in" Left="0.161375045776367in" Top="0.52667236328125in" Name="shape7">
+							<ShapeType>
+								<LineShape Direction="EW" />
+							</ShapeType>
+						</Shape>
+						<HtmlTextBox Width="7.45874881744385in" Height="0.367032051086426in" Left="0.220833381017049in" Top="0.15956179300944in" Value="= Fields.EstimateNote" Name="htmlTextBox13">
+							<Style>
+								<Font Size="9pt" />
+							</Style>
+							<ConditionalFormatting>
+								<FormattingRule>
+									<Style>
+										<Font Size="7pt" />
+									</Style>
+									<Filters>
+										<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+									</Filters>
+								</FormattingRule>
+								<FormattingRule>
+									<Style>
+										<Font Size="10pt" />
+									</Style>
+									<Filters>
+										<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 3" />
+									</Filters>
+								</FormattingRule>
+							</ConditionalFormatting>
+						</HtmlTextBox>
+					</Items>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style Visible="False" />
+							<Filters>
+								<Filter Expression="= Fields.EstimateNote" Operator="Equal" Value="= &quot;&quot;" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</Panel>
+				<SubReport Width="8.40920321146647in" Height="0.298352559407555in" Left="0.0181891123453776in" Top="1.84226099650065in" Name="Estimate_Images">
+					<Style BackgroundColor="Transparent" />
+					<ReportSource>
+						<UriReportSource Uri="Estimate_Images.trdx">
+							<Parameters>
+								<Parameter Name="AdminInfoID">
+									<Value>
+										<String>= Parameters.AdminInfoID.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="ImageSizeParameter">
+									<Value>
+										<String>= Parameters.ImageSizeParameter.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="ContentDirectory">
+									<Value>
+										<String>= Parameters.ContentDirectory.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="FontSizeLines">
+									<Value>
+										<String>= Parameters.FontSizeLines.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="IncludeImages">
+									<Value>
+										<String>= Parameters.IncludeImages.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="ImageSupplement">
+									<Value>
+										<String>= Parameters.ImageSupplement.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="ImageOnlyChecked">
+									<Value>
+										<String>= Parameters.ImageOnlyChecked.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="PdrOnly">
+									<Value>
+										<String>= Parameters.PdrOnly.Value</String>
+									</Value>
+								</Parameter>
+							</Parameters>
+						</UriReportSource>
+					</ReportSource>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style Visible="False" />
+							<Filters>
+								<Filter Expression="= Parameters.ShowPhotoPage.Value" Operator="Equal" Value="= False" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</SubReport>
+				<SubReport Width="8.39105351765951in" Height="0.299921671549484in" Left="0.0181891123453776in" Top="2.4426949818929in" Name="Estimate_Vendors">
+					<Style BackgroundColor="Transparent" />
+					<ReportSource>
+						<UriReportSource Uri="Estimate_Vendors.trdx">
+							<Parameters>
+								<Parameter Name="AdminInfoID">
+									<Value>
+										<String>= Parameters.AdminInfoID.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="Supplement">
+									<Value>
+										<String>= Parameters.Supplement.Value</String>
+									</Value>
+								</Parameter>
+							</Parameters>
+						</UriReportSource>
+					</ReportSource>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style Visible="False" />
+							<Filters>
+								<Filter Expression="= Parameters.ShowVendors.Value" Operator="Equal" Value="= False" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</SubReport>
+				<SubReport Width="8.3910535176595in" Height="0.299999872843425in" Left="0.0181891123453776in" Top="2.74269549051921in" Name="Estimate_VehicleAccessories">
+					<Style BackgroundColor="Transparent" />
+					<ReportSource>
+						<UriReportSource Uri="Estimate_VehicleAccessories.trdx">
+							<Parameters>
+								<Parameter Name="AdminInfoID">
+									<Value>
+										<String>= Parameters.AdminInfoID.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="FontSizeHeaders">
+									<Value>
+										<String>= Parameters.FontSizeHeaders.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="FontSizeDetails">
+									<Value>
+										<String>= Parameters.FontSizeHeader.Value</String>
+									</Value>
+								</Parameter>
+							</Parameters>
+						</UriReportSource>
+					</ReportSource>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style Visible="False" />
+							<Filters>
+								<Filter Expression="= Parameters.VehicleOptionsInFooter.Label" Operator="Equal" Value="= False" />
+							</Filters>
+						</FormattingRule>
+						<FormattingRule>
+							<Style Visible="False" />
+							<Filters>
+								<Filter Expression="= Fields.VehicleOptions" Operator="Equal" Value="=&quot;&quot;" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</SubReport>
+				<SubReport Width="8.40920352935791in" Height="0.299999862909317in" Left="0.0192708571751912in" Top="2.14060147603353in" Name="Estimate_PDFs">
+					<Style BackgroundColor="Transparent" />
+					<ReportSource>
+						<UriReportSource Uri="Estimate_PDFs.trdx">
+							<Parameters>
+								<Parameter Name="AdminInfoID">
+									<Value>
+										<String>= Parameters.AdminInfoID.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="ImageSizeParameter">
+									<Value>
+										<String>= Parameters.ImageSizeParameterPDF.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="ContentDirectory">
+									<Value>
+										<String>= Parameters.ContentDirectory.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="FontSizeLines">
+									<Value>
+										<String>= Parameters.FontSizeLines.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="IncludeImages">
+									<Value>
+										<String>= Parameters.IncludeImages.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="ImageSupplement">
+									<Value>
+										<String>= Parameters.ImageSupplement.Value</String>
+									</Value>
+								</Parameter>
+								<Parameter Name="ImageOnlyChecked">
+									<Value>
+										<String>= Parameters.ImageOnlyChecked.Value</String>
+									</Value>
+								</Parameter>
+							</Parameters>
+						</UriReportSource>
+					</ReportSource>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style Visible="False" />
+							<Filters>
+								<Filter Expression="= Parameters.ShowPDFPage.Value" Operator="Equal" Value="= False" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</SubReport>
+				<Panel Width="7.66987419128418in" Height="0.286985715230306in" Left="0.299999952316284in" Top="1.55519676208496in" Name="panel16">
+					<Items>
+						<HtmlTextBox Width="7.46987374623617in" Height="0.200079282124837in" Left="0.200000127156576in" Top="0.0869064331054688in" Value="= Fields.CompanyNotes" Name="htmlTextBox14">
+							<Style BackgroundColor="Transparent">
+								<Font Size="9pt" />
+							</Style>
+							<ConditionalFormatting>
+								<FormattingRule>
+									<Style>
+										<Font Size="7pt" />
+									</Style>
+									<Filters>
+										<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+									</Filters>
+								</FormattingRule>
+								<FormattingRule>
+									<Style>
+										<Font Size="10pt" />
+									</Style>
+									<Filters>
+										<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 3" />
+									</Filters>
+								</FormattingRule>
+							</ConditionalFormatting>
+						</HtmlTextBox>
+					</Items>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style Visible="False" />
+							<Filters>
+								<Filter Expression="= Fields.CompanyNotes" Operator="Equal" Value="=''" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</Panel>
+				<Panel Width="8.20000044504801in" Height="1.58684158325195in" Left="0.100000063578288in" Top="3.10103130340576in" Name="panel17">
+					<Style Visible="False" />
+					<Items>
+						<HtmlTextBox Width="8in" Height="0.599999745686849in" Left="0.100000381469727in" Top="0.900000254313151in" Value="*All financing is subject to credit approval. Terms may vary. Payment options through Wisetack are provided by&amp;nbsp;Wisetack's &lt;a href=&quot;https://www.wisetack.com/lenders&quot; target=&quot;_blank&quot;&gt;lending partners&lt;/a&gt;. For example, a $1,000 purchase could cost $45.18 a month for 24 months, based on a 7.9% APR, or $333.33 a month for 3 months, based on a 0% APR. See additional terms at &lt;a href=&quot;http://wisetack.com/faqs&quot;&gt;http://wisetack.com/faqs&lt;/a&gt;." Name="htmlTextBox16">
+							<Style TextAlign="Center" VerticalAlign="Bottom">
+								<Font Italic="True" />
+							</Style>
+						</HtmlTextBox>
+					</Items>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style Visible="True" />
+							<Filters>
+								<Filter Expression="= Parameters.IncludeLoanApplicationLink.Value" Operator="Equal" Value="= True" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</Panel>
+			</Items>
+		</DetailSection>
+		<PageFooterSection Height="0.638999283313751in" Name="pageFooterSection1">
+			<Style BackgroundColor="White" />
+			<Items>
+				<Panel Width="8.01150035858154in" Height="0.438999156157176in" Left="0.0000394185371988in" Top="0.0389995574951172in" Name="panel8">
+					<Style BackgroundColor="White" />
+					<Items>
+						<HtmlTextBox Width="1.39374923706055in" Height="0.200000122189522in" Left="1.19537687301636in" Top="0.147961929440498in" Value="Powered By Web-Est" Name="htmlTextBox25">
+							<Style>
+								<Font Size="9pt" />
+							</Style>
+						</HtmlTextBox>
+						<HtmlTextBox Width="2.00000023841858in" Height="0.200000122189522in" Left="3.29537677764893in" Top="0.147961929440498in" Value="{PageNumber} of {PageCount}" Name="htmlTextBox26">
+							<Style TextAlign="Center">
+								<Font Size="9pt" />
+							</Style>
+						</HtmlTextBox>
+						<HtmlTextBox Width="1.90458587805431in" Height="0.200000122189522in" Left="5.89537572860718in" Top="0.147961929440498in" Value="{Parameters.TimeStamp.Value}" Name="htmlTextBox27">
+							<Style Visible="True" />
+							<ConditionalFormatting>
+								<FormattingRule>
+									<Style Visible="False" />
+									<Filters>
+										<Filter Expression="= Parameters.NoFooterDateTimeStamp.Value" Operator="Equal" Value="= 1" />
+									</Filters>
+								</FormattingRule>
+							</ConditionalFormatting>
+						</HtmlTextBox>
+						<Shape Width="7.49195289611816in" Height="0.0996061936020851in" Left="0.499960581461589in" Top="0in" Name="shape5">
+							<ShapeType>
+								<LineShape Direction="EW" />
+							</ShapeType>
+						</Shape>
+					</Items>
+				</Panel>
+			</Items>
+		</PageFooterSection>
+		<ReportHeaderSection Height="1in" Name="reportHeaderSection1">
+			<Style BackgroundColor="White" />
+			<Items>
+				<HtmlTextBox Width="2.40007909138998in" Height="0.297838131586711in" Left="5.60000038146972in" Top="0.902083206176758in" Value="&lt;span&gt;&lt;strong&gt;{Parameters.HeaderText.Value}&lt;/strong&gt;&lt;/span&gt;&lt;span style=&quot;font-size: 17pt&quot;&gt;&lt;/span&gt;" Name="htmlTextBox2">
+					<Style TextAlign="Right">
+						<Font Size="17pt" />
+					</Style>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style>
+								<Font Size="14pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeHeaders.Value" Operator="Equal" Value="=1" />
+							</Filters>
+						</FormattingRule>
+						<FormattingRule>
+							<Style>
+								<Font Size="21pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeHeaders.Value" Operator="Equal" Value="=3" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</HtmlTextBox>
+				<HtmlTextBox Width="2.51114491621653in" Height="0.997916698455812in" Left="3.0888557434082in" Top="0.902083285649618in" Value="= IIF(Parameters.PrintShopInfo.Value=true, IIf(IsNull(Fields.CompanyName, '') &lt;&gt; '',  '&lt;b&gt;' + Fields.CompanyName + '&lt;/b&gt;&lt;br /&gt;', '')&#xD;&#xA;+ IIf(IsNull(Fields.CompanyContactName, '') &lt;&gt; '',  Fields.CompanyContactName + '&lt;br /&gt;', '')&#xD;&#xA;+ IIf(IsNull(Fields.CompanyAddress, '') &lt;&gt; ' ',  Fields.CompanyAddress + '&lt;br /&gt;', '')&#xD;&#xA;+ IIf(IsNull(Fields.CompanyCityStateZip, '') &lt;&gt; '',  Fields.CompanyCityStateZip + '&lt;br /&gt;', '')&#xD;&#xA;+ IIf(IsNull(Fields.CompanyContactCellPhone, '') &lt;&gt; ' ',  Fields.CompanyContactPhoneType1 + ': ' + Fields.CompanyContactCellPhone + '&lt;br /&gt;', '')&#xD;&#xA;+ IIf(IsNull(Fields.CompanyContactSecondaryPhone, '') &lt;&gt; ' ',  Fields.CompanyContactPhoneType2 + ': ' + Fields.CompanyContactSecondaryPhone + '&lt;br /&gt;', '')&#xD;&#xA;+ IIf(IsNull(Fields.CompanyContactFax, '') &lt;&gt; '',  'Fax: ' + Fields.CompanyContactFax + '&lt;br /&gt;', '')&#xD;&#xA;+ IIf(IsNull(Fields.CompanyContactEmail, '') &lt;&gt; '' And IsNull(Fields.PrintEmailAddressInHeader, 'False') &lt;&gt; 'False',  Fields.CompanyContactEmail, ''),'')" CanShrink="True" Name="htmlTextBox33">
+					<Style TextAlign="Center">
+						<Font Size="9pt" />
+					</Style>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style>
+								<Font Size="7pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeDetails.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+							</Filters>
+						</FormattingRule>
+						<FormattingRule>
+							<Style>
+								<Font Size="11pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeDetails.Value" Operator="Equal" Value="= 3" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</HtmlTextBox>
+				<HtmlTextBox Width="2.38663903872172in" Height="0.699999968210856in" Left="5.60000101725261in" Top="1.20000001589457in" Value="= IIf(IsNull(Fields.EstimateDescription, '') &lt;&gt; '', Fields.EstimateDescription + '&lt;br/&gt;', '')&#xD;&#xA;+ IIf(IsNull(Fields.EstimateNumber, 0) &gt; 0 And Parameters.ShowEstimateNumber.Value = True, 'Est #  ' + CStr(Fields.EstimateNumber) + '&lt;br/&gt;', '')&#xD;&#xA;+ IIf(IsNull(Fields.EstimateID, 0) &gt; 0 And Parameters.ShowID.Value = True, 'ID #  ' + CStr(Fields.EstimateID) + '&lt;br/&gt;', '')&#xD;&#xA;+ IIf(Trim(IsNull(Fields.EstimatorsName, '')) &lt;&gt; '',  Parameters.EstimatorOrAppraiser.Value + ': ' + Fields.EstimatorsName + '&lt;br/&gt;', '')" CanShrink="True" Name="htmlTextBox2">
+					<Style TextAlign="Right">
+						<Font Size="9pt" />
+					</Style>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style>
+								<Font Size="7pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeDetails.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+							</Filters>
+						</FormattingRule>
+						<FormattingRule>
+							<Style>
+								<Font Size="11pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeDetails.Value" Operator="Equal" Value="= 3" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</HtmlTextBox>
+				<Panel Width="7.49in" Height="0.0520833333333333in" Left="0.52in" Top="2.35in" Name="panel1">
+					<Style BackgroundColor="GrayText" />
+				</Panel>
+				<PictureBox Url="= Fields.CompanyLogoPath" Width="2.56794349352519in" Height="1.49992084503174in" Left="0.520833492279053in" Top="0.8in" Sizing="ScaleProportional" MimeType="" Name="pictureBox4">
+					<Style Visible="False" TextAlign="Left">
+						<BackgroundImage Repeat="NoRepeat" />
+					</Style>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style Visible="True" />
+							<Filters>
+								<Filter Expression="= Fields.NoHeaderLogo" Operator="Equal" Value="= False" />
+								<Filter Expression="= Parameters.ShowHeaderLogo.Value" Operator="Equal" Value="= True" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</PictureBox>
+				<HtmlTextBox Width="2.58669376373291in" Height="0.897916634877523in" Left="0.502083301544189in" Top="0.902083285649618in" Value="= Fields.CompanyName" Name="htmlTextBox9">
+					<Style Visible="True" TextAlign="Center">
+						<Font Size="17pt" Bold="True" />
+						<Padding Left="0in" Right="0in" />
+					</Style>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style>
+								<Font Size="14pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeHeaders.Value" Operator="Equal" Value="=1" />
+							</Filters>
+						</FormattingRule>
+						<FormattingRule>
+							<Style>
+								<Font Size="21pt" />
+							</Style>
+							<Filters>
+								<Filter Expression="= Parameters.FontSizeHeaders.Value" Operator="Equal" Value="=3" />
+							</Filters>
+						</FormattingRule>
+						<FormattingRule>
+							<Style Visible="False" />
+							<Filters>
+								<Filter Expression="= Parameters.ShowHeaderLogo.Value" Operator="Equal" Value="= True" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</HtmlTextBox>
+			</Items>
+			<ConditionalFormatting>
+				<FormattingRule>
+					<Style Visible="False" />
+					<Filters>
+						<Filter Expression="= Parameters.PrintHeaderInfoOnEstimateReport.Value" Operator="Equal" Value="=0" />
+					</Filters>
+				</FormattingRule>
+			</ConditionalFormatting>
+		</ReportHeaderSection>
+	</Items>
+	<StyleSheet>
+		<StyleRule>
+			<Style>
+				<Padding Left="2pt" Right="2pt" />
+			</Style>
+			<Selectors>
+				<TypeSelector Type="TextItemBase" />
+				<TypeSelector Type="HtmlTextBox" />
+			</Selectors>
+		</StyleRule>
+		<StyleRule>
+			<Style Color="Black">
+				<BorderStyle Default="Solid" />
+				<BorderColor Default="Black" />
+				<BorderWidth Default="1px" />
+				<Font Name="Georgia" Size="9pt" />
+			</Style>
+			<Selectors>
+				<StyleSelector Type="Table" StyleName="Civic.TableNormal" />
+			</Selectors>
+		</StyleRule>
+		<StyleRule>
+			<Style>
+				<BorderStyle Default="Solid" />
+				<BorderColor Default="Black" />
+				<BorderWidth Default="1px" />
+				<Font Name="Georgia" Size="9pt" />
+			</Style>
+			<Selectors>
+				<DescendantSelector>
+					<Selectors>
+						<TypeSelector Type="Table" />
+						<StyleSelector Type="ReportItem" StyleName="Civic.TableBody" />
+					</Selectors>
+				</DescendantSelector>
+			</Selectors>
+		</StyleRule>
+		<StyleRule>
+			<Style BackgroundColor="140, 174, 173" Color="228, 238, 243" VerticalAlign="Middle">
+				<BorderStyle Default="Solid" />
+				<BorderColor Default="Black" />
+				<BorderWidth Default="1px" />
+				<Font Name="Georgia" Size="10pt" />
+			</Style>
+			<Selectors>
+				<DescendantSelector>
+					<Selectors>
+						<TypeSelector Type="Table" />
+						<StyleSelector Type="ReportItem" StyleName="Civic.TableHeader" />
+					</Selectors>
+				</DescendantSelector>
+			</Selectors>
+		</StyleRule>
+		<StyleRule>
+			<Style Color="Black">
+				<BorderStyle Default="Solid" />
+				<BorderColor Default="Black" />
+				<BorderWidth Default="1px" />
+				<Font Name="Book Antiqua" Size="9pt" />
+			</Style>
+			<Selectors>
+				<StyleSelector Type="Table" StyleName="Apex.TableNormal" />
+			</Selectors>
+		</StyleRule>
+		<StyleRule>
+			<Style>
+				<BorderStyle Default="Solid" />
+				<BorderColor Default="Black" />
+				<BorderWidth Default="1px" />
+				<Font Name="Book Antiqua" Size="9pt" />
+			</Style>
+			<Selectors>
+				<DescendantSelector>
+					<Selectors>
+						<TypeSelector Type="Table" />
+						<StyleSelector Type="ReportItem" StyleName="Apex.TableBody" />
+					</Selectors>
+				</DescendantSelector>
+			</Selectors>
+		</StyleRule>
+		<StyleRule>
+			<Style BackgroundColor="105, 103, 109" Color="206, 185, 102" VerticalAlign="Middle">
+				<BorderStyle Default="Solid" />
+				<BorderColor Default="Black" />
+				<BorderWidth Default="1px" />
+				<Font Name="Book Antiqua" Size="10pt" />
+			</Style>
+			<Selectors>
+				<DescendantSelector>
+					<Selectors>
+						<TypeSelector Type="Table" />
+						<StyleSelector Type="ReportItem" StyleName="Apex.TableHeader" />
+					</Selectors>
+				</DescendantSelector>
+			</Selectors>
+		</StyleRule>
+		<StyleRule>
+			<Style BackgroundColor="236, 236, 237">
+				<BorderStyle Default="Solid" />
+				<BorderColor Default="Black" />
+				<BorderWidth Default="1px" />
+				<Font Name="Book Antiqua" Size="9pt" />
+			</Style>
+			<Selectors>
+				<DescendantSelector>
+					<Selectors>
+						<TypeSelector Type="Table" />
+						<StyleSelector Type="ReportItem" StyleName="Apex.TableGroup" />
+					</Selectors>
+				</DescendantSelector>
+			</Selectors>
+		</StyleRule>
+		<StyleRule>
+			<Style Color="Black">
+				<BorderStyle Default="Solid" />
+				<BorderColor Default="Black" />
+				<BorderWidth Default="1px" />
+				<Font Name="Tahoma" Size="9pt" />
+			</Style>
+			<Selectors>
+				<StyleSelector Type="Table" StyleName="Normal.TableNormal" />
+			</Selectors>
+		</StyleRule>
+		<StyleRule>
+			<Style>
+				<BorderStyle Default="Solid" />
+				<BorderColor Default="Black" />
+				<BorderWidth Default="1px" />
+				<Font Name="Tahoma" Size="9pt" />
+			</Style>
+			<Selectors>
+				<DescendantSelector>
+					<Selectors>
+						<TypeSelector Type="Table" />
+						<StyleSelector Type="ReportItem" StyleName="Normal.TableBody" />
+					</Selectors>
+				</DescendantSelector>
+			</Selectors>
+		</StyleRule>
+		<StyleRule>
+			<Style VerticalAlign="Middle">
+				<BorderStyle Default="Solid" />
+				<BorderColor Default="Black" />
+				<BorderWidth Default="1px" />
+				<Font Name="Tahoma" Size="10pt" />
+			</Style>
+			<Selectors>
+				<DescendantSelector>
+					<Selectors>
+						<TypeSelector Type="Table" />
+						<StyleSelector Type="ReportItem" StyleName="Normal.TableHeader" />
+					</Selectors>
+				</DescendantSelector>
+			</Selectors>
+		</StyleRule>
+	</StyleSheet>
+	<PageSettings>
+		<PageSettings PaperKind="Letter" Landscape="False">
+			<Margins>
+				<MarginsU Left="0in" Right="0in" Top="0in" Bottom="0in" />
+			</Margins>
+		</PageSettings>
+	</PageSettings>
+	<Groups>
+		<Group Name="group35">
+			<GroupHeader>
+				<GroupHeaderSection KeepTogether="False" Height="0.847917025287946in" Name="groupHeaderSection1">
+					<Items>
+						<Panel Width="1.86570803324381in" Height="0.5in" Left="6.14512507120768in" Top="0.095911979675293in" Name="panel12">
+							<Items>
+								<HtmlTextBox Width="1.86362397670746in" Height="0.200000122189522in" Left="0in" Top="0in" Value="=IIf(IsNull(Fields.[4], '') &lt;&gt; '',  '&lt;b&gt;' + Substr(Fields.[4], 1, Len(Fields.[4]) - 1), '')" KeepTogether="False" CanShrink="True" Name="htmlTextBox31">
+									<Style>
+										<Font Size="8pt" />
+									</Style>
+									<ConditionalFormatting>
+										<FormattingRule>
+											<Style>
+												<Font Size="7pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+											</Filters>
+										</FormattingRule>
+										<FormattingRule>
+											<Style>
+												<Font Size="10pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 3" />
+											</Filters>
+										</FormattingRule>
+									</ConditionalFormatting>
+								</HtmlTextBox>
+								<HtmlTextBox Width="1.86362397670746in" Height="0.200000122189522in" Left="0.00208409627278646in" Top="0.252004941304525in" Value="=IIf(IsNull(Fields.[7], '') &lt;&gt; '',  '&lt;b&gt;' + Substr(Fields.[7], 1, Len(Fields.[7]) - 1), '')" KeepTogether="False" CanShrink="True" Name="htmlTextBox32">
+									<Style>
+										<Font Size="8pt" />
+									</Style>
+									<ConditionalFormatting>
+										<FormattingRule>
+											<Style>
+												<Font Size="7pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+											</Filters>
+										</FormattingRule>
+										<FormattingRule>
+											<Style>
+												<Font Size="10pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 3" />
+											</Filters>
+										</FormattingRule>
+									</ConditionalFormatting>
+								</HtmlTextBox>
+							</Items>
+						</Panel>
+						<Panel Width="1.82732582092285in" Height="0.500000556310018in" Left="4.30000019073486in" Top="0.0959113438924154in" Name="panel13">
+							<Items>
+								<HtmlTextBox Width="1.82732617855072in" Height="0.200000122189522in" Left="0.00003941853841146in" Top="0in" Value="=IIf(IsNull(Fields.[3], '') &lt;&gt; '',  '&lt;b&gt;' + Substr(Fields.[3], 1, Len(Fields.[3]) - 1), '')" KeepTogether="False" CanShrink="True" Name="htmlTextBox30">
+									<Style>
+										<Font Size="8pt" />
+									</Style>
+									<ConditionalFormatting>
+										<FormattingRule>
+											<Style>
+												<Font Size="7pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+											</Filters>
+										</FormattingRule>
+										<FormattingRule>
+											<Style>
+												<Font Size="10pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 3" />
+											</Filters>
+										</FormattingRule>
+									</ConditionalFormatting>
+								</HtmlTextBox>
+								<HtmlTextBox Width="1.82732617855072in" Height="0.212083175778389in" Left="0.00003910064697266in" Top="0.252005577087402in" Value="=IIf(IsNull(Fields.[6], '') &lt;&gt; '',  '&lt;b&gt;' + Substr(Fields.[6], 1, Len(Fields.[6]) - 1), '')" KeepTogether="False" CanShrink="True" Name="htmlTextBox37">
+									<Style>
+										<Font Size="8pt" />
+									</Style>
+									<ConditionalFormatting>
+										<FormattingRule>
+											<Style>
+												<Font Size="7pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+											</Filters>
+										</FormattingRule>
+										<FormattingRule>
+											<Style>
+												<Font Size="10pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 3" />
+											</Filters>
+										</FormattingRule>
+									</ConditionalFormatting>
+								</HtmlTextBox>
+							</Items>
+						</Panel>
+						<Panel Width="1.86362393697103in" Height="0.5in" Left="2.39999993642171in" Top="0.095911979675293in" Name="panel14">
+							<Items>
+								<HtmlTextBox Width="1.86362397670746in" Height="0.200000127156576in" Left="0.0000003178914388in" Top="0in" Value="=IIf(IsNull(Fields.[2], '') &lt;&gt; '',  '&lt;b&gt;' + Substr(Fields.[2], 1, Len(Fields.[2]) - 1), '')" KeepTogether="False" CanShrink="True" Name="htmlTextBox29">
+									<Style>
+										<Font Size="8pt" />
+									</Style>
+									<ConditionalFormatting>
+										<FormattingRule>
+											<Style>
+												<Font Size="7pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+											</Filters>
+										</FormattingRule>
+										<FormattingRule>
+											<Style>
+												<Font Size="10pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 3" />
+											</Filters>
+										</FormattingRule>
+									</ConditionalFormatting>
+								</HtmlTextBox>
+								<HtmlTextBox Width="1.86362397670746in" Height="0.200000122189522in" Left="0in" Top="0.252005259195964in" Value="=IIf(IsNull(Fields.[5], '') &lt;&gt; '',  '&lt;b&gt;' + Substr(Fields.[5], 1, Len(Fields.[5]) - 1), '')" KeepTogether="False" CanShrink="True" Name="htmlTextBox38">
+									<Style>
+										<Font Size="8pt" />
+									</Style>
+									<ConditionalFormatting>
+										<FormattingRule>
+											<Style>
+												<Font Size="7pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+											</Filters>
+										</FormattingRule>
+										<FormattingRule>
+											<Style>
+												<Font Size="10pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 3" />
+											</Filters>
+										</FormattingRule>
+									</ConditionalFormatting>
+								</HtmlTextBox>
+							</Items>
+						</Panel>
+						<Panel Width="1.90000025431315in" Height="0.752005681395531in" Left="0.489583333333333in" Top="0.0959113438924154in" Name="panel15">
+							<Items>
+								<HtmlTextBox Width="1.86362393697103in" Height="0.452004750569661in" Left="0in" Top="0in" Value="=IIf(IsNull(Fields.[1], '') &lt;&gt; '',  '&lt;b&gt;' + Substr(Fields.[1], 1, Len(Fields.[1]) - 1), '')" KeepTogether="False" CanShrink="True" Name="htmlTextBox28">
+									<Style>
+										<Font Size="8pt" />
+									</Style>
+									<ConditionalFormatting>
+										<FormattingRule>
+											<Style>
+												<Font Size="7pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+											</Filters>
+										</FormattingRule>
+										<FormattingRule>
+											<Style>
+												<Font Size="10pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 3" />
+											</Filters>
+										</FormattingRule>
+									</ConditionalFormatting>
+								</HtmlTextBox>
+								<HtmlTextBox Width="1.86362397670746in" Height="0.200000122189522in" Left="0in" Top="0.500000317891439in" Value="=IIf(IsNull(Fields.[8], '') &lt;&gt; '',  '&lt;b&gt;' + Substr(Fields.[8], 1, Len(Fields.[8]) - 1), '')" KeepTogether="False" CanShrink="True" Name="htmlTextBox5">
+									<Style>
+										<Font Size="8pt" />
+									</Style>
+									<ConditionalFormatting>
+										<FormattingRule>
+											<Style>
+												<Font Size="7pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+											</Filters>
+										</FormattingRule>
+										<FormattingRule>
+											<Style>
+												<Font Size="10pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 3" />
+											</Filters>
+										</FormattingRule>
+										<FormattingRule>
+											<Style Visible="False" />
+											<Filters>
+												<Filter Expression="= Fields.[8]" Operator="Equal" Value="=&quot;&quot;" />
+											</Filters>
+										</FormattingRule>
+									</ConditionalFormatting>
+								</HtmlTextBox>
+							</Items>
+						</Panel>
+					</Items>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style Visible="False" />
+							<Filters>
+								<Filter Expression="= Parameters.HeaderLabels.Value" Operator="Equal" Value="= True" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</GroupHeaderSection>
+			</GroupHeader>
+			<GroupFooter>
+				<GroupFooterSection Height="0.00999999977648258in" Name="groupFooterSection1">
+					<Style Visible="False" />
+				</GroupFooterSection>
+			</GroupFooter>
+			<Groupings>
+				<Grouping />
+			</Groupings>
+		</Group>
+		<Group Name="group36">
+			<GroupHeader>
+				<GroupHeaderSection Height="1.75105206171672in" Name="groupHeaderSection2">
+					<Style BackgroundColor="White" />
+					<Items>
+						<Panel Width="7.7104172706604in" Height="0.199999998013179in" Left="0.489583333333333in" Top="0.104167302449544in" Name="panel3">
+							<Items>
+								<HtmlTextBox Width="7.49in" Height="0.2in" Left="0in" Top="0in" Value="=IIf(IsNull(Fields.[1], '') &lt;&gt; '',  '&lt;b&gt;' + Replace(Replace(Substr(Fields.[1], 1, Len(Fields.[1]) - 1), '&lt;/b&gt;&lt;br/&gt;', ':&lt;/b&gt;  '), '&lt;br/&gt;', ' / '), '')" Name="htmlTextBox3">
+									<Style>
+										<Font Size="8pt" />
+									</Style>
+									<ConditionalFormatting>
+										<FormattingRule>
+											<Style>
+												<Font Size="7pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+											</Filters>
+										</FormattingRule>
+										<FormattingRule>
+											<Style>
+												<Font Size="10pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 3" />
+											</Filters>
+										</FormattingRule>
+									</ConditionalFormatting>
+								</HtmlTextBox>
+							</Items>
+							<ConditionalFormatting>
+								<FormattingRule>
+									<Style Visible="False" />
+									<Filters>
+										<Filter Expression="= Fields.[1]" Operator="Equal" Value="= Null" />
+									</Filters>
+								</FormattingRule>
+							</ConditionalFormatting>
+						</Panel>
+						<Panel Width="7.70000060399373in" Height="0.199999998013179in" Left="0.489583343267441in" Top="0.310865125929316in" Name="panel4">
+							<Items>
+								<HtmlTextBox Width="7.49in" Height="0.2in" Left="0.00208338101704915in" Top="0in" Value="=IIf(IsNull(Fields.[2], '') &lt;&gt; '',  '&lt;b&gt;' + Replace(Replace(Substr(Fields.[2], 1, Len(Fields.[2]) - 1), '&lt;/b&gt;&lt;br/&gt;', ':&lt;/b&gt;  '), '&lt;br/&gt;', ' / '), '')" Name="htmlTextBox4">
+									<Style>
+										<Font Size="8pt" />
+									</Style>
+									<ConditionalFormatting>
+										<FormattingRule>
+											<Style>
+												<Font Size="7pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+											</Filters>
+										</FormattingRule>
+										<FormattingRule>
+											<Style>
+												<Font Size="10pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 3" />
+											</Filters>
+										</FormattingRule>
+									</ConditionalFormatting>
+								</HtmlTextBox>
+							</Items>
+							<ConditionalFormatting>
+								<FormattingRule>
+									<Style Visible="False" />
+									<Filters>
+										<Filter Expression="= Fields.[2]" Operator="Equal" Value="= Null" />
+									</Filters>
+								</FormattingRule>
+							</ConditionalFormatting>
+						</Panel>
+						<Panel Width="7.70000076293945in" Height="0.200000002980232in" Left="0.489583343267441in" Top="0.724260777855913in" Name="panel5">
+							<Items>
+								<HtmlTextBox Width="7.48999977111816in" Height="0.200000002980232in" Left="0.00208338093943894in" Top="0in" Value="=IIf(IsNull(Fields.[4], '') &lt;&gt; '',  '&lt;b&gt;' + Replace(Replace(Substr(Fields.[4], 1, Len(Fields.[4]) - 1), '&lt;/b&gt;&lt;br/&gt;', ':&lt;/b&gt;  '), '&lt;br/&gt;', ' / '), '')" Name="htmlTextBox6">
+									<Style>
+										<Font Size="8pt" />
+									</Style>
+									<ConditionalFormatting>
+										<FormattingRule>
+											<Style>
+												<Font Size="7pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+											</Filters>
+										</FormattingRule>
+										<FormattingRule>
+											<Style>
+												<Font Size="10pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 3" />
+											</Filters>
+										</FormattingRule>
+									</ConditionalFormatting>
+								</HtmlTextBox>
+							</Items>
+							<ConditionalFormatting>
+								<FormattingRule>
+									<Style Visible="False" />
+									<Filters>
+										<Filter Expression="= Fields.[4]" Operator="Equal" Value="= Null" />
+									</Filters>
+								</FormattingRule>
+							</ConditionalFormatting>
+						</Panel>
+						<Panel Width="7.7104172706604in" Height="0.200000002980232in" Left="0.489583402872086in" Top="0.517562949409088in" Name="panel6">
+							<Items>
+								<HtmlTextBox Width="7.48999977111816in" Height="0.200000002980232in" Left="0in" Top="0in" Value="=IIf(IsNull(Fields.[3], '') &lt;&gt; '',  '&lt;b&gt;' + Replace(Replace(Substr(Fields.[3], 1, Len(Fields.[3]) - 1), '&lt;/b&gt;&lt;br/&gt;', ':&lt;/b&gt;  '), '&lt;br/&gt;', ' / '), '')" Name="htmlTextBox7">
+									<Style>
+										<Font Size="8pt" />
+									</Style>
+									<ConditionalFormatting>
+										<FormattingRule>
+											<Style>
+												<Font Size="7pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+											</Filters>
+										</FormattingRule>
+										<FormattingRule>
+											<Style>
+												<Font Size="10pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 3" />
+											</Filters>
+										</FormattingRule>
+									</ConditionalFormatting>
+								</HtmlTextBox>
+							</Items>
+							<ConditionalFormatting>
+								<FormattingRule>
+									<Style Visible="False" />
+									<Filters>
+										<Filter Expression="= Fields.[3]" Operator="Equal" Value="= Null" />
+									</Filters>
+								</FormattingRule>
+							</ConditionalFormatting>
+						</Panel>
+						<Panel Width="7.70000076293945in" Height="0.200000002980232in" Left="0.489583343267441in" Top="0.930958606302738in" Name="panel7">
+							<Items>
+								<HtmlTextBox Width="7.48999977111816in" Height="0.200000002980232in" Left="0.00208338093943894in" Top="0in" Value="=IIf(IsNull(Fields.[5], '') &lt;&gt; '',  '&lt;b&gt;' + Replace(Replace(Substr(Fields.[5], 1, Len(Fields.[5]) - 1), '&lt;/b&gt;&lt;br/&gt;', ':&lt;/b&gt;  '), '&lt;br/&gt;', ' / '), '')" Name="htmlTextBox8">
+									<Style>
+										<Font Size="8pt" />
+									</Style>
+									<ConditionalFormatting>
+										<FormattingRule>
+											<Style>
+												<Font Size="7pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+											</Filters>
+										</FormattingRule>
+										<FormattingRule>
+											<Style>
+												<Font Size="10pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 3" />
+											</Filters>
+										</FormattingRule>
+									</ConditionalFormatting>
+								</HtmlTextBox>
+							</Items>
+							<ConditionalFormatting>
+								<FormattingRule>
+									<Style Visible="False" />
+									<Filters>
+										<Filter Expression="= Fields.[5]" Operator="Equal" Value="= Null" />
+									</Filters>
+								</FormattingRule>
+							</ConditionalFormatting>
+						</Panel>
+						<Panel Width="7.70000076293945in" Height="0.200000002980232in" Left="0.489583343267441in" Top="1.13765643474956in" Name="panel9">
+							<Items>
+								<HtmlTextBox Width="7.48999977111816in" Height="0.200000002980232in" Left="0.00208338093943894in" Top="0in" Value="=IIf(IsNull(Fields.[6], '') &lt;&gt; '',  '&lt;b&gt;' + Replace(Replace(Substr(Fields.[6], 1, Len(Fields.[6]) - 1), '&lt;/b&gt;&lt;br/&gt;', ':&lt;/b&gt;  '), '&lt;br/&gt;', ' / '), '')" Name="htmlTextBox10">
+									<Style>
+										<Font Size="8pt" />
+									</Style>
+									<ConditionalFormatting>
+										<FormattingRule>
+											<Style>
+												<Font Size="7pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+											</Filters>
+										</FormattingRule>
+										<FormattingRule>
+											<Style>
+												<Font Size="10pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 3" />
+											</Filters>
+										</FormattingRule>
+									</ConditionalFormatting>
+								</HtmlTextBox>
+							</Items>
+							<ConditionalFormatting>
+								<FormattingRule>
+									<Style Visible="False" />
+									<Filters>
+										<Filter Expression="= Fields.[6]" Operator="Equal" Value="= Null" />
+									</Filters>
+								</FormattingRule>
+							</ConditionalFormatting>
+						</Panel>
+						<Panel Width="7.70000076293945in" Height="0.200000002980232in" Left="0.489583343267441in" Top="1.34435426319639in" Name="panel10">
+							<Items>
+								<HtmlTextBox Width="7.48999977111816in" Height="0.200000002980232in" Left="0.00208338093943894in" Top="0in" Value="=IIf(IsNull(Fields.[7], '') &lt;&gt; '',  '&lt;b&gt;' + Replace(Replace(Substr(Fields.[7], 1, Len(Fields.[7]) - 1), '&lt;/b&gt;&lt;br/&gt;', ':&lt;/b&gt;  '), '&lt;br/&gt;', ' / '), '')" Name="htmlTextBox11">
+									<Style>
+										<Font Size="8pt" />
+									</Style>
+									<ConditionalFormatting>
+										<FormattingRule>
+											<Style>
+												<Font Size="7pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+											</Filters>
+										</FormattingRule>
+										<FormattingRule>
+											<Style>
+												<Font Size="10pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 3" />
+											</Filters>
+										</FormattingRule>
+									</ConditionalFormatting>
+								</HtmlTextBox>
+							</Items>
+							<ConditionalFormatting>
+								<FormattingRule>
+									<Style Visible="False" />
+									<Filters>
+										<Filter Expression="= Fields.[7]" Operator="Equal" Value="= Null" />
+									</Filters>
+								</FormattingRule>
+							</ConditionalFormatting>
+						</Panel>
+						<Panel Width="7.70000076293945in" Height="0.200000002980232in" Left="0.489583343267441in" Top="1.55105209350586in" Name="panel11">
+							<Items>
+								<HtmlTextBox Width="7.48999977111816in" Height="0.200000002980232in" Left="0.00208338093943894in" Top="0in" Value="=IIf(IsNull(Fields.[8], '') &lt;&gt; '',  '&lt;b&gt;' + Replace(Replace(Substr(Fields.[8], 1, Len(Fields.[8]) - 1), '&lt;/b&gt;&lt;br/&gt;', ':&lt;/b&gt;  '), '&lt;br/&gt;', ' / '), '')" Name="htmlTextBox12">
+									<Style>
+										<Font Size="8pt" />
+									</Style>
+									<ConditionalFormatting>
+										<FormattingRule>
+											<Style>
+												<Font Size="7pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 1&#xD;&#xA;" />
+											</Filters>
+										</FormattingRule>
+										<FormattingRule>
+											<Style>
+												<Font Size="10pt" />
+											</Style>
+											<Filters>
+												<Filter Expression="= Parameters.FontSizeHeader.Value" Operator="Equal" Value="= 3" />
+											</Filters>
+										</FormattingRule>
+									</ConditionalFormatting>
+								</HtmlTextBox>
+							</Items>
+							<ConditionalFormatting>
+								<FormattingRule>
+									<Style Visible="False" />
+									<Filters>
+										<Filter Expression="= Fields.[8]" Operator="Equal" Value="= Null" />
+									</Filters>
+								</FormattingRule>
+							</ConditionalFormatting>
+						</Panel>
+					</Items>
+					<ConditionalFormatting>
+						<FormattingRule>
+							<Style Visible="False" />
+							<Filters>
+								<Filter Expression="= Parameters.HeaderLabels.Value" Operator="Equal" Value="= False" />
+							</Filters>
+						</FormattingRule>
+					</ConditionalFormatting>
+				</GroupHeaderSection>
+			</GroupHeader>
+			<GroupFooter>
+				<GroupFooterSection Height="0.001in" Name="groupFooterSection2">
+					<Style Visible="False" />
+				</GroupFooterSection>
+			</GroupFooter>
+		</Group>
+	</Groups>
+	<ReportParameters>
+		<ReportParameter Name="AdminInfoID" Type="Integer" AllowBlank="False">
+			<Value>
+				<String>3467979</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="ImageSizeParameter" Type="Integer" AllowBlank="False">
+			<Value>
+				<String>0</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="ImageSizeParameterPDF" Type="Integer" AllowBlank="False">
+			<Value>
+				<String>0</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="ContentDirectory" Text="ContentDirectory">
+			<Value>
+				<String>C:\ProestimatorUserContent</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="IncludeImages" Type="Boolean" Text="= True">
+			<Value>
+				<String>True</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="ImageSupplement" Type="Integer">
+			<Value>
+				<String>-1</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="ImageOnlyChecked" Type="Boolean">
+			<Value>
+				<String>False</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="ShowHeaderLogo" Type="Boolean">
+			<Value>
+				<String>True</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="ShowInsuranceSection" Type="Boolean">
+			<Value>
+				<String>True</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="ShowPhotoPage" Type="Boolean">
+			<Value>
+				<String>True</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="ShowExternalNotes" Type="Boolean">
+			<Value>
+				<String>True</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="ShowInternalNotes" Type="Boolean">
+			<Value>
+				<String>True</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="ShowEstimateNumber" Type="Boolean">
+			<Value>
+				<String>True</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="ShowID" Type="Boolean">
+			<Value>
+				<String>True</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="ShowPaymentInfo" Type="Boolean">
+			<Value>
+				<String>True</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="ShowAlternatingGrayBars" Type="Boolean">
+			<Value>
+				<String>True</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="ShowEstimator" Type="Boolean">
+			<Value>
+				<String>True</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="HeaderText">
+			<Value>
+				<String>none</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="ImageDirectory">
+			<Value>
+				<String>C:\ProEstimator\Images\</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="Supplement" Type="Integer" Text="0">
+			<Value>
+				<String>0</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="HeaderLabels" Type="Boolean" Text="= False">
+			<Value>
+				<String>False</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="SupplementOnly" Type="Boolean" Text="False">
+			<Value>
+				<String>False</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="ShowVendors" Type="Boolean">
+			<Value>
+				<String>True</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="EOROnly" Type="Boolean">
+			<Value>
+				<String>True</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="HideHours" Type="Boolean">
+			<Value>
+				<String>false</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="FontSizeDetails" Type="Integer">
+			<Value>
+				<String>2</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="FontSizeHeader" Type="Integer">
+			<Value>
+				<String>2</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="FontSizeHeaders" Type="Integer">
+			<Value>
+				<String>2</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="FontSizeLines" Type="Integer">
+			<Value>
+				<String>2</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="FontSizeTableHeaders" Type="Integer">
+			<Value>
+				<String>2</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="FontSizeTotals" Type="Integer">
+			<Value>
+				<String>2</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="VehicleOptionsInFooter" Type="Boolean">
+			<Value>
+				<String>= True</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="PrintShopInfo" Type="Boolean">
+			<Value>
+				<String>= True</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="TimeStamp" />
+		<ReportParameter Name="EstimatorOrAppraiser">
+			<Value>
+				<String>Estimator</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="ShowPDFPage" Type="Boolean">
+			<Value>
+				<String>False</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="PdrOnly" Type="Integer">
+			<Value>
+				<String>0</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="PrintPnLNotes" Type="Integer">
+			<Value>
+				<String>0</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="PrintInspectionDate" Type="Integer">
+			<Value>
+				<String>0</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="PrintRepairDays" Type="Integer">
+			<Value>
+				<String>0</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="SelectedTechnicians">
+			<Value>
+				<String>0</String>
+			</Value>
+		</ReportParameter>		
+		<ReportParameter Name="NoFooterDateTimeStamp" Type="Integer" Text="0">
+			<Value>
+				<String>0</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="PrintHeaderInfoOnEstimateReport" Type="Integer" />
+		<ReportParameter Name="IncludeLoanApplicationLink" Type="Boolean" Text="IncludeLoanApplicationLink">
+			<Value>
+				<String>false</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="FinancingAsLowAsMonthlyAmount">
+			<Value>
+				<String>1.11</String>
+			</Value>
+		</ReportParameter>
+		<ReportParameter Name="FinancingLoanApplicationLink">
+			<Value>
+				<String>na</String>
+			</Value>
+		</ReportParameter>
+	</ReportParameters>
+</Report>

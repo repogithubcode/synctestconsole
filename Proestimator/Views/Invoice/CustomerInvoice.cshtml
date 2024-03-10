@@ -1,0 +1,423 @@
+﻿@model Proestimator.ViewModel.CustomerInvoiceVM
+
+@using Proestimator.ViewModel.Contracts;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_CustomerInvoice;
+}
+
+<style>
+    table {
+        width: 100%;
+        margin: 1em 0;
+        clear: both;
+        font-size: 1em;
+        background-color: white;
+    }
+
+    tbody {
+        display: table-row-group;
+        vertical-align: middle;
+        border-color: inherit;
+        background-color: white;
+    }
+
+    tr {
+        display: table-row;
+        vertical-align: inherit;
+        border-color: inherit;
+        background-color: white;
+    }
+
+    th {
+        font-weight: bold;
+        text-align: center;
+    }
+
+    td, th {
+        display: table-cell;
+        vertical-align: inherit;
+    }
+
+    td {
+        padding: 3px;
+        line-height: 18px;
+        text-align: center;
+        vertical-align: top;
+    }
+
+    table a {
+        /*color: black;*/
+    }
+
+    .stripe-button-el {
+        width: 200px;
+    }
+
+    .hide-small{
+    }
+
+    @@media (max-width: 700px) {
+        .hide-small {
+            display: none;
+        }
+    }
+
+    .past-due {
+        color: red;
+    }
+</style>
+
+<script>
+
+    var _totals = @Html.Raw(Json.Encode(Model.TotalsArray));
+    var earlyCheckbox = false;
+    var selectedEarlyIDs = "";
+
+    function isEarlyRenew() {
+        for (i = 0; i < _totals.length; i++) {
+            if (_totals[i].InvoiceEarlyRenew) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function GetPriceForInvoice(invoiceID)
+    {
+        for (i = 0; i < _totals.length; i++) {
+            if (_totals[i].InvoiceID == invoiceID) {
+                if (_totals[i].InvoiceEarlyRenew) {
+                    earlyCheckbox = true;
+                    selectedEarlyIDs += (selectedEarlyIDs == "" ? "" : ",") + invoiceID;
+                }
+                return _totals[i].InvoiceTotal;
+            }
+        }
+
+        return 0;
+    }
+
+    function updateTotal() {
+        var total = 0;
+
+        var selectedInvoiceIDs = "";
+        var seperator = "";
+
+        earlyCheckbox = false;
+        selectedEarlyIDs = "";
+
+        $(".invoice-selection").each(function (i, obj) {
+            if ($(obj).is(":checked"))
+            {
+                var invoiceID = $(obj).attr("id");
+                var row = $(obj).closest("tr");
+
+                if (row.find("td").first().next().html() == "false") {
+                    selectedEarlyIDs += (selectedEarlyIDs == "" ? "" : ",") + invoiceID;
+                }
+
+                total += GetPriceForInvoice(invoiceID);
+
+                selectedInvoiceIDs += seperator + invoiceID;
+                seperator = ",";
+            }
+        });
+
+        $(".past-due").each(function (i, obj) {
+            var invoiceID = $(obj).attr("id");
+
+            total += GetPriceForInvoice(invoiceID);
+
+            selectedInvoiceIDs += seperator + invoiceID;
+            seperator = ",";
+        });
+
+        $(".selected-invoices").val(selectedInvoiceIDs);
+        $("#selectedTotal").text('$' + parseFloat(total, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString());
+        if (earlyCheckbox) { $("#earlyPay").show(); }
+        else { $("#earlyPay").hide(); }
+        $(".selected-earlyrenew").val(selectedEarlyIDs);
+    }
+
+    $(document).ready(function () {
+
+        $('#autoPayCheckbox').change(function () {
+            $('#AutoPaySelectedString').val($("#autoPayCheckbox").is(':checked'));
+        });
+
+        $('#AutoPaySelectedString').val($("#autoPayCheckbox").is(':checked'));
+
+        $('#earlyPayCheckbox').change(function () {
+            $('#earlyCheckboxInStripe').prop('checked', $("#earlyPayCheckbox").is(':checked'));
+            @if (!Model.HasSavedPaymentInfo)
+            {
+                <text>if ($("#earlyPayCheckbox").is(':checked')) { $("#SaveCardButtonContainer").show(); }
+                    else { $("#SaveCardButtonContainer").hide(); }</text>
+            }
+        });
+
+        $('#earlyCheckboxInStripe').prop('checked', $("#earlyPayCheckbox").is(':checked'));
+
+        @if (!Model.HasSavedPaymentInfo)
+        {
+            <text>if (!isEarlyRenew() || $("#earlyPayCheckbox").is(':checked')) { $("#SaveCardButtonContainer").show(); }</text>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.Message))
+        {
+            <text>ShowUserMessage("@Model.Message.Trim().Replace(Environment.NewLine, "")", true, 5000);</text>
+        }
+
+        var payWithSavedButton = $("#payWithSaved");
+        if (payWithSavedButton)
+        {
+            payWithSavedButton.click(function (e)
+            {
+                if ($(".selected-invoices").val() == "")
+                {
+                    ShowUserMessage("@Proestimator.Resources.ProStrings.SelectInvoiceToPay", true, 7000);
+                    e.preventDefault();
+                    return false;
+                }
+                if (earlyCheckbox && !$("#earlyPayCheckbox").is(':checked')) {
+                    ShowUserMessage("You must check the box to acknowledge the conditions before paying for early renewal.", true, 7000);
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        }
+    });
+
+    function InvoiceGridDataChanged(arg) {
+        // Wire up hilighting the row when hovering.
+        $("#invoice-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                var customerID = row.find("td").first().html();
+
+                row.toggleClass("k-state-hover");
+            }
+        );
+
+        $(".invoice-selection").change(function () {
+            var bChecked = $(this).is(":checked");
+            var row = $(this).closest("tr");
+            if (bChecked && row.find("td").first().next().html() == "false") {
+                if (!confirm("note: you have selected to pay an invoice that is not due yet, please confirm that you want to make this payment now")) {
+                    $(this).prop('checked', !bChecked);
+                }
+            }
+            updateTotal();
+        });
+
+        updateTotal();
+    }
+
+    function InvoiceGridLineSelectionChanged(arg) {
+
+        // Get the selected item and call the ClickedItem event
+        var row = $("#invoice-grid").find(".k-state-selected").first();
+        var checkbox = row.find(".invoice-selection");
+        
+        checkbox.prop("checked", !checkbox.is(":checked"));
+
+        if (checkbox.is(":checked") && row.find("td").first().next().html() == "false") {
+            if (!confirm("note: you have selected to pay an invoice that is not due yet, please confirm that you want to make this payment now")) {
+                checkbox.prop("checked", !checkbox.is(":checked"));
+            }
+        }
+
+        $(".k-state-selected").removeClass("k-state-selected");
+
+        updateTotal();
+    }
+
+</script>
+
+<div id="workDesk" class="page-container">
+    <div class="container">       
+
+        <div class="container" style="text-align: center;">
+
+            @* ----------------------------------------------------------------------------------------------------------------------------------------------*@
+            @* Tech support contact info *@
+            @* ----------------------------------------------------------------------------------------------------------------------------------------------*@
+            <p>
+                @Proestimator.Resources.ProStrings.CCCharge_TechSupport
+                <br />@Proestimator.Resources.ProStrings.CCCharge_AdminContact
+                <br />@Proestimator.Resources.ProStrings.CCCharge_Hours
+            </p>
+
+            @if (Model.Invoices.Count > 0)
+            {
+                <h1 style="padding-top: 20px; margin-bottom: 10px;">@Proestimator.Resources.ProStrings.DueInvoices</h1>
+
+                using (Html.BeginForm("CustomerInvoice", "Invoice", FormMethod.Post, new { @class = "container" }))
+                {
+
+                    @Html.HiddenFor(model => model.LoginID)
+
+                    @* ----------------------------------------------------------------------------------------------------------------------------------------------*@
+                    @* A table with all due invoices *@
+                    @* ----------------------------------------------------------------------------------------------------------------------------------------------*@
+        <div class="datagrid">
+            @(Html.Kendo().Grid<InvoiceVM>(Model.Invoices)
+                                .Name("invoice-grid")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(item => item.InvoiceID).Hidden();
+                                    columns.Bound(item => item.ToPayDue).Hidden();
+                                    columns.Bound(item => item.Summary).Title(@Proestimator.Resources.ProStrings.Summary);
+                                    columns.Bound(item => item.DueDate).Format("{0:MM/dd/yyyy}").Title(@Proestimator.Resources.ProStrings.Invoice_DueDate);
+                                    columns.Bound(item => item.InvoiceAmount).Format("{0:c}").HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.Invoice_Amount);
+                                    columns.Bound(item => item.SalesTax).Format("{0:c}").HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.Invoice_SalesTax);
+                                    columns.Bound(item => item.InvoiceTotal).Format("{0:c}").Title(@Proestimator.Resources.ProStrings.InvoiceTotal);
+                                    columns.Bound(item => item.Notes).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.Notes);
+                                    columns.Bound("").Template(@<text></text>).ClientTemplate("# if (PastDue) { #" + " <label class='past-due' id='#= InvoiceID#'><input type='checkbox' checked='checked' disabled onclick='return false;' /> " + @Proestimator.Resources.ProStrings.PastDue + "</label>" + "# } else { #" + "<input id='#= InvoiceID#' type='checkbox'" + "# if (ToPayDue) { #" + " checked='checked'" + "# } #" + " class='invoice-selection' />" + "# } #");
+                                })
+                                .Selectable()
+                                .Events(events => events
+                                    .DataBound("InvoiceGridDataChanged")
+                                    .Change("InvoiceGridLineSelectionChanged")
+                                )
+                                .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .ServerOperation(false)
+                                    .PageSize(20)
+                                )
+                        )
+        </div>
+
+                    if (Model.UserCanChangeContract)
+                    {
+                        <div style="padding-top: 20px; padding-bottom: 20px;">
+                            <a class="button nav-btn" href="/@ViewBag.UserID/invoice/pick-contract">@Proestimator.Resources.ProStrings.ChangeContract</a>
+                        </div>
+                    }
+
+                    <p><b>@Proestimator.Resources.ProStrings.PaymentTotal:</b> <span id="selectedTotal" /></p>
+
+                    <div id="earlyPay">
+                        <input type="checkbox" name="earlyPayCheckbox" id="earlyPayCheckbox" /><span>By checking this box you are acknowledging that this is an early renewal and payment may be non-refundable.</span>
+                    </div>
+
+                    @Html.TextBoxFor(o => o.SelectedInvoices, new { @class = "selected-invoices", @style = "display: none;" })
+                    @Html.TextBoxFor(o => o.SelectedEarlyRenew, new { @class = "selected-earlyrenew", @style = "display: none;" })
+
+                    @* ----------------------------------------------------------------------------------------------------------------------------------------------*@
+                    @* Show a summary of the saved payment details if there are any *@
+                    @* ----------------------------------------------------------------------------------------------------------------------------------------------*@
+                    if (Model.HasSavedPaymentInfo)
+                    {
+
+                        <table style="width: 250px; border: 1px solid black; margin: 30px auto 10px; padding-bottom: 17px;">
+                            <tr>
+                                <td colspan="2">
+                                    <p><b>@Proestimator.Resources.ProStrings.CCCharge_SavedInfo</b></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: right;" align="right">@Proestimator.Resources.ProStrings.CCCharge_Last4:</td>
+                                <td style="text-align: left;">@Model.Last4</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: right;" align="right">@Proestimator.Resources.ProStrings.CCCharge_ExpirationDate:</td>
+                                <td style="text-align: left;">@Model.CardExpiration.ToShortDateString()</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <input type="submit" class="button nav-btn" value="@Proestimator.Resources.ProStrings.DeleteCardInfo" data-form-action="/@ViewBag.UserID/invoice/delete-cc" />
+                                </td>
+                            </tr>
+                        </table>
+
+                        if (Model.CardHasError)
+                        {
+                            <div style="border: 1px solid red; padding-left: 10px; padding-right: 10px; max-width: 500px; margin: 0px auto; margin-top: 10px;">
+                                <p>@Proestimator.Resources.ProStrings.CardHasErrorMessage</p>
+                                <p>Error: @Model.CardErrorMessage</p>
+                                <p>
+                                    <input type="submit" class="button nav-btn" value="Clear Error" data-form-action="/@ViewBag.UserID/invoice/clear-cc-error" />
+                                </p>
+                            </div>
+                        }
+
+                        <div style="text-align: center; padding-top: 20px;">
+
+                            @if (!Model.CardHasError)
+                            {
+                                <input id="payWithSaved" type="submit" class="button nav-btn" value="@Proestimator.Resources.ProStrings.CCharge_PayWithSaved" data-form-action="/@ViewBag.UserID/invoice/pay-with-saved" />
+                            }
+
+                            <br /><br />
+                            <span style="color: red;">@Model.Message</span>
+                        </div>
+                    }
+                }
+
+                @* ----------------------------------------------------------------------------------------------------------------------------------------------*@
+                @* There is no saved payment info, show a button to open the Stripe payment control. *@
+                @* ----------------------------------------------------------------------------------------------------------------------------------------------*@
+                if (!Model.HasSavedPaymentInfo)
+                {
+            <div id="PaymentButtonWrapper" class="container center">
+
+                <div style="width: 400px; margin: 0px auto;">
+
+                    <div id="SaveCardButtonContainer" class="container center" style="padding-bottom: 20px; display: none;">
+                        <div style="width: 200px; margin: 0px auto;">
+                            <form action="/@ViewBag.UserID/invoice/customer-invoice" method="POST" style="margin-left: -18px;" id="stripe">
+                                <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                                        data-key="@Model.StripeKey"
+                                        data-name="@Proestimator.Resources.ProStrings.WebEst"
+                                        data-description="@Proestimator.Resources.ProStrings.WebEstPaymentInformation "
+                                        data-zip-code="true"
+                                        data-allow-remember-me="false"
+                                        data-label="@Proestimator.Resources.ProStrings.MakePayment"
+                                        data-panel-label="@Proestimator.Resources.ProStrings.SaveCard"
+                                        data-image="https://stripe.com/img/documentation/checkout/marketplace.png"
+                                        data-locale="auto">
+                                </script>
+
+                                @Html.TextBoxFor(o => o.SelectedInvoices, new { @class = "selected-invoices", @style = "display: none;" })
+                                @Html.TextBoxFor(model => model.AutoPaySelectedString, new { @style = "display: none;" })
+                                @Html.TextBoxFor(o => o.SelectedEarlyRenew, new { @class = "selected-earlyrenew", @style = "display: none;" })
+                                <input type="checkbox" name="earlyCheckboxInStripe" id="earlyCheckboxInStripe" style="display: none;" />
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper" style="padding-top: 10px;">
+
+                        @if (Model.ForceAutoPay)
+                        {
+                            <input type="checkbox" id="autoPayCheckbox" checked="checked" disabled="disabled" />
+                        }
+                        else
+                        {
+                            <input type="checkbox" id="autoPayCheckbox" checked="checked" />
+                        }
+                        @Proestimator.Resources.ProStrings.CCCharge_AllowAutoPay
+                    </div>
+
+                    @if (Model.ForceAutoPay)
+                    {
+                        <b>@Proestimator.Resources.ProStrings.CCCharge_AutoPayRequired</b>
+                    }
+
+                </div>
+            </div>
+            }
+            }
+            else
+            {
+                <h1>@Proestimator.Resources.ProStrings.NoInvoicesDue</h1>
+            }
+
+        </div>
+
+    </div>
+
+</div>

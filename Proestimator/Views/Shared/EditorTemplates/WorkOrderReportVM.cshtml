@@ -1,0 +1,141 @@
+﻿@model Proestimator.ViewModel.Printing.WorkOrderReportVM
+
+@using Proestimator.ViewModel.Printing;
+@using Proestimator.ViewModel.SendEstimate;
+
+<style>
+    @@media (max-width: 900px) {
+        .report-details-middle {
+            width: 100%;
+        }
+    }
+</style>
+<script>
+
+    function GetSearchParameters()
+    {
+        var result = { userID: @ViewBag.UserID, estimateID: @ViewBag.EstimateID };
+        return result
+    }
+
+    var technicianVMListLaborTypeALL = '';
+
+    function fillTechnicianDDL(technicianVMList, laborTypeText, selectedTechnicianID)
+    {
+        var template = '';
+
+        if(laborTypeText == "All")
+        {
+            template = "<select id='technicianDDL' name='technicianDDL' onchange='WOTechnicianOnchange();' style='width:80%;margin: 4px; height: 25px;'>";
+
+            template += "<option value='0'>Select</option>";
+
+            for (var i = 0; i < technicianVMList.length; i++) {
+
+                var technicianFullName = technicianVMList[i].FirstName + ' ' + technicianVMList[i].LastName;
+                template += "<option value='" + technicianVMList[i].ID + "'>" + technicianFullName + "</option>";
+            }
+
+            template += "</select>";
+
+            technicianVMListLaborTypeALL = technicianVMList;
+        }
+        else
+        {
+            template = "<select id='technicianDDL' name='technicianDDL' style='width:80%;margin: 4px; height: 25px;'>";
+            template += "<option value='0'>Select</option>";
+
+            for (var i = 0; i < technicianVMList.length; i++) {
+
+                var technicianFullName = technicianVMList[i].FirstName + ' ' + technicianVMList[i].LastName;
+
+                if (selectedTechnicianID == technicianVMList[i].ID) {
+                    template += "<option selected value='" + technicianVMList[i].ID + "'>" + technicianFullName + "</option>";
+                }
+                else {
+                    template += "<option value='" + technicianVMList[i].ID + "'>" + technicianFullName + "</option>";
+                }
+
+            }
+
+            // technicianVMListLaborTypeALL
+            if(technicianVMListLaborTypeALL.length > 0)
+            {
+                for (var i = 0; i < technicianVMListLaborTypeALL.length; i++) {
+
+                    var technicianFullName = technicianVMListLaborTypeALL[i].FirstName + ' ' + technicianVMListLaborTypeALL[i].LastName;
+
+                    if (selectedTechnicianID == technicianVMListLaborTypeALL[i].ID) {
+                        template += "<option selected value='" + technicianVMListLaborTypeALL[i].ID + "'>" + technicianFullName + "</option>";
+                    }
+                    else {
+                        template += "<option value='" + technicianVMListLaborTypeALL[i].ID + "'>" + technicianFullName + "</option>";
+                    }
+                }
+            }
+
+            template += "</select>";
+        }
+
+        return template;
+    }
+
+    function WOLaborTypeCheckboxClick(chkSelect) {
+
+        $("#work-order-labor-type-technician-grid").find("tbody").find("tr").each(function (i, obj) {
+            $($(obj).find("#chkSelect")).prop('checked',chkSelect.checked);
+        });
+
+    }
+
+    function WOTechnicianOnchange() {
+
+        var allLaborTechnicianID = '';
+        var allLaborTechnicianName = '';
+
+        $("#work-order-labor-type-technician-grid").find("tbody").find("tr").each(function (i, obj) {
+
+            var laborTypeText = $(obj).find("#laborTypeText").text();
+
+            if(laborTypeText == "All")
+            {
+                allLaborTechnicianID = $(obj).find("#technicianDDL").val();
+                allLaborTechnicianName = $(obj).find("#technicianDDL option:selected").text();
+                return false;
+            }
+        });
+
+        $("#work-order-labor-type-technician-grid").find("tbody").find("tr").each(function (i, obj) {
+
+            var laborTypeText = $(obj).find("#laborTypeText").text();
+
+            if(laborTypeText != "All")
+            {
+                $(obj).find("#technicianDDL").val(allLaborTechnicianID);
+            }
+        });
+    }
+
+</script>
+
+<div>
+    @(Html.Kendo().Grid<WorkOrderReportVM>()
+    .Name("work-order-labor-type-technician-grid")
+        .Columns(columns =>
+        {
+            columns.Bound(item => item.LaborTypeID).Title("LaborTypeID").Hidden();
+            columns.Bound("").Template(@<text></text>).ClientTemplate("<label id='laborTypeText' style='margin: 0px;'>#= LaborTypeText#</label>").Title("Labor Type").Width("15%");
+            columns.Bound(item => item.LaborTypeID).ClientTemplate("#= fillTechnicianDDL(TechnicianVMList,LaborTypeText,SelectedTechnicianID) #").Title("Technician").Width("70%");
+        })
+        //.Selectable()
+        .Pageable(pageable => pageable
+            .Refresh(false)
+         )
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .ServerOperation(false)
+            .Read(read => read.Action("GetWOLaborTypeTechnicianList", "Printing").Data("GetSearchParameters"))
+            .PageSize(100)
+        )
+)
+</div>

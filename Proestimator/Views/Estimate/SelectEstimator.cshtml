@@ -1,0 +1,72 @@
+﻿@model Proestimator.ViewModel.SelectEstimatorVM
+@using Proestimator.ViewModel;
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.Estimator_Select;
+}
+<script>
+    function SelectEstimator(id) {
+        $("#SelectedEstimatorID").val(id);
+        $("#submitButton").click();
+    }
+</script>
+<style>
+    .selected-row {
+        font-weight: bold;
+    }
+</style>
+<div id="workDesk" class="page-container">
+    @using (Html.BeginForm("SelectEstimator", "Estimate", FormMethod.Post, new { @class = "container" }))
+    {
+        @Html.HiddenFor(o => o.UserID)
+        @Html.HiddenFor(o => o.LoginID)
+        @Html.HiddenFor(o => o.EstimateID)
+        <div id="formHeader">
+            @* The title and header area *@
+            <div id="formHeadline" class="container">
+                <h2>@Proestimator.Resources.ProStrings.Estimator_Select</h2>
+                <div class="inlineNote container">
+                </div>
+            </div>
+        </div>
+        <div id="lgRow1" class="container">
+            <div>
+                <table style="margin:  0px auto;width: 400px;" cellpadding="10">
+                    @if (Model.Estimators.Count == 0)
+                    {
+                        <tr>
+                            <td width="100" colspan="2">
+                                <span>
+                                    There are no Estimators set. Go to the
+                                    <a href="/@Model.UserID/settings/estimators" class="k-link" style="color: blue;">Settings</a>
+                                    page to add an Estimator.
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var item in Model.Estimators)
+                        {
+                            <tr>
+                                <td width="100">
+                                    <input type="button" title="Select" value="Select" onclick="location.href='/@Model.UserID/estimate/@Model.EstimateID/select-estimator/@item.ID'" class="button">
+                                </td>
+                                <td>@item.Description</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td width="100" colspan="2">
+                                <br /><br />
+                                <span>
+                                    Default Estimator can be set on the
+                                    <a href="/@Model.UserID/settings/estimators" class="k-link" style="color: blue;">Settings</a>
+                                    page.
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+    }
+</div>

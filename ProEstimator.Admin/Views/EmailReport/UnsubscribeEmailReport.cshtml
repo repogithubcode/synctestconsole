@@ -1,0 +1,264 @@
+﻿@model ProEstimator.Admin.ViewModel.EmailReport.UnsubscribeEmailReportVM
+
+@using ProEstimator.Admin.ViewModel.EmailReport;
+
+@{
+    ViewBag.Title = "Administration - Unsubscribe Email Report";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<style>
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .padd-top {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    .k-grid td {
+        white-space: normal;
+    }
+
+    .stackem {
+        margin-bottom: 5px;
+    }
+
+    .k-state-selected {
+        background-color: #f9f9f9 !important;
+        border: 2px solid black !important;
+        border-bottom: 2px solid black !important;
+        border-right: 2px solid black !important;
+    }
+
+    #email-report-grid {
+        cursor: pointer;
+    }
+
+    .legend span {
+        border: 1px solid #ccc;
+        float: left;
+        width: 12px;
+        height: 12px;
+        margin: 2px;
+    }
+
+    .row-line-hovered {
+        background-color: #dddddd !important;
+        border-color: gray;
+    }
+
+    .legend .pass {
+        background-color: #90EE90;
+    }
+
+    .legend .pending {
+        background-color: #FFFFFF;
+    }
+
+    .legend .fail {
+        background-color: #FF6961;
+    }
+
+    #email-report-grid .pass {
+        background-color: #90EE90;
+    }
+
+    #email-report-grid .pending {
+        background-color: #FFFFFF;
+    }
+
+    #email-report-grid .fail {
+        background-color: #FF6961;
+    }
+    .hide-a {
+        display: none;
+    }
+</style>
+
+<script>
+
+    var _unsubscribeID = 0;
+    var historyDialog;
+    
+    function GetSearchParameters() {
+        return {
+            emailAddressFilter: $("#EmailAddress").val(), statusFilter: $("#Status").val()
+        };
+    }
+
+    function GetParameters() {
+        return {
+            unsubscribeID: _unsubscribeID
+        };
+    }
+
+    $(document).ready(function () {
+        // Do the acount id search
+        $("#btnSearchEmailReport").click(function () {
+            RefreshGrid();
+        });
+
+        historyDialog = $("#modal-history").dialog({
+            autoOpen: false,
+            height: 400,
+            width: 500,
+            modal: true
+        });
+
+    });
+
+    function RefreshGrid() {
+        var grid = $("#email-report-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+    }
+
+    function RefreshHistoryGrid() {
+        var grid = $("#history-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+    }
+
+    function DetailsDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#email-report-grid tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("row-line-hovered");
+            }
+        );
+    }
+
+    function DeleteUnsubscribe(email, isUnsubscribe)
+    {
+        var action = "Are you sure to " + (isUnsubscribe ? "Re-Subscribe ?" : "Un-Subscribe ?");
+        var evt = isUnsubscribe ? "resubscribe" : "unsubscribe";
+        if (confirm(action)) {
+            ShowLoadingOverlay();
+            $.getJSON("/EmailReport/DeleteUnsubscribe", {
+                salesRepID: @ViewBag.SessionSalesRepID, email: email, isUnsubscribe: isUnsubscribe, evt: evt
+            }, function (data) {
+                HideLoadingOverlay();
+                if (data.Success) {
+                    RefreshGrid();
+                }
+                else {
+                    alert("Failed with " + data.ErrorMessage);
+                }
+            });
+        }
+    }
+
+    function History(unsubscribeID) {
+        historyDialog.dialog("open");
+        _unsubscribeID = unsubscribeID;
+        RefreshHistoryGrid();
+    }
+</script>
+
+<div class="page-container">
+    <div class="row padd-top">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>Unsubscribed Email Report</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="container">
+                            <div class="row stackem">
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Email Address</span>
+                                        <input type="text" class="form-control" placeholder="Email Address" aria-describedby="emailAddress" id="EmailAddress" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Unsubscribed Status</span>
+                                        <select id="Status">
+                                            <option value="" selected>All</option>
+                                            <option value="unsubscribe">Unsubscribe</option>
+                                            <option value="resubscribe">Resubscribe</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <a class="btn btn-primary" href="javascript:void(0);" style="width:95% !important" id="btnSearchEmailReport" role="button">Search</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-history" title="Status Change Log" class="ui-widget">
+            <div class="datagrid">
+                @(Html.Kendo().Grid<UnsubscribeEmailReportVM>()
+                    .Name("history-grid")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(item => item.ID).Hidden();
+                        columns.Bound(item => item.TimeStamp).Format("{0:MM/dd/yyyy h:mm tt}");
+                        columns.Bound(item => item.Event).Title("Status");
+                        columns.Bound(item => item.SalesRep).Title("Sales Rep");
+                    })
+                        .Selectable()
+                        .Pageable(pageable => pageable
+                            .Refresh(false)
+                        )
+                        .Reorderable(reorder => reorder.Columns(true))
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Read(read => read.Action("GetUnsubscribeHistory", "EmailReport").Data("GetParameters"))
+                            .PageSize(25)
+                        )
+                    )
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="datagrid">
+                    @(Html.Kendo().Grid<UnsubscribeEmailReportVM>()
+                    .Name("email-report-grid")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(item => item.ID).Hidden();
+                        columns.Bound(item => item.Email).Title("Email Address");
+                        columns.Bound(item => item.Event).Title("Status");
+                        columns.Bound(item => item.TimeStamp).Format("{0:MM/dd/yyyy h:mm tt}");
+                        columns.Template(@<text></text>).ClientTemplate("<a id=\"btnHistory\" onclick=\"History(#=ID#)\"" + "#if (!History) {#" + " class='hide-a'" + "#}#" +">View Status Change By Admin</a>").Width(200).Title("");
+                        columns.Template(@<text></text>).ClientTemplate("<a id=\"DeleteLink#=ID#\" class='btn btn-primary' onclick=\"DeleteUnsubscribe('#=Email#',#=Unsubscribed#)\"># if (Unsubscribed) { #" + "Re-Subscribe" + "# }#" + "#if (!Unsubscribed) {#" + "Un-Subscribe" + "#} #</a>").Width(100).Title("");
+                    })
+                        .Selectable()
+                        .Pageable(pageable => pageable
+                            .Refresh(false)
+                        )
+                        .Events(events => events
+                            .DataBound("DetailsDataChanged")
+                        )
+                        .Reorderable(reorder => reorder.Columns(true))
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Read(read => read.Action("GetUnsubscribeReport", "EmailReport").Data("GetSearchParameters"))
+                            .PageSize(25)
+                        )
+                    )
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,71 @@
+﻿
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ProEstimator</title>
+    <meta name="viewport" content="width=device-width, initial-scale = 1.0, user-scalable = no">
+    <link href="/Content/css/main.css?s=22" rel="stylesheet" type="text/css" />
+    <link href="/Content/css/forms.css" rel="stylesheet" type="text/css" />
+    <script src="/Scripts/kendo/2020.1.406/jquery.min.js"></script>
+
+    <link rel="icon" href="/images/we_app_icon.ico">
+</head>
+<body>
+    <div class="mainWrapper">
+        <div class="container">
+            <div id="header" class="section group container">
+
+                <div id="smHeader" class="container">
+                    <div id="smLogo" style="width: 100%; text-align: center;">
+                        <img id="smLogoImg" src="/Content/images/WebEstGlobalSmall.png" alt="Web-Est Global" />
+
+                        <p id="supportNumber">
+                            <a href="mailto:help@web-est.com">help@web-est.com</a>
+                            <br /><a href="tel:888-932-3780" style="color: black; font-size: large;">(888) 932-3780</a>
+                        </p>
+                    </div>
+                </div>
+
+                <div id="lgHeader" class="container">
+                    <div class="col sm_4_4 md_8_8 lg_2_12 xl_2_14" id="logo">
+                        <a href="http://web-est.com/"><img id="smLogoImg" src="/Content/images/WebEstGlobalSmall.png" alt="Web-Est Global" /></a>
+                    </div>
+
+                    <div id="lgHeaderPanel" class="col sm_4_4 md_8_8 lg_10_12 xl_12_14">
+                        <div id="SupportContainer" class="col sm_4_4 md_8_8 lg_3_12 xl_3_14">
+                            <a href="javascript:$zopim.livechat.window.show()"><img src="/content/images/TechSupport.png" alt="Tech Support" id="imgTechSupport" /></a>
+
+                            <p id="supportNumber">Tech Support: (888) 932-3780 x203</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div data-role="content">
+
+                <style>
+                    #linkForgotPassword {
+                        cursor: pointer;
+                    }
+
+                    #forgotPasswordWrapper {
+                        display: none;
+                    }
+
+                    .loginLabel {
+                        margin-top: 10px;
+                    }
+                </style>
+
+                <div class="container">
+                    <p>The site is down.  We are currently working with our providers to get it back up.  Sorry for the inconvenience.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).on("mobileinit", function () {
+            $.mobile.ajaxEnabled = false;
+        });
+    </script>
+</body>
+</html>

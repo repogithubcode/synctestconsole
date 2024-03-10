@@ -1,0 +1,145 @@
+﻿@model Proestimator.ViewModel.MessagesPageVM
+
+@using Proestimator.ViewModel;
+
+@{
+    ViewBag.Title = @Proestimator.Resources.ProStrings.Messages;
+}
+
+<style>
+   
+    .left-side {
+        float: left;
+        width: 400px;
+    }
+
+    .right-side {
+        float: left;
+        width: calc(100% - 400px);
+        padding-top: 5px;
+        padding-left: 10px;
+    }
+
+    .message-wrapper {
+        border-bottom: 1px solid black;
+        cursor: pointer;
+        padding: 5px;
+    }
+
+    .message-wrapper:hover {
+        background-color: #7ca0bc;
+    }
+
+    .message-wrapper-selected {
+        background-color: #1d69a6 !important;
+        color: white;
+    }
+
+    .message-title {
+        float: left;
+        font-size: 1.2em;
+    }
+
+    .message-date {
+        float: right;
+    }
+
+    .message-preview {
+        width: 390px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.9em;
+    }
+
+    .message-unread {
+        font-weight: bold;
+    }
+
+    .message-big-wrapper {
+        padding-left: 30px;
+        padding-right: 20px;
+    }
+
+    .message-full {
+        clear: both;
+        padding-top: 20px;
+    }
+
+    .message-full a {
+        color: black;
+        text-decoration: underline;
+    }
+
+    @@media (max-width: 700px) {
+       
+    }
+</style>
+
+<script>
+
+    var _messages = [];
+
+    $(document).ready(function () {
+
+        $(".message-wrapper").click(function () {
+            var id = $(this).attr("data-id");
+
+            // Find the data in the cache and load it into the details form
+            for(i = 0; i < _messages.length; i++)
+            {
+                if (_messages[i].ID == id)
+                {
+                    $("#divMessageTitle").text(_messages[i].Title);
+                    $("#divMessageDate").text(_messages[i].Date);
+
+                    $("#divMessage").empty();
+                    var decoded = $("<div/>").html(_messages[i].Message).text();
+                    $("#divMessage").append($.parseHTML(decoded));
+                }
+            }
+
+            $("#message-" + id).removeClass("message-unread");
+
+            $(".message-wrapper-selected").removeClass("message-wrapper-selected");
+            $("#message-" + id).addClass("message-wrapper-selected");
+
+            var unreadMessages = $(".message-unread").length;
+            RefreshHeaderMessagesLink(unreadMessages);
+
+            $.getJSON("@Url.Action("MarkMessageSeen", "Home")", { userID: @ViewBag.UserID, messageID: id }, function (data) {
+            });
+        });
+
+        @foreach(MessageVM message in Model.Messages)
+        {
+            @:_messages.push({ ID: @message.ID, Date: "@message.Date", Title: "@message.Title", Message: "@message.Message"});
+        }
+    });
+</script>
+
+<div id="workDesk" class="page-container">
+    @using (Html.BeginForm("Messages", "Home", FormMethod.Post, new { @class = "container" }))
+    {
+        <h1 style="padding-top: 15px;">@Proestimator.Resources.ProStrings.Messages</h1>
+
+        <div class="left-side">
+            @foreach (MessageVM message in Model.Messages)
+            {
+                <div id="message-@message.ID" class="message-wrapper @(message.HasBeenSeen ? "" : "message-unread")" data-id="@message.ID">
+                    <div class="message-title">@message.Title</div>
+                    <div class="message-date">@message.Date</div>
+                    <div class="message-preview">@System.Text.RegularExpressions.Regex.Replace(message.Message, @"<(.|\n)*?>", " ")</div>
+                </div>
+            }
+        </div>
+        
+        <div class="right-side">
+            <div class="message-big-wrapper">
+                <div id="divMessageTitle" class="message-title"></div>
+                <div id="divMessageDate" class="message-date"></div>
+                <div id="divMessage" class="message-full"></div>
+            </div>
+        </div>
+    }
+</div> 

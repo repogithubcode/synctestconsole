@@ -1,0 +1,1177 @@
+﻿@model Proestimator.ViewModel.SendEstimate.SendEstimateVM
+
+@using Proestimator.ViewModel.SendEstimate;
+
+@{
+    ViewBag.Title = @Proestimator.Resources.ProStrings.SendEstimate;
+}
+
+<style>
+        .mail-radio-container {
+            height: 10px;
+            padding-left: 10px;
+        }
+
+        .mail-radio-container label {
+            font-size: small;
+            float: left;
+            padding-right: 10px;
+        }
+
+    .k-state-selected td {
+        background-color: #1d69a6 !important;
+        color: white;
+    }
+
+    .k-state-hover td {
+        background-color: #7ca0bc;
+        color: white;
+    }
+
+    .group-list {
+        text-align: left;
+        font-weight: bold;
+        list-style: none;
+    }
+
+    h1 {
+        margin: 0px;
+    }
+
+    #imgLoad {
+        width: 105px;
+        height: 40px;
+    }
+
+    .attachments-wrapper {
+        border: 1px solid black;
+        padding: 10px;
+        /*margin-left: 20px;*/
+        margin-top: 18px;
+        max-width: 1200px;
+    }
+
+    #attachments-container {
+        overflow: auto;
+    }
+
+    .attachment-container {
+        clear: both;
+        margin-bottom: 5px;
+        overflow: auto;
+    }
+
+    .close-container {
+        float: left;
+    }
+
+        .close-container input {
+            padding: 2px !important;
+            margin: 0px;
+        }
+
+    .view-container {
+        float: left;
+        margin-left: 5px;
+    }
+
+        .view-container input {
+            padding: 2px !important;
+            margin: 0px;
+        }
+
+    .attachment-name-container {
+        float: left;
+        padding-left: 10px;
+        padding-top: 5px;
+        width:80%;
+        overflow:hidden;
+    }
+
+    .popup-list {
+        padding-left: 0px;
+    }
+
+        .popup-list li {
+            list-style: none;
+        }
+
+        .popup-list a {
+            color: black;
+            cursor: pointer;
+        }
+
+            .popup-list a:hover {
+                background-color: #3292d5;
+            }
+
+    #sentMessage {
+        text-align: left;
+        font-size: small;
+        margin-top: 0px;
+    }
+
+    #noAttachmentConfirm {
+        height: 0px;
+        opacity: 0;
+        display: none;
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 600px;
+    }
+
+    .message-display-bad {
+        border-top: solid 1px red;
+        border-bottom: solid 1px red;
+        background-color: #ffe8e8;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+    }
+
+    .message-display-good {
+        border-top: solid 1px #16ff4f;
+        border-bottom: solid 1px #16ff4f;
+        background-color: #c6ffd4;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+    }
+
+    .ui-dialog {
+        max-width: 100%;
+    }
+
+    @@media (max-width: 700px) 
+    {
+        #formHeader-back {
+            display: none;
+        }
+    }
+        
+</style>
+
+
+<script type="text/javascript">
+    var _defaultBodyTemplateID = "@Model.DefaultBodyTemplateID";
+
+    var _emailPopupType;
+    var _attachmentIDs = [];
+
+    var _showMessageTimeout;
+
+    var _shopEmails = "";
+
+    $(document).ready(function () {
+
+        $(".type-checkbox").change(function () {
+            RefreshGrid();
+        });
+
+        var emailDialog = $("#modal-email").dialog({
+            autoOpen: false,
+            height: 400,
+            width: 500,
+            modal: true
+        });
+
+        var phoneDialog = $("#modal-phone").dialog({
+            autoOpen: false,
+            height: 400,
+            width: 500,
+            modal: true
+        });
+
+        CKEDITOR.replace('Template-TextArea', {
+            extraPlugins: 'find,placeholder,base64image,justify,spacingsliders,font',
+            removePlugins: 'image,sourcearea,about'
+        });
+
+        $("#txtTo").change(function () {
+            CheckEmails($.trim($("#txtTo").val()), "#errorMessageTo");
+        });
+
+        $("#txtCC").change(function () {
+            CheckEmails($.trim($("#txtCC").val()), "#errorMessageCC");
+        });
+
+        $("#buttonTo").click(function () {
+            _emailPopupType = "to";
+            emailDialog.dialog("open");
+        });
+
+        $("#buttonCC").click(function () {
+            _emailPopupType = "cc";
+            emailDialog.dialog("open");
+        });
+
+        $("#buttonPhone").click(function () {
+            phoneDialog.dialog("open");
+        });
+
+        InitTemplateDefaults();
+
+        $("#btnSend").click(function () {
+            if (_attachmentIDs.length == 0)
+            {
+                ShowNoAttachmentsMessage();
+            }
+            else
+            {
+                ShowHideSendEstimateHistoryLegend();
+                SendEmail();
+            }
+        });
+
+        $("#btnSendAnyway").click(function () {
+            ShowHideSendEstimateHistoryLegend();
+            SendEmail();
+        });
+
+        $("#btnCancel").click(function () {
+            HideNoAttachmentsMessage();
+        });
+
+        $("#btnNew").click(function () {
+            ClearForm();
+            $("#grid").find("tr").removeClass("k-state-selected");
+            $("#txtSubject").val($("#DefaultSubject").val());
+            InitTemplateDefaults();
+        });
+
+        $("#btnOK").click(function () {
+            HideMessage();
+        });
+
+        $("#txtTo").attr("autocomplete", "2oimfmlkmco");
+        $("#txtCC").attr("autocomplete", "fkajeiw39jf");
+        $("#txtPhone").attr("autocomplete", "fa3afaooklf");
+
+        @if(ViewBag.IsMobileDevice)
+        {
+            <text>
+        $("#modal-window-sendEstimateHistoryMobileDevice").dialog({
+            autoOpen: false,
+            modal: true,
+            title: '@Proestimator.Resources.ProStrings.SentEstimateHistory',
+            width: ($(window).width()),
+            minHeight: 0,
+            position: { my: "left top", at: "left top", of: $("#AddReportAttachments") },
+            close: function () {
+                console.log("Close");
+            }
+        });
+            </text>
+        }
+    });
+
+    function ShowHideSendEstimateHistoryLegend() {
+
+        var grid = $("#grid").data("kendoGrid");
+        if(grid != undefined) {
+            var dataSource = grid.dataSource;
+
+            //total records
+            var totalRecords = dataSource.total();
+
+            if (totalRecords > 0)
+            {
+                $("#isMobileDeviceLegend").show();
+            }
+            else
+            {
+                $("#isMobileDeviceLegend").hide();
+            }
+        }
+        else{
+            $("#isMobileDeviceLegend").hide();
+        }
+    }
+
+    function ShowNoAttachmentsMessage()
+    {
+        $("#noAttachmentConfirm").show();
+
+        $("#noAttachmentConfirm").animate({
+            opacity: 1.0,
+            height: $("#noAttachmentConfirm").get(0).scrollHeight
+        }, 300
+        , function () {
+            $("#noAttachmentConfirm").height("auto");
+        });
+    }
+
+    function HideNoAttachmentsMessage()
+    {
+        $("#noAttachmentConfirm").animate({
+            opacity: 0.0,
+            height: 0
+        }, 300
+        , function () {
+            $("#noAttachmentConfirm").hide();
+        });
+    }
+
+    function addEmail(emailAddress)
+    {
+        var currentList = _emailPopupType == "to" ? $("#txtTo").val() : $("#txtCC").val();
+
+        if (currentList.indexOf(emailAddress) == -1)
+        {
+            if (currentList.length > 0)
+            {
+                currentList += " ; ";
+            }
+            currentList += emailAddress;
+
+            if (_emailPopupType == "to")
+            {
+                $("#txtTo").val(currentList);
+                CheckEmails($.trim($("#txtTo").val()), "#errorMessageTo");
+            }
+            else
+            {
+                $("#txtCC").val(currentList);
+                CheckEmails($.trim($("#txtCC").val()), "#errorMessageCC");
+            }
+        }
+    }
+
+    function addPhone(phoneNumber) {
+        var currentList = $("#txtPhone").val();
+
+        if (currentList.indexOf(phoneNumber) == -1) {
+            if (currentList.length > 0) {
+                currentList += " ; ";
+            }
+            currentList += phoneNumber;
+
+            $("#txtPhone").val(currentList);
+        }
+    }
+
+    function RefreshGrid() {
+        $("#grid").data("kendoGrid").dataSource.read();
+        $("#grid").data("kendoGrid").refresh();
+    }
+
+    function GetListParameters() {
+        var result = { estimateID: @Model.EstimateID, email: $("#checkEmail").is(":checked"), sms: $("#checkSMS").is(":checked") };
+        return result
+    }
+
+    function onDataBound(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#grid tbody tr").hover(
+            function () {
+                // Hilight the hovered row
+                var row = $(this).closest("tr");
+                row.addClass("k-state-hover");
+            }
+            , function () {
+                // Remove the Hover state from all rows
+                $(".k-state-hover").each(function (index) {
+                    $(this).removeClass("k-state-hover");
+                });
+            }
+        );
+
+        // See if an email ID was passed
+        var selectedID = $("#SelectedEmailID").val();
+        if (selectedID > 0)
+        {
+            var el = $("#grid");
+            var grid = el.data("kendoGrid");
+            var matches = $.grep(grid.dataSource.data(), function (d) {
+                return d.ID == selectedID;
+            });
+
+            if (matches.length > 0)
+            {
+                var row = $("*[data-uid='" + matches[0].uid + "']");
+                grid.select(row);
+            }
+        }
+
+        @if(ViewBag.IsMobileDevice)
+        {
+        <text>
+            ShowHideSendEstimateHistoryLegend();
+            $("#history-container").hide();
+        </text>
+        }
+        else
+        {
+            <text>
+        if (arg.sender.dataSource._total > 0)
+        {
+            $("#history-container").show();
+        }
+        </text>
+        }
+    }
+
+    function onPreviewSelectionChange(arg) {
+        // Remove the Hover state from all rows
+        $(".k-state-hover").each(function (index) {
+            $(this).removeClass("k-state-hover");
+        });
+
+        // Get the selected item and call the ClickedItem event
+        var row = $("#grid").find(".k-state-selected").first();
+        var id = row.find("td").first().html();
+
+        LoadSentEmail(id);
+    }
+
+    function LoadSentEmail(id)
+    {
+        var sentMessage = "@Proestimator.Resources.ProStrings.MessageSentOn";
+        var errorMessage = '';
+        var deliverMessage = '';
+        var deliverErrMessage = '';
+
+        $.ajax({
+            url: '@Url.Action("GetSentEmail", "SendEstimate")',
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ "userID": @ViewBag.UserID, "estimateID": @Model.EstimateID, "id": id }),
+            success: function (result) {
+                ClearForm();
+
+                $("#txtTo").val(result.ToAddresses);
+                $("#txtCC").val(result.CCAddresses);
+                $("#txtPhone").val(result.PhoneNumbers);
+                $("#txtSubject").val(result.Subject);
+                CKEDITOR.instances['Template-TextArea'].setData(result.Body);
+                sentMessage = sentMessage.replace("{0}", result.SentTimeMessage);
+                if (result.ErrorMessage != '') { errorMessage = result.PhoneNumbers + ' : ' + result.ErrorMessage; }
+                for (i = 0; i < result.StatusMessage.length; i++) {
+                    var message = result.StatusMessage[i];
+                    if (message.Event == 'delivered') {
+                        if (deliverMessage != '') { deliverMessage += '<br>'; }
+                        deliverMessage += message.Event + ' to ' + message.Email + ' at ' + kendo.toString(kendo.parseDate(message.TimeStamp), 'h:mm:ss tt');
+                    }
+                    else {
+                        if (deliverErrMessage != '') { deliverErrMessage += '<br>'; }
+                        deliverErrMessage += message.Email + ' : ' + message.Event + ' at ' + kendo.toString(kendo.parseDate(message.TimeStamp), 'h:mm:ss tt');
+                        if (message.Reason != '') { deliverErrMessage += ' due to ' + message.Reason; }
+                    }
+                }
+                $("#sentMessage").html(sentMessage);
+                $("#deliverMessage").html(deliverMessage);
+                $("#deliverErrMessage").html(deliverErrMessage);
+                $("#errorMessage").html(errorMessage);
+
+                for(i = 0; i < result.ReportAttachments.length; i++)
+                {
+                    AddReportAttachment(result.ReportAttachments[i], result.ReportAttachments[i].ReportName);
+                }
+            }
+        });
+    }
+
+    function SendEmail() {
+        $("#btnSend").prop("disabled", true);
+        HideNoAttachmentsMessage();
+        applyLoading();
+
+        var toAddresses = $("#txtTo").val();
+        var ccAddresses = $("#txtCC").val();
+        var phoneNumbers = $("#txtPhone").val();
+        var subject = $("#txtSubject").val();
+        var body = CKEDITOR.instances['Template-TextArea'].getData();
+
+        $.ajax({
+            url: '@Url.Action("SendEmail", "SendEstimate")',
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ "userID": @ViewBag.UserID, "loginID": @Model.LoginID, "estimateID": @Model.EstimateID, "toAddresses": toAddresses, "ccAddresses": ccAddresses, "phoneNumbers": phoneNumbers, "subject": subject, "body": body, "reportIDs": _attachmentIDs }),
+            success: function (result) {
+                $("#btnSend").prop("disabled", false);
+                removeLoading();
+                HideNoAttachmentsMessage();
+                RefreshGrid();
+
+                console.log(result);
+
+                if (result === "success" || $.trim(result) === "") {
+                    ClearForm();
+                    $("#txtSubject").val($("#DefaultSubject").val());
+                    InitTemplateDefaults();
+                    ShowUserMessage("@Proestimator.Resources.ProStrings.MessageSent.", false, 4000);
+                }
+                else {
+                    ShowUserMessage(result, true, 4000);
+                }
+            }
+        });
+    }
+
+    function CheckEmails(emailAddress, message) {
+        if (emailAddress == "") {
+            $(message).html("");
+        }
+        else {
+            $.ajax({
+                url: '@Url.Action("CheckEmails", "SendEstimate")',
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ "userID": @ViewBag.UserID, "toAddresses": emailAddress }),
+                success: function (result) {
+                    if (result != "") {
+                        $(message).html(result + "<br>");
+                    }
+                    else {
+                        $(message).html(result);
+                    }
+                }
+            });
+        }
+    }
+
+    function ClearForm()
+    {
+        $("#txtTo").val("");
+        $("#txtCC").val("");
+        $("#txtPhone").val("");
+        $("#txtSubject").val("");
+        $("#attachments-container").empty();
+        $("#NoAttachmentsMessage").show();
+        $("#sentMessage").text("");
+        $("#errorMessage").text("");
+        $("#errorMessageTo").text("");
+        $("#errorMessageCC").text("");
+        $("#deliverMessage").text("");
+        $("#deliverErrMessage").text("");
+
+        _attachmentIDs = [];
+    }
+
+    function GenerateReport(reportType, language, extraParam, _isModelPopup, version, customReportType)
+    {
+        $.ajax({
+            url: "/SendEstimate/CreateReportAttachment/",
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ "userID": @ViewBag.UserID, "estimateID": @Model.EstimateID, "reportType": reportType, "language": language, "extraParam": extraParam, "version": version, "customReportType": customReportType }),
+            beforeSend: function () {
+                if(_isModelPopup) {
+                    _loadingPopupHeightDiv = 1;
+                    applyLoadingPopup();
+                }
+                else {
+                    applyLoading();
+                }
+            },
+            success: function (result) {
+                console.log(result);
+                if(_isModelPopup) {
+                    removeLoadingPopup();
+                }
+                else {
+                    removeLoading();
+                }
+
+                if (result.Success === true)
+                {
+                    ShowUserMessage(result.Report.ReportName + " attached", false, 3000);
+                    AddReportAttachment(result.Report, result.Report.ReportName);
+
+                    // If any emails addresses were returned, add them to the emailAddresses ul if they aren't already
+                    for (var i = 0; i < result.NewEmailAddresses.length; i++)
+                    {
+                        var contactName = result.NewEmailAddresses[i].Contact;
+                        var emailAddress = result.NewEmailAddresses[i].EmailAddress;
+                        var bounce = result.NewEmailAddresses[i].Bounce;
+                        var unsubscribe = result.NewEmailAddresses[i].Unsubscribe;
+
+                        if (_shopEmails.indexOf(emailAddress) == -1)
+                        {
+                            _shopEmails += emailAddress;
+
+                            if (bounce && unsubscribe) {
+                                $("#emailAddresses").append("<li><a onclick=\"addEmail('" + emailAddress + "')\"><b>" + contactName + "</b> - " + emailAddress + "<br><font color='red'>Please double-check above adddress as it is on bounce list</font><br><font color='red'>The above adddress is on unsubscribe list set by the recipient</font></a></li>");
+                            }
+                            else if (bounce) {
+                                $("#emailAddresses").append("<li><a onclick=\"addEmail('" + emailAddress + "')\"><b>" + contactName + "</b> - " + emailAddress + "<br><font color='red'>Please double-check above adddress as it is on bounce list</font></a></li>");
+                            }
+                            else if (unsubscribe) {
+                                $("#emailAddresses").append("<li><a onclick=\"addEmail('" + emailAddress + "')\"><b>" + contactName + "</b> - " + emailAddress + "<br><font color='red'>The above adddress is on unsubscribe list set by the recipient</font></a></li>");
+                            }
+                            else {
+                                $("#emailAddresses").append("<li><a onclick=\"addEmail('" + emailAddress + "')\"><b>" + contactName + "</b> - " + emailAddress + "</a></li>");
+                            }
+                        }
+                    }
+                    $(".ui-dialog-titlebar-close").trigger('click');
+
+                    if (result.ErrorMessage.length > 0) {
+                        ShowUserMessage(result.ErrorMessage, false, 5000);
+                    }
+                }
+                else
+                {
+                    ShowUserMessage(result.ErrorMessage, true, 4000);
+                }
+            },
+            error: function (error) {
+                removeLoading();
+                ShowUserMessage(error, true, 4000);
+            }
+        });
+    }
+
+    function AddReportAttachment(reportVM, fullName)
+    {
+        var newDiv = "<div id='" + reportVM.ID + "' class='attachment-container'>\
+                                <div class='close-container'><input type='button' class='button' value='@Proestimator.Resources.ProStrings.Delete' onclick='deleteAttachment(" + reportVM.ID + ")'></div>\
+                                <div class='view-container'><input type='button' class='button' value='@Proestimator.Resources.ProStrings.View' onclick='viewAttachment(" + reportVM.ID + ", \"" + fullName + "\")'></div>\
+                                <div class='attachment-name-container'>" + reportVM.ReportName + "</div>\
+                            </div>";
+        $("#attachments-container").append(newDiv);
+
+        $("#NoAttachmentsMessage").hide();
+
+        _attachmentIDs.push(reportVM.ID);
+    }
+
+    function viewAttachment(id, fullName)
+    {
+        var win = window.open("/@ViewBag.UserID/estimate/@Model.EstimateID/view-attachment/" + id + "/" + fullName, "_blank");
+        if (win) {
+            //Browser has allowed it to be opened
+            win.focus();
+        } else {
+            //Browser has blocked it
+            alert("@Proestimator.Resources.ProStrings.BrowserBlockedSite.");
+        }
+    }
+
+    function deleteAttachment(id)
+    {
+        $.ajax({
+            url: '/SendEstimate/DeleteAttachment/',
+            type: "POST",
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ 'userID': @ViewBag.UserID, 'reportID': id }),
+            success: function (result) {
+                if (result === "")
+                {
+                    var attachmentDiv = $("#" + id);
+                    if (attachmentDiv)
+                    {
+                        attachmentDiv.remove();
+                    }
+
+                    _attachmentIDs.splice($.inArray(id, _attachmentIDs), 1);
+
+                    if (_attachmentIDs.length === 0)
+                    {
+                        $("#NoAttachmentsMessage").show();
+                    }
+                }
+                else {
+                    ShowUserMessage(result, true, 4000);
+                }
+            },
+            error: function (error) {
+                removeLoading();
+            }
+        });
+    }
+
+    function OpenSentEstimateHistoryPopup() {
+        $("#history-container").show();
+        $('#history-container').insertAfter('#modal-window-sendEstimateHistoryMobileDevice .modal-body');
+        $('#modal-window-sendEstimateHistoryMobileDevice').dialog('open');
+        $('html, body').animate({scrollTop:$(document).height() });
+    }
+
+    var defaultBodyTemplate = '';
+    function InitTemplateDefaults() {
+
+        if ($("#Body-Templates")) {
+            $("#Body-Templates").val(_defaultBodyTemplateID);
+        } 
+
+        if (defaultBodyTemplate !== '') {
+            CKEDITOR.instances['Template-TextArea'].setData(defaultBodyTemplate);
+            return;
+        }
+
+        CKEDITOR.instances['Template-TextArea'].setData('');
+
+        if ($("#Body-Templates") && _defaultBodyTemplateID != '0') {
+            UpdateBodyFromTemplate();
+        }
+
+        defaultBodyTemplate = CKEDITOR.instances['Template-TextArea'].getData();
+    }
+
+    function UpdateBodyFromTemplate() {
+        var txtBody = CKEDITOR.instances['Template-TextArea'].getData();
+        var startIndex = txtBody.indexOf('<!--BODY_START-->');
+        var endIndex = txtBody.indexOf('<!--BODY_END-->');
+        var templateID = $("#Body-Templates").val();
+
+        if (templateID === '0') {
+            // Body Template changed to "None" - Clear the email body if there is one
+            if (startIndex >= 0 && endIndex > startIndex) {
+                CKEDITOR.instances['Template-TextArea'].setData(txtBody.substr(0, startIndex) + txtBody.substr(endIndex + ('<!--BODY_END-->').length));
+            }
+        } else {
+            // Different Body Template selected - Clear the current body template, if there is one, and get the new body template and insert it into the body
+            $.ajax({
+                async: false,
+                url: '@Url.Action("GetTemplate", "Settings")',
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ "userID": @ViewBag.UserID, "templateID": templateID }),
+                beforeSend: function () {
+                    $('#overlay').show();
+                },
+                success: function (result) {
+                    var newTemplate = result ? '<!--BODY_START--> ' + result.Template + ' <!--BODY_END-->' : '';
+                    if (startIndex === -1) {
+                        CKEDITOR.instances['Template-TextArea'].setData(newTemplate + txtBody);
+                    } else {
+                        // Replace the current template section in the editor with the currently selected template
+                        CKEDITOR.instances['Template-TextArea'].setData(txtBody.substr(0, startIndex) + newTemplate + txtBody.substr(endIndex + ('<!--BODY_END-->').length));
+                    }
+                    $('#overlay').hide();
+                },
+                error: function (error) {
+                    $('#overlay').hide();
+                    ShowUserMessage(error, true, 4000);
+                    return '';
+                }
+            });
+        }
+    }
+
+</script>
+
+<div id="workDesk" class="page-container">
+        <div id="modal-window-sendEstimateHistoryMobileDevice" style="display:none;" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (!Model.HasAccountEmailAddress)
+            {
+            <div style="padding-top: 30px; text-align: center;">
+                <p>@Proestimator.Resources.ProStrings.ConfigureEmailAddressMessage</p>
+
+                @if (Model.AccountIsLocked)
+                {
+                    <p>@Proestimator.Resources.ProStrings.AccountProfileLockedMessage</p>
+                }
+                else
+                {
+                    <p>@Proestimator.Resources.ProStrings.AccountProfileNotLockedMessagePart1 <a href="/@ViewBag.LoginID/settings/company-profile" style="color: black; text-decoration: underline;">@Proestimator.Resources.ProStrings.AccountProfileNotLockedMessagePart2 </a> @Proestimator.Resources.ProStrings.AccountProfileNotLockedMessagePart3</p>
+                }
+
+            </div>
+        }
+        else
+        {
+            using (Html.BeginForm("Index", "SendEstimate", FormMethod.Post, new { @class = "container", @id = "SendEstimateForm" }))
+            {
+                <input type="hidden" id="redirectData" name="redirectDataField" />
+                <input id="submitButton" type="submit" value="@Proestimator.Resources.ProStrings.Submit" class="submit" style="display: none;" />
+
+                @Html.HiddenFor(o => o.SelectedEmailID)
+                @Html.HiddenFor(o => o.EstimateID)
+                @Html.HiddenFor(o => o.DefaultSubject)
+
+                @* The page title *@
+                <div id="estimateFormHeader">
+
+                    <div id="formHeader-back">
+                        <a id="detailsBtn" data-link-id="Print-Back" class="button nav-btn" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/estimate/@Model.EstimateID/printing');"><< @Proestimator.Resources.ProStrings.Estimate_Navigation_Print</a>
+                    </div>
+
+                    <div id="formHeader-center">
+                        <h1>@Proestimator.Resources.ProStrings.SendEstimateHeader</h1>
+
+                        <input type="button" id="btnNew" class="button nav-btn do-not-disable" value="@Proestimator.Resources.ProStrings.New" />
+                        <input type="button" id="btnSend" class="button nav-btn do-not-disable" value="@Proestimator.Resources.ProStrings.SendEstimateSmall" />
+
+                        <span style="font-size: 0.8em;"><i>@Proestimator.Resources.ProStrings.EmsFilesGeneratedPrintPage</i></span>
+                    </div>
+
+                    <div id="formHeader-next" style="padding-top: 10px; width: auto;text-align:center">
+                        <a href="~/Files/Instructions/Send Estimate Tab.pdf" target="_blank" style="color: black; font-size: small;">
+                            <img src="~/Images/help.png" width="20" height="20" style="margin: 2px auto;" />
+                            <p>@Proestimator.Resources.ProStrings.HowTo</p>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="form-container">
+                    <div id="noAttachmentConfirm" class="message-display-bad">
+                        <p>@Proestimator.Resources.ProStrings.NoAttachmentSendEmailAnyway</p>
+
+                        <input type="button" id="btnCancel" class="button do-not-disable" style="max-width: 150px;" value="@Proestimator.Resources.ProStrings.Button_Cancel" />
+                        <input type="button" id="btnSendAnyway" class="button do-not-disable" style="max-width: 150px;" value="@Proestimator.Resources.ProStrings.SendEstimateSmall" />
+                    </div>
+                    <div class="half-container" id="compose">
+
+                        <legend><span class="number">1</span>@Proestimator.Resources.ProStrings.Compose</legend>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label"><a id="buttonTo" class="button">@Proestimator.Resources.ProStrings.EmailTo</a></label>
+                            <div class="field-control">
+                                <input type="text" id="txtTo" />
+                                <div id="errorMessageTo" style="color: red; text-align: left; font-size: small;"></div>
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label"><a id="buttonCC" class="button">@Proestimator.Resources.ProStrings.EmailCC</a></label>
+                            <div class="field-control">
+                                <input type="text" id="txtCC" />
+                                <div id="errorMessageCC" style="color: red; text-align: left; font-size: small;"></div>
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label"><a id="buttonPhone" class="button">@Proestimator.Resources.ProStrings.SMS</a></label>
+                            <div class="field-control">
+                                <input type="text" id="txtPhone" />
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Subject</label>
+                            <div class="field-control">
+                                <input type="text" id="txtSubject" value="@Model.DefaultSubject" />
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Body</label>
+                            <div class="field-control">
+                                <textarea class="ckeditor" cols="20" id="Template-TextArea" name="Template" rows="2"></textarea>
+                                <div>
+                                    <p style="margin: 5px;"><a href="https://www.youtube.com/watch?v=ZFd2PE1l6vU" target="_blank" style="color: black; text-decoration: underline;">Text editor help video</a></p>
+                                </div>
+                                <div id="sentMessage"></div>
+                                <div id="deliverMessage" style="color: green; font-size: small; text-align: left;"></div>
+                                <p id="deliverErrMessage" style="font-size: small; text-align: left;"></p>
+                                <p id="errorMessage" style="color: red; font-size: small; text-align: left;"></p>
+                            </div>
+                        </div>
+
+                        @if (Model.BodyTemplates != null && Model.BodyTemplates.Count > 0)
+                        {
+                            <div class="field-wrapper">
+                                <label class="inputLabel field-label">Body Templates</label>
+                                <div class="field-control">
+                                    <select id="Body-Templates" onchange="UpdateBodyFromTemplate('BODY')">
+                                        <option value="0" selected>None</option>
+                                        @foreach (TemplateVM template in Model.BodyTemplates)
+                                        {
+                                            <option value="@template.ID">@template.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="field-wrapper">
+                                <label class="inputLabel field-label">Body Templates</label>
+                                <div class="field-control">
+                                    <a class="button nav-btn" style="float: left;" onclick="SubmitAndRedirect('/@ViewBag.UserID/settings/email-template');">To Click here to create an email body template</a>
+                                </div>
+                            </div>
+                        }
+
+                        @if (ViewBag.ShowFinancing == true && Model.IsFinancingMerchantApproved)
+                        {
+                            <style>
+                                .divWisetackLoanAppButton input {
+                                    border: white;
+                                    background-color: #349ad8;
+                                    font-size: 22px;
+                                    font-weight: bold;
+                                    min-width: 480px;
+                                    color: white;
+                                    min-height: 40px;
+                                    cursor: pointer;
+                                    border-radius: 6px;
+                                }
+
+                                .finLoanAppOuterDiv {
+                                    max-width: 660px;
+                                    display: grid;
+                                    grid-template-columns: auto auto auto auto;
+                                    grid-template-rows: auto auto auto auto auto;
+                                }
+
+                                .finWisetackLoanAppCTASection {
+                                    grid-column-start: 1;
+                                    grid-column-end: 4;
+                                    grid-row-start: 1;
+                                    grid-row-end: 3;
+                                }
+
+                                .finWisetackLoanAppCTATitle {
+                                    font-weight: bold;
+                                    font-size: 16px;
+                                }
+
+                                .finWisetackLoanAppCTAText {
+                                    font-size: 14px;
+                                    margin-top: 3px;
+                                }
+
+                                .finWisetackLoanAppCTALearnMore {
+                                    font-size: 14px;
+                                    margin-top: 3px;
+                                }
+
+                                .finWisetackCTAImage {
+                                    float: inline-end;
+                                    margin-top: -25px;
+                                    width: 370px;
+                                }
+
+                                .finWisetackIcon img {
+                                    max-width: 100px;
+                                }
+
+                                .divWisetackLoanAppButton {
+                                    grid-column-start: 1;
+                                    grid-column-end: 5;
+                                    margin-top: 5px;
+                                    grid-row-start: 4;
+                                    grid-row-end: 5;
+                                }
+
+                                .divPromoInfoContainer {
+                                    grid-column-start: 1;
+                                    grid-column-end: 4;
+                                    grid-row-start: 5;
+                                    grid-row-end: 6;
+                                    margin-top: 5px;
+                                    max-width: 400px;
+                                    min-height: 35px;
+                                }
+
+                                .promoInfoDiv {
+                                    font-size: 16px;
+                                }
+
+                                .finWisetackLoanAppCTALearnMore a:link, a:hover, a:visited, a:active {
+                                    color: #349ad8;
+                                    text-decoration: underline;
+                                }
+                            </style>
+                            <script>
+                            var wisetackIsCallingPaymentLinkApi = false;
+
+                            $(document).ready(function () {
+                                $('#overlay').hide();
+                                wisetackSetLoanAppPromoInfo();
+                            });
+
+                            function wisetackIncludePaymentLink() {
+                                if (wisetackIsCallingPaymentLinkApi)
+                                    return;
+                                wisetackIsCallingPaymentLinkApi = true;
+                                $('#overlay').show();
+                                $.getJSON('@Url.Action("GetLoanApplicationInsertLinkInfo", "Financing")', { userID: @ViewBag.UserID, estimateID: @Model.EstimateID }, function (data) {
+                                    if (data.Success === true) {
+                                        var txtBody = CKEDITOR.instances['Template-TextArea'].getData();
+                                        var finStartIndex = txtBody.indexOf('<!--FINANCE_START-->');
+                                        var finEndIndex = txtBody.indexOf('<!--FINANCE_END-->');
+
+                                        // Remove the current context with a finance cta & link, if exists
+                                        if (finStartIndex >= 0 && finEndIndex > finStartIndex) {
+                                            txtBody = txtBody.substr(0, finStartIndex) + txtBody.substr(finEndIndex + '<!--FINANCE_END-->'.length);
+                                        }
+
+                                        var wisetackInsertLinkText = '<!--FINANCE_START--> <p></p><p>Click the link below to pay your $' + data.AmountToFinance + ' estimate over time through '
+                                            + 'Wisetack consumer financing. Checking your options does not impact your credit score!<br /><br /><a href="' + data.PaymentLink + '">'
+                                            + data.PaymentLink + '</a><br /><br /></p> <!--FINANCE_END-->';
+
+                                        var footerTextIndex = txtBody.indexOf('<!--FOOTER_START-->');
+                                        if (footerTextIndex === -1) {
+                                            CKEDITOR.instances['Template-TextArea'].setData(txtBody + wisetackInsertLinkText);
+                                        } else {
+                                            CKEDITOR.instances['Template-TextArea'].setData(txtBody.substr(0, footerTextIndex) + wisetackInsertLinkText + txtBody.substr(footerTextIndex));
+                                        }
+
+                                        // auto-check the checkbox to insert this also into the PDF, if attached later
+                                        // commenting out for now. we're setting this to default checked per discussion with Ryan and Jack
+                                        //$("#chkIncludeLoanApplicationLink").prop("checked", true);
+                                    } else {
+                                        alert('Unable to generate a payment link for this estimate. ' + data.ErrorMessage);
+                                    }
+                                    wisetackIsCallingPaymentLinkApi = false;
+                                    $('#overlay').hide();
+                                });
+                            }
+
+                            function wisetackSetLoanAppPromoInfo() {
+                                $.getJSON('@Url.Action("GetMerchantPromoInfo", "Financing")', { userID: @ViewBag.UserID, estimateID: @Model.EstimateID }, function (data) {
+                                    if (data.Success === true) {
+                                        $('#promoInfoDiv').html('@Proestimator.Resources.ProStrings.FinancingLoanApplicationCTAAsLowAsPrefix<b>$' + data.AsLowAsMonthlyPayment + '</b>@Proestimator.Resources.ProStrings.FinancingLoanApplicationCTAAsLowAsPostfix')
+                                    } else {
+                                        console.warn('Unable to get wisetack promo information for this user. Error: ' + data.ErrorMessage);
+                                    }
+                                });
+                            }
+
+                            </script>
+                            <div class="field-wrapper">
+                                <label class="inputLabel field-label"></label>
+                                <div class="field-control">
+                                    <div class="finLoanAppOuterDiv">
+                                        <div class="finWisetackLoanAppCTASection">
+                                            <div class="finWisetackLoanAppCTATitle">
+                                                @Proestimator.Resources.ProStrings.FinancingLoanApplicationCTATitle
+                                            </div>
+                                            <div class="finWisetackLoanAppCTAText">
+                                                @Proestimator.Resources.ProStrings.FinancingLoanApplicationCTAText
+                                            </div>
+                                            <div class="finWisetackLoanAppCTALearnMore">
+                                                <a href="https://www.wisetack.com/getting-started/webest" target="_blank">@Proestimator.Resources.ProStrings.FinancingLoanApplicationCTALearnMore</a>
+                                                <div class="finWisetackCTAImage">
+                                                    <div class="finWisetackIcon"><img src="~/Content/images/WisetackNavy.png" /></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="divPromoInfoContainer" class="divPromoInfoContainer">
+                                            <div id="promoInfoDiv" class="promoInfoDiv"></div>
+                                        </div>
+                                        <div class="divWisetackLoanAppButton">
+                                            <input type="button" value="@Proestimator.Resources.ProStrings.FinancingLoanApplicationIncludePaymentLink" onclick="wisetackIncludePaymentLink()" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="overlay" style="position: fixed; top: 100; left: 0; width: 100%; height: 100%; opacity: 0.8; background: white no-repeat center; ">
+                                <img src="~/Content/images/loader.gif" />
+                            </div>
+                        }
+
+                    </div>
+
+                    @if (ViewBag.IsMobileDevice == false)
+                    {
+                        <text>
+                            <legend>@Proestimator.Resources.ProStrings.SentEstimateHistory</legend>
+                        </text>
+                    }
+
+                    <div class="half-container">
+
+                        <div id="history-container" style="display: none;">
+                            <div class="mail-radio-container" style="display: none;">
+                                <label><input type="checkbox" id="checkEmail" class="type-checkbox" checked="checked" />@Proestimator.Resources.ProStrings.Email</label>
+                                <label><input type="checkbox" id="checkSMS" class="type-checkbox" checked="checked" />@Proestimator.Resources.ProStrings.SMS</label>
+                            </div>
+
+                            <div class="datagrid">
+                                @(Html.Kendo().Grid<SentEstimateSummaryVM>()
+                                .Name("grid")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(item => item.ID).Hidden();
+                                    columns.Bound(item => item.TimeStamp).ClientTemplate("#= kendo.toString(kendo.parseDate(TimeStamp), 'M/d/yyyy h:mm:ss tt') #").Title(@Proestimator.Resources.ProStrings.Sent);
+                                    columns.Bound(item => item.Message).Title(@Proestimator.Resources.ProStrings.Subject);
+                                    columns.Bound(item => item.RecipientList).Title(@Proestimator.Resources.ProStrings.Recipients);
+                                    columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("  " + "# if (HasError) { #" + "<img src=\"/Images/checkmark.png\" style=\"max-width: 30px!important; margin: 0 auto; \" />" + "# } #").Title(@Proestimator.Resources.ProStrings.Errors);
+                                })
+                                .Sortable()
+                                .Selectable()
+                                .Events(events => events
+                                    .DataBound("onDataBound")
+                                    .Change("onPreviewSelectionChange")
+                                )
+                                .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .ServerOperation(false)
+                                    .Read(read => read.Action("GetSentList", "SendEstimate").Data("GetListParameters"))
+                                )
+                            )
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="container" id="AddReportAttachments">
+
+                        <legend><span class="number">2</span>@Proestimator.Resources.ProStrings.AddReportAttachments</legend>
+
+                        <div class="attachments-wrapper">
+                            <p id="NoAttachmentsMessage"><i><b>@Proestimator.Resources.ProStrings.NoAttachmentsMessagePart1 </b> - @Proestimator.Resources.ProStrings.NoAttachmentsMessagePart2</i></p>
+                            <div id="attachments-container">
+
+                            </div>
+                        </div>
+
+                        <div>
+                            @Html.EditorFor(model => model.ReportCreator)
+                        </div>
+
+                    </div>
+
+                    <div class="container" style="margin-top: 70px;">
+
+
+                    </div>
+
+                    @if (ViewBag.IsMobileDevice)
+                    {
+                        <text>
+                            <legend id="isMobileDeviceLegend"><a href="#" onclick="OpenSentEstimateHistoryPopup();" style="color:black;text-decoration:underline">@Proestimator.Resources.ProStrings.ViewSentEstimateHistory</a></legend>
+                        </text>
+                    }
+
+                </div>
+
+                <div id="modal-email" title="Select Email Addresses" class="ui-widget">
+                    <ul id="emailAddresses" class="popup-list">
+                        @foreach (EmailAddressVM emailAddress in Model.EmailAddresses)
+                        {
+                            <li>
+                                <a onclick="addEmail('@emailAddress.EmailAddress')">
+                                    <b>@emailAddress.Contact</b> - @emailAddress.EmailAddress
+                                    @if (emailAddress.Bounce)
+                                    {<text><br><font color="red">Please double-check above adddress as it is on bounce list</font></text>}
+                                    @if (emailAddress.Unsubscribe)
+                                    {<text><br><font color="red">The above adddress is on unsubscribe list set by the recipient</font></text>}
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+                <div id="modal-phone" title="Select Phone Numbers" class="ui-widget">
+                    <ul class="popup-list">
+                        @foreach (PhoneNumberVM phoneNumber in Model.PhoneNumbers)
+                        {
+                            <li><a onclick="addPhone('@phoneNumber.PhoneNumber')"><b>@phoneNumber.Contact</b> - @phoneNumber.PhoneNumber</a></li>
+                        }
+                    </ul>
+                </div>
+            }
+        }
+
+    </div>

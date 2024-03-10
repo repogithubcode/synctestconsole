@@ -1,0 +1,184 @@
+﻿@model Proestimator.ViewModel.LoginOldVM
+
+@using Proestimator.Resources
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_Login;
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+}
+
+<style>
+    #linkForgotPassword {
+        cursor: pointer;
+    }
+
+    #forgotPasswordWrapper {
+        display: none;
+    }
+
+    .loginLabel {
+        margin-top: 10px;
+    }
+
+    .field-label {
+        width: 40% !important;
+    }
+
+    .field-control {
+        width: 60% !important;
+    }
+</style>
+
+<script>
+    $(document).ready(function ()
+    {
+        $("#btnOldCredentials").click(function () {
+            $.getJSON('@Url.Action("CheckOldCredentials", "Login")', {
+                  loginName: $("#UserName").val()
+                , organization: $("#Organization").val()
+                , password: $("#Password").val()
+            }, function (data) {
+                if (data.Success)
+                {
+                    $("#NewUserName").val(data.Message);
+                    $("#OldLogInCredentials").fadeOut(function () { $("#NewLogInCredentials").fadeIn(); });
+                }
+                else
+                {
+                    $("#OldErrorMessage").text(data.ErrorMessage);
+                }
+            });
+        });
+
+        @if (string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <text>
+                $("#OldLogInCredentials").fadeIn();
+            </text>
+        }
+        else
+        {
+            <text>
+                $("#OldLogInCredentials").hide();
+                $("#NewLogInCredentials").show();
+                $("#NewErrorMessage").text('@Model.ErrorMessage');
+                $("#NewErrorMessage").fadeIn();
+            </text>
+        }
+
+        var username = document.getElementById('UserName');
+        var organization = document.getElementById('Organization');
+        var password = document.getElementById('Password');
+        var cleanText;
+
+        cleanText = function (e) {
+            e.preventDefault();
+            var pastedText = '';
+
+            if (e.clipboardData && e.clipboardData.getData) {
+                pastedText = e.clipboardData.getData('text/plain');
+            }
+            else if (window.clipboardData && window.clipboardData.getData) {// IE
+                pastedText = window.clipboardData.getData('Text');
+            }
+
+            this.value = $.trim(pastedText);
+        };
+
+        // when paste event happpens on password text box
+        password.onpaste = cleanText;
+
+        // when paste event happpens on username text box
+        username.onpaste = cleanText;
+
+        // when paste event happpens on username text box
+        organization.onpaste = cleanText;
+    });
+</script>
+
+<div class="container">
+    @using (Html.BeginForm("OldLogin", "Login", FormMethod.Post, new { @class = "container" }))
+    {
+        @Html.ValidationSummary(true)
+
+        <div id="loginFormContainer" class="container" style="max-width: 500px; margin: 0px auto; float: none;">
+            <div id="OldLogInCredentials" style="display: none;">
+                <div id="loginHeader">
+                    <h1>@Proestimator.Resources.ProStrings.Login_OldCredentials</h1>
+                </div>
+                <div class="field-wrapper">
+                    <label class="loginLabel field-label">@Proestimator.Resources.ProStrings.Login_LoginName</label>
+                    <div class="field-control">
+                        @Html.TextBoxFor(model => model.UserName, new { autocomplete = "off", @class = "textbox login-text" })
+                    </div>
+                </div>
+                <div class="field-wrapper">
+                    <label class="loginLabel field-label">@Proestimator.Resources.ProStrings.Login_Organization</label>
+                    <div class="field-control">
+                        @Html.TextBoxFor(model => model.Organization, new { autocomplete = "off", @class = "textbox login-text" })
+                    </div>
+                </div>
+                <div class="field-wrapper">
+                    <label class="loginLabel field-label">@Proestimator.Resources.ProStrings.Login_Password</label>
+                    <div class="field-control">
+                        @Html.TextBoxFor(model => model.Password, new { autocomplete = "off", type = "password", @class = "textbox login-text" })
+                    </div>
+                </div>
+
+                <div class="field-wrapper">
+                    <label class="loginLabel field-label"></label>
+                    <div class="field-control" style="text-align: center;">
+                        <input id="btnOldCredentials" type="button" value="@Proestimator.Resources.ProStrings.Submit" class="button" />
+                    </div>
+                </div>
+
+                <div class="field-wrapper">
+                    <label class="loginLabel field-label"></label>
+                    <div class="field-control">
+                        <label id="OldErrorMessage" style="font-size:medium; color:red; text-align: center; padding-top: 10px;"></label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="NewLogInCredentials" style="display: none;">
+                <div id="loginHeader">
+                    <h1>@Proestimator.Resources.ProStrings.Login_NewCredentials</h1>
+                </div>
+                <div class="field-wrapper">
+                    <label class="loginLabel field-label">@Proestimator.Resources.ProStrings.Login_NewUserName</label>
+                    <div class="field-control">
+                        @Html.TextBoxFor(model => model.NewUserName, new { autocomplete = "off", @class = "textbox login-text" })
+                    </div>
+                </div>
+                <div class="field-wrapper">
+                    <label class="loginLabel field-label">@Proestimator.Resources.ProStrings.Login_NewPassword</label>
+                    <div class="field-control">
+                        @Html.TextBoxFor(model => model.NewPassword, new { autocomplete = "off", @class = "textbox login-text", type = "password" })
+                    </div>
+                </div>
+                <div class="field-wrapper">
+                    <label class="loginLabel field-label">@Proestimator.Resources.ProStrings.Login_NewPassword2</label>
+                    <div class="field-control">
+                        @Html.TextBoxFor(model => model.NewPassword2, new { autocomplete = "off", @class = "textbox login-text", type = "password" })
+                    </div>
+                </div>
+                <div class="field-wrapper">
+                    <label class="loginLabel field-label"></label>
+                    <div class="field-control" style="text-align: center;">
+                        <input type="submit" value="@Proestimator.Resources.ProStrings.Submit" class="button" />
+                    </div>
+                </div>
+
+                <div class="field-wrapper">
+                    <label class="loginLabel field-label"></label>
+                    <div class="field-control">
+                        <label id="NewErrorMessage" style="font-size:medium; color:red; text-align: center; padding-top: 10px; display: none;"></label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        }
+
+    </div>

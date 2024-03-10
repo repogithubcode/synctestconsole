@@ -1,0 +1,309 @@
+﻿@model Proestimator.ViewModel.Profiles.PaintFinishVM
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_PaintFinish;
+}
+
+<style>
+    @@media screen and (max-width:700px) {
+        #smEstimateNavRow {
+            border: 1px solid #349ad8;
+            background-color: #f5f9fb;
+            max-width: 100%;
+            padding-right: 30px;
+        }
+
+        #estimateNavigation {
+            margin-top: 15px;
+        }
+    }
+</style>
+
+<div id="workDesk" class="page-container">
+
+    @if (!Model.ProfileIsValid)
+    {
+        <h2>@Proestimator.Resources.ProStrings.InvalidProfile</h2>
+    }
+    else
+    {
+        using (Html.BeginForm("PaintFinish", "RateProfile", FormMethod.Post, new { @class = "container" }))
+        {
+            @Html.Partial("RateProfileTopMenu", Model.ProfileID)
+
+            @Html.HiddenFor(model => model.LoginID)
+            @Html.HiddenFor(model => model.ProfileID)
+            @Html.HiddenFor(model => model.ProfileName)
+            @Html.HiddenFor(model => model.Description)
+            @Html.HiddenFor(model => model.EstimateID)
+
+            Html.EnableClientValidation(false);
+
+            <input type="hidden" id="redirectData" name="redirectDataField" />
+
+            <div class="tabcontent container">
+
+                <div id="formHeader">
+                    <div id="profileName" class="container rate-ProfileName">
+                        <label>
+                            <b>Profile Name: @Model.ProfileName</b>
+
+                            <p class="profile-message">
+                                @if (Model.IsGlobalProfile)
+                                {
+                                    @Proestimator.Resources.ProStrings.ProfileMessage_Global
+                                }
+                                else
+                                {
+                                    @Proestimator.Resources.ProStrings.ProfileMessage_Estimate
+                                }
+                            </p>
+                        </label>
+                    </div>
+
+                    @* The previous and next buttons *@
+                    <div id="container">
+                        <div class="half-container">
+                            <a class="button nav-btn" href="@("javascript:SubmitAndRedirect('/" + ViewBag.UserID + "/rates/" + Model.ProfileID + "');")">&lt;&lt; @Proestimator.Resources.ProStrings.RateProfile_ProfileRates</a>
+                        </div>
+
+                        <div class="half-container">
+                            <a class="button nav-btn" href="@("javascript:SubmitAndRedirect('/" + ViewBag.UserID + "/print-options/" + Model.ProfileID + "');")">@Proestimator.Resources.ProStrings.RateProfile_Printing>></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="lgRow1" class="container">
+
+                    @* The Save button above the forms *@
+                    @if (Model.EstimateID > 0 && Model.EstimateIsLocked)
+                    {
+                        <p class="error-message">@Proestimator.Resources.ProStrings.RateProfile_LockedEstimate</p>
+                    }
+
+                    <div class="container center" style="padding-bottom: 20px;">
+                        @if (!Model.EstimateIsLocked)
+                        {
+                            <input id="submitButton" class="button nav-btn" type="submit" value="@Proestimator.Resources.ProStrings.Save" />
+                        }
+                    </div>
+
+                    <div id="overlapFieldSetContainer" class="container">
+
+                        <fieldset id="customerFieldSet">
+
+                            <legend><span class="number">1</span>@Proestimator.Resources.ProStrings.RateProfile_OverlapPanel</legend>
+
+                            <div id="rateProfileTableContainer" class="col sm_4_4 md_4_8 lg_6_12  xl_7_14">
+                                <table id="overlapTable" style="margin: 0px;">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">@Proestimator.Resources.ProStrings.Adjacent</th>
+                                            <th scope="col">@Proestimator.Resources.ProStrings.NonAdjacent</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                @Html.EditorFor(model => model.paintProfile.AdjacentDeduction)
+                                                &nbsp; @Proestimator.Resources.ProStrings.HoursAbreviation
+                                            </td>
+                                            <td>
+                                                @Html.EditorFor(model => model.paintProfile.NonAdjacentDeduction)&nbsp; @Proestimator.Resources.ProStrings.HoursAbreviation
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div id="additionalOverlapCont" class="col md_8_8" style="padding-top: 20px;">
+                                @Html.CheckBoxFor(model => model.AllowDeduction)
+                                <span class="inlineNote">@Proestimator.Resources.ProStrings.RateProfile_AllowDeductions</span><br>
+
+                                @Html.CheckBoxFor(model => model.EdgeInterior)
+                                <span class="inlineNote">@Proestimator.Resources.ProStrings.RateProfile_AllowEdging</span> <br>
+
+                                @Html.CheckBoxFor(model => model.paintProfile.ManualPaintOverlap)
+                                <span class="inlineNote">@Proestimator.Resources.ProStrings.RateProfile_AllowPaintOverlap</span><br>
+
+                                <!--
+                                Html.CheckBoxFor(model => model.paintProfile.AutomaticOverlap)
+                                <span class="inlineNote">Apply Overlap Automatically</span><br>
+                                    -->
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+
+                <div id="lgRow1" class="container">
+
+                    <div id="overlapFieldSetContainer" class="container">
+
+                        <fieldset id="paintFinishFieldsetContainer" style="width:100%">
+
+                            <div class="container">
+                                <div class="container">
+                                    <legend><span class="number">2</span> @Proestimator.Resources.ProStrings.RateProfile_PaintFinishSetup</legend>
+                                </div>
+                            </div>
+
+                            <div id="rateProfileTableContainer" class="col sm_4_4 md_4_8 lg_6_12 xl_7_14">
+                                <table id="overlapTable" style="margin: 0px;">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col"></th>
+                                            <th scope="col">@Proestimator.Resources.ProStrings.MajorPanels</th>
+                                            <th scope="col">@Proestimator.Resources.ProStrings.AdditionalPanels</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <tr>
+                                            <td>@Proestimator.Resources.ProStrings.RateProfile_Add2Stage:</td>
+                                            <td>
+                                                @Html.EditorFor(model => model.paintProfile.MajorClearCoat)&nbsp; %
+                                            </td>
+                                            <td>
+                                                @Html.EditorFor(model => model.paintProfile.OverlapClearCoat)&nbsp; %
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>@Proestimator.Resources.ProStrings.RateProfile_Add3Stage:</td>
+                                            <td>
+                                                @Html.EditorFor(model => model.paintProfile.MajorThreeStage)&nbsp; %
+                                            </td>
+                                            <td>
+                                                @Html.EditorFor(model => model.paintProfile.OverlapThreeStage) &nbsp; %
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>@Proestimator.Resources.ProStrings.RateProfile_Add2Tone:</td>
+                                            <td>
+                                                @Html.EditorFor(model => model.paintProfile.MajorTwoTone)&nbsp; %
+                                            </td>
+                                            <td>
+                                                @Html.EditorFor(model => model.paintProfile.OverLapTwoTone)&nbsp; %
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div id="rateProfileTableContainer" class="col sm_4_4 md_4_8 lg_6_12 xl_7_14">
+                                <table id="paintPercentTable" style="margin: 0px;">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col"></th>
+                                            <th scope="col">@Proestimator.Resources.ProStrings.Amount</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <tr>
+                                            <td>@Proestimator.Resources.ProStrings.RateProfile_AddForBlend</td>
+                                            <td>
+                                                @Html.EditorFor(model => model.paintProfile.Blend)&nbsp; %
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>@Proestimator.Resources.ProStrings.RateProfile_AddForThreeTwoBlend</td>
+                                            <td>
+                                                @Html.EditorFor(model => model.paintProfile.ThreeTwoBlend)&nbsp; %
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>@Proestimator.Resources.ProStrings.RateProfile_AddForUnderside:</td>
+                                            <td>
+                                                @Html.EditorFor(model => model.paintProfile.Underside)&nbsp; %
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>@Proestimator.Resources.ProStrings.RateProfile_AddForEdging:</td>
+                                            <td>
+                                                @Html.EditorFor(model => model.paintProfile.Edging)>&nbsp; @Proestimator.Resources.ProStrings.HoursAbreviation
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+
+                <div id="lgRow1" class="container">
+
+                    <div id="overlapFieldSetContainer" class="container">
+
+                        <fieldset id="customerFieldSet">
+
+                            <div class="container">
+                                <div class="container">
+                                    <legend><span class="number">3</span> @Proestimator.Resources.ProStrings.RateProfile_AdditionalOptions</legend>
+                                </div>
+                            </div>
+
+                            <div id="rateProfileTableContainer" class="col sm_4_4 md_4_8 lg_6_12  xl_7_14">
+                                <table id="overlapTable" style="margin: 0px;">
+
+                                    <thead>
+                                        <tr>
+                                            <th scope="col"></th>
+                                            <th scope="col">@Proestimator.Resources.ProStrings.Clearcoat</th>
+                                            <th scope="col">@Proestimator.Resources.ProStrings.TwoTone</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <tr>
+                                            <td>@Proestimator.Resources.ProStrings.RateProfile_InnerPanels:</td>
+                                            <td>
+                                                @Html.CheckBoxFor(model => model.ThreeStageInner)
+                                            </td>
+                                            <td>
+                                                @Html.CheckBoxFor(model => model.TwoToneInner)
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>@Proestimator.Resources.ProStrings.RateProfile_EdgesAndLockPillars:</td>
+                                            <td>
+                                                @Html.CheckBoxFor(model => model.ThreeStagePillars)
+                                            </td>
+                                            <td>
+                                                @Html.CheckBoxFor(model => model.TwoTonePillars)
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>@Proestimator.Resources.ProStrings.RateProfile_UndersidesAndInterior:</td>
+                                            <td>
+                                                @Html.CheckBoxFor(model => model.ThreeStateInterior)
+                                            </td>
+                                            <td>
+                                                @Html.CheckBoxFor(model => model.TwoToneInterior)
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </fieldset>
+
+                    </div>
+                </div>
+
+            </div>
+
+            @* The bottom previous and next buttons *@
+            <div id="container" style="padding-bottom: 20px;">
+                <div class="half-container">
+                    <a class="button nav-btn" href="@("javascript:SubmitAndRedirect('/" + ViewBag.UserID + "/rates/" + Model.ProfileID + "');")">@Proestimator.Resources.ProStrings.PreviousButton</a>
+                </div>
+
+                <div class="half-container">
+                    <a class="button nav-btn" href="@("javascript:SubmitAndRedirect('/" + ViewBag.UserID + "/print-options/" + Model.ProfileID + "');")">@Proestimator.Resources.ProStrings.NextButton</a>
+                </div>
+            </div>
+        }
+    }
+</div> 

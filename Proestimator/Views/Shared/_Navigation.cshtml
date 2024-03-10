@@ -1,0 +1,68 @@
+﻿<script>
+    function MobileBack()
+    {
+        if (!closeMenuMobile())
+        {
+            window.history.back();
+        }
+    }
+
+    function closeMenuMobile()
+    {
+        if ($("#menuCloseBtn").is(":visible"))
+        {
+            $('#navigation').hide();
+            return true;
+        }
+
+        return false;
+    }
+
+    function stopPropagation(evt)
+    {
+        if (typeof evt.stopPropagation == "function")
+        {
+            evt.stopPropagation();
+        }
+        else
+        {
+            evt.cancelBubble = true;
+        }
+    }
+
+    function LogAddOnsClick() {
+        $.getJSON('@Url.Action("CSBLogAddOnsPage", "Home")', { userID: @ViewBag.UserID }, function (data) {
+        });
+    }
+
+</script>
+
+<div id="navigation" onclick="closeMenuMobile();" style="max-width:115px;">
+    <nav id="nav">
+        <ul id="menu" style="cursor: pointer;">
+            <li onclick="$('#navigation').hide()" class="navItem lg_hide" id="menuCloseBtn" style="background-color: #1D6896; font-size: 14px;">< @Proestimator.Resources.ProStrings.CloseMenu</li>
+            <li onclick="SubmitAndRedirect('/@ViewBag.UserID/new-estimate'); stopPropagation(event);" class="navItem">@Proestimator.Resources.ProStrings.NewEstimate</li>
+            <li onclick="SubmitAndRedirect('/@ViewBag.UserID'); stopPropagation(event);" class="navItem @(ViewBag.NavID == "estimate" ? "selectedNavItem" : "")">@Proestimator.Resources.ProStrings.OpenEstimate</li>
+            <li onclick="SubmitAndRedirect('/@ViewBag.UserID/frame-data/@ViewBag.EstimateID'); stopPropagation(event);" class="navItem @(ViewBag.NavID == "frame" ? "selectedNavItem" : "")">@Proestimator.Resources.ProStrings.FrameData</li>
+
+            <li id="mainMenuPartsSearch" onclick="SubmitAndRedirect('/@ViewBag.UserID/parts-look-up/@ViewBag.EstimateID'); stopPropagation(event);" class="navItem @(ViewBag.NavID == "parts" ? "selectedNavItem" : "")">@Proestimator.Resources.ProStrings.PartsSearch</li>
+
+            <li onclick="@if (ViewBag.ReportsPermit) {<text>SubmitAndRedirect('/@ViewBag.UserID/reports/create-report');</text>} else {<text>noPermission('Reports page');</text>} stopPropagation(event);" class="navItem @(ViewBag.NavID == "reports" ? "selectedNavItem" : "")">@Proestimator.Resources.ProStrings.Reports</li>
+            <li onclick="SubmitAndRedirect('/@ViewBag.UserID/support'); stopPropagation(event);" class="navItem @(ViewBag.NavID == "support" ? "selectedNavItem" : "")">@Proestimator.Resources.ProStrings.Support</li>
+            @if (ViewBag.ShowFinancing == true)
+            {
+                <li onclick="SubmitAndRedirect('/@ViewBag.UserID/financingApproved'); stopPropagation(event);" class="navItem @(ViewBag.NavID == "financing" ? "selectedNavItem" : "")">@Proestimator.Resources.ProStrings.Financing</li>
+            }
+            @if (ViewBag.ShowCreditCardPayment == true)
+            {
+                <li onclick="SubmitAndRedirect('/@ViewBag.UserID/creditCardPaymentApproved'); stopPropagation(event);" class="navItem @(ViewBag.NavID == "creditCardPayment" ? "selectedNavItem" : "")">@Proestimator.Resources.ProStrings.CreditCardPaymentTabLabel</li>
+            }
+            <li onclick="@if (ViewBag.RatesPermit) {<text>SubmitAndRedirect('/@ViewBag.UserID/rates');</text>} else {<text>noPermission('Rates page');</text>} stopPropagation(event);" class="navItem @(ViewBag.NavID == "rates" ? "selectedNavItem" : "")">@Proestimator.Resources.ProStrings.Rates</li>
+            <li onclick="@if (ViewBag.VendorPermit) {<text>SubmitAndRedirect('/@ViewBag.UserID/vendors');</text>} else {<text>noPermission('Vendor page');</text>} stopPropagation(event);" class="navItem @(ViewBag.NavID == "vendors" ? "selectedNavItem" : "")">@Proestimator.Resources.ProStrings.Vendors</li>
+            <li onclick="@if (ViewBag.AddOnsPermit && ViewBag.SettingsPermit) {<text>SubmitAndRedirect('/@ViewBag.UserID/settings/contract');</text>} else {<text>noPermission('Add Ons page', 'Settings page');</text>} LogAddOnsClick(); stopPropagation(event);" class="navItem @(ViewBag.NavID == "settings" && ViewBag.settingsTopMenuID != null && ViewBag.settingsTopMenuID == 3 ? "selectedNavItem" : "")">@Proestimator.Resources.ProStrings.PageTitle_AddOns</li>
+            <li onclick="@if (ViewBag.SettingsPermit) {<text>SubmitAndRedirect('/@ViewBag.UserID/settings/estimators');</text>} else {<text>noPermission('Settings page');</text>} stopPropagation(event);" class="navItem @(ViewBag.NavID == "settings" && (ViewBag.settingsTopMenuID != null && ViewBag.settingsTopMenuID != 3) ? "selectedNavItem" : "")">@Proestimator.Resources.ProStrings.Settings</li>
+            @*<li onclick="SubmitAndRedirect('/@ViewBag.UserID/partner-network'); stopPropagation(event);" class="navItem" style="padding-top: 14px;">@Proestimator.Resources.ProStrings.PartnerNetwork</li>*@
+            <li onclick="SubmitAndRedirect('/@ViewBag.UserID/log-out'); stopPropagation(event);" class="navItem">@Proestimator.Resources.ProStrings.Logout</li>
+        </ul>
+    </nav>  
+</div>

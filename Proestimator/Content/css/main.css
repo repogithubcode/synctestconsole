@@ -1,0 +1,4152 @@
+/******* Global *******/
+#Claimantstates, #Claimanttimezone, #InsuredtimeZone, #licenseState, #licenseState, #states, #cust_timezone, #Insuredstates {
+    height: 50px;
+    width: 48%;
+    margin-left: 17px;
+}
+
+.setDropDownheight {
+    margin-top: 8px;
+}
+
+select:focus {
+    color: white;
+    background-color: #1d69a6;
+    text-decoration: none
+}
+
+html {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: white;
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    height: 100%;
+}
+
+label {
+    /*color:#1D69A6;*/
+}
+
+#header {
+}
+
+.linkbutton {
+    border: 4px outset;
+    padding: 2px;
+    text-decoration: none;
+}
+
+img {
+    max-width: 100%;
+    margin: 10px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+.k-state-selected td {
+    background-color: #1d69a6 !important;
+    color: white;
+}
+
+.k-state-hover td {
+    background-color: #7ca0bc;
+    color: white;
+}
+
+.search-match {
+    font-weight: bold;
+}
+
+/*http://www.bestcssbuttongenerator.com/#/12 */
+button {
+    -moz-box-shadow: 0px 1px 0px 0px #f0f7fa;
+    -webkit-box-shadow: 0px 1px 0px 0px #f0f7fa;
+    box-shadow: 0px 1px 0px 0px #f0f7fa;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #3993e9), color-stop(1, #019ad2));
+    background: -moz-linear-gradient(top, #3993e9 5%, #019ad2 100%);
+    background: -webkit-linear-gradient(top,#3993e9 5%, #019ad2 100%);
+    background: -o-linear-gradient(top, #3993e9 5%, #019ad2 100%);
+    background: -ms-linear-gradient(top, #3993e9 5%, #019ad2 100%);
+    background: linear-gradient(to bottom, #3993e9 5%, #019ad2 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#33bdef', endColorstr='#019ad2',GradientType=0);
+    padding: 5px 5px 5px 5px;
+    color: #FFF;
+    background-color: #3292d5;
+    font-size: 14px;
+    text-align: center;
+    font-style: normal;
+    border-radius: 5px;
+    width: 100%;
+    border: 1px solid #3292d5;
+    border-width: 1px 1px 3px;
+    margin-top: 5px;
+    white-space: nowrap;
+}
+
+    button:hover {
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #019ad2), color-stop(1, #33bdef));
+        background: -moz-linear-gradient(top, #019ad2 5%, #33bdef 100%);
+        background: -webkit-linear-gradient(top, #019ad2 5%, #33bdef 100%);
+        background: -o-linear-gradient(top, #019ad2 5%, #33bdef 100%);
+        background: -ms-linear-gradient(top, #019ad2 5%, #33bdef 100%);
+        background: linear-gradient(to bottom, #019ad2 5%, #33bdef 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#019ad2', endColorstr='#33bdef',GradientType=0);
+        background-color: #019ad2;
+    }
+
+    button:active {
+        position: relative;
+        top: 1px;
+    }
+
+.button {
+    -moz-box-shadow: inset 0px 1px 0px 0px #54a3f7;
+    -webkit-box-shadow: inset 0px 1px 0px 0px #54a3f7;
+    box-shadow: inset 0px 1px 0px 0px #54a3f7;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #007dc1), color-stop(1, #0061a7));
+    background: -moz-linear-gradient(top, #007dc1 5%, #0061a7 100%);
+    background: -webkit-linear-gradient(top, #007dc1 5%, #0061a7 100%);
+    background: -o-linear-gradient(top, #007dc1 5%, #0061a7 100%);
+    background: -ms-linear-gradient(top, #007dc1 5%, #0061a7 100%);
+    background: linear-gradient(to bottom, #007dc1 5%, #0061a7 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#007dc1', endColorstr='#0061a7',GradientType=0);
+    padding: 5px 5px 5px 5px;
+    color: #FFF;
+    background-color: #1d69a6;
+    font-size: 14px;
+    text-align: center;
+    font-style: normal;
+    border-radius: 5px;
+    width: 100%;
+    border: 1px solid #1d69a6;
+    border-width: 1px 1px 3px;
+    margin-top: 5px;
+    cursor: pointer;
+}
+
+    .button:hover {
+        -moz-box-shadow: inset 0px 1px 0px 0px #007dc1;
+        -webkit-box-shadow: inset 0px 1px 0px 0px #007dc1;
+        box-shadow: inset 0px 1px 0px 0px #007dc1;
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #0061a7), color-stop(1, #007dc1));
+        background: -moz-linear-gradient(top, #0061a7 5%, #007dc1 100%);
+        background: -webkit-linear-gradient(top, #0061a7 5%, #007dc1 100%);
+        background: -o-linear-gradient(top, #0061a7 5%, #007dc1 100%);
+        background: -ms-linear-gradient(top, #0061a7 5%, #007dc1 100%);
+        background: linear-gradient(to bottom, #0061a7 5%, #007dc1 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#0061a7', endColorstr='#007dc1',GradientType=0);
+        background-color: #0061a7;
+    }
+
+.button-green {
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #7bc345), color-stop(1, #5b9133));
+    background: -moz-linear-gradient(top, #7bc345 5%, #5b9133 100%);
+    background: -webkit-linear-gradient(top, #7bc345 5%, #5b9133 100%);
+    background: -o-linear-gradient(top, #7bc345 5%, #5b9133 100%);
+    background: -ms-linear-gradient(top, #7bc345 5%, #5b9133 100%);
+    background: linear-gradient(to bottom, #7bc345 5%, #5b9133 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#7bc345', endColorstr='#5b9133',GradientType=0);
+    border: 1px solid #5b9133;
+}
+
+    .button-green:hover {
+        -moz-box-shadow: inset 0px 1px 0px 0px #007dc1;
+        -webkit-box-shadow: inset 0px 1px 0px 0px #007dc1;
+        box-shadow: inset 0px 1px 0px 0px #007dc1;
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #5b9133), color-stop(1, #7bc345));
+        background: -moz-linear-gradient(top, #5b9133 5%, #7bc345 100%);
+        background: -webkit-linear-gradient(top, #5b9133 5%, #7bc345 100%);
+        background: -o-linear-gradient(top, #5b9133 5%, #7bc345 100%);
+        background: -ms-linear-gradient(top, #5b9133 5%, #7bc345 100%);
+        background: linear-gradient(to bottom, #5b9133 5%, #7bc345 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#5b9133', endColorstr='#7bc345',GradientType=0);
+        background-color: #5b9133;
+    }
+
+.button-gray {
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #c4c4c4), color-stop(1, #878787));
+    background: -moz-linear-gradient(top, #c4c4c4 5%, #878787 100%);
+    background: -webkit-linear-gradient(top, #c4c4c4 5%, #878787 100%);
+    background: -o-linear-gradient(top, #c4c4c4 5%, #878787 100%);
+    background: -ms-linear-gradient(top, #c4c4c4 5%, #878787 100%);
+    background: linear-gradient(to bottom, #c4c4c4 5%, #878787 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#c4c4c4', endColorstr='#878787',GradientType=0);
+    border: 1px solid #878787;
+}
+
+    .button-gray:hover {
+        -moz-box-shadow: inset 0px 1px 0px 0px #007dc1;
+        -webkit-box-shadow: inset 0px 1px 0px 0px #007dc1;
+        box-shadow: inset 0px 1px 0px 0px #007dc1;
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #878787), color-stop(1, #c4c4c4));
+        background: -moz-linear-gradient(top, #878787 5%, #c4c4c4 100%);
+        background: -webkit-linear-gradient(top, #878787 5%, #c4c4c4 100%);
+        background: -o-linear-gradient(top, #878787 5%, #c4c4c4 100%);
+        background: -ms-linear-gradient(top, #878787 5%, #c4c4c4 100%);
+        background: linear-gradient(to bottom, #878787 5%, #c4c4c4 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#878787', endColorstr='#c4c4c4',GradientType=0);
+        background-color: #878787;
+    }
+
+.button:active {
+    position: relative;
+    top: 1px;
+}
+
+.nav-btn {
+    width: 100%;
+    display: block;
+}
+
+@media (min-width: 900px) {
+    .nav-btn {
+        width: auto;
+        min-width: 120px;
+        display: inline;
+    }
+}
+
+.white {
+    color: white;
+}
+
+.openEstimate {
+    padding: 5px 5px 5px 5px;
+    color: #FFFFFF;
+    float: left;
+    background-color: #1d69a6;
+    font-size: 14px;
+    text-align: center;
+    font-style: normal;
+    /*border-radius: 5px;*/
+    width: 175px;
+    border: 1px solid white;
+    border-width: 1px 1px 3px;
+    margin-top: 5px;
+}
+
+.selected {
+    background-color: #52a0e0;
+}
+
+.leftEdge {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+.rightEdge {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.inputLabel {
+    padding: 0;
+    color: black;
+    background-color: #ffffff;
+    font-size: .750em;
+    text-align: left;
+    font-style: normal;
+    border-radius: 5px;
+    width: 100%;
+    /*border: 1px solid black;*/
+    border-width: 0;
+    margin-top: 5px;
+}
+
+.form-label {
+    color: black;
+}
+
+.text-uppercase {
+    text-transform: uppercase;
+}
+
+button:hover {
+    background-color: #1d69a6;
+    color: white;
+    border-radius: 5px;
+}
+
+#lgHideMenuBtn {
+    margin-left: 5px;
+    text-align: center;
+}
+
+#lgShowMenuBtn {
+    margin-left: 5px;
+}
+
+/* Navigation */
+#navigation {
+    z-index: 100000;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    bottom: 0;
+    overflow: auto;
+    display: none;
+    background-color: #349ad8;
+}
+
+#nav {
+    font-family: 'Nunito', sans-serif;
+    font-size: .750em;
+    padding-top: 0;
+    margin-top: 0;
+    position: relative;
+}
+
+#estimateView {
+    font-family: 'Nunito', sans-serif;
+    font-size: .875em;
+    padding-top: 0;
+    margin-top: 0;
+    float: right;
+}
+
+#estimateNavView {
+    padding-top: 0;
+    margin-top: 0;
+    font-size: 1.00em;
+    display: none;
+}
+
+
+.topMenu {
+    list-style-type: none;
+    padding: 0;
+    border: 0;
+    text-align: center;
+    line-height: 25px;
+}
+
+    .topMenu li {
+        display: inline;
+        color: black;
+        padding: 5px 10px;
+        white-space: nowrap;
+        cursor: pointer;
+    }
+
+        .topMenu li a {
+            color: black;
+        }
+
+        .topMenu li:hover {
+            background-color: #1d69a6;
+            color: white;
+            border-bottom-color: white;
+        }
+
+        .topMenu li.selected {
+            background-color: #1d69a6;
+            color: white;
+            border: 1px solid #1d69a6;
+            border-bottom-color: white;
+        }
+
+            .topMenu li.selected a {
+                color: white;
+            }
+
+/*#menuToggle {
+
+				text-align: right;
+				background-color: #1d69a6;
+				padding-right: 10px;
+				font-size: 14px;
+			}
+
+			#toggleButton {
+
+				background-color: 
+			}*/
+
+#menu {
+    padding-top: 0;
+    margin-top: -10;
+    font-size: 1.00em;
+    height: 100%;
+}
+
+nav ul {
+    list-style: none;
+    margin: 0 0 0 0px;
+    padding: 0 0 0 0px;
+}
+
+nav a {
+}
+
+.navItem {
+    padding: 20px;
+    border-style: solid;
+    border-color: white;
+    border-width: 1px 0 1px 0;
+    color: white;
+    background-color: #349ad8;
+    font-size: 12px;
+    height: 100%;
+}
+
+#navWorkDesk {
+    padding: 20px;
+    border-style: solid;
+    border-color: white;
+    border-width: 1px 0 0 0;
+    color: white;
+    background-color: #349ad8;
+    font-size: 13px;
+    height: 100%;
+    border-width: 0;
+}
+
+.navItem:hover {
+    background-color: #3292d5;
+}
+
+.selectedNavItem {
+    background-color: white;
+    color: black;
+}
+
+a {
+    color: white;
+}
+
+    a:visited {
+        color: white;
+    }
+
+.textLink a {
+    color: black;
+}
+
+    .textLink a:visited {
+        color: black;
+    }
+
+.open-button {
+    width: 100px;
+    display: block;
+    margin: 0px auto;
+    padding: 3px;
+}
+
+.datagrid table td {
+    padding: 1px !important;
+}
+
+/*mytooltip {
+    padding: 0px;
+    background: #c6ffd4;
+    position: absolute;
+    z-index: 1;
+    max-width: 300px;
+    -webkit-box-shadow: 0 0 5px #aaa;
+    box-shadow: 0 0 5px #aaa;
+    font-size: 15px;
+    border-radius: 5px;
+    margin-right: -10px;
+}*/
+
+/****** WorkDesk  *******/
+
+#workDesk {
+    font-family: 'Nunito', sans-serif;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 15px;
+    padding-right: 5px;
+    height: 100%;
+    /* margin-top: 15%; */
+}
+
+/******* FOOTER *******/
+
+.footer {
+    background-color: #f7fafc;
+    text-align: left;
+    font-size: .625em;
+}
+
+/*  SECTIONS  */
+
+.section {
+    clear: both;
+    padding: 0px;
+    margin: 0px;
+}
+
+/*  COLUMN SETUP  */
+.col {
+    display: block;
+    float: left;
+}
+
+    .col:first-child {
+        margin-left: 0;
+    }
+
+/*  GROUPING  */
+.group:before,
+.group:after {
+    content: "";
+    display: table;
+}
+
+.group:after {
+    clear: both;
+}
+
+.group {
+    zoom: 1; /* For IE 6/7 */
+}
+
+*, *:before, *:after {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+#smEstimateNavRow {
+    max-width: 90%;
+    margin-top: 25px;
+    padding-left: 30px;
+}
+
+form {
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 8px;
+    background: white;
+}
+
+h1 {
+    margin: 0 0 30px 0;
+    text-align: center;
+    font-size: 1.625em;
+}
+
+#customerInfoForm {
+    border: 1px solid #202020;
+    margin-top: 0;
+    padding-top: 0;
+    padding-left: 0;
+}
+
+#pageBtns {
+    padding-bottom: 50px;
+}
+
+#prvItemBtnView {
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 20px;
+}
+
+#customerPrvViewBtn {
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 20px;
+    text-align: left;
+}
+
+#nxtItemBtnView {
+    padding-left: 5px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+}
+
+#nxtAddPartsBottomBtn {
+    margin-bottom: 20px;
+    text-align: right;
+}
+
+#formHeader {
+    padding-top: 15px;
+    text-align: center;
+    /*height: 50px;*/
+}
+
+#estimateFormHeader {
+    padding-top: 10px;
+    z-index: 100;
+}
+
+#estimateFormHeader2 {
+    padding-top: 10px;
+    z-index: 100;
+}
+
+#formHeader-back {
+}
+
+#formHeader-center {
+    height: 100%;
+    margin: 0 auto;
+    text-align: center;
+}
+
+#formHeader-center2 {
+    height: 100%;
+    margin: 0 auto;
+    text-align: center;
+}
+
+#formHeader-center h1 {
+    display: none;
+}
+
+#formHeader-center2 h1 {
+    display: none;
+}
+
+.rate-ProfileName {
+    margin-top: 22px;
+    margin-bottom: 10px;
+}
+
+.form-container {
+    padding-top: 20px;
+}
+
+input::-webkit-input-placeholder {
+    color: black;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="date"],
+input[type="datetime"],
+input[type="email"],
+input[type="number"],
+input[type="search"],
+input[type="tel"],
+input[type="time"],
+input[type="url"],
+textarea,
+select {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    font-size: 16px;
+    height: auto;
+    margin: 0;
+    outline: 0;
+    padding: 0 0 0 15px;
+    width: 100%;
+    background-color: #e8eeef;
+    color: black;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.03) inset;
+    margin-bottom: 15px;
+}
+
+textarea {
+    min-height: 150px;
+    font-family: sans-serif;
+    padding: 10px !important;
+    max-width: 100%;
+    min-width: 100%;
+}
+
+input[type="radio"],
+input[type="checkbox"] {
+    margin: 0 4px 8px 0;
+}
+
+/*select {
+    padding: 6px;
+    height: 32px;
+    border-radius: 2px;
+}*/
+
+fieldset {
+    margin-bottom: 30px;
+    border: none;
+}
+
+legend {
+    font-size: 1.10em;
+    margin-bottom: 10px;
+}
+
+label {
+    display: block;
+    margin-bottom: 3px;
+}
+
+    label.light {
+        font-weight: 300;
+        display: inline;
+    }
+
+    label.med {
+        font-weight: 500;
+        display: inline;
+    }
+
+.number {
+    background-color: #1d69a6;
+    color: #fff;
+    height: 30px;
+    width: 30px;
+    display: inline-block;
+    font-size: 0.8em;
+    margin-right: 4px;
+    line-height: 30px;
+    text-align: center;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.2);
+    border-radius: 100%;
+}
+
+#bottomBtns {
+    padding: 0 0 10px 10px;
+}
+
+#prvBtn {
+    padding-bottom: 20px;
+}
+
+#nxtBtnVehicle {
+    padding-bottom: 10px;
+    /*padding-left: 40px;*/
+}
+
+/*OPEN ESTIMATE*/
+.estimateBtn {
+    background-color: red;
+}
+
+
+/*LOGIN INFO*/
+
+#loginFormContainer {
+    margin-top: 20px !important;
+    font-size: .875em;
+}
+
+.loginLabel {
+    font-size: 1.0em;
+    text-align: left;
+    font-style: normal;
+    padding: 3px;
+}
+
+.login-button-adjust {
+    float: left;
+    width: 40%;
+}
+
+.estimate-summary-left {
+    width: 50%;
+}
+
+.estimate-summary-right {
+    width: 50%;
+}
+
+#smEstimatePanel {
+    border: 1px solid #349ad8;
+    background-color: #f5f9fb;
+    border-radius: 10px;
+    margin-top: 10px;
+    margin-left: 5%;
+    margin-right: 5%;
+    width: 90%;
+}
+
+#sticky-anchor {
+    width: 100%;
+    height: 2px;
+    background-color: transparent;
+}
+
+.mobile-menu-container {
+    text-align: center;
+    width: 100%;
+    padding-top: 5px;
+    padding-bottom: 10px;
+    border-bottom: 5px solid #349ad8;
+    background-color: white;
+}
+
+    .mobile-menu-container.stick {
+        position: fixed;
+        z-index: 10000;
+        top: 0;
+    }
+
+.image-container {
+    float: left;
+    max-width: 600px;
+}
+
+.image-delete-container {
+    float: left;
+    width: 100%;
+    padding-bottom: 30px;
+    clear: both;
+}
+
+.vendor-container {
+    width: 90%;
+    margin: 0px auto;
+}
+
+.box-content {
+    padding: 0px;
+    background-color: #ffffff;
+}
+
+.graphic-container-small {
+    display: block;
+    width: 100%;
+    float: left;
+    padding: 5px;
+    z-index: 10;
+}
+
+.graphic-container-large {
+    display: none;
+}
+
+.graphical-header {
+    width: 100%;
+}
+
+.graphical-center {
+    width: 100%;
+    background-color: white;
+}
+
+.graphical-container {
+    width: 100%;
+    background-color: white;
+}
+
+.graphical-footer {
+    padding: 0px;
+    border: 0px;
+    background-color: white;
+    width: 100%;
+    height: 175px;
+}
+
+.graphic-top-row {
+    width: 100%;
+    height: 100%;
+}
+
+.radio-container {
+    height: 100%;
+    width: 100%;
+}
+
+.radio-title {
+    display: none;
+}
+
+.paint-type {
+    margin: 5px;
+}
+
+#sectionSearchContainer {
+    width: 100%;
+    padding: 0px 5px;
+}
+
+#partInfoTableContainer {
+    display: none;
+    margin-top: 5px;
+    font-size: 12px;
+}
+
+.modal-container {
+    display: none; /* Hidden by default */
+    z-index: 100; /* Sit on top */
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background-color: white;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    padding-bottom: 0px;
+}
+
+.popup-panel {
+    display: none;
+    border: silver outset;
+    background-color: whitesmoke;
+    width: 100%;
+    overflow-y: scroll;
+    overflow-x: scroll;
+    padding: 5px;
+}
+
+a.reportButton {
+    background: url(../Images/ViewReport.gif) no-repeat top left;
+    display: block;
+    width: 16px;
+    height: 20px;
+    text-indent: -9999px; /* hides the link text */
+}
+
+.resizable {
+}
+
+.resizable-top {
+}
+
+.resizable-bottom {
+}
+
+.ui-resizable-s {
+}
+
+.manual-entry-container {
+    padding: 10px;
+    top: 185px;
+    bottom: 187px;
+    overflow: auto;
+}
+
+.size-detector {
+    display: none;
+}
+
+#graphical-page-stuff {
+    height: 100%;
+}
+
+#PartInformation {
+    margin-bottom: 150px;
+    height: 100%;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background-color: white;
+    padding: 10px;
+}
+
+.parts-info-wrapper {
+    margin-top: 10px;
+    height: calc(100% - 85px);
+}
+
+.parts-info-scroller {
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.accessories-list {
+    list-style: none;
+    -moz-column-count: 2;
+    -moz-column-gap: 20px;
+    -webkit-column-count: 2;
+    -webkit-column-gap: 20px;
+    column-count: 2;
+    column-gap: 20px;
+    padding-left: 0px;
+}
+
+.existing-customer-list {
+    width: calc(100% - 30px);
+}
+
+.half-or-whole-container {
+    float: left;
+    width: 100%;
+    padding-left: 6px;
+    padding-right: 5px;
+}
+
+
+
+::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+    color: #969696 !important;
+}
+
+:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    color: #969696 !important;
+    opacity: 1;
+}
+
+::-moz-placeholder { /* Mozilla Firefox 19+ */
+    color: #969696 !important;
+    opacity: 1;
+}
+
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+    color: #969696 !important;
+}
+
+::-ms-input-placeholder { /* Microsoft Edge */
+    color: #969696 !important;
+}
+
+::placeholder { /* Most modern browsers support this now. */
+    color: #969696 !important;
+}
+
+.header-message {
+    max-width: 500px;
+    margin: 0px auto;
+    padding: 20px;
+    display: none;
+}
+
+.header-message-bad {
+    border-left: solid 1px red;
+    border-right: solid 1px red;
+    border-bottom: solid 1px red;
+    background-color: #ffe8e8;
+}
+
+.header-message-good {
+    border-left: solid 1px #16ff4f;
+    border-right: solid 1px #16ff4f;
+    border-bottom: solid 1px #16ff4f;
+    background-color: #c6ffd4;
+}
+
+#header-message-text {
+    padding: 0px;
+    margin: 0px;
+}
+
+#PartsAndLaborContainer {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    background-color: white;
+    padding: 10px;
+    overflow-y: scroll;
+}
+
+@media (min-width: 300px) {
+    /****** mobile layout ******/
+    /*  GRID OF FOUR  */
+    .sm_05_4 {
+        width: 12.125%;
+    }
+
+    .sm_1_4 {
+        width: 24.25%;
+    }
+
+    .sm_2_4 {
+        width: 49.5%;
+    }
+
+    .sm_3_4 {
+        width: 74.75%;
+    }
+
+    .sm_4_4 {
+        width: 100%;
+    }
+
+    /*  PUSH x of x Columns */
+    .sm__push_05_4 {
+        margin-left: 12.125%;
+    }
+
+    .sm_push_1_4 {
+        margin-left: 24.25%;
+    }
+
+    .sm_push_2_4 {
+        margin-left: 49.5%;
+    }
+
+    .sm_push_3_4 {
+        margin-left: 74.75%;
+    }
+
+    .sm_1_12 {
+        width: 7.416%;
+    }
+
+    .sm_2_12 {
+        width: 15.83%;
+    }
+
+    .sm_3_12 {
+        width: 24.25%;
+    }
+
+    .sm_4_12 {
+        width: 32.66%;
+    }
+
+    .sm_5_12 {
+        width: 41.08%;
+    }
+
+    .sm_6_12 {
+        width: 49.5%;
+    }
+
+    .sm_7_12 {
+        width: 57.91%;
+    }
+
+    .sm_8_12 {
+        width: 66.33%;
+    }
+
+    .sm_9_12 {
+        width: 74.75%;
+    }
+
+    .sm_10_12 {
+        width: 83.16%;
+    }
+
+    .sm_11_12 {
+        width: 91.58%;
+    }
+
+    .sm_12_12 {
+        width: 100%;
+    }
+
+    /* Push x of x columns */
+    .sm_push_1_12 {
+        margin-left: 7.416%;
+    }
+
+    .sm_push_2_12 {
+        margin-left: 15.83%;
+    }
+
+    .sm_push_3_12 {
+        margin-left: 24.25%;
+    }
+
+    .sm_push_4_12 {
+        margin-left: 32.66%;
+    }
+
+    .sm_push_5_12 {
+        margin-left: 41.08%;
+    }
+
+    .sm_push_6_12 {
+        margin-left: 49.5%;
+    }
+
+    .sm_push_7_12 {
+        margin-left: 57.91%;
+    }
+
+    .md_push_8_12 {
+        margin-left: 66.33%;
+    }
+
+    .sm_push_9_12 {
+        margin-left: 74.75%;
+    }
+
+    .sm_push_10_12 {
+        margin-left: 83.16%;
+    }
+
+    .sm_push_11_12 {
+        margin-left: 91.58%;
+    }
+
+    .sm_hide {
+        display: none;
+    }
+
+    a {
+        text-decoration: none;
+        color: white;
+        /*color: black;
+        cursor:pointer;*/
+    }
+
+    #header {
+        text-align: center;
+        margin: 0;
+        background-color: #ffffff;
+        padding: 0 0 10px 0;
+    }
+
+    #mobileMenuButton {
+        margin-left: 5px;
+    }
+
+    .smMenuBtn {
+        margin-left: 5px;
+    }
+
+    #shopName {
+        margin-top: 40px;
+        font-size: 18px;
+        /* text-align: center; */
+    }
+
+    #imgTechSupport {
+        display: none;
+    }
+
+    #supportNumber {
+        margin-top: 10px;
+        font-size: .625em;
+    }
+
+    #smEstimateBtn {
+    }
+
+    #lgHeader {
+        display: none;
+    }
+
+    #headerButtons {
+        display: none;
+    }
+
+    #workDesk {
+        margin-left: 0;
+        padding-left: 0;
+    }
+
+    #addPartsHeader {
+        margin-bottom: 10px;
+    }
+
+    #documentationView {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #documentation {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #estiamteTableView {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #estimates {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #partsLookupView {
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 0;
+        border-left: 0;
+    }
+
+    #partsLookup {
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: -10px;
+    }
+
+    #rateProfileView {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #rateProfile {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #tableContainer {
+        margin-left: 0;
+        padding-left: 0;
+    }
+
+    table {
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
+        background-color: #ffffff;
+        margin: 10% 25% 10% 0;
+        text-align: center;
+        font-size: .750em;
+    }
+
+    caption {
+        font-size: 1.3em;
+        font-weight: 400;
+        padding: 10px 0;
+    }
+
+    th {
+        padding: 12px 15px;
+        text-align: center;
+        border-bottom: 1px solid #E1E1E1;
+        font-weight: 400;
+        background: white;
+    }
+
+    tr {
+        border-bottom: 1px solid #FFF;
+        margin-bottom: 5px;
+    }
+
+
+    th, td {
+        text-align: left;
+        /* padding: 10px; */
+        font-weight: 200;
+    }
+
+    td {
+        /*padding: 12px 15px;*/
+        text-align: left;
+        /* text-indent: 5px; */
+        /* border-bottom: 1px solid #E1E1E1; */
+        font-size: .875em;
+    }
+
+    #formHeadline {
+        /*padding-top: 10px;
+        margin-bottom: 30px;*/
+        text-align: center;
+        /*height: 50px;*/
+        width: 100%;
+        clear: both;
+        font-size: .750em;
+    }
+
+    #firstColumn {
+        text-indent: 10px;
+    }
+
+    .searchRow {
+        background-color: #ffffff;
+    }
+
+    tfoot tr {
+        background: none;
+    }
+
+    tfoot td {
+        padding: 10px 2px;
+        font-size: 0.8em;
+        font-style: italic;
+        color: #8a97a0;
+    }
+
+    .smallCell {
+        font-size: .750em;
+    }
+
+    label.light {
+        font-weight: 300;
+        /*  display: inline; */
+        font-size: .850em;
+    }
+
+    #FourthColumn {
+        display: none;
+    }
+
+    #textarea {
+        width: 90%;
+    }
+
+    #estimateView {
+    }
+
+    #smHideLinesBtn {
+        display: none;
+    }
+
+    #lgEstimateNavRow {
+        display: none;
+    }
+
+    input:-webkit-input-placeholder {
+        color: black;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="date"],
+    input[type="datetime"],
+    input[type="email"],
+    input[type="number"],
+    input[type="search"],
+    input[type="tel"],
+    input[type="time"],
+    input[type="url"],
+    textarea,
+    select {
+        /*background: rgba(255,255,255,0.1);*/
+        /*border: none;*/
+        font-size: 14px;
+        padding: 0 0 0 10px;
+        height: 30px;
+    }
+
+    input[type="radio"],
+    input[type="checkbox"] {
+        margin: 0 4px 8px 0;
+    }
+
+    #vinContainer {
+        text-align: right;
+    }
+
+    #estimateTips {
+        text-align: center;
+    }
+
+    .inlineNote {
+        font-size: 12px;
+    }
+
+    #vehicleInfoHeadline {
+        margin-bottom: 30px;
+    }
+
+    #lgManualBtn {
+        display: none;
+    }
+
+    #partsBtns {
+        text-align: right;
+    }
+
+    fieldset {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    #vinNumberSet {
+        margin-bottom: 0;
+        margin-top: 20px;
+    }
+
+    #sectionSelect {
+        width: 100%;
+        margin-bottom: 10%;
+    }
+
+    #partsListBtnCont {
+        margin-bottom: 20px;
+    }
+
+    #kbbContainer {
+        text-align: right;
+        margin-right: 25px;
+    }
+
+    .break {
+        margin-bottom: 10px;
+    }
+
+    #operationContainer {
+        margin-top: 20px;
+    }
+
+    #blendtimeContainer {
+        /*width: 25%;*/
+        padding-right: 20px;
+    }
+
+    #paintTimeContainer {
+        /*width: 25%;*/
+        padding-right: 20px;
+    }
+
+    #undersideContainer {
+        /*width: 25%;*/
+        padding-right: 20px;
+    }
+
+    #toneStageInput {
+        height: 30px;
+        margin-bottom: 0;
+    }
+
+    #typeField {
+        margin-bottom: 30px;
+    }
+
+
+    /****INSURANCE****/
+
+    #supplementHeader {
+        text-align: center;
+        margin: 0;
+    }
+
+    #commitBtnContainer {
+        margin: 20px 0 20px 0;
+    }
+
+    #supplementInfoTable {
+        margin: 0;
+    }
+
+    #supplementHistory {
+        margin: 0;
+    }
+
+    /****ADD IMAGES****/
+
+    .imageContainer {
+        margin-top: 30px;
+    }
+
+    #imageHeaderContainer {
+        margin: 10px 0 10px 0;
+    }
+
+    #imageEditBtns {
+        text-align: right;
+    }
+
+    #imageFile {
+        font-size: .75em;
+        text-align: right;
+    }
+
+    /****ESTIMATE DETAILS****/
+
+    #jobStatusBtnContainer {
+        text-align: right;
+    }
+
+    #jobHistoryTable {
+        margin: 0 0 50px 0;
+    }
+
+    #printItemsCol1 {
+        margin-top: 20px;
+        margin-bottom: 50px;
+        padding-left: 10px;
+    }
+
+    #printItemsCol2 {
+        margin-top: 20px;
+        margin-bottom: 50px;
+    }
+
+    #printItemsLabel {
+        text-align: center;
+    }
+
+    /****PRINT ESTIMATE*****/
+
+    #detailsItemBtnView {
+        text-align: left;
+        margin-bottom: 30px;
+    }
+
+    #lgPDFBtn,
+    #lgExcelBtn {
+        display: none;
+    }
+
+    #reportHistoryTable {
+        margin: 0 0 50px 0;
+    }
+
+
+
+    /****OPEN ESTIMATE****/
+    #openEstimateForm {
+        margin: 0px;
+        padding: 0px;
+    }
+
+    @media (min-width: 900px) {
+        #openEstimateForm {
+            margin-top: 10px;
+            margin-left: 5px;
+            padding-top: 0;
+            padding-left: 1px;
+        }
+    }
+
+    #searchContainer {
+        margin-left: 5%;
+        margin-bottom: 10px;
+    }
+
+    #sectionSearchField {
+        /*height: 25px;*/
+        border-radius: 10px;
+    }
+
+    #grid {
+        border: none;
+        /*margin: 10px;*/
+    }
+
+    /*#btnSearchEstimates {
+
+        padding-bottom: 10px;
+    }*/
+
+
+    #magGlassContainer {
+        text-align: right;
+    }
+
+    #magGlass {
+        border-radius: 100%;
+        height: 30px;
+        width: 30px;
+        color: white;
+        background-color: #1d69a6;
+        color: #fff;
+        height: 30px;
+        width: 30px;
+        display: inline-block;
+        font-size: 1.25em;
+        margin-right: 4px;
+        line-height: 30px;
+        text-align: center;
+        text-shadow: 0 1px 0 rgba(255,255,255,0.2);
+        border-radius: 100%;
+    }
+
+    #estimateFilterSelectContainer {
+        text-align: center;
+        margin-bottom: 20px;
+        margin-left: 5%;
+        margin-right: 5%;
+    }
+
+    #estimateFilterView {
+        text-align: center;
+    }
+
+    #estimateTableHeader {
+        margin-bottom: 5px;
+    }
+
+    #editEstimateViewContainer {
+        margin-left: 1%;
+        margin-top: 20px;
+    }
+
+    #pageNumberEstimateViewContainer {
+        margin-top: 20px;
+    }
+
+    #smEstimateHistoryTable {
+        margin: 0 0 50px 0;
+    }
+
+
+    #largeTableCol {
+        display: none;
+    }
+
+    /******ESTIMATE PANEL*****/
+
+
+    #smBillingPanel {
+        border: 1px solid #870000;
+        font-size: 18px;
+        text-align: center;
+        background-color: #f5f9fb;
+        border-radius: 10px;
+        margin-top: 10px;
+        margin-left: 10%;
+        margin-right: 10%;
+        width: 80%;
+        padding-left: 10px;
+        height: 100px;
+    }
+
+    #payButton {
+        text-align: center;
+    }
+
+    .red-button {
+        margin-top: 20px;
+        background-color: #870000;
+        border-color: #870000;
+    }
+
+    #estimatePanelHeaderContainer {
+        margin-top: 5px;
+        margin-bottom: 5px;
+        padding-left: 10px;
+    }
+
+    #estimatePanelDetails {
+        text-align: left;
+        font-size: .75em;
+        padding-left: 1%;
+    }
+
+    #estimatePanelBtns {
+        margin-top: 5px;
+        font-size: .75em;
+        padding-left: 5px;
+    }
+
+    /***PARTS LOOKUP.html**/
+    #customerFieldSet {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    #partsLookupForm {
+        border: 1px solid #1d69a6;
+        margin-top: 10px;
+        margin-left: 10px;
+        padding-top: 0;
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    #partsSearchContainer {
+        background-color: none;
+        /*margin-left: 5%;*/
+        /*margin-right: 1%;*/
+    }
+
+    #searchHeader {
+        padding-bottom: 20px;
+        text-align: center;
+    }
+
+    #partNumberRadio {
+        padding-left: 20px;
+    }
+
+    #partSearchRadioContainer {
+        margin-bottom: 20px;
+    }
+
+    #descriptionRadio {
+        padding-left: 20px;
+    }
+
+    #partsSearchTableView {
+        padding-left: 5%;
+        margin-left: 0;
+        width: 90%;
+    }
+
+    #partsSearchTable {
+        margin-left: 0;
+    }
+
+    /****RATE PROFILE****/
+    #rateProfileForm {
+        border: 1px solid #1d69a6;
+        margin-top: 10px;
+        margin-left: 15px;
+        padding-top: 0;
+        padding-left: 1px;
+    }
+
+    #smRateProfileTable {
+        margin: 0 0 50px 0;
+    }
+
+    /****SELECT VENDORS****/
+    #vendorCaptionContainer {
+        text-align: center;
+    }
+
+    #selectVendorHeadNote {
+        text-align: center;
+    }
+
+    #smSelectVendorTable {
+        margin: 0 0 50px 0;
+    }
+
+    /****INSURANCE PROFILE****/
+    #newProfileContainer {
+        margin-top: 20px;
+    }
+
+    #searchInsProfileHeader {
+        padding-bottom: 20px;
+        padding-top: 20px;
+        text-align: center;
+    }
+
+    #insuranceProfileForm {
+        border: 1px solid #1d69a6;
+        margin-top: 0;
+        margin-left: 10px;
+        margin-right: 10px;
+        padding-top: 0;
+        padding-left: 0;
+    }
+
+    #insuranceProfileFieldSet {
+        /*padding-left: 10px;
+				padding-right: 10px;*/
+        margin-top: 20px;
+        margin-bottom: 0;
+    }
+
+    #insuranceProfileSearchContainer {
+        margin-left: 5%;
+        padding-left: 5%;
+        /*margin-right: 1%;*/
+    }
+
+    #insuranceVendorTableContainer {
+        width: 90%;
+        padding-left: 1%;
+        padding-right: 1%;
+    }
+
+    #smInsuranceVendorProfileTable {
+        width: 100%;
+        margin-left: 5%;
+        /*margin-right: 1%;*/
+    }
+
+    #insProfileBtnRow {
+        padding-left: 5%;
+    }
+
+    #profileCheckBoxContainer {
+        text-align: left;
+    }
+
+    /****FRAME DATA****/
+    #smFrameTable {
+        margin: 0 0 50px 0;
+    }
+
+    /****LOGIN INFORMATION****/
+    #loginCredentials {
+    }
+
+    #loginContactField {
+        margin-top: 25px;
+    }
+
+    #loginPasswordContainer {
+        margin-top: 25px;
+    }
+
+    /****COMPANY PROFILE****/
+    #companyNameFieldset {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    #companyContactInfoFieldset {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    #companyAddressFieldSet {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    #companyIDFieldset {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    /***PREFERENCES***/
+    #programRadioContainer {
+        margin-top: 20px;
+    }
+
+    #autoPaintSelectContainer {
+        margin-top: 20px;
+    }
+
+    #timeZone {
+        height: 50px;
+    }
+
+    #existingCustomer {
+        height: 50px;
+    }
+
+    /***SHOP MANAGE***/
+    #smManageCalendar {
+        margin: 0 0 50px 0;
+        border-color: white;
+        width: 90%;
+        margin-left: 5%;
+        margin-right: 5%;
+    }
+
+    #calendar {
+        display: none;
+    }
+
+    /*LINE ITEMS View*/
+
+    #lineItemHeader {
+        background-color: #349ad8;
+        color: white;
+        font-size: 1em;
+        text-align: center;
+        height: 10%;
+        border-bottom: 1px solid white;
+    }
+
+    .popup-panel-insurance-left {
+        float: left;
+    }
+
+    .popup-panel-insurance-right {
+        float: left;
+    }
+
+    .tabcontent {
+    }
+}
+
+@media screen and (max-width:700px) {
+    .md_display_col {
+        display: none;
+    }
+}
+
+@media screen and (min-width:700px) {
+
+    .tabcontent {
+        padding: 15px;
+    }
+
+    .accessories-list {
+        -moz-column-count: 4;
+        -webkit-column-count: 4;
+        column-count: 4;
+        padding-left: 20px;
+    }
+
+    html {
+        background-color: #f7fafc;
+    }
+
+    .estimate-search-button {
+        margin: 0px 0px 0px 5px !important;
+    }
+
+    .advanced-search-area {
+        float: left;
+        margin-top: 10px;
+    }
+
+    .graphic-top-row {
+        width: auto;
+    }
+
+    .paint-type {
+        width: auto;
+        float: left;
+    }
+
+    #sectionContainer {
+        width: 80%;
+        margin: 0px auto;
+        margin-top: 15px;
+    }
+
+    /****** TABLET LAYOUT ******/
+
+    #PartInformation {
+        position: relative;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .estimate-summary-left {
+        width: 25%;
+    }
+
+    .estimate-summary-right {
+        width: 75%;
+    }
+
+    .image-delete-container {
+        width: 100px;
+        padding-left: 10px;
+        padding-bottom: 0px;
+        min-width: 300px;
+        clear: both;
+    }
+
+    .vendor-container {
+        width: 90%;
+    }
+
+    .box-content {
+        padding: 10px;
+    }
+
+    /*  GRID OF EIGHT  */
+
+    .md_05_8 {
+        width: 5.81%;
+    }
+
+    .md_1_8 {
+        width: 11.62%;
+    }
+
+    .md_2_8 {
+        width: 24.25%;
+    }
+
+    .md_3_8 {
+        width: 36.87%;
+    }
+
+    .md_4_8 {
+        width: 49.5%;
+    }
+
+    .md_5_8 {
+        width: 62.12%;
+    }
+
+    .md_6_8 {
+        width: 74.75%;
+    }
+
+    .md_7_8 {
+        width: 87.37%;
+    }
+
+    .md_8_8 {
+        width: 100%;
+    }
+
+    /*  PUSH x of x Columns */
+    .md_push_05_8 {
+        margin-left: 5.81%;
+    }
+
+    .md_push_1_8 {
+        margin-left: 11.62%;
+    }
+
+    .md_push_1_05_8 {
+        margin-left: 17.43%;
+    }
+
+    .md_push_2_8 {
+        margin-left: 24.25%;
+    }
+
+    .md_push_3_8 {
+        margin-left: 36.87%;
+    }
+
+    .md_push_4_8 {
+        margin-left: 49.5%;
+    }
+
+    .md_push_5_8 {
+        margin-left: 62.12%;
+    }
+
+    .md_push_6_8 {
+        margin-left: 74.75%;
+    }
+
+    .md_push_7_8 {
+        margin-left: 87.37%;
+    }
+
+    .md_1_12 {
+        width: 7.416%;
+    }
+
+    .md_2_12 {
+        width: 15.83%;
+    }
+
+    .md_3_12 {
+        width: 24.25%;
+    }
+
+    .md_4_12 {
+        width: 32.66%;
+    }
+
+    .md_5_12 {
+        width: 41.08%;
+    }
+
+    .md_6_12 {
+        width: 49.5%;
+    }
+
+    .md_7_12 {
+        width: 57.91%;
+    }
+
+    .md_8_12 {
+        width: 66.33%;
+    }
+
+    .md_9_12 {
+        width: 74.75%;
+    }
+
+    .md_10_12 {
+        width: 83.16%;
+    }
+
+    .md_11_12 {
+        width: 91.58%;
+    }
+
+    .md_12_12 {
+        width: 100%;
+    }
+
+    /* Push x of x columns */
+    .md_push_1_12 {
+        margin-left: 7.416%;
+    }
+
+    .md_push_2_12 {
+        margin-left: 15.83%;
+    }
+
+    .md_push_3_12 {
+        margin-left: 24.25%;
+    }
+
+    .md_push_4_12 {
+        margin-left: 32.66%;
+    }
+
+    .md_push_5_12 {
+        margin-left: 41.08%;
+    }
+
+    .md_push_6_12 {
+        margin-left: 49.5%;
+    }
+
+    .md_push_7_12 {
+        margin-left: 57.91%;
+    }
+
+    .md_push_8_12 {
+        margin-left: 66.33%;
+    }
+
+    .md_push_9_12 {
+        margin-left: 74.75%;
+    }
+
+    .md_push_10_12 {
+        margin-left: 83.16%;
+    }
+
+    .md_push_11_12 {
+        margin-left: 91.58%;
+    }
+
+    .md_hide {
+        display: none;
+    }
+
+    .md_display {
+        display: block;
+    }
+
+
+
+    .form-container {
+        padding-top: 100px;
+    }
+
+
+    #content-area {
+        padding-bottom: 40px;
+    }
+
+    #logo {
+        margin: 0;
+        padding: 0;
+    }
+
+    #shopName {
+        text-align: left;
+        text-indent: 50px;
+    }
+
+    #supportNumber {
+        margin-top: 0px;
+    }
+
+    .smMenuBtn {
+    }
+
+    #smEstimateBtn {
+    }
+
+
+    /* 
+	#emptyItem {
+				
+		padding: 20px;
+		border-style: solid;
+		border-color: white;
+		border-width: 1px 0 0 0;
+				
+		color: white;
+		background-color: #349ad8;
+		height: 75px;
+					
+	} */
+
+    a {
+        text-decoration: none;
+    }
+
+    #documentationView {
+        margin-left: 10%;
+    }
+
+    #documentation {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #estiamteTableView {
+        margin-left: 10%;
+    }
+
+    #estimates {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #partsLookupView {
+        margin-left: 1%;
+    }
+
+    #partsLookup {
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: -10px;
+    }
+
+    #rateProfileView {
+        margin-left: 12%;
+    }
+
+    #rateProfile {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #smEstimateNavRow {
+        max-width: 100%;
+        margin-top: 25px;
+        padding-left: 75px;
+        padding-right: 50px;
+    }
+
+    h1 {
+        margin: 0 0 10px 0;
+        text-align: center;
+        font-size: 1.625em;
+    }
+
+    form {
+        max-width: 100%;
+        /* margin-top: 25px;*/
+        margin-left: auto;
+        margin-right: auto;
+        /*padding-left: 120px;*/
+        /* background: #f4f7f8; */
+        border-radius: 8px;
+    }
+
+    #customerInfoForm {
+    }
+
+    input:-webkit-input-placeholder {
+        color: black;
+    }
+
+    /*input[type="text"],
+    input[type="password"],
+    input[type="date"],
+    input[type="datetime"],
+    input[type="email"],
+    input[type="number"],
+    input[type="search"],
+    input[type="tel"],
+    input[type="time"],
+    input[type="url"],
+    textarea,
+    select {
+        background: rgba(255,255,255,0.1);
+        border: none;
+        font-size: 16px;
+        height: auto;
+        margin: 0;
+        outline: 0;
+        padding: 15px;
+        width: 100%;
+        background-color: #e8eeef;
+        color: black;
+        box-shadow: 0 1px 0 rgba(0,0,0,0.03) inset;
+        margin-bottom: 30px;
+    }*/
+
+    select {
+        margin-bottom: 30px;
+    }
+
+    input[type="radio"],
+    input[type="checkbox"] {
+        margin: 0 4px 8px 0;
+    }
+
+    #smEstimateNavRow {
+        display: block;
+    }
+
+    #prvItemBtnView {
+        padding-left: 20px;
+        padding-bottom: 20px;
+    }
+
+    .formButton {
+        padding-left: 90px;
+        /* padding-right: 10px; */
+    }
+
+    table {
+        font-size: .750em;
+        margin-top: 0px;
+    }
+
+    caption {
+        font-size: 1.3em;
+        font-weight: 400;
+        padding: 10px 0;
+    }
+
+    th {
+        padding: 12px 15px;
+        text-align: center;
+        border-bottom: 1px solid #E1E1E1;
+        font-weight: 400;
+        /*background: #8a97a0;*/
+    }
+
+    td {
+        /*padding: 12px 15px;*/
+        text-align: left;
+        font-size: 1.0em;
+        background-color: white;
+    }
+
+    tr {
+        border-bottom: 1px solid #FFF;
+        margin-bottom: 5px;
+    }
+
+    th, td {
+        text-align: left;
+        /* padding: 10px; */
+        font-weight: 200;
+    }
+
+    /* th:first-child,
+			td:first-child {
+				
+			padding-left: 0; 
+			
+			}
+			
+			th:last-child,
+			td:last-child {
+				
+			padding-right: 0; 
+			
+			} */
+
+
+    #firstColumn {
+        text-indent: 10px;
+        width: 70px;
+    }
+
+    .searchRow {
+        background-color: #ffffff;
+    }
+
+    tfoot tr {
+        background: none;
+    }
+
+    tfoot td {
+        padding: 10px 2px;
+        font-size: 0.8em;
+        font-style: italic;
+        color: #8a97a0;
+    }
+
+    .smallCell {
+        font-size: .750em;
+    }
+
+    label.light {
+        font-weight: 300;
+        /*  display: inline; */
+        font-size: .750em;
+    }
+
+    #documentation {
+    }
+
+    #partsLookupView {
+        padding-left: 5px;
+    }
+
+    #rateProfileView {
+    }
+
+    /****ISURANCE****/
+    #supplementInfoTableContainer {
+        margin-top: 50px;
+    }
+
+    #supplementHistoryTableContainer {
+        margin-top: 10px;
+    }
+
+    #estimateFilterSelectContainer {
+        display: none;
+    }
+
+    #estimateFilterBtns {
+        display: block;
+        /*text-align: center;*/
+        /*margin-left: 4%;*/
+    }
+
+    #estimateFilterBtns2 {
+        display: block;
+    }
+
+    /*#lgEstimateHistoryTable {
+        margin: 0 0 50px 0;
+    }*/
+
+    /*#pageNumberEstimateViewContainer {
+
+				margin-left: 11.62%;
+			}*/
+
+
+    /****ESTIMATE PANEL****/
+
+    /******ESTIMATE PANEL*****/
+
+    #smEstimatePanel {
+        border: 1px solid #349ad8;
+        background-color: #f5f9fb;
+        border-radius: 10px;
+        margin-top: 10px;
+        margin-left: 10%;
+        margin-right: 10%;
+        width: 80%;
+        padding-left: 10px;
+    }
+
+    #smBillingPanel {
+        border: 1px solid #870000;
+        font-size: 18px;
+        text-align: center;
+        background-color: #f5f9fb;
+        border-radius: 10px;
+        margin-top: 10px;
+        margin-left: 10%;
+        margin-right: 10%;
+        width: 80%;
+        padding-left: 10px;
+        height: 100px;
+    }
+
+    #payButton {
+        text-align: center;
+    }
+
+    .red-button {
+        /*margin-top:20px;*/
+        background-color: #870000;
+        border-color: #870000;
+    }
+
+    #estimatePanelHeaderContainer {
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+
+    #estimatePanelDetails {
+        text-align: left;
+        font-size: .75em;
+        padding-left: 1%;
+    }
+
+    #estimatePanelBtns {
+        margin-top: 10px;
+    }
+
+    /***PARTS LOOKUP.html***/
+    #partNumberRadio {
+        padding-left: 10%;
+    }
+
+    #partsSearchContainer {
+        margin-left: 1%;
+    }
+
+    #descriptionContainer {
+        padding-left: 5%;
+    }
+
+    #vehDescField {
+        font-size: .75em;
+    }
+
+    /****RATE PROFILE****/
+    .lgRateProfileTable {
+        display: table;
+        padding: 20px;
+    }
+
+    #editEstimateSelect {
+        margin-bottom: 10px;
+    }
+
+    td.colName {
+        font-size: 1em;
+    }
+
+    #saveBtns {
+        text-align: right;
+    }
+
+    /****SELECT VENDORS****/
+
+    #lgSelectVendorTable {
+        display: block;
+        margin-left: 0;
+        border-color: white;
+    }
+
+    /****INSURANCE VENDORS****/
+    #lgInsuranceVendorProfileTable {
+        display: block;
+        border-color: white;
+    }
+
+    /****SHOP MANAGE***/
+    #customerListForm {
+        border: 1px solid #1d69a6;
+        margin-top: 0;
+        margin-left: 5px;
+        padding-top: 0;
+        padding-left: 0;
+    }
+
+    #lgCustomerTable {
+        width: 90%;
+        margin: 0 0 50px 0;
+        border: 0;
+    }
+
+    #createCustomerBtn {
+        margin-left: 20px;
+    }
+
+    #calendar {
+        display: block;
+        border-color: white;
+        margin-left: 0;
+        /*padding-left: 5%;*/
+        text-align: center;
+    }
+
+    /***PRESET CHARGES***/
+    #lgRowPreset {
+        margin-top: 15px;
+    }
+
+    #ratesHeader {
+        margin-top: 50px;
+    }
+
+    #loginFormContainer {
+        margin-top: 120px !important;
+    }
+
+    .login-button-adjust {
+        height: 30px;
+        padding-top: 10px;
+    }
+
+    .graphic-container-small {
+        width: auto;
+    }
+
+    .half-or-whole-container {
+        width: 50%;
+        padding-left: 0px;
+        padding-right: 10px;
+    }
+
+    #PartsAndLaborContainer {
+        position: relative;
+        background-color: white;
+        padding: 10px;
+        overflow-y: scroll;
+        margin-bottom: 150px;
+        height: 100%;
+        overflow-y: scroll;
+    }
+
+    .popup-panel-insurance-left {
+        float: left;
+    }
+
+    .popup-panel-insurance-right {
+        float: left;
+        padding-left: 20px;
+        padding-top: 43px;
+    }
+}
+
+@media screen and (min-width: 900px) {
+
+    #graphical-page-stuff {
+        overflow: auto;
+    }
+
+
+
+    /***** Header  ******/
+    #estimateFormHeader {
+        position: fixed;
+        width: 100%;
+        height: 75px;
+        margin-left: -25px;
+        border-bottom: 1px solid black;
+        background-color: white;
+        padding-top: 3px
+    }
+
+    #formHeader-back {
+        width: 300px;
+        height: 100%;
+        padding-top: 40px;
+        position: absolute;
+        left: 0;
+        text-align: left;
+        padding-left: 15px;
+    }
+
+    #formHeader-center {
+        height: 100%;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+        #formHeader-center h1 {
+            padding: 0px;
+            margin: 0px;
+            display: block;
+        }
+
+    #formHeader-next {
+        padding-top: 43px;
+        height: 100%;
+        position: absolute;
+        right: 113px;
+        top: 0;
+        width: 300px;
+        text-align: right;
+        padding-right: 15px;
+    }
+
+
+
+    /******* Desktop Layout *******/
+
+    /*  GRID OF TWELVE  */
+
+    .lg_1_12 {
+        width: 7.416%;
+    }
+
+    .lg_2_12 {
+        width: 15.83%;
+    }
+
+    .lg_3_12 {
+        width: 24.25%;
+    }
+
+    .lg_4_12 {
+        width: 32.66%;
+    }
+
+    .lg_5_12 {
+        width: 41.08%;
+    }
+
+    .lg_6_12 {
+        width: 49.5%;
+    }
+
+    .lg_7_12 {
+        width: 57.91%;
+    }
+
+    .lg_8_12 {
+        width: 66.33%;
+    }
+
+    .lg_9_12 {
+        width: 74.75%;
+    }
+
+    .lg_10_12 {
+        width: 83.16%;
+    }
+
+    .lg_11_12 {
+        width: 91.58%;
+    }
+
+    .lg_12_12 {
+        width: 100%;
+    }
+
+
+    /* Push x of x columns */
+
+    .lg_push_1_12 {
+        margin-left: 7.416%;
+    }
+
+    .lg_push_2_12 {
+        margin-left: 15.83%;
+    }
+
+    .lg_push_3_12 {
+        margin-left: 24.25%;
+    }
+
+    .lg_push_4_12 {
+        margin-left: 32.66%;
+    }
+
+    .lg_push_5_12 {
+        margin-left: 41.08%;
+    }
+
+    .lg_push_6_12 {
+        margin-left: 49.5%;
+    }
+
+    .lg_push_7_12 {
+        margin-left: 57.91%;
+    }
+
+    .lg_push_8_12 {
+        margin-left: 66.33%;
+    }
+
+    .lg_push_9_12 {
+        margin-left: 74.75%;
+    }
+
+    .lg_push_10_12 {
+        margin-left: 83.16%;
+    }
+
+    .lg_push_11_12 {
+        margin-left: 91.58%;
+    }
+
+    .lg_hide {
+        display: none;
+    }
+
+    .lg_display {
+        display: block;
+    }
+
+    .lg_display_table {
+        display: table;
+    }
+
+    html {
+        background-color: white;
+    }
+
+    #smHeader {
+        display: none;
+    }
+
+    #lgHeader {
+        display: block;
+    }
+
+    #lgBillingHeader {
+        border: 1px solid #870000;
+        font-size: 18px;
+        text-align: center;
+        background-color: #f5f9fb;
+        border-radius: 10px;
+        margin-top: 10px;
+        padding-left: 10px;
+        height: 100px;
+    }
+
+    #nav {
+        text-align: center;
+        display: block;
+        font-size: .750em;
+        /* margin-top: 140px; */
+        height: 100%;
+        display: none;
+        /* position: fixed; */
+    }
+
+    nav ul {
+        /* list-style: none;
+				margin: 0 0 0 0px;
+				padding: 0 0 0 0px; */
+    }
+
+    nav a {
+        /* color: black; */
+    }
+
+    .navItem {
+        /* padding: 20px;
+				border-style: solid;
+				border-color: white;
+				border-width: 1px 0 0 0;
+				
+				color: white;
+				background-color: #349ad8;
+				height: 100%; */
+        padding-left: 15px;
+        max-height: 56px;
+        height: 7%;
+    }
+
+        .navItem:hover {
+            background-color: #1d69a6;
+        }
+
+    #navigation {
+        position: fixed;
+        left: auto;
+        top: 110px;
+        right: auto;
+        bottom: auto;
+        width: auto;
+        display: block;
+        background-color: transparent;
+        height: 100%;
+    }
+
+    #payButton {
+        text-align: center;
+    }
+
+    .red-button {
+        margin-top: 20px;
+        background-color: #870000;
+        border-color: #870000;
+    }
+
+    #content-area {
+        position: absolute;
+        left: 113px;
+        top: 110px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        width: 90%;
+        padding-bottom: 40px;
+    }
+
+    #calendarView {
+    }
+
+
+    #logo {
+        display: block;
+    }
+
+    #topHeaderButtons {
+        display: none;
+    }
+
+    #header {
+        position: fixed;
+        height: 110px;
+        z-index: 1000;
+        border-bottom: 5px solid #349ad8;
+    }
+
+    #headerButtons {
+        display: block;
+    }
+
+    #nav {
+        display: block;
+        /* position: fixed;
+				height: 100%;
+				top: 136px; 
+				left: 0px;  */
+    }
+
+    #SupportContainer {
+        /* margin-left: 15.83%;
+				width: 24.25%; */
+        padding-left: 0px;
+        align: right;
+    }
+
+    #imgTechSupport {
+        display: block;
+    }
+
+    #supportNumber {
+        text-align: center;
+        margin: 0;
+        padding: 0;
+    }
+
+    #lgHideLinesBtn {
+        display: none;
+    }
+
+
+    #workDesk {
+        /* padding-left: 200px; */
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .nonMenuWorkDesk {
+        padding-left: 80px;
+    }
+
+    #smEstimateNavRow {
+        /*max-width: 90%;
+				margin-top: 25px;
+				padding-left: 90px; 
+				margin-right: 100px;*/
+        display: none;
+    }
+
+    #lgEstimateNavRow {
+        display: block;
+        text-align: left;
+        height: 60px;
+        padding-left: 10px;
+    }
+
+    #lgEstimateNavRowRatesProfile {
+        display: block;
+        text-align: left;
+        height: 60px;
+    }
+
+    #lgEstimateNavRowRatesProfile2 {
+        display: block;
+        text-align: left;
+        height: 90px;
+
+    }
+
+    #estimateList, #customReportSubMenuList {
+        list-style-type: none;
+        margin: 35px 0 0 0;
+        padding: 0;
+        border: 0;
+        overflow: hidden;
+        border: 1px solid #349ad8;
+        background-color: #f5f9fb;
+        margin-top: 20px;
+        width: 100%;
+        height: 50px;
+        padding-top: 16px;
+    }
+
+    #estimateNav {
+        display: inline;
+        background-color: #1d69a6;
+        color: white;
+        border: 0;
+        border-radius: 5px;
+        font-size: 14px;
+        padding: 5px 10px 5px 10px;
+        border: 1px solid #1d69a6;
+    }
+
+    #estimateNavAnchorSelected {
+        background-color: #ccc;
+        padding-top: 21px;
+        padding-bottom: 25px;
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    #estimateNavAnchorFirst {
+        padding-left: 8px;
+    }
+
+    #estimateNav:hover {
+        -moz-box-shadow: inset 0px 1px 0px 0px #007dc1;
+        -webkit-box-shadow: inset 0px 1px 0px 0px #007dc1;
+        box-shadow: inset 0px 1px 0px 0px #007dc1;
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #0061a7), color-stop(1, #007dc1));
+        background: -moz-linear-gradient(top, #0061a7 5%, #007dc1 100%);
+        background: -webkit-linear-gradient(top, #0061a7 5%, #007dc1 100%);
+        background: -o-linear-gradient(top, #0061a7 5%, #007dc1 100%);
+        background: -ms-linear-gradient(top, #0061a7 5%, #007dc1 100%);
+        background: linear-gradient(to bottom, #0061a7 5%, #007dc1 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#0061a7', endColorstr='#007dc1',GradientType=0);
+        background-color: #0061a7;
+    }
+
+    #estimateNavSelected {
+        display: inline;
+        background-color: #1d69a6;
+        color: white;
+        border: 0;
+        border-radius: 5px;
+        padding: 5px 10px 5px 10px;
+        border: 1px solid #1d69a6;
+        font-size: 14px;
+    }
+
+
+
+    #formHeadline {
+        /*padding-top: 10px;
+        text-align: center;
+        height: 50px;*/
+    }
+
+    .form-label {
+        color: black;
+    }
+
+    #pageBtns {
+        height: 100px;
+    }
+
+    #manualBtn {
+    }
+
+    #graphicalBtn {
+    }
+
+    #lgManualBtn {
+        display: block;
+    }
+
+    form {
+        /* max-width: 300px; */
+        /* margin: 10px auto; */
+        /* padding: 10px 20px; */
+        max-width: 100%;
+        /* margin-top: 25px; */
+        margin-left: auto;
+        margin-right: auto;
+        /*padding-left: 20px;*/
+        padding-right: 20px;
+        background: white;
+        border-radius: 8px;
+    }
+
+    h1 {
+        margin: 0 0 30px 0;
+        text-align: center;
+        font-size: 1.625em;
+    }
+
+    #vinNumber {
+        margin-left: 0;
+    }
+
+    #vinBtn {
+    }
+
+    #vinContainer {
+        text-align: right;
+    }
+
+    #prvItemBtn {
+        margin-left: 0;
+    }
+
+    input:-webkit-input-placeholder {
+        color: black;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="date"],
+    input[type="datetime"],
+    input[type="email"],
+    input[type="number"],
+    input[type="search"],
+    input[type="tel"],
+    input[type="time"],
+    input[type="url"],
+    textarea,
+    select {
+        background: rgba(255,255,255,0.1);
+        border: none;
+        font-size: 14px;
+        /*height: 25px;*/
+        margin: 0;
+        outline: 0;
+        padding: 0 0 0 10px;
+        width: 100%;
+        background-color: #e8eeef;
+        color: black;
+        box-shadow: 0 1px 0 rgba(0,0,0,0.03) inset;
+        margin-bottom: 12px;
+    }
+
+    input[type="radio"],
+    input[type="checkbox"] {
+        margin: 0 4px 8px 0;
+    }
+
+    /*select {
+        padding: 6px;
+        height: 50px;
+        border-radius: 2px;
+    }*/
+
+    fieldset {
+        margin-bottom: 30px;
+        border: none;
+    }
+
+    legend {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+    }
+
+        label.light {
+            font-weight: 300;
+            font-size: 15px;
+            display: inline;
+        }
+
+    .number {
+        background-color: #1d69a6;
+        color: #fff;
+        height: 30px;
+        width: 30px;
+        display: inline-block;
+        font-size: 0.8em;
+        margin-right: 4px;
+        line-height: 30px;
+        text-align: center;
+        text-shadow: 0 1px 0 rgba(255,255,255,0.2);
+        border-radius: 100%;
+    }
+
+    #customerFieldsSet {
+    }
+
+    #addressFieldSet {
+    }
+
+    /*wide Fieldset: Column 1*/
+
+    #address1,
+    #city,
+    #zip,
+    #mileageIn,
+    #productionDate,
+    #license,
+    #exteriorColorText {
+        width: 48%;
+    }
+
+    /*wide Fieldset: Column 2*/
+
+    #address2,
+    #state,
+    #timeZone,
+    #mileageOut,
+    #estimatedValue,
+    #licenseState,
+    #interiorColorText {
+        margin-left: 2%;
+        width: 48%;
+    }
+
+
+
+    #nxtBtnVehicle {
+        margin-bottom: 20px;
+    }
+
+    #partInfoContainer {
+        margin-bottom: 0;
+    }
+
+    #partInfoSet {
+        padding-top: 85px;
+    }
+
+    #sectionSelect {
+        width: 100%;
+        /*margin-left: 10%;*/
+        margin-bottom: 5%;
+    }
+
+    #paintTimeContainer {
+        padding-right: 0;
+    }
+
+    #undersideContainer {
+        /*width: 25%;*/
+        padding-right: 0;
+    }
+
+    #blendtimeContainer {
+        /*width: 25%;*/
+        padding-right: 0;
+    }
+
+
+
+    #panelContainer {
+        margin-top: 0;
+    }
+
+    #panelTypeSelect {
+        margin-bottom: 10px;
+    }
+
+
+    #otherTypeSelect {
+        margin-top: 20px;
+        padding-top: 8px;
+    }
+
+    /****INSURANCE****/
+
+    #supplementInfoTableContainer {
+        margin-left: 0;
+        margin-top: 40px;
+    }
+
+    #supplementHistoryTableContainer {
+        margin-top: 0;
+    }
+
+    #supplementPrintContainer {
+        /*margin-left: 0;*/
+    }
+
+    .imageContainer:img {
+        width: 50%;
+    }
+
+    /****ESTIMATE DETAILS*****/
+
+    #jobHistoryTableContainer {
+        margin-left: 0;
+    }
+
+    #jobHistoryTable {
+        margin: 0 0 50px 0;
+    }
+
+    /****PRINT ESTIMATE****/
+
+    #smPDFBtn,
+    #smExcelBtn {
+        display: none;
+    }
+
+    #lgPDFBtn,
+    #lgExcelBtn {
+        display: block;
+    }
+
+    /****OPEN ESTIMATE****/
+
+    #estimateFilterView {
+        text-align: center;
+    }
+
+    #lgEstimateHistoryTable {
+        width: 100%;
+        margin: 0 0 10px 1%;
+        border: 0;
+    }
+
+    /****ESTIMATE PANEL****/
+
+    #estimatePanelHeaderContainer {
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+
+    #estimatePanelDetails {
+        text-align: left;
+        font-size: .75em;
+        padding-left: 1%;
+    }
+
+    #estimatePanelBtns {
+        margin-top: 10px;
+    }
+
+    /***PARTS LOOKUP.html***/
+
+
+
+    #vehDescField {
+        font-size: .875em;
+    }
+
+    /****SELECT VENDORS****/
+
+    #lgSelectVendorTable {
+        margin-left: 5%;
+    }
+
+    /****LOGIN INFORMATION****/
+
+    #loginCredentials {
+        text-align: right;
+        font-size: 1.25em;
+    }
+
+    /***COMPANY PROFILE***/
+
+    #companyNameContainer {
+        margin-left: 0;
+    }
+
+    /*****FRAME DATA ******/
+
+    #rateProfileTableContainer {
+        margin-left: 10px;
+    }
+
+
+    /****SHOP MANAGE****/
+
+    #customerListForm {
+        border: 1px solid #1d69a6;
+        margin-top: 0;
+        margin-left: 5px;
+        padding-top: 0;
+        padding-left: 0;
+    }
+
+    #lgCustomerTable {
+        width: 90%;
+        margin: 0 0 50px 0;
+        border: 0;
+    }
+
+    .radio-title {
+        display: block;
+        margin: 10px;
+        float: left;
+        font-weight: bold;
+        margin-left: 30px;
+    }
+
+    .graphical-container {
+        position: absolute;
+        left: 0px;
+        top: 50px;
+        bottom: 0px;
+        overflow: hidden;
+    }
+
+
+    .graphical-center {
+        position: absolute;
+        left: 0px;
+        top: 50px;
+        bottom: 120px;
+        overflow: auto;
+    }
+
+    .graphical-header {
+        position: fixed;
+        width: 100%;
+        left: 114px;
+        top: 110px;
+    }
+
+    .graphical-footer {
+        padding: 0px;
+        border: 0px;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+    }
+
+    /*
+    .graphical-footer {
+        padding: 0px;
+        border: 0px;
+        width: 100%;
+        position: absolute;
+        bottom: 0px;
+        left: 0px;
+        overflow: auto;
+    }
+    */
+    #sectionSearchContainer {
+        position: fixed;
+        top: 170px;
+        margin-top: 0px;
+        width: 30%;
+    }
+
+    #imageContainer {
+        margin-left: 30%;
+        width: 72%;
+    }
+
+    #btnRowContainer {
+        position: fixed;
+        right: 30px;
+    }
+
+    .resizable {
+        overflow: hidden;
+    }
+
+    .resizable-top {
+        height: 70%;
+    }
+
+    .resizable-bottom {
+        height: 30%;
+        position: relative;
+        border-left: 4px solid #349ad8;
+        border-right: 4px solid #349ad8;
+        border-bottom: 4px solid #349ad8;
+    }
+
+    .ui-resizable-s {
+        cursor: s-resize;
+        height: 10px !important;
+        width: 100%;
+        bottom: -5px;
+        left: 0;
+        background-color: #349ad8;
+    }
+
+    .manual-entry-container {
+        position: fixed;
+    }
+
+    .message-area {
+        border: 1px solid red;
+        max-width: 500px;
+        margin: 10px auto;
+        padding-left: 10px;
+        padding-right: 10px;
+        padding-bottom: 20px;
+    }
+
+    .popup-panel-insurance-left {
+        width: 35%;
+        float: left;
+        margin-top: 39px;
+    }
+
+    .popup-panel-insurance-right {
+        width: 65%;
+        float: left;
+    }
+
+    .inlineNote {
+        font-size: 11px;
+    }
+
+    .inlineNoteExtend {
+        margin-top: 26px;
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+    }
+}
+
+@media screen and (min-width: 1280px) {
+    .size-detector {
+        display: block;
+    }
+
+    #PartInformation {
+        overflow-y: scroll;
+        width: 90%;
+        margin: 0px auto;
+    }
+
+    #partInfoTableContainer {
+        margin-bottom: 150px;
+        display: block;
+        width: 75%;
+        float: right;
+    }
+
+    .modal-container {
+        padding-bottom: 150px;
+        padding-left: 0px;
+        top: 100px;
+        background-color: transparent;
+    }
+
+    .popup-panel {
+        margin: 20px auto;
+        padding: 20px;
+        width: 80%;
+    }
+
+    #imageContainer {
+        margin-left: 25%;
+        width: 50%;
+    }
+
+    .popup-panel-insurance-left {
+        margin-top: 25px;
+    }
+
+    .xl_1_14 {
+        width: 7.14285714286%;
+    }
+
+    .xl_2_14 {
+        width: 14.2857142857%;
+    }
+
+    .xl_3_14 {
+        width: 21.4285714286%;
+    }
+
+    .xl_4_14 {
+        width: 28.5714285714%;
+    }
+
+    .xl_5_14 {
+        width: 35.7142857143%;
+    }
+
+    .xl_6_14 {
+        width: 42.8571428571%;
+    }
+
+    .xl_7_14 {
+        width: 50.0%;
+    }
+
+    .xl_8_14 {
+        width: 57.1428571429%;
+    }
+
+    .xl_9_14 {
+        width: 64.2857142857%;
+    }
+
+    .xl_10_14 {
+        width: 71.4285714286%;
+    }
+
+    .xl_11_14 {
+        width: 78.5714285714%;
+    }
+
+    .xl_12_14 {
+        width: 85.7142857143%;
+    }
+
+    .xl_13_14 {
+        width: 92.8571428571%;
+    }
+
+    .xl_14_14 {
+        width: 100%;
+    }
+
+
+
+    .xl_push_1_14 {
+        margin-left: 7.14285714286%;
+    }
+
+    .xl_push_2_14 {
+        margin-left: 14.2857142857%;
+    }
+
+    .xl_push_3_14 {
+        margin-left: 21.4285714286%;
+    }
+
+    .xl_push_4_14 {
+        margin-left: 28.5714285714%;
+    }
+
+    .xl_push_5_14 {
+        margin-left: 35.7142857143%;
+    }
+
+    .xl_push_6_14 {
+        margin-left: 42.8571428571%;
+    }
+
+    .xl_push_7_14 {
+        margin-left: 50.0%;
+    }
+
+    .xl_push_8_14 {
+        margin-left: 57.1428571429%;
+    }
+
+    .xl_push_9_14 {
+        margin-left: 64.2857142857%;
+    }
+
+    .xl_push_10_14 {
+        margin-left: 71.4285714286%;
+    }
+
+    .xl_push_11_14 {
+        margin-left: 78.5714285714%;
+    }
+
+    .xl_push_12_14 {
+        margin-left: 85.7142857143%;
+    }
+
+    .xl_push_13_14 {
+        margin-left: 92.8571428571%;
+    }
+
+    .xl_push_14_14 {
+        margin-left: 100%;
+    }
+
+
+
+    #logo {
+    }
+
+    #dt {
+    }
+
+    #supplementPrintContainer {
+        margin-left: 0;
+    }
+
+    /****OPEN ESTIMATE****/
+
+    #lgEstimateHistoryTable {
+        width: 95%;
+        margin-left: 1%;
+    }
+
+
+    /****SELECT VENDORS****/
+
+    #lgSelectVendorTable {
+        margin-left: 10%;
+    }
+
+
+    /****INSURANCE VENDORS****/
+
+    #lgInsuranceVendorProfileTable {
+        padding-left: 5%;
+    }
+
+
+
+    /***SHOP MANAGE***/
+
+    #lgCustomerTable {
+        width: 95%;
+        margin-left: 1%;
+    }
+
+
+
+
+    .textbox {
+        -webkit-border-radius: 5px;
+        -moz-border-radius: 5px;
+        border-radius: 5px;
+        border: 1px solid #848484;
+        outline: 0;
+        height: 25px;
+        width: 275px;
+    }
+
+    .login-text {
+        height: 40px !important;
+        padding: 10px !important;
+    }
+
+    .rate_input {
+        width: 50%;
+        height: 30px;
+        background-color: #e1e1e1;
+        border: 0;
+        padding-left: 5px;
+        border-radius: 5px;
+    }
+
+    .popup-panel-insurance-left {
+        width: 35%;
+        float: left;
+    }
+
+    .popup-panel-insurance-right {
+        width: 65%;
+        float: left;
+    }
+
+    .inlineNote {
+        font-size: 12px;
+    }
+
+    .inlineNoteExtend {
+        margin-top: 10px;
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+    }
+}
+
+/*DataGrid Table*/
+.datagrid table {
+    border-collapse: collapse;
+    text-align: center;
+    width: 100%;
+}
+
+.datagrid {
+    font: normal 12px/150% Verdana, Arial, Helvetica, sans-serif;
+    background: #fff;
+    /*overflow: hidden;*/
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    text-align: center;
+}
+    /*.datagrid table {
+border:1px solid #006699;
+}*/
+
+    .datagrid table td, .datagrid table th {
+        padding: 5px 4px;
+    }
+
+    .datagrid table thead th {
+        background: -webkit-gradient( linear, left top, left bottom, color-stop(0.05, #006699), color-stop(1, #00557F) );
+        background: -moz-linear-gradient( center top, #006699 5%, #00557F 100% );
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#006699', endColorstr='#00557F');
+        background-color: #006699;
+        color: #FFFFFF;
+        font-size: 12px;
+        font-weight: bold;
+        border-left: 1px solid #0070A8;
+        text-align: center;
+    }
+
+        .datagrid table thead th:first-child {
+            border: none;
+        }
+
+#smGraphicalGrid tbody td {
+    font-size: 10px !important;
+}
+
+.datagrid table tbody td {
+    color: #000000;
+    border-left: 1px solid #E1EEF4;
+    font-size: 12px;
+    font-weight: normal;
+    text-align: center;
+}
+
+.datagrid table tbody .alt td {
+    background: #E1EEF4;
+    color: #000000;
+}
+
+.datagrid table tbody td:first-child {
+    border-left: none;
+}
+
+.datagrid table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.datagrid table tfoot td div {
+    border-top: 1px solid #006699;
+    background: #E1EEf4;
+}
+
+.datagrid table tfoot td {
+    padding: 0;
+    font-size: 12px;
+}
+
+    .datagrid table tfoot td div {
+        padding: 2px;
+    }
+
+    .datagrid table tfoot td ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        text-align: right;
+    }
+
+.datagrid table tfoot li {
+    display: inline;
+}
+
+    .datagrid table tfoot li a {
+        text-decoration: none;
+        display: inline-block;
+        padding: 2px 8px;
+        margin: 1px;
+        color: #FFFFFF;
+        border: 1px solid #006699;
+        -webkit-border-radius: 3px;
+        -moz-border-radius: 3px;
+        border-radius: 3px;
+        background: -webkit-gradient( linear, left top, left bottom, color-stop(0.05, #006699), color-stop(1, #00557F) );
+        background: -moz-linear-gradient( center top, #006699 5%, #00557F 100% );
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#006699', endColorstr='#00557F');
+        background-color: #006699;
+    }
+
+.datagrid table tfoot ul.active, .datagrid table tfoot ul a:hover {
+    text-decoration: none;
+    border-color: #00557F;
+    color: #FFFFFF;
+    background: none;
+    background-color: #006699;
+}
+
+div.dhtmlx_window_active, div.dhx_modal_cover_dv {
+    position: fixed !important;
+}
+
+.table-button {
+    text-decoration: none;
+    display: inline-block;
+    padding: 2px 8px;
+    margin: 1px;
+    color: #FFFFFF;
+    border: 1px solid #006699;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    background: -webkit-gradient( linear, left top, left bottom, color-stop(0.05, #006699), color-stop(1, #00557F) );
+    background: -moz-linear-gradient( center top, #006699 5%, #00557F 100% );
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#006699', endColorstr='#00557F');
+    background-color: #006699;
+}
+
+.center {
+    text-align: center;
+}
+
+.ddContainer {
+    float: left;
+    width: 100%;
+}
+
+@media (min-width: 500px) {
+    .ddContainer {
+        width: 32%;
+        max-width: 200px;
+        padding-right: 10px;
+    }
+}
+
+ul.tab {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid #349ad8;
+    background-color: #f5f9fb;
+}
+
+    ul.tab li {
+        float: left;
+        padding: 8px;
+    }
+
+        ul.tab li a {
+            display: inline-block;
+            text-align: center;
+            text-decoration: none;
+            transition: 0.3s;
+            color: white;
+            height: 30px;
+            padding: 4px;
+        }
+
+            /* Change background color of links on hover */
+            ul.tab li a:hover {
+                background-color: #ddd;
+            }
+
+            /* Create an active/current tablink class */
+            ul.tab li a:focus, .active {
+                background-color: #ccc;
+            }
+
+.tabcontent {
+    padding: 5px;
+    margin-bottom: 20px;
+    border: 1px solid #349ad8;
+    border-top: none;
+}
+
+.ReportHistoryContainer {
+    height: 400px;
+    overflow-y: auto;
+}
+
+
+/* Vendor page stuff */
+.box {
+    padding-top: 10px;
+    clear: both;
+}
+
+.message-container {
+    text-align: center;
+    color: red;
+}
+
+
+#keywords {
+    margin: 0 auto;
+    font-size: 1.2em;
+    margin-bottom: 15px;
+}
+
+
+.sortable-table thead {
+    cursor: pointer;
+}
+
+    .sortable-table thead tr th {
+        font-weight: bold;
+        text-align: center;
+    }
+
+        .sortable-table thead tr th span {
+            padding-right: 20px;
+            background-repeat: no-repeat;
+            background-position: 100% 100%;
+        }
+
+        .sortable-table thead tr th.headerSortUp, .sortable-table thead tr th.headerSortDown {
+            background: #acc8dd;
+        }
+
+            .sortable-table thead tr th.headerSortUp span {
+                background-image: url('../images/UpArrow2.gif');
+            }
+
+            .sortable-table thead tr th.headerSortDown span {
+                background-image: url('../images/DownArrow2.gif');
+            }
+
+
+.sortable-table tbody tr {
+    color: #555;
+}
+
+    .sortable-table tbody tr td {
+        text-align: center;
+        padding: 15px 10px;
+    }
+
+        .sortable-table tbody tr td.lalign {
+            text-align: left;
+        }
+
+@media (min-width: 1590px) {
+    .topMenu {
+        line-height: 50px;
+    }
+
+        .topMenu li {
+            width: 75%;
+            border: 0;
+            border-radius: 5px;
+            padding: 10px;
+            border: 1px solid #1d69a6;
+        }
+}
+
+@media (min-width: 1640px) {
+
+    .graphic-container-large {
+        display: block;
+    }
+
+    .graphic-container-small {
+        display: none;
+    }
+}
+
+.k-grid-header th.k-header, .k-filter-row th {
+    text-align: center !important;
+}
+
+.deleted-row {
+    color: lightgray;
+    font-style: italic;
+}
+
+/* For selected rows in a grid, make the text white. */
+.k-state-selected > td {
+    color: white !important;
+}
+
+/* Toggle button on/off */
+/* Start */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 2px;
+    background-color: white;
+    -webkit-transition: .2s;
+    transition: .2s;
+}
+
+input:checked + .slider {
+    background-color: #007dc1;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #007dc1;
+}
+
+input:checked + .slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 85px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+/* End */
+
+.admonishment {
+    font-size: 12px;
+    color: red;
+    font-weight: bold
+}

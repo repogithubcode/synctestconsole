@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report Width="8.42739232381185in" Name="PrintImage_PDF.trdx" xmlns="http://schemas.telerik.com/reporting/2012/3.8">
+  <Items>
+    <DetailSection Height="8.90000089009603in" Name="detailSection1">
+      <Items>
+        <Table>
+          <Body>
+            <Cells>
+              <TableCell RowIndex="0" ColumnIndex="0" RowSpan="1" ColumnSpan="1">
+                <ReportItem>
+                  <PictureBox Url="= Parameters.ImagePath.Value" Width="8.19999984180113in" Height="8.69696468606829in" Left="0in" Top="0in" Sizing="ScaleProportional" MimeType="" Name="pictureBox1" StyleName="">
+                    <!--<Style>
+                      <Padding Top="10px" Bottom="10px" />
+                    </Style>-->
+                  </PictureBox>
+                </ReportItem>
+              </TableCell>
+            </Cells>
+            <Columns>
+              <Column Width="8.19999984180113in" />
+            </Columns>
+            <Rows>
+              <Row Height="8.69696468606829in" />
+            </Rows>
+          </Body>
+          <Corner />
+          <RowGroups>
+            <TableGroup Name="detailTableGroup2">
+              <ChildGroups>
+                <TableGroup Name="group29" />
+              </ChildGroups>
+              <Groupings>
+                <Grouping />
+              </Groupings>
+            </TableGroup>
+          </RowGroups>
+          <ColumnGroups>
+            <TableGroup Name="tableGroup7" />
+          </ColumnGroups>
+        </Table>
+      </Items>
+    </DetailSection>
+  </Items>
+  
+  <PageSettings>
+    <PageSettings PaperKind="Letter" Landscape="False">
+      <Margins>
+        <MarginsU Left="0in" Right="0in" Top="0in" Bottom="0in" />
+      </Margins>
+    </PageSettings>
+  </PageSettings>
+  <ReportParameters>
+    <ReportParameter Name="ImagePath">
+      <Value>
+        <String>none</String>
+      </Value>
+    </ReportParameter>
+  </ReportParameters>
+</Report>

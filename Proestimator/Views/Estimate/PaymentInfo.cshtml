@@ -1,0 +1,688 @@
+﻿@model Proestimator.ViewModel.PaymentInfoVM
+
+@using System.Linq;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_PaymentInfo;
+}
+
+@section Head
+{
+    @if (Model.CreditCardPaymentShow)
+    {
+        HttpWebRequest request = (HttpWebRequest)
+        WebRequest.Create(Model.CreditCardPaymentLightBoxTerminalApi);
+        request.KeepAlive = false;
+        request.Method = "POST";
+        byte[] postBytes = System.Text.Encoding.ASCII.GetBytes(Model.CreditCardPaymentUriParams);
+        request.ContentType = "application/x-www-form-urlencoded";
+        request.ContentLength = postBytes.Length;
+        Stream requestStream = request.GetRequestStream();
+        requestStream.Write(postBytes, 0, postBytes.Length);
+        requestStream.Close();
+        HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+        Response.Write(new StreamReader(response.GetResponseStream()).ReadToEnd());
+
+        <script type="text/javascript">
+            $(document).ready(function () {
+
+                // Handle the result from a CC payment made, calling our api to insert the data into our system and then
+                //   reload the page *after* the user closes the modal window showing the receipt.
+                var intellipayStatus = '';
+                intellipay.enable('amount');
+                intellipay.setItemLabel("account", "Estimate ID");
+                intellipay.runOnApproval(function (response) {
+                    intellipayStatus = 'APPROVED';
+                    response.loginID = @Model.LoginID;
+                    response.estimateID = @Model.EstimateID;
+
+                    $.ajax({
+                        url: '@Url.Action("ProcessPaymentCompleteResult", "CreditCardPayment")',
+                        type: "POST",
+                        dataType: "json",
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify(response),
+                        success: function (data) {
+                            if (data.Success) {
+                                intellipayStatus = 'UPDATE_SUCCESS';
+                            } else {
+                                intellipayStatus = 'UPDATE_FAILURE';
+                                ShowUserMessage(data.Message, false, 3000)
+                            }
+                        }
+                    });
+                });
+                intellipay.runOnNonApproval(function (response) {
+                    // NOTE: Currently we are not doing anything with this declined status.
+                    // It looks like IP is handling this fine as-is, displaying the needed message.
+                    intellipayStatus = 'DECLINED';
+                });
+                intellipay.runOnClose(function () {
+                    WaitAndReload();
+                });
+                function WaitAndReload() {
+                    console.log('intellipayStatus: ' + intellipayStatus);
+                    if (intellipayStatus === 'UPDATE_SUCCESS') {
+                        location.reload();
+                    } else if (intellipayStatus === 'APPROVED') {
+                        setTimeout(WaitAndReload, 250);
+                    }
+                }
+
+            });
+        </script>
+    }
+}
+
+<script type="text/javascript">
+    var _payees = @Html.Raw(Json.Encode(Model.PayeePresets))
+
+         $(document).ready(function () {
+             $("#WhoPays").change(function () {
+                 var selectedWhoPays = $("#WhoPays").val();
+                 console.log("Selected: " + _payees[selectedWhoPays]);
+
+                 for (i = 0; i < _payees.length; i++)
+                 {
+                     if (_payees[i].Key == selectedWhoPays)
+                     {
+                         $("#PayeeName").val(_payees[i].Value);
+                     }
+                 }
+
+             });
+         });
+</script>
+
+<div id="workDesk" class="page-container">
+
+    @using (Html.BeginForm("PaymentInfo", "Estimate", FormMethod.Post, new { @class = "container" }))
+    {
+        @Html.HiddenFor(model => model.UserID)
+        @Html.HiddenFor(model => model.PaymentId)
+
+        <input type="hidden" id="redirectData" name="redirectDataField" />
+
+        <div id="estimateFormHeader">
+
+            <div id="formHeader-back">
+                <a class="button nav-btn" data-link-id="EstimateNotes-Back" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/estimate/@Model.EstimateID/estimatenotes');">@Proestimator.Resources.ProStrings.EstimateNotesBackButton</a>
+            </div>
+
+            <div id="formHeader-center">
+                <h1>@Proestimator.Resources.ProStrings.PaymentInformationHeader</h1>
+                @if (Model.CreditCardPaymentID == 0)
+                {
+                    <a class="button nav-btn" href="/@ViewBag.UserID/estimate/@Model.EstimateID/payment-info/">&nbsp;&nbsp;@Proestimator.Resources.ProStrings.ClearForm&nbsp;&nbsp;</a>
+                    <input id="submitButton" class="button nav-btn" type="submit" value="@Proestimator.Resources.ProStrings.Save" />
+                }
+                else
+                {
+                    <div style="margin-top:12px;">
+                        <a class="button nav-btn" href="/@ViewBag.UserID/estimate/@Model.EstimateID/payment-info/">&nbsp;&nbsp;@Proestimator.Resources.ProStrings.ClearForm&nbsp;&nbsp;</a>
+                    </div>
+                }
+            </div>
+
+            <div id="formHeader-next">
+                <a class="button nav-btn" data-link-id="Print-Next" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/estimate/@Model.EstimateID/printing');">@Proestimator.Resources.ProStrings.PrintPageButton </a>
+            </div>
+
+        </div>
+
+        <div class="form-container">
+
+            @if (ViewBag.ShowFinancing == true)
+            {
+                <!--BEGIN: WISETACK FINANCING SECTION-->
+
+                <style>
+                    .wisetackSignupInnerContent {
+                        width: 400px;
+                        height: 850px;
+                        overflow: hidden;
+                    }
+
+                    .ui-dialog-titlebar {
+                        background-color: white;
+                        height: 22px;
+                        border: none;
+                        margin: 10px;
+                    }
+
+                    .ui-dialog {
+                        z-index: 1000 !important;
+                    }
+
+                    .hide-small {
+                    }
+
+                    .hide-med {
+                    }
+
+                    .save-buttons {
+                        width: 200px;
+                        margin-right: 10px;
+                    }
+
+                    .customer-details-wrapper {
+                        display: none;
+                        height: 1px;
+                    }
+
+                    .hide-column {
+                        display: none;
+                    }
+
+                    .imported-true {
+                        display: none !important;
+                    }
+
+                    .estimate-id-label {
+                        display: none;
+                    }
+
+                    @@media (max-width: 1400px) {
+                        .hide-med {
+                            display: none;
+                        }
+                    }
+
+                    @@media (max-width: 700px) {
+                        .save-buttons {
+                            width: 100%;
+                        }
+
+                        .hide-small {
+                            display: none;
+                        }
+                    }
+
+                    .finCustomerLoanAppSectionHide {
+                        display: none;
+                        visibility: hidden;
+                    }
+
+                    .finCustomerLoanAppSectionHideShow {
+                    }
+
+                    .divWisetackLoanAppButton input {
+                        border: white;
+                        background-color: #349ad8;
+                        font-size: 22px;
+                        font-weight: bold;
+                        min-width: 380px;
+                        color: white;
+                        min-height: 40px;
+                        cursor: pointer;
+                        border-radius: 6px;
+                    }
+
+                    .finLoanAppOuterDiv {
+                        max-width: 660px;
+                        display: grid;
+                        grid-template-columns: auto auto auto;
+                        grid-template-rows: auto auto auto auto auto;
+                        padding: 5px;
+                        margin-left: 10%;
+                    }
+
+                    .finWisetackLoanAppCTASection {
+                        grid-column-start: 1;
+                        grid-column-end: 4;
+                        grid-row-start: 1;
+                        grid-row-end: 3;
+                    }
+
+                    .finWisetackLoanAppCTATitle {
+                        font-weight: bold;
+                        font-size: 16px;
+                    }
+
+                    .finWisetackLoanAppCTAText {
+                        font-size: 14px;
+                        margin-top: 3px;
+                    }
+
+                    .finWisetackLoanAppCTALearnMore {
+                        font-size: 14px;
+                        margin-top: 3px;
+                    }
+
+                    .finWisetackCTAImage {
+                        float: inline-end;
+                        margin-top: -25px;
+                        width: 370px;
+                    }
+
+                    .finWisetackIcon img {
+                        max-width: 100px;
+                    }
+
+                    .divWisetackLoanAppButton {
+                        grid-column-start: 1;
+                        grid-column-end: 4;
+                        margin-top: 5px;
+                        grid-row-start: 4;
+                        grid-row-end: 5;
+                    }
+
+                    .divWisetackLoanAppStatus {
+                        font-size: 14px;
+                        grid-column-start: 1;
+                        grid-column-end: 4;
+                        grid-row-start: 3;
+                        grid-row-end: 4;
+                        color: #1d69a6;
+                    }
+
+                    .divPromoInfoContainer {
+                        grid-column-start: 1;
+                        grid-column-end: 4;
+                        grid-row-start: 5;
+                        grid-row-end: 6;
+                        margin-top: 5px;
+                        max-width: 400px;
+                        min-height: 35px;
+                    }
+
+                    .promoInfoDiv {
+                        font-size: 16px;
+                    }
+
+                    .finWisetackLoanAppCTALearnMore a:link, a:hover, a:visited, a:active {
+                        color: #349ad8;
+                        text-decoration: underline;
+                    }
+                </style>
+                <script>
+                    var wisetackIntervalId = -1;
+                    var wisetackMerchantId = '';
+                    var wisetackMerchantSignupLink = '';
+                    var wisetackMerchantSignupStatus = '';
+                    var wisetackCurrentLoanApplicationStatus = '';
+                    var wisetackLoanAppLink = '';
+                    var wisetackCustomerName = '';
+                    var wisetackMaximumAmount = '';
+                    var wisetackRequestedLoanAmount = '';
+                    var wisetackApprovedLoanAmount = '';
+                    var wisetackApplicationStartDate = '';
+                    var wisetackDateOfLastUpdate = '';
+                    var wisetackAmountToFinance = '';
+                    var wisetackEstimatedDateOfCompletion = '';
+                    var wisetackLoanAppMobileNumber = '';
+                    var wisetackTransactionID = '';
+                    var wisetackExpirationDate = '';
+                    var wisetackStartLoanAppClicked = false;
+                    var wisetackIsCallingApi = false;
+                    var wisetackIsCallingPromoApi = false;
+                    var wisetackEstimateGrandTotal = '';
+                    var wisetackPromoApiCalled = false;
+
+                    $(document).ready(function () {
+                        $('#divWisetackLoanAppStatus').hide();
+                        wisetackStartPolling();
+                    });
+
+                    function wisetackSetLoanAppInfo() {
+                        if (wisetackIsCallingApi)
+                            return;
+                        wisetackIsCallingApi = true;
+                        $.getJSON('@Url.Action("GetFinancingLoanAppInfo", "Financing")', { userID: @ViewBag.UserID, estimateID: @Model.EstimateID }, function (data) {
+                            if (data.Success === true) {
+                                wisetackMerchantId = data.MerchantID;
+                                wisetackMerchantSignupLink = data.MerchantSignupLink;
+                                wisetackMerchantSignupStatus = data.MerchantSignupStatus;
+                                wisetackTransactionID = data.TransactionID;
+                                wisetackLoanAppLink = data.LoanApplicationLink;
+                                wisetackCurrentLoanApplicationStatus = data.LoanApplicationStatus;
+                                wisetackCustomerName = data.CustomerName;
+                                wisetackMaximumAmount = data.MaximumAmount;
+                                wisetackRequestedLoanAmount = data.RequestedLoanAmount;
+                                wisetackApprovedLoanAmount = data.ApprovedLoanAmount;
+                                wisetackApplicationStartDate = data.ApplicationStartDate;
+                                wisetackDateOfLastUpdate = data.DateOfLastUpdate;
+                                wisetackAmountToFinance = data.AmountToFinance;
+                                wisetackEstimatedDateOfCompletion = data.EstimatedDateOfCompletion;
+                                wisetackLoanAppMobileNumber = data.LoanAppMobileNumber;
+                                wisetackExpirationDate = data.ExpirationDate;
+                                wisetackEstimateGrandTotal = data.GrandTotal;
+                            } else {
+                                console.warn('Unable to get wisetack financing information for this user. Error: ' + data.ErrorMessage);
+                            }
+
+                            if (wisetackEstimateGrandTotal !== '' && wisetackEstimateGrandTotal !== '0.00' && wisetackPromoApiCalled === false) {
+                                wisetackSetLoanAppPromoInfo();
+                            }
+
+                            wisetackUpdateUiUsingCurrentStatus();
+                            wisetackIsCallingApi = false;
+                        });
+                    }
+
+                    function wisetackSetLoanAppPromoInfo() {
+                        wisetackPromoApiCalled = true;
+                        if (wisetackIsCallingPromoApi)
+                            return;
+
+                        if (wisetackCurrentLoanApplicationStatus === 'AUTHORIZED' || wisetackCurrentLoanApplicationStatus === 'LOAN TERMS ACCEPTED'
+                            || wisetackCurrentLoanApplicationStatus === 'LOAN CONFIRMED' || wisetackCurrentLoanApplicationStatus === 'SETTLED') {
+                            $('#promoInfoDiv').html('');
+                            return;
+                        }
+
+                        wisetackIsCallingPromoApi = true;
+                        $.getJSON('@Url.Action("GetMerchantPromoInfo", "Financing")', { userID: @ViewBag.UserID, estimateID: @Model.EstimateID }, function (data) {
+                            if (data.Success === true) {
+                                $('#promoInfoDiv').html('@Proestimator.Resources.ProStrings.FinancingLoanApplicationCTAAsLowAsPrefix<b>$' + data.AsLowAsMonthlyPayment + '</b>@Proestimator.Resources.ProStrings.FinancingLoanApplicationCTAAsLowAsPostfix')
+                            } else {
+                                console.warn('Unable to get wisetack promo information for this user. Error: ' + data.ErrorMessage);
+                            }
+                            wisetackIsCallingPromoApi = false;
+                        });
+                    }
+
+                    function wisetackStartPolling() {
+                        wisetackSetLoanAppInfo();
+                        if (wisetackIntervalId > 0)
+                            return;
+                        wisetackIntervalId = window.setInterval(function () {
+                            wisetackSetLoanAppInfo();
+                        }, 3000);
+                    }
+
+                    function wisetackSendLoanApp() {
+                        wisetackStartLoanAppClicked = true;
+                        wisetackStartPolling();
+                        var requestLoanAppUrl = '/@ViewBag.UserID/financingRequestLoanApp/@Model.EstimateID';
+                        $("#wisetackSignupDiv").html('<object class="wisetackSignupInnerContent" data="' + requestLoanAppUrl + '"/>');
+                        $("#wisetackSignupDiv").dialog({
+                            showTitle: false,
+                            autoOpen: true,
+                            width: 'auto',
+                            height: 'auto',
+                            modal: true
+                        });
+                    }
+
+                    function wisetackReplaceDesriptiveStrings(text, link, phone, expDate, finAmt, apprvAmt) {
+                        return text
+                            .replace('[LOAN_APP_LINK]', link)
+                            .replace('[LOAN_APP_MOBILE_NUMBER]', phone)
+                            .replace('[LOAN_APP_EXPIRE_DATE]', expDate)
+                            .replace('[LOAN_APP_FINANCE_AMOUNT]', finAmt)
+                            .replace('[LOAN_APP_EXPIRE_DATE]', expDate)
+                            .replace('[LOAN_APP_APPROVED_FOR_AMOUNT]', apprvAmt);
+                    }
+
+                    function wisetackUpdateUiUsingCurrentStatus() {
+
+                        if (wisetackEstimateGrandTotal === '' || wisetackEstimateGrandTotal === '0.00') {
+                            clearInterval(wisetackIntervalId);
+                            wisetackIntervalId = -1;
+                            return;
+                        }
+
+                        if (wisetackIntervalId > -1 &&
+                                (wisetackCurrentLoanApplicationStatus === 'SETTLED' ||
+                                wisetackCurrentLoanApplicationStatus === 'LOAN CONFIRMED' ||
+                                (wisetackLoanAppLink === '' && !wisetackStartLoanAppClicked))) {
+                            clearInterval(wisetackIntervalId);
+                            wisetackIntervalId = -1;
+                        }
+
+                        if (wisetackMerchantSignupStatus === 'APPLICATION_APPROVED') {
+                            var wisetackAppButtonHtml = '';
+                            var wisetackAppStatusInfoHtml = '';
+                            var wisetackMobileNumberFormatted = wisetackLoanAppMobileNumber;
+                            if (wisetackMobileNumberFormatted.indexOf('+1') === 0 && wisetackMobileNumberFormatted.length === 12) {
+                                wisetackMobileNumberFormatted = '(' + wisetackMobileNumberFormatted.substring(2, 5) + ') '
+                                    + wisetackMobileNumberFormatted.substring(5, 8) + '-'
+                                    + wisetackMobileNumberFormatted.substring(8);
+                            }
+                            if (wisetackLoanAppLink === '') {
+                                wisetackAppButtonHtml = '<input type="button" value="@Proestimator.Resources.ProStrings.FinancingLoanApplicationSendAppButtonLabel" onclick="wisetackSendLoanApp()" />';                            }
+                            else {
+                                if (wisetackCurrentLoanApplicationStatus !== 'LOAN CONFIRMED' && wisetackCurrentLoanApplicationStatus !== 'SETTLED') {
+                                    wisetackAppButtonHtml = '<input type="button" value="@Proestimator.Resources.ProStrings.FinancingLoanApplicationResendAppButtonLabel" onclick="wisetackSendLoanApp()" />';
+                                }
+
+                                wisetackAppStatusInfoHtml = '<span>';
+
+                                if (wisetackCurrentLoanApplicationStatus === 'EXPIRED') {
+                                    wisetackAppStatusInfoHtml += wisetackReplaceDesriptiveStrings('@Proestimator.Resources.ProStrings.FinancingLoanApplicationStatusExpired_Descriptive',
+                                        wisetackLoanAppLink, wisetackMobileNumberFormatted, wisetackExpirationDate, wisetackAmountToFinance, wisetackApprovedLoanAmount);
+                                } else if (wisetackCurrentLoanApplicationStatus === 'DECLINED') {
+                                    wisetackAppStatusInfoHtml += wisetackReplaceDesriptiveStrings('@Proestimator.Resources.ProStrings.FinancingLoanApplicationStatusDeclined_Descriptive',
+                                        wisetackLoanAppLink, wisetackMobileNumberFormatted, wisetackExpirationDate, wisetackAmountToFinance, wisetackApprovedLoanAmount);
+                                } else if (wisetackCurrentLoanApplicationStatus === 'REFUNDED') {
+                                    wisetackAppStatusInfoHtml += wisetackReplaceDesriptiveStrings('@Proestimator.Resources.ProStrings.FinancingLoanApplicationStatusRefunded_Descriptive',
+                                        wisetackLoanAppLink, wisetackMobileNumberFormatted, wisetackExpirationDate, wisetackAmountToFinance, wisetackApprovedLoanAmount);
+                                } else if (wisetackCurrentLoanApplicationStatus === 'CANCELED') {
+                                    wisetackAppStatusInfoHtml += wisetackReplaceDesriptiveStrings('@Proestimator.Resources.ProStrings.FinancingLoanApplicationStatusCanceled_Descriptive',
+                                        wisetackLoanAppLink, wisetackMobileNumberFormatted, wisetackExpirationDate, wisetackAmountToFinance, wisetackApprovedLoanAmount);
+                                } else {
+
+                                    if (wisetackMobileNumberFormatted === '') {
+                                        wisetackAppStatusInfoHtml += wisetackReplaceDesriptiveStrings('@Proestimator.Resources.ProStrings.FinancingLoanApplicationStatusGeneralWithoutNumber_Descriptive',
+                                            wisetackLoanAppLink, wisetackMobileNumberFormatted, wisetackExpirationDate, wisetackAmountToFinance, wisetackApprovedLoanAmount);
+                                    } else {
+                                        wisetackAppStatusInfoHtml += wisetackReplaceDesriptiveStrings('@Proestimator.Resources.ProStrings.FinancingLoanApplicationStatusGeneralWithNumber_Descriptive',
+                                            wisetackLoanAppLink, wisetackMobileNumberFormatted, wisetackExpirationDate, wisetackAmountToFinance, wisetackApprovedLoanAmount);
+                                    }
+
+                                    if (wisetackApprovedLoanAmount !== '') {
+                                        wisetackAppStatusInfoHtml += wisetackReplaceDesriptiveStrings('@Proestimator.Resources.ProStrings.FinancingLoanApplicationStatusGeneralApprovedFor_Descriptive',
+                                            wisetackLoanAppLink, wisetackMobileNumberFormatted, wisetackExpirationDate, wisetackAmountToFinance, wisetackApprovedLoanAmount);
+                                    } else {
+                                        wisetackAppStatusInfoHtml += '. ';
+                                    }
+
+                                    if (wisetackExpirationDate !== '' && (wisetackCurrentLoanApplicationStatus === 'ACTIONS REQUIRED'
+                                        || wisetackCurrentLoanApplicationStatus === 'INITIATED' || wisetackCurrentLoanApplicationStatus === 'LOAN TERMS ACCEPTED')) {
+                                        wisetackAppStatusInfoHtml += wisetackReplaceDesriptiveStrings('@Proestimator.Resources.ProStrings.FinancingLoanApplicationStatusGeneralExpiresOn_Descriptive',
+                                            wisetackLoanAppLink, wisetackMobileNumberFormatted, wisetackExpirationDate, wisetackAmountToFinance, wisetackApprovedLoanAmount);
+                                    }
+
+                                    if (wisetackCurrentLoanApplicationStatus === 'SETTLED') {
+                                        wisetackAppStatusInfoHtml += '<br /><b>@Proestimator.Resources.ProStrings.FinancingLoanApplicationStatusGeneralCurrentStatus_Descriptive:</b> @Proestimator.Resources.ProStrings.FinancingLoanApplicationStatusSettled_Descriptive. ';
+                                    } else if (wisetackCurrentLoanApplicationStatus === 'AUTHORIZED') {
+                                        wisetackAppStatusInfoHtml += '<br /><b>@Proestimator.Resources.ProStrings.FinancingLoanApplicationStatusGeneralCurrentStatus_Descriptive:</b> @Proestimator.Resources.ProStrings.FinancingLoanApplicationStatusAutorized_Descriptive. ';
+                                    } else if (wisetackCurrentLoanApplicationStatus === 'INITIATED') {
+                                        wisetackAppStatusInfoHtml += '<br /><b>@Proestimator.Resources.ProStrings.FinancingLoanApplicationStatusGeneralCurrentStatus_Descriptive:</b> @Proestimator.Resources.ProStrings.FinancingLoanApplicationStatusInitiated_Descriptive. ';
+                                    } else if (wisetackCurrentLoanApplicationStatus === 'ACTIONS REQUIRED') {
+                                        wisetackAppStatusInfoHtml += '<br /><b>@Proestimator.Resources.ProStrings.FinancingLoanApplicationStatusGeneralCurrentStatus_Descriptive:</b> @Proestimator.Resources.ProStrings.FinancingLoanApplicationStatusActionsRequired_Descriptive. ';
+                                    } else if (wisetackCurrentLoanApplicationStatus === 'LOAN TERMS ACCEPTED') {
+                                        wisetackAppStatusInfoHtml += '<br /><b>@Proestimator.Resources.ProStrings.FinancingLoanApplicationStatusGeneralCurrentStatus_Descriptive:</b> @Proestimator.Resources.ProStrings.FinancingLoanApplicationStatusLoanTermsAccepted_Descriptive. ';
+                                    } else if (wisetackCurrentLoanApplicationStatus === 'LOAN CONFIRMED') {
+                                        wisetackAppStatusInfoHtml += '<br /><b>@Proestimator.Resources.ProStrings.FinancingLoanApplicationStatusGeneralCurrentStatus_Descriptive:</b> @Proestimator.Resources.ProStrings.FinancingLoanApplicationStatusLoanConfirmed_Descriptive. ';
+                                    }
+                                }
+
+                                wisetackAppStatusInfoHtml += '</span>';
+                            }
+
+                            $('#divWisetackLoanAppButton').html(wisetackAppButtonHtml);
+                            $('#divWisetackLoanAppStatus').html(wisetackAppStatusInfoHtml);
+                            if (wisetackAppStatusInfoHtml !== '') {
+                                $('#divWisetackLoanAppStatus').show();
+                            } else {
+                                $('#divWisetackLoanAppStatus').hide();
+                            }
+                            $('#divCustomerLoanAppSection').removeClass('finCustomerLoanAppSectionHide').addClass('finCustomerLoanAppSectionShow');
+                        }
+                    }
+                </script>
+
+                <div id="divCustomerLoanAppSection" class="finCustomerLoanAppSectionHide">
+                    <div id="wisetackSignupDiv" title="Wisetack Financing Application"></div>
+
+                    <div class="finLoanAppOuterDiv">
+                        <div class="finWisetackLoanAppCTASection">
+                            <div class="finWisetackLoanAppCTATitle">
+                                @Proestimator.Resources.ProStrings.FinancingLoanApplicationCTATitle
+                            </div>
+                            <div class="finWisetackLoanAppCTAText">
+                                @Proestimator.Resources.ProStrings.FinancingLoanApplicationCTAText
+                            </div>
+                            <div class="finWisetackLoanAppCTALearnMore">
+                                <a href="https://www.wisetack.com/getting-started/webest" target="_blank">@Proestimator.Resources.ProStrings.FinancingLoanApplicationCTALearnMore</a>
+                                <div class="finWisetackCTAImage">
+                                    <div class="finWisetackIcon"><img src="~/Content/images/WisetackNavy.png" /></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="divWisetackLoanAppStatus" class="divWisetackLoanAppStatus"></div>
+                        <div id="divWisetackLoanAppButton" class="divWisetackLoanAppButton"></div>
+                        <div id="divPromoInfoContainer" class="divPromoInfoContainer">
+                            <div id="promoInfoDiv" class="promoInfoDiv"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--END: WISETACK FINANCING SECTION-->
+            }
+
+            <div id="lgRow1" class="container">
+
+                @* The Save button above the forms *@
+                <div class="container center">
+                    <p class="error-message">@Model.SaveMessage</p>
+                </div>
+
+                <div id="customerField" class="half-container">
+
+                    <fieldset id="customerFieldSet">
+
+                        @if (Model.CreditCardPaymentShow)
+                        {
+                            <div class="field-wrapper" style="margin-bottom:30px;">
+                                <label class="inputLabel field-label"></label>
+                                <div class="field-control">
+                                    <a id="intellipayButton" data-ipayname="submit" class="ipayfield button nav-btn">&nbsp;&nbsp;&nbsp;@Proestimator.Resources.ProStrings.PayWithCreditCardButtonLabel&nbsp;&nbsp;&nbsp;</a>
+                                    <input class="ipayfield" data-ipayname="account" type="hidden" value="@Model.EstimateID">
+                                    <input class="ipayfield" data-ipayname="amount" type="hidden" value="@Model.TotalRemaining">
+                                    <input class="ipayfield" data-ipayname="email" type="hidden" value="@Model.CustomerEmailAddress">
+                                </div>
+                            </div>
+                        }
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Payment_WhoPays</label>
+                            <div class="field-control">
+                                @Html.DropDownListFor(model => model.WhoPays, Model.WhoPaysList)
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Payment_PayeeName</label>
+                            <div class="field-control">
+                                @Html.TextBoxFor(model => model.PayeeName, new { autocomplete = "off" })
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Payment_Type</label>
+                            <div class="field-control">
+                                @Html.DropDownListFor(model => model.PaymentType, Model.PaymentTypeList)
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Amount $</label>
+                            <div class="field-control">
+                                @Html.TextBoxFor(model => model.Amount, new { autocomplete = "off", @class = "currency" })
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.CheckNumber</label>
+                            <div class="field-control">
+                                @Html.TextBoxFor(model => model.CheckNumber, new { autocomplete = "off" })
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Date</label>
+                            <div class="field-control">
+                                @Html.TextBoxFor(model => model.PaymentDate, new { autocomplete = "off", @class = "datepicker" })
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Memo</label>
+                            <div class="field-control">
+                                @Html.TextBoxFor(model => model.Memo, new { autocomplete = "off" })
+                            </div>
+                        </div>
+
+                    </fieldset>
+
+                </div>
+
+                <div id="customerField" class="half-container">
+                    @if (Model.PaymentList.Count > 0)
+                    {
+                        <div class="container center" style="padding-bottom: 20px;">
+                            <legend>Payment History</legend>
+                        </div>
+                        <div id="detailList" class="datagrid">
+                            <table style="margin-top: 6px;">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th></th>
+                                        <th>@Proestimator.Resources.ProStrings.Name</th>
+                                        <th>@Proestimator.Resources.ProStrings.Date</th>
+                                        <th>@Proestimator.Resources.ProStrings.Memo</th>
+                                        <th>@Proestimator.Resources.ProStrings.Amount</th>
+                                    </tr>
+                                </thead>
+
+                                @foreach (var detail in Model.PaymentList)
+                                {
+                                    <tr>
+                                        @if (detail.CreditCardPaymentID == 0)
+                                        {
+                                            <td><input type="button" title="Delete" value="@Proestimator.Resources.ProStrings.Delete" onclick="location.href='/@ViewBag.UserID/estimate/@Model.EstimateID/delete-payment/@detail.PaymentId'" class="button" /></td>
+                                            <td><input type="button" title="Edit" value="@Proestimator.Resources.ProStrings.Edit" onclick="location.href='/@ViewBag.UserID/estimate/@Model.EstimateID/payment-info/@detail.PaymentId'" class="button" /></td>
+                                        }
+                                        else
+                                        {
+                                            <td colspan="2"><input type="button" title="View" value="@Proestimator.Resources.ProStrings.View" onclick="location.href='/@ViewBag.UserID/estimate/@Model.EstimateID/payment-info/@detail.PaymentId'" class="button" /></td>
+                                        }
+                                        <td>@detail.PayeeName</td>
+                                        <td>@detail.PaymentDate</td>
+                                        <td>@detail.Memo</td>
+                                        <td>@detail.Amount</td>
+                                    </tr>
+                                }
+
+                                <tr style="padding-top: 15px; border-top: 1px solid black;">
+                                    <td colspan="5" style="text-align: right;">
+                                        @Proestimator.Resources.ProStrings.EstimateTotal:
+                                    </td>
+                                    <td style="border-left: none !important;">@Model.EstimateTotal</td>
+                                </tr>
+
+                                <tr style="padding-top: 15px;">
+                                    <td colspan="5" style="text-align: right;">
+                                        - @Proestimator.Resources.ProStrings.TotalPaid:
+                                    </td>
+                                    <td style="border-left: none !important;">@Model.TotalPaid</td>
+                                </tr>
+
+                                <tr style="padding-top: 15px;">
+                                    <td colspan="5" style="text-align: right;">
+                                        = @Proestimator.Resources.ProStrings.TotalRemaining:
+                                    </td>
+                                    <td style="border-top: 1px solid black; border-left: none !important;">@Model.TotalRemaining</td>
+                                </tr>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,387 @@
+﻿@model ProEstimator.Admin.ViewModel.SalesBoard.SalesBoardVM
+
+@using ProEstimator.Admin.ViewModel.SalesBoard;
+
+@{
+    ViewBag.Title = "Administration - Sales Board Report";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<style>
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .padd-top {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    .k-grid td {
+        white-space: normal;
+    }
+
+    .stackem {
+        margin-bottom: 15px;
+    }
+</style>
+
+<script>
+
+    function GetReportDeatailsSearchParameters() {
+        return {
+            ytdMonthFilter: $("#hdnytdmonth").val(), ytdValueFilter: $("#hdnytdvalue").val(), ytdYearFilter: $("#hdnytdyear").val()
+        };
+    }
+
+    function OnCalendarClick(ytdmonth, ytdvalue, ytdyear) {
+        $('#hdnytdmonth').val(ytdmonth);
+        $('#hdnytdvalue').val(ytdvalue);
+        $('#hdnytdyear').val(ytdyear);
+        
+        $('#month').text(ytdmonth);
+        $('#year').text(ytdyear);
+
+        // Refresh the SalesBoardDetailsReport grid
+        var grid = $("#GetSalesBoardDetailsReport-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+        }
+    }
+
+    function OnSalesBoardDetailsReportGridClick(salesRepID, month, year) {
+
+        var win = window.open("", "_blank")
+        var url = '@Url.Action("Index", "SalesBoardUserDetailsReport")' + '?salesRepID=' + salesRepID + '&month=' + month + '&year=' + year;
+        win.location = url;
+    }
+
+    function OnAllSalesBoardUserDetailsClick() {
+
+        var month = $('#month').text();
+        var year = $("#year").text();
+        var salesRepID = '-1';
+
+        var win = window.open("", "_blank")
+        var url = '@Url.Action("Index", "SalesBoardUserDetailsReport")' + '?salesRepID=' + salesRepID + '&month=' + month + '&year=' + year;
+        win.location = url;
+    }
+
+    function InsertSalesBoard() {
+
+        var loginID = $("#LoginID").val().trim();
+        var salesRep = $("#SalesRepDDL").val().trim();
+        var soldMonth = $("#MonthSoldDDL").val().trim();
+        var soldYear = $("#YearSoldDDL").val().trim();
+
+        if (loginID == '' || salesRep == '-1' || soldMonth == '-1' || soldYear == '-1')
+        {
+            alert('Please enter all required fields.');
+            return;
+        }
+
+        $.ajax({
+            url: '@Url.Action("InsertSalesBoardReport", "SalesBoardReport")',
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({
+                "LoginID": loginID
+                , "Est": $('#chkEst').is(":checked")
+                , "Frame": $('#chkFrame').is(":checked")
+                , "EMS": $('#chkEMS').is(":checked")
+                , "SalesRep": salesRep
+                , "SoldMonth": soldMonth
+                , "SoldYear": soldYear
+                , "AddUser": $("#chkMultiUser").is(":checked")
+                , "hasQBExporter": $('#chkQBExporter').is(":checked")
+                , "ProAdvisor": $("#chkProAdvisor").is(":checked")
+                , "HasBundle": $("#chkBundle").is(":checked")
+                , "HasImageEditor": $("#chkImages").is(":checked")
+                , "HasEnterpriseReporting": $("#chkReporting").is(":checked")
+            }),
+            //beforeSend: function () {
+            //    applyLoading();
+            //},
+            success: function (result) {
+                console.log(result);
+
+                if (result.Success === true) {
+                    alert('Report saved successfully');
+
+                    // Refresh the yeartodatesalesboardreport grid
+                    var grid = $("#yeartodatesalesboardreport-grid").data("kendoGrid");
+
+                    if (grid) {
+                        grid.dataSource.read();
+                    }
+
+                    // make hidden variables empty
+                    $('#hdnytdmonth').val('');
+                    $('#hdnytdvalue').val('');
+                    $('#hdnytdyear').val('');
+
+                    $('#LoginID').val('');
+                    $('#chkEst').prop("checked", false);
+                    $('#chkFrame').prop("checked", false);
+                    $('#chkEMS').prop("checked", false);
+                    $('#chkMultiUser').prop("checked", false);
+                    $('#SalesRepDDL').val('-1');
+
+                    $('#chkBundle').prop("checked", false);
+                    $('#chkQBExporter').prop("checked", false);
+                    $('#chkProAdvisor').prop("checked", false);
+                    $('#chkImages').prop("checked", false);
+                    $('#chkReporting').prop("checked", false);
+
+                    // Refresh the SalesBoardDetailsReport grid based on empty hidden variable values
+                    var grid = $("#GetSalesBoardDetailsReport-grid").data("kendoGrid");
+
+                    if (grid) {
+                        grid.dataSource.read();
+                    }
+                }
+            },
+            error: function (error) {
+                //removeLoading();
+                //ShowUserMessage(error, true, 4000);
+            }
+        });
+    }
+
+    $(document).ready(function () {
+
+        $('#month').text(@Model.SelectedMonthSold);
+        $('#year').text(@Model.SelectedYearSold);
+
+        // Do the acount id search
+        $("#btnyeartodatesalesboardreport").click(function () {
+
+            // Refresh the yeartodatesalesboardreport grid
+            var grid = $("#yeartodatesalesboardreport-grid").data("kendoGrid");
+
+            if (grid) {
+                grid.dataSource.read();
+            }
+        });
+    });
+
+</script>
+
+<div class="row padd-top">
+    <div class="col-lg-8 col-md-7 col-sm-6">
+        <h3>
+            Sales Board Report
+        </h3>
+    </div>
+    <form>
+        @if (Model.HasCommitPermission)
+        {
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4>Add Sales to Board * Required Fileds</h4>
+                        </div>
+                        <div class="panel-body">
+                            <div class="container">
+
+                                <div class="row">
+                                    <div class="col-lg-4 stackem">
+                                        <div class="input-group">
+                                            <span class="input-group-addon"><span style="color:red">*</span>Login ID</span>
+                                            <input type="text" class="form-control" placeholder="Login ID" aria-describedby="loginId" id="LoginID" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 stackem">
+                                        <div class="input-group">
+                                            <span class="input-group-addon"><span style="color:red">*</span>Sales Rep#</span>
+                                            @Html.DropDownListFor(model => model.SelectedSalesRep, Model.SalesRepDDL, new { @id = "SalesRepDDL", style = "width: 185px;height:32px" })
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-4 stackem">
+                                        <div class="input-group">
+                                            <span class="input-group-addon"><span style="color:red">*</span>Year Sold</span>
+                                            @Html.DropDownListFor(model => model.SelectedYearSold, Model.YearSoldDDL, new { @id = "YearSoldDDL", style = "width: 185px;height:32px" })
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 stackem">
+                                        <div class="input-group">
+                                            <span class="input-group-addon"><span style="color:red">*</span>Month Sold</span>
+                                            @Html.DropDownListFor(model => model.SelectedMonthSold, Model.MonthSoldDDL, new { @id = "MonthSoldDDL", style = "width: 185px;height:32px" })
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 stackem">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">Est</span>
+                                            <input id="chkEst" name="chkEst" type="checkbox" style="width: 30px;height: 30px;" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-4 stackem">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">Frame</span>
+                                            <input id="chkFrame" name="chkFrame" type="checkbox" style="width: 30px;height: 30px;" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 stackem">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">Com Pkg</span>
+                                            <input id="chkEMS" name="chkEMS" type="checkbox" style="width: 30px;height: 30px;" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 stackem">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">Multi User</span>
+                                            <input id="chkMultiUser" name="chkMultiUser" type="checkbox" style="width: 30px;height: 30px;" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-4 stackem">
+                                        <div class="input-group">
+                                            <span class="input-group-addon" style="border-right-width: 2px;border-right-style: groove;">Bundle</span>
+                                            <input id="chkBundle" name="chkBundle" type="checkbox" style="width: 30px;height: 30px;" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 stackem">
+                                        <div class="input-group">
+                                            <span class="input-group-addon" style="border-right-width: 2px;border-right-style: groove;">QB Exporter</span>
+                                            <input id="chkQBExporter" name="chkQBExporter" type="checkbox" style="width: 30px;height: 30px;" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 stackem">
+                                        <div class="input-group">
+                                            <span class="input-group-addon" style="border-right-width: 2px;border-right-style: groove;">Pro Advisor</span>
+                                            <input id="chkProAdvisor" name="chkProAdvisor" type="checkbox" style="width: 30px;height: 30px;" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-4 stackem">
+                                        <div class="input-group">
+                                            <span class="input-group-addon" style="border-right-width: 2px;border-right-style: groove;">Image Editing</span>
+                                            <input id="chkImages" name="chkImages" type="checkbox" style="width: 30px;height: 30px;" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 stackem">
+                                        <div class="input-group">
+                                            <span class="input-group-addon" style="border-right-width: 2px;border-right-style: groove;">Reporting</span>
+                                            <input id="chkReporting" name="chkReporting" type="checkbox" style="width: 30px;height: 30px;" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-footer">
+                            <div class="col-lg-10 pull-left">
+
+                            </div>
+                            <div class="col-lg-2 pull-left">
+                                <a class="btn btn-primary" href="javascript:void(0);" style="width:95% !important" id="btnCommitSale" role="button" onclick="InsertSalesBoard();">commit sale</a>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+       
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Year to Date</h4>
+            </div>
+            <input type="hidden" id="hdnytdvalue" />
+            <input type="hidden" id="hdnytdmonth" />
+            <input type="hidden" id="hdnytdyear" />
+            <br />
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="yeartodatesalesboardreport-grid-container" class="datagrid">
+                        @(Html.Kendo().Grid<SalesBoardReportVM>()
+                                .Name("yeartodatesalesboardreport-grid")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(item => item.Year).Title("Year");
+                                    columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnCalendarClick('1','#= Jan#','#= Year#')\">#=Jan#</a>").Title("Jan");
+                                    columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnCalendarClick('2','#= Feb#','#= Year#')\">#=Feb#</a>").Title("Feb");
+                                    columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnCalendarClick('3','#= Mar#','#= Year#')\">#=Mar#</a>").Title("Mar");
+                                    columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnCalendarClick('4','#= Apr#','#= Year#')\">#=Apr#</a>").Title("Apr");
+                                    columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnCalendarClick('5','#= May#','#= Year#')\">#=May#</a>").Title("May");
+                                    columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnCalendarClick('6','#= Jun#','#= Year#')\">#=Jun#</a>").Title("Jun");
+                                    columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnCalendarClick('7','#= Jul#','#= Year#')\">#=Jul#</a>").Title("Jul");
+                                    columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnCalendarClick('8','#= Aug#','#= Year#')\">#=Aug#</a>").Title("Aug");
+                                    columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnCalendarClick('9','#= Sept#','#= Year#')\">#=Sept#</a>").Title("Sept");
+                                    columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnCalendarClick('10','#= Oct#','#= Year#')\">#=Oct#</a>").Title("Oct");
+                                    columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnCalendarClick('11','#= Nov#','#= Year#')\">#=Nov#</a>").Title("Nov");
+                                    columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnCalendarClick('12','#= Dec#','#= Year#')\">#=Dec#</a>").Title("Dec");
+                                    columns.Bound(item => item.Total).Title("Total");
+                                })
+                                .Sortable()
+                                .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .ServerOperation(false)
+                                    .Read(read => read.Action("GetYearToDateSalesBoardReport", "SalesBoardReport"))
+                                ))
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Sales Board Details - <span id="month"></span> / <span id="year"></span></h4>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="SalesBoardDetailsReport-Grid-Container" class="datagrid">
+                        @(Html.Kendo().Grid<SalesBoardDetailReportVM>()
+                            .Name("GetSalesBoardDetailsReport-grid")
+                            .Columns(columns =>
+                            {
+                                columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnSalesBoardDetailsReportGridClick('#= SalesRepID#','#= Month#','#= Year#')\">#=Name#</a>").Title("Name");
+                                columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnSalesBoardDetailsReportGridClick('#= SalesRepID#','#= Month#','#= Year#')\">#=Count#</a>").Title("Estimatic");
+                                columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnSalesBoardDetailsReportGridClick('#= SalesRepID#','#= Month#','#= Year#')\">#=Frame#</a>").Title("Frame");
+                                columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnSalesBoardDetailsReportGridClick('#= SalesRepID#','#= Month#','#= Year#')\">#=Ems#</a>").Title("EMS");
+                                columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnSalesBoardDetailsReportGridClick('#= SalesRepID#','#= Month#','#= Year#')\">#=MultiUser#</a>").Title("Multi User");
+                                columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnSalesBoardDetailsReportGridClick('#= SalesRepID#','#= Month#','#= Year#')\">#=Bundle#</a>").Title("Bundle");
+                                columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnSalesBoardDetailsReportGridClick('#= SalesRepID#','#= Month#','#= Year#')\">#=QBExporter#</a>").Title("QB Exporter");
+                                columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnSalesBoardDetailsReportGridClick('#= SalesRepID#','#= Month#','#= Year#')\">#=ProAdvisor#</a>").Title("Pro Advisor");
+                                columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnSalesBoardDetailsReportGridClick('#= SalesRepID#','#= Month#','#= Year#')\">#=ImageEditor#</a>").Title("Images");
+                                columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"OnSalesBoardDetailsReportGridClick('#= SalesRepID#','#= Month#','#= Year#')\">#=EnterpriseReporting#</a>").Title("Reports");
+                            })
+            .Sortable()
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .ServerOperation(false)
+                .Read(read => read.Action("GetSalesBoardDetailsReport", "SalesBoardReport").Data("GetReportDeatailsSearchParameters"))
+            ))
+                    </div>
+                </div>
+            </div>
+            <div class="panel-footer">
+                <div class="col-lg-10 pull-left">
+
+                </div>
+                <div class="col-lg-2 pull-left">
+                    <a class="btn btn-primary" href="javascript:void(0);" id="btnCommitSale" role="button" onclick="OnAllSalesBoardUserDetailsClick();">All board user details</a>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+

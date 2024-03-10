@@ -1,0 +1,871 @@
+﻿@model ProEstimator.Admin.ViewModel.RenewalReport.RenewalReportPageVM
+
+@using ProEstimator.Admin.ViewModel.RenewalReport;
+
+@{
+    ViewBag.Title = "Administration - Renewal Report";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<script type='text/javascript'>
+    var _columnSelections;
+    var showHideLinkID = 'ShowHideLink';
+    var checkboxListID = 'cblist';
+    var kendoGridID = 'renewal-report-grid';
+    var controllerName = 'RenewalReport';
+    var getActionMethodName = 'GetGridShowHideColumnInfo';
+    var loginID = @Model.SessionSalesRepID;
+    var saveActionMethodName = 'SaveGridShowHideColumnInfo';
+    var saveMargin = '10px';
+    var cancelMargin = '0px';
+    var saveGridSortingColumnMethodName = 'SaveGridSortingColumn';
+    var sortedField = ''
+    var sortedDir = ''
+</script>
+
+<script src="~/Scripts/Common/KendoGridShowHideColumn.js"></script>
+
+<script>
+
+    var _salesRepID = @Model.SessionSalesRepID;
+
+    $(document).ready(function () {
+    
+        //$("#RenewalsPanel").hide();
+
+        $("#SalesRepID").change(function () {
+            $("#RenewalsPanel").hide();
+            _salesRepID = $("#SalesRepID").val();
+            RefreshSaveButton();
+            GetRenewalGoal();
+        });
+
+        $("#BonusMonthID").change(function () {
+            var salesRepIDTxt = $("#SalesRepID option:selected").text();
+            if(salesRepIDTxt != 'Select')
+            {
+                GetRenewalGoal();
+            }
+        });
+
+        $("#BonusYear").change(function () {
+            var salesRepIDTxt = $("#SalesRepID option:selected").text();
+            if(salesRepIDTxt != 'Select')
+            {
+                GetRenewalGoal();
+            }
+        });
+
+        $("#ContentWrapper").show();
+
+        $("#SalesBonusSave").click(function () {
+            SaveSaleBonuses();
+        });
+
+        $("#SaveForcastButton").click(function () {
+            SaveForcast();
+        });
+
+        LoadGridShowHideColumnInfo();
+
+        $("#column-checkboxes input").change(function()
+        {
+            var grid = $("#renewal-report-grid").data("kendoGrid");
+            var colIndex = parseInt($(this).attr("data-column"));
+
+            if ($(this).is(":checked") === true)
+            {
+                grid.showColumn(colIndex);
+            }
+            else
+            {
+                grid.hideColumn(colIndex);
+            }
+            //console.log($(this).attr("data-column") + ": " + $(this).is(":checked"));
+        });
+
+        $("#btnExcelExport").click(function () {
+            var month = $("#BonusMonthID").val();
+            var year = $("#BonusYear").val();
+
+            var win = window.open("/RenewalReport/DownloadData/?salesRepID=" + _salesRepID + "&month=" + month +"&year=" + year + "&search=" + $("#filter").val(), "_blank");
+
+            if (win) {
+                //Browser has allowed it to be opened
+                win.focus();
+            } else {
+                //Browser has blocked it
+                alert("Your browser blocked the site from opening a new tab, please allow popups for this site.");
+            }
+        });
+
+        $("#filter").on("input", function (e) {
+            var grid = $("#renewal-report-grid").data("kendoGrid");
+            var columns = grid.columns;
+
+            var filter = { logic: "or", filters: [] };
+            columns.forEach(function (x) {
+                if (x.field) {
+                    var type = grid.dataSource.options.schema.model.fields[x.field].type;
+                    if (type == "string") {
+                        filter.filters.push({
+                            field: x.field,
+                            operator: "contains",
+                            value: e.target.value
+                        })
+                    //}
+                    //else if (type == "number") {
+                    //    if (isNumeric(e.target.value)) {
+                    //        filter.filters.push({
+                    //            field: x.field,
+                    //            operator: "contains",
+                    //            value: e.target.value
+                    //        });
+                    //    }    
+
+                    //} else if (type == "date") {
+                    //    var data = grid.dataSource.data();
+                    //    for (var i=0;i<data.length ; i++){
+                    //        var dateStr = kendo.format(x.format, data[i][x.field]);
+                    //        // change to includes() if you wish to filter that way https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/includes
+                    //        if(dateStr.startsWith(e.target.value)){
+                    //            filter.filters.push({
+                    //                field: x.field,
+                    //                operator:"eq",
+                    //                value: data[i][x.field]
+                    //            })
+                    //        }
+                    //    }
+                    } else if (type == "boolean" && getBoolean(e.target.value) !== null) {
+                        var bool = getBoolean(e.target.value);
+                        filter.filters.push({
+                            field: x.field,
+                            operator: "eq",
+                            value: bool
+                        });
+                    }               
+                }
+            });
+
+            grid.dataSource.filter(filter);
+
+            var filteredCount = grid.dataSource._view.length;
+            var totalCount = grid.dataSource._pristineTotal;
+            var filteredMessage = "";
+            if (filteredCount < totalCount)
+            {
+                filteredMessage = " (Filtered From " + totalCount + " Rows)";
+            }
+            $("#labelDetailsCount").text(filteredCount + " Rows" + filteredMessage);
+
+            RefreshWillRenewHeaders();
+        });
+
+        @if(!Model.IsAdmin)
+        {
+            <text>
+             GetRenewalGoal();
+            </text>
+        }
+    });
+
+    function isNumeric(n) {
+        return !isNaN(parseFloat(n)) && isFinite(n);
+    }
+
+    function getBoolean(str) {
+        if("true".startsWith(str)){
+            return true;
+        } else if("false".startsWith(str)){
+            return false;
+        } else {
+            return null;
+        }          
+    }
+
+    function GetRenewalGoal()
+    {
+        var month = $("#BonusMonthID").val();
+        var year = $("#BonusYear").val();
+
+        ShowLoadingOverlay();
+
+        $.getJSON("/RenewalReport/GetRenewalGoal", { salesRepID: _salesRepID, month: month, year: year }, function (data) {
+            HideLoadingOverlay();
+            var bonusEarnedTable = $("#BonusEarnedTable");
+            bonusEarnedTable.empty();
+
+            if (data && data.GoodData === true)
+            {
+                $("#RenewalsPanel").show();
+
+                if (_salesRepID > -1)
+                {
+                    $("#SalesBonus100").val(data.RenewalGoal.SalesBonus100);
+                    $("#SalesBonus110").val(data.RenewalGoal.SalesBonus110);
+                    $("#SalesBonus120").val(data.RenewalGoal.SalesBonus120);
+                    $("#SalesBonus130").val(data.RenewalGoal.SalesBonus130);
+
+                    $("#RenewalBonus1Yr100").val(data.RenewalGoal.RenewalBonus1Yr100);
+                    $("#RenewalBonus1Yr110").val(data.RenewalGoal.RenewalBonus1Yr110);
+                    $("#RenewalBonus120").val(data.RenewalGoal.RenewalBonus120);
+                    $("#RenewalBonus130").val(data.RenewalGoal.RenewalBonus130);
+
+                    $(".bonuses-fields").show();
+                }
+                else
+                {
+                    ClearBonusForm();
+                    $(".bonuses-fields").hide();
+                }
+
+                $("#RenewalGoal1Yr").val(data.RenewalGoal.RenewalGoal1Yr);
+                $("#RenewalGoal2Yr").val(data.RenewalGoal.RenewalGoal2Yr);
+
+                $("#SalesGoal").val(data.RenewalGoal.SalesGoal);
+
+                var grid = $("#renewal-report-grid").data("kendoGrid");
+
+                grid.dataSource.data(data.RenewalDetails);
+
+                $("#labelDetailsCount").text(data.RenewalDetails.length + " Rows");
+
+                // Fill the bonus earned table
+                $("#RenewalsDue").text(data.RenewalsTotalDisplay);
+                
+                for (i = 0; i < data.BonusEarnedLines.length; i++)
+                {
+                    var forcastInput = "";
+
+                    if (data.BonusEarnedLines[i].Forecast != "")
+                    {
+                        if (data.RenewalGoal.SalesRepId == -1)
+                        {
+                            forcastInput = data.BonusEarnedLines[i].Forecast;
+                        }
+                        else
+                        {
+                            forcastInput = "<input type='text' id='Forecast' value='" + data.BonusEarnedLines[i].Forecast + "' class='form-control ng-pristine ng-untouched ng-valid ng-empty' style='width: 60px;' />";
+                        }
+                    }
+                    bonusEarnedTable.append("<tr><td>" + data.BonusEarnedLines[i].Name + "</td><td>" + data.BonusEarnedLines[i].Goal + "</td><td>" + forcastInput + "</td><td>" + data.BonusEarnedLines[i].Actual + "</td><td>" + data.BonusEarnedLines[i].MTD + "</td><td>" + data.BonusEarnedLines[i].MTDPercent + "</td></tr>");
+                }
+
+                RefreshWillRenewHeaders();
+            }
+            else
+            {
+                ClearBonusForm();
+
+                $("#RenewalGoal1Yr").val("");
+                $("#RenewalGoal2Yr").val("");
+
+                $("#SalesGoal").val("");
+
+                var grid = $("#renewal-report-grid").data("kendoGrid");
+                grid.dataSource.data(data.RenewalDetails);
+            }
+        });
+    }
+
+    function RefreshSaveButton()
+    {
+        if ($("#SalesRepID").val() > 0)
+        {
+            $("#SalesBonusSave").show();
+        }
+        else
+        {
+            $("#SalesBonusSave").hide();
+        }
+    }
+
+    function ClearBonusForm()
+    {
+        $("#SalesBonus100").val("");
+        $("#SalesBonus110").val("");
+        $("#SalesBonus120").val("");
+        $("#SalesBonus130").val("");
+
+        $("#RenewalBonus1Yr100").val("");
+        $("#RenewalBonus1Yr110").val("");
+        $("#RenewalBonus120").val("");
+        $("#RenewalBonus130").val("");
+    }
+
+    function WillRenewChange(checkbox, loginID, contractID, source) {
+        $.getJSON("/RenewalReport/UpdateWillRenew", { loginID: loginID, contractID: contractID, willRenew: checkbox.checked, source: source }, function (data) {
+            if (data != "") {
+                console.log(data);
+            }
+            else {
+                console.log("Changed will renew for " + loginID + " contract " + contractID);
+            }
+
+            RefreshWillRenewHeaders();
+        });
+    }
+
+    function WillNotRenewChange(checkbox, loginID, contractID) {
+        $.getJSON("/RenewalReport/UpdateWillNotRenew", { loginID: loginID, contractID: contractID, willNotRenew: checkbox.checked }, function (data) {
+            if (data != "") {
+                console.log(data);
+            }
+            else {
+                console.log("Changed will not renew for " + loginID + " contract " + contractID);
+            }
+
+            RefreshWillRenewHeaders();
+        });
+    }
+
+    function SaveNotes(loginID, contractID)
+    {
+        var notes = $("#NotesInput").val();
+
+        $.getJSON("/RenewalReport/SaveNotes", { loginID: loginID, contractID: contractID, notes: notes }, function (data) {
+            if (data != "") {
+                console.log(data);
+            }
+            else {
+                $("#NotesRow").remove();
+                $("#Notes" + contractID).html(notes);
+                console.log("Notes changed for " + loginID + " contract " + contractID);
+            }
+        });
+    }
+
+    function SaveSaleBonuses()
+    {
+        ShowLoadingOverlay();
+
+        $.getJSON("/RenewalReport/SaveSaleBonuses",
+            {
+                  salesRepID: _salesRepID
+                , month: $("#BonusMonthID").val()
+                , year: $("#BonusYear").val()
+                , renewalGoal1Yr: $("#RenewalGoal1Yr").val()
+                , renewalGoal2Yr: $("#RenewalGoal2Yr").val()
+                , salesGoal: $("#SalesGoal").val()
+                , salesBonus100: $("#SalesBonus100").val()
+                , salesBonus110: $("#SalesBonus110").val()
+                , salesBonus120: $("#SalesBonus120").val()
+                , salesBonus130: $("#SalesBonus130").val()
+                , renewalBonus1Yr100: $("#RenewalBonus1Yr100").val()
+                , renewalBonus1Yr110: $("#RenewalBonus1Yr110").val()
+                , renewalBonus120: $("#RenewalBonus120").val()
+                , renewalBonus130: $("#RenewalBonus130").val()
+            }
+            , function (data)
+            {
+                HideLoadingOverlay();
+                GetRenewalGoal();
+            }
+        );
+    }
+
+    function SaveForcast()
+    {
+        ShowLoadingOverlay();
+
+        var forecast = "";
+        var forecastInput = $("#Forecast");
+        if (forecastInput)
+        {
+            forecast = forecastInput.val();
+        }
+
+        $.getJSON("/RenewalReport/SaveForcast",
+            {
+                salesRepID: _salesRepID
+                , month: $("#BonusMonthID").val()
+                , year: $("#BonusYear").val()
+                , forecast: forecast
+            }
+            , function (data)
+            {
+                HideLoadingOverlay();
+                GetRenewalGoal();
+            }
+        );
+    }
+
+    function GetRenewalReportParams() {
+        var result =
+        {
+            year: $("#BonusYear").val()
+            , month: $("#BonusMonthID").val()
+            , salesRepID: _salesRepID
+        };
+        return result;
+    }
+
+    function DetailsDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#renewal-report-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("row-line-hovered");
+            }
+        );
+
+        var grid = $("#renewal-report-grid").data("kendoGrid");
+
+        // Set row background colors
+        grid.tbody.find(">tr").each(function () {
+            var dataItem = grid.dataItem(this);
+
+            if (dataItem.PastDue)
+            {
+                $(this).addClass("pastDue");
+            }
+            else if (dataItem.DidRenew)
+            {
+                $(this).addClass("paid");
+            }
+            else if (dataItem.YearsWithWebEst == 1)
+            {
+                $(this).addClass("firstYear");
+            }
+        })
+    }
+
+    var _lastNotesLoginID = 0;
+
+    function DetailsLineSelectionChanged(arg) {
+        var row = $("#renewal-report-grid").find(".k-state-selected").first();
+        var loginID = row.find("td").first().html();
+        var contractID = row.find("td").eq(1).html();
+        var notes = row.find("td").last().find("label").html();
+
+        if ($("#NotesRow").is(":visible") && _lastNotesLoginID == loginID)
+        {
+            $("#NotesRow").remove();
+        }
+        else
+        {
+            $("#NotesRow").remove();
+            row.after("<tr id='NotesRow'><td><input id='SaveButton' type='button' value='Save' onclick='SaveNotes(" + loginID + ", " + contractID + ");' /></td><td colspan='10'><textarea id='NotesInput' class='notes-input'>" + notes + "</textarea></td></tr>");
+            $("#NotesInput").focus();
+        }
+
+        _lastNotesLoginID = loginID;
+    }
+
+    function RefreshWillRenewHeaders()
+    {
+        var willRenew = 0;
+        var willNotRenew = 0;
+
+        $(".WillRenewBox").each(function () {
+            if ($(this).is(":checked"))
+            {
+                willRenew++;
+            }
+        })
+
+        $(".WillNotRenewBox").each(function () {
+            if ($(this).is(":checked"))
+            {
+                willNotRenew++;
+            }
+        })
+
+        $("#willRenewTotal").text("(" + willRenew + ")");
+        $("#willNotRenewTotal").text("(" + willNotRenew + ")");
+    }
+
+    function OnColumnReorder(e) {
+
+        var grid = $("#" + kendoGridID).data("kendoGrid");
+        var urlToSave = "/" + controllerName + "/" + saveGridSortingColumnMethodName;
+
+        ShowLoadingOverlay();
+        console.log(e.column);
+
+        $.ajax({
+            url: urlToSave,
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({
+                "loginID": loginID, "gridControlID": kendoGridID, "columnTitle": e.column.field, "newIndex": e.newIndex
+            }),
+            success: function (data) {
+                HideLoadingOverlay();
+            }
+        });
+    }
+    
+</script>
+
+<style>
+    .admin-container {
+        max-width: 100%;
+    }
+
+    .notes-input {
+        width: 100% !important;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        height: 100px;
+    }
+
+    .row-line-hovered {
+        background-color: #dddddd !important;
+        border-color: gray;
+    }
+
+    .k-state-selected {
+        background-color: #f9f9f9 !important;
+        border: 2px solid black !important;
+        border-bottom: 2px solid black !important;
+        border-right: 2px solid black !important;
+    }
+
+    .legend span {
+        border: 1px solid #ccc;
+        float: left;
+        width: 12px;
+        height: 12px;
+        margin: 2px;
+    }
+
+    .legend .paid {
+        background-color: #90EE90;
+    }
+
+    .legend .firstYear {
+        background-color: #FFFF00;
+    }
+
+    .legend .pastDue {
+        background-color: #FF6961;
+    }
+
+    #renewal-report-grid {
+        cursor: pointer;
+        overflow-y: auto;
+        height: 800px;
+    }
+
+    #renewal-report-grid .paid {
+        background-color: #d8ffd8;
+    }
+
+    #renewal-report-grid .firstYear {
+        background-color: #ffffd8;
+    }
+
+    #renewal-report-grid .pastDue {
+        background-color: #ffc9c9;
+    }
+
+    #renewal-report-grid .scroll {
+        overflow-y: auto;
+        height: 100px;
+    }
+
+    .k-grid td
+    {
+        border-left: hidden;
+        border-right: hidden;
+    }
+
+    #renewal-report-grid tr {
+        border-bottom: 1px solid #dddddd;
+    }
+
+    .k-grid-header {
+        position: sticky;
+        position: -webkit-sticky; /* Safari */
+        top: 0;
+    }
+    
+</style>
+
+<div id="ContentWrapper" style="display: none;">
+@if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(Model.SessionSalesRepID, "RenewalReport"))
+{
+    <div style="padding-left: 28px;">
+        <h3>
+            Renewal Report - @Model.SalesRepName
+        </h3>
+    </div>
+
+    <div class="col-lg-12">
+        <div>
+            <div class="col-lg-6 col-sm-12" style="padding-left: 0px;">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Sales Bonuses</div>
+                    <div class="panel-body">
+
+                        @if (Model.CanEditBonusGoals)
+                        {
+                            <table class="table table-responsive table-condensed table-striped">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
+                                        <th style="height: 27px;"><span class="bonuses-fields">1 year renewal bonuses</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td width="100">Sales Rep</td>
+                                        <td width="250">
+                                            @if (Model.IsAdmin)
+                                            {
+                                                @Html.DropDownListFor(model => model.SalesRepID, (SelectList)Model.SalesReps, new { @class = "form-control ng-pristine ng-untouched ng-valid ng-empty" })
+                                            }
+                                            else
+                                            {
+                                                <div style="padding-top: 11px; font-weight: bold; font-size: 1.2em; padding-left: 17px;">
+                                                    @Model.SalesRepName
+                                                </div>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="input-group bonuses-fields">
+                                                <span class="input-group-addon" style="min-width: 0;">100%</span>
+                                                <span class="input-group-addon" style="min-width: 0;"><button type="button"><i class="fa fa-dollar"></i></button></span>
+                                                <input type="text" id="SalesBonus100" class="form-control ng-pristine ng-untouched ng-valid ng-empty">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="input-group bonuses-fields">
+                                                <span class="input-group-addon" style="min-width: 0;"><button type="button"><i class="fa fa-dollar"></i></button></span>
+                                                <input type="text" id="RenewalBonus1Yr100" class="form-control ng-pristine ng-untouched ng-valid ng-empty">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bonus Month</td>
+                                        <td>
+                                            @Html.DropDownListFor(model => model.BonusMonthID, (SelectList)Model.BonusMonths, new { @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                        </td>
+                                        <td>
+                                            <div class="input-group bonuses-fields">
+                                                <span class="input-group-addon" style="min-width: 0;">110%</span>
+                                                <span class="input-group-addon" style="min-width: 0;"><button type="button"><i class="fa fa-dollar"></i></button></span>
+                                                <input type="text" id="SalesBonus110" class="form-control ng-pristine ng-untouched ng-valid ng-empty">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="input-group bonuses-fields">
+                                                <span class="input-group-addon" style="min-width: 0;"><button type="button"><i class="fa fa-dollar"></i></button></span>
+                                                <input type="text" id="RenewalBonus1Yr110" class="form-control ng-pristine ng-untouched ng-valid ng-empty">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bonus Year</td>
+                                        <td>
+                                            @Html.DropDownListFor(model => model.BonusYear, (SelectList)Model.BonusYears, new { @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                        </td>
+                                        <td>
+                                            <div class="input-group bonuses-fields">
+                                                <span class="input-group-addon" style="min-width: 0;">120%</span>
+                                                <span class="input-group-addon" style="min-width: 0;"><button type="button"><i class="fa fa-dollar"></i></button></span>
+                                                <input type="text" id="SalesBonus120" class="form-control ng-pristine ng-untouched ng-valid ng-empty">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="input-group bonuses-fields">
+                                                <span class="input-group-addon" style="min-width: 0;"><button type="button"><i class="fa fa-dollar"></i></button></span>
+                                                <input type="text" id="RenewalBonus120" class="form-control ng-pristine ng-untouched ng-valid ng-empty">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Renewal Goal 1yr</td>
+                                        <td ng-show="report.Permissions.EditBonusGoals" class="" style="">
+                                            <div class="input-group">
+                                                <span class="input-group-addon" style="min-width: 0;"><button type="button"><i class="fa fa-percent"></i></button></span>
+                                                <input type="text" id="RenewalGoal1Yr" class="form-control ng-pristine ng-untouched ng-valid ng-not-empty">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="input-group bonuses-fields">
+                                                <span class="input-group-addon" style="min-width: 0;">130%</span>
+                                                <span class="input-group-addon" style="min-width: 0;"><button type="button"><i class="fa fa-dollar"></i></button></span>
+                                                <input type="text" id="SalesBonus130" class="form-control ng-pristine ng-untouched ng-valid ng-empty">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="input-group bonuses-fields">
+                                                <span class="input-group-addon" style="min-width: 0;"><button type="button"><i class="fa fa-dollar"></i></button></span>
+                                                <input type="text" id="RenewalBonus130" class="form-control ng-pristine ng-untouched ng-valid ng-empty">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr ng-show="report.Permissions.EditBonusGoals" class="" style="">
+                                        <td ng-show="report.Permissions.EditBonusGoals" class="" style="">Renewal Goal 2yr</td>
+                                        <td ng-show="report.Permissions.EditBonusGoals" class="">
+                                            <div class="input-group">
+                                                <span class="input-group-addon" style="min-width: 0;"><button type="button"><i class="fa fa-percent"></i></button></span>
+                                                <input type="text" id="RenewalGoal2Yr" class="form-control ng-pristine ng-untouched ng-valid ng-not-empty">
+                                            </div>
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr ng-show="report.Permissions.EditBonusGoals" class="">
+                                        <td ng-show="report.Permissions.EditBonusGoals" class="" style="">Sales Goal</td>
+                                        <td ng-show="report.Permissions.EditBonusGoals" class="">
+                                            <input id="SalesGoal" class="form-control ng-pristine ng-untouched ng-valid ng-not-empty" type="number">
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <table class="table table-responsive table-condensed table-striped">
+                                <tbody>
+                                    <tr>
+                                        <td>Bonus Month</td>
+                                        <td>
+                                            @Html.DropDownListFor(model => model.BonusMonthID, (SelectList)Model.BonusMonths, new { @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bonus Year</td>
+                                        <td>
+                                            @Html.DropDownListFor(model => model.BonusYear, (SelectList)Model.BonusYears, new { @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        }
+
+                    </div>
+                    <div class="panel-footer">
+                        @if (ProEstimator.Business.Logic.Admin.SalesRepPermissionManager.HasPermission(Model.SessionSalesRepID, "EditBonusGoals"))
+                        {
+                            <a class="btn btn-default pull-right" id="SalesBonusSave" style="display: none;">Save</a>
+                        }
+                        
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-lg-6 col-sm-12" style="padding-right: 0px;">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Growth Bonus Earned</div>
+                    <div class="panel-body ng-binding">
+                        Renewals Due 1y/2y/Total: <span id="RenewalsDue"></span>
+                        <table class="table table-responsive table-condensed table-striped">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Goal</th>
+                                    <th>Forecast</th>
+                                    <th>Actual</th>
+                                    <th>MTD</th>
+                                    <th>MTD %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="BonusEarnedTable"></tbody>
+                        </table>
+                    </div>
+                    <div class="panel-footer">
+                        <a class="btn btn-default pull-right" id="SaveForcastButton">Save</a>
+
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="RenewalsPanel">
+        <div class="panel panel-default">
+            <div class="panel-heading panel-height">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <h4>Renewals by date</h4>
+                    </div>
+                    <div class="col-sm-offset-4 col-sm-4 legend">
+                        <div style="float: left; padding-top:12px;"><span class="paid"></span> Paid Renewal</div>
+                        <div style="float: left; padding-top:12px;"><span class="firstYear"></span> First Year Renewal</div>
+                        <div style="padding-top:12px;"><span class="pastDue"></span> Past Due</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <div style="float: left;">
+                    <input type="button" value="Excel" id="btnExcelExport" />
+                    <label id="labelDetailsCount" style="padding-left: 10px;"></label>
+                </div>
+                <div style="text-align: right; padding-bottom: 10px;">
+                    Search: <input type="text" id="filter" />
+                </div>
+
+                <div class="row">
+                    <div class="hide-small" style="padding-left: 15px;">
+                        <input type="button" id="ShowHideLink" onclick="ShowHideLinkClick();" style="font-weight: bold;color: black; font-size:0.8em; text-decoration: underline;padding: 0;border: none;background: none;outline:none;" value="Show/Hide Grid Column" />
+                    </div>
+                    <div id="cblist" class="menu" style="display: none;position: absolute;z-index: 1000;background-color: #1d69a6;color: #FFF; width:150px;margin-top: 3px"></div>
+                </div>
+
+                <div class="datagrid">
+                    @(Html.Kendo().Grid<RenewalDetailsVM>()
+                        .Name("renewal-report-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.LoginID);
+                            columns.Bound(item => item.ContractID).Hidden();
+                            columns.Bound(item => item.SalesRep);
+                            columns.Bound(item => item.Company).Encoded(false);
+                            columns.Bound(item => item.AddOns).Encoded(false);
+                            columns.Bound(item => item.State);
+                            columns.Bound(item => item.RenewalAmount).Format("{0:c}");
+                            columns.Bound(item => item.EstimateCountSummary).Encoded(false).Title("Estimates");
+                            columns.Bound(item => item.YearsWithWebEst).Title("Total Years");
+                            columns.Bound(item => item.IsContractSigned).Template(@<text></text>).ClientTemplate("# if (IsContractSigned) { #" + "<img src='/images/checkmark.png' />" + "# } #").Width(30).Title("Is Contract Signed");
+                            columns.Bound(item => item.AutoRenew).Template(@<text></text>).ClientTemplate("# if (AutoRenew) { #" + "<img src='/images/checkmark.png' />" + "# } #").Width(20).Title("Auto Renew");
+                            //columns.Bound(item => item.RenewalDate).ClientTemplate("#= kendo.toString(kendo.parseDate(RenewalDate), 'MM/dd/yyyy') #");
+                            columns.Bound(item => item.RenewalDate);
+                            columns.Bound(item => item.WillRenew).Template(@<text></text>).ClientTemplate("<input type='checkbox' class='checkbox WillRenewBox' onchange=\"WillRenewChange(this, #= LoginID#, #= ContractID#, '#= Source#');\" # if (WillRenew) { #" + "checked" + "# } # />").Width(20).HeaderTemplate("Will Renew <label id='willRenewTotal' style='margin-bottom: 0px;'></label>");
+                            columns.Bound(item => item.WillNotRenew).Template(@<text></text>).ClientTemplate("<input type='checkbox' class='checkbox WillNotRenewBox' onchange='WillNotRenewChange(this, #= LoginID#, #= ContractID#);' # if (WillNotRenew) { #" + "checked" + "# } # />").Width(20).HeaderTemplate("Will Not Renew <label id='willNotRenewTotal' style='margin-bottom: 0px;'></label>");
+                            columns.Bound(item => item.PastDue).Format("{0:c}");
+                            //columns.Bound(item => item.PETrial);
+                            //columns.Bound(item => item.Source).Hidden();
+                            columns.Bound(item => item.Notes).Template(@<text></text>).ClientTemplate("<label class='scroll' id='Notes#= ContractID#'>#= Notes#</label>").Title("Notes");                     
+                        })
+            .Selectable()
+            .Sortable()
+            .Events(events => events
+                .DataBound("DetailsDataChanged")
+                .Change("DetailsLineSelectionChanged")
+                .ColumnReorder("OnColumnReorder")
+            )
+            .Reorderable(reorder => reorder.Columns(true))
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .ServerOperation(false)
+                .Read(read => read.Action("GetRenewalReportGrid", "RenewalReport").Data("GetRenewalReportParams"))
+            )
+            .AutoBind(false)
+                    )
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <p>You don't have access to this page.</p>
+}
+    
+</div>

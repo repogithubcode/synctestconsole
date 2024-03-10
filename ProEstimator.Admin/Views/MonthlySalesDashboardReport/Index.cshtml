@@ -1,0 +1,599 @@
+﻿@model ProEstimator.Admin.ViewModel.MonthlySalesDashboard.MonthlySalesDashboardPageVM
+
+@using ProEstimator.Admin.ViewModel.MonthlySalesDashboard;
+
+@{
+    ViewBag.Title = "Administration - Renewal Report";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<script>
+
+    $(document).ready(function () {
+
+        $("#NewSalesPanel").show();
+        $("#RenewSalesPanel").hide();
+
+        $("#btnSearch").click(function () {
+            LoadGrid();
+        });
+
+
+        $("#SaveMonthlySales").click(function () {
+            SaveMonthlySalesDashboard();
+        });
+
+        function SaveMonthlySalesDashboard() {
+
+            // reset grid for "✔" (Monthly Sales)
+            // Gets the data source from the grid.
+            var grid = '';
+            var previousCycleContractID = '';
+
+            if ($("#salesTypeDDL").val() == "New") {
+                grid = "#monthly-sales-dashboard-report-grid";
+                previousCycleContractID = -1;
+            }
+            else if ($("#salesTypeDDL").val() == "Renew") {
+                grid = "#monthly-renew-sales-dashboard-report-grid";
+            }
+
+            var dataSource = $(grid).data("kendoGrid").dataSource;
+            // Gets the full set of data from the data source
+            var allData = dataSource.data();
+    
+            // reset markstatus cell
+            $.each(allData, function (index, item) {
+                $("#markStatus" + item.ContractID).html("");
+            });
+
+            // save values in grid
+            $.each(allData, function (index, item) {
+
+                if ($("#salesTypeDDL").val() == "New") {
+                    previousCycleContractID = 0;
+                }
+                else if ($("#salesTypeDDL").val() == "Renew") {
+                    previousCycleContractID = item.PreviousCycleContractID;
+                }
+
+                var walkThroughVal = $("#WalkThrough" + item.ContractID).val();
+                var payCodeVal = $("#payCodeCommissionDDL" + item.ContractID).val();
+                var commissionVal = $("#txtCommission" + item.ContractID).val();
+                var muCommissionVal = $("#txtMUCommission" + item.ContractID).val();
+                var qbCommissionVal = $("#txtQBCommission" + item.ContractID).val();
+                var rowValChangedVal = $("#RowValChanged" + item.ContractID).val();
+                var paymentExtensionVal = $("#chkPaymentExtension" + item.ContractID).is(":checked");
+                
+                if (rowValChangedVal == true) {
+                    $.ajax({
+                        url: "/MonthlySalesDashboardReport/SaveMonthlySales",
+                        type: "POST",
+                        dataType: "json",
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify({
+                            "contractID": item.ContractID, "previousCycleContractID": previousCycleContractID, "walkThrough": walkThroughVal, "payCode": payCodeVal,
+                            "commission": commissionVal, "muCommission": muCommissionVal, "qbCommission": qbCommissionVal, "paymentExtension": paymentExtensionVal
+                        }),
+                        success: function (data) {
+                            console.log(data);
+                            $("#markStatus" + item.ContractID).css("color", "green");
+                            $("#markStatus" + item.ContractID).html("✔");
+                            $("#RowValChanged" + item.ContractID).val('');
+                            $("#chkSelect" + item.ContractID).prop('checked', false);
+                        },
+                        error: function () {
+                            $("#markStatus" + item.ContractID).css("color", "red");
+                            $("#markStatus" + item.ContractID).html("X");
+                            $("#RowValChanged" + item.ContractID).val('');
+                        }
+                    });
+                }
+            });
+        }
+
+        function LoadGrid() {
+
+            // GetpayCodeCommission();
+
+            //$("#detailsWorkingOverlay").show();
+            _distinctPayCodeCommissionsFilledAlready = false;
+
+            $.getJSON("/MonthlySalesDashboardReport/GetPayCodeCommission", { salesType: $("#salesTypeDDL").val() }, function (data) {
+                _payCodeCommissionsList = data;
+
+                var grid = '';
+
+                if ($("#salesTypeDDL").val() == "New")
+                {
+                    grid = $("#monthly-sales-dashboard-report-grid").data("kendoGrid");
+                    $("#NewSalesPanel").show();
+                    $("#RenewSalesPanel").hide();
+                }
+                else if ($("#salesTypeDDL").val() == "Renew") {
+                    grid = $("#monthly-renew-sales-dashboard-report-grid").data("kendoGrid");
+                    $("#NewSalesPanel").hide();
+                    $("#RenewSalesPanel").show();
+                }
+
+                if (grid) {
+                    grid.dataSource.read();
+                }
+                
+                //$("#detailsWorkingOverlay").hide();
+            });
+        }
+
+        $("#column-checkboxes input").change(function () {
+            var grid = $("#monthly-sales-dashboard-report-grid").data("kendoGrid");
+            var colIndex = parseInt($(this).attr("data-column"));
+
+            if ($(this).is(":checked") === true) {
+                grid.showColumn(colIndex);
+            }
+            else {
+                grid.hideColumn(colIndex);
+            }
+        });
+
+        $("#btnExcelExport").click(function () {
+
+            var month = $("#CurrentMonth").val();
+            var year = $("#CurrentYear").val();
+
+            var win = window.open("/MonthlySalesDashboardReport/DownloadData/?month=" + month + "&year=" + year, "_blank");
+
+            if (win) {
+                //Browser has allowed it to be opened
+                win.focus();
+            } else {
+                //Browser has blocked it
+                alert("Your browser blocked the site from opening a new tab, please allow popups for this site.");
+            }
+        });
+    });
+
+    function OnChangePaymentExtension(contractID) {
+        var paymentExtensionVal = $("#chkPaymentExtension" + contractID).is(":checked");
+        $("#RowValChanged" + contractID).val(paymentExtensionVal);
+    }
+
+    function OnChangeSelect(contractID) {
+        var selectVal = $("#chkSelect" + contractID).is(":checked");
+        $("#RowValChanged" + contractID).val(selectVal);
+    }
+
+    function isNumeric(n) {
+        return !isNaN(parseFloat(n)) && isFinite(n);
+    }
+
+    function getBoolean(str) {
+        if ("true".startsWith(str)) {
+            return true;
+        } else if ("false".startsWith(str)) {
+            return false;
+        } else {
+            return null;
+        }
+    }
+
+    function GetSearchParameters() {
+        var result =
+        {
+            monthFilter: $("#CurrentMonth").val(),
+            yearFilter: $("#CurrentYear").val()
+        };
+        return result;
+    }
+
+    function fillpayCodeCommissionDDL(contractID, payCode) {
+        var template = "<select id='payCodeCommissionDDL" + contractID + "' name='payCodeCommissionDDL" + contractID +
+                                            "' style='width:60px' onchange='OnChangePayCodeCommissionDDL(" + contractID + ")'>";
+
+        template += "<option value='0'>Select</option>";
+
+        var _distinctPayCodeCommissions =  new Array(_payCodeCommissionsList.length);
+        for (var i = 0; i < _payCodeCommissionsList.length; i++) {
+
+            _distinctPayCodeCommissions[i] = new Array(2);
+
+            for (var j = 0; j <= i; j++) {
+
+                var isPayCodeExists = false;
+                if (_distinctPayCodeCommissions[j][0] == _payCodeCommissionsList[i].PayCode)
+                {
+                    isPayCodeExists = true;
+                    break;
+                }
+            }
+
+            if (isPayCodeExists == false)
+            {
+                _distinctPayCodeCommissions[i][0] = _payCodeCommissionsList[i].PayCode;
+                _distinctPayCodeCommissions[i][1] = _payCodeCommissionsList[i].CodeListVsText;
+            }
+        }
+
+        for (var i = 0; i < _distinctPayCodeCommissions.length; i++) {
+
+            if (_distinctPayCodeCommissions[i][0] != undefined)
+            {
+                if (_distinctPayCodeCommissions[i][0] == payCode) {
+                    template += "<option value='" + _distinctPayCodeCommissions[i][0] + "' selected>" + _distinctPayCodeCommissions[i][1] + "</option>";
+                }
+                else {
+                    template += "<option value='" + _distinctPayCodeCommissions[i][0] + "'>" + _distinctPayCodeCommissions[i][1] + "</option>";
+                }
+            }
+        }
+
+        template += "</select>";
+
+        return template;
+    }
+
+    const formatToCurrency = amount => {
+        return "$" + amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+    };
+
+    function OnChangePayCodeCommissionDDL(contractID) {
+
+        var payCode = $("#payCodeCommissionDDL" + contractID).val();
+
+        for (var i = 0; i < _payCodeCommissionsList.length; i++) {
+            if (_payCodeCommissionsList[i].PayCode == payCode) {
+                $("#txtCommission" + contractID).val(formatToCurrency(_payCodeCommissionsList[i].Commission));
+                OnKeyupAnyCommission(contractID);
+            }
+        }
+
+        $("#RowValChanged" + contractID).val(true);
+    }
+
+    var _payCodeCommissionsList = '';
+
+    function GetpayCodeCommission() {
+
+        $.getJSON("/MonthlySalesDashboardReport/GetPayCodeCommission", { salesType: $("#salesTypeDDL").val() }, function (data) {
+            _payCodeCommissionsList = data;
+        });
+    }
+
+    function OnChangeWalkthrough(contractID) {
+
+        var contractTermDescVal = $("#lblContractTermDescription" + contractID).text();
+
+        // ems
+        var hasEMS = false;
+        if ($("#lblEMS" + contractID).text() == 'Y') {
+            hasEMS = true;
+        }
+        //console.log("hasFrame = " + hasFrame);
+
+        // frame
+        var hasFrame = false;
+        if ($("#lblFrame" + contractID).text() == 'Y') {
+            hasFrame = true;
+        }
+        //console.log("hasFrame = " + hasFrame);
+
+        // walkthrough
+        var hasWT = true;
+        if ($("#WalkThrough" + contractID).val() == '') {
+            hasWT = false;
+        }
+
+        for (var i = 0; i < _payCodeCommissionsList.length; i++) {
+            if ((_payCodeCommissionsList[i].HasEMS == hasEMS) && (_payCodeCommissionsList[i].HasFrame == hasFrame)
+                && (_payCodeCommissionsList[i].HasWT == hasWT) && (_payCodeCommissionsList[i].ContractTermDescription == contractTermDescVal)) {
+
+                var payCode = _payCodeCommissionsList[i].PayCode;
+                $("#payCodeCommissionDDL" + contractID).val(payCode);
+
+                OnChangePayCodeCommissionDDL(contractID);
+                OnKeyupAnyCommission(contractID);
+            }
+        }
+
+        $("#RowValChanged" + contractID).val(true);
+    }
+
+    function isNumberKey(evt) {
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode != 46 && charCode > 31
+          && (charCode < 48 || charCode > 57))
+            return false;
+
+        return true;
+    }
+
+    function OnKeyupAnyCommission(contractID) {
+
+        var commission = "0.00";
+        if ($("#txtCommission" + contractID).val() != '')  { 
+            commission = parseFloat($("#txtCommission" + contractID).val().replace("$", ''));
+        }
+        //console.log("commission = " + commission);
+
+        var muCommission = "0.00";
+        if ($("#txtMUCommission" + contractID).val() != '') {
+            muCommission = parseFloat($("#txtMUCommission" + contractID).val().replace("$", ''));
+        }
+        //console.log("muCommission = " + muCommission);
+
+        var qbCommission = "0.00";
+        if ($("#txtQBCommission" + contractID).val() != '') {
+            qbCommission = parseFloat($("#txtQBCommission" + contractID).val().replace("$", ''));
+        }
+        //console.log("qbCommission = " + qbCommission);
+
+        var totalCommmission = commission + muCommission + qbCommission;
+        $("#txtTotalCommission" + contractID).val(formatToCurrency(totalCommmission));
+    }
+
+    function OnChangeAnyCommission(controlID) {
+
+        var commission = "0.00";
+        if ($("#" + controlID).val() != '') {
+            commission = parseFloat($("#" + controlID).val().replace("$", ''));
+        }
+
+        $("#" + controlID).val(formatToCurrency(commission));
+        $("#RowValChanged" + contractID).val(true);
+    }
+
+</script>
+
+<style>
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .padd-top {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    .admin-container {
+        max-width: 97.5%;
+    }
+
+    .notes-input {
+        width: 100% !important;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        height: 100px;
+    }
+
+    .row-line-hovered {
+        background-color: #dddddd !important;
+        border-color: gray;
+    }
+
+    /*.k-state-selected {
+        background-color: #f9f9f9 !important;
+        border: 2px solid black !important;
+        border-bottom: 2px solid black !important;
+        border-right: 2px solid black !important;
+    }*/
+
+    .legend span {
+        border: 1px solid #ccc;
+        float: left;
+        width: 12px;
+        height: 12px;
+        margin: 2px;
+    }
+
+    #monthly-sales-dashboard-report-grid {
+        cursor: pointer;
+    }
+
+    #monthly-renew-sales-dashboard-report-grid {
+        cursor: pointer;
+    }
+
+    .k-grid td {
+        border-left: hidden;
+        border-right: hidden;
+    }
+
+    #monthly-sales-dashboard-report-grid tr {
+        border-bottom: 1px solid #dddddd;
+    }
+
+    #monthly-renew-sales-dashboard-report-grid tr {
+        border-bottom: 1px solid #dddddd;
+    }
+
+    .k-grid .k-grid-header .k-header .k-link {
+        height: auto;
+    }
+
+    .k-grid .k-grid-header .k-header {
+        white-space: normal;
+    }
+
+    .datagrid table td, .datagrid table th {
+        padding: 1px 5px;
+    }
+
+    .k-grid-header th.k-header, .k-filter-row th {
+        padding: 2px;
+    }
+</style>
+
+<div class="row padd-top">
+
+    <form id="MonthlySalesDashboard" name="monthlySalesDashboard">
+
+        <div class="row" style="margin: 0px auto; max-width: 1100px">
+            <h3>
+                Monthly Sales Dashboard Report
+            </h3>
+
+            <div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>Search Criteria</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="container">
+                            <div class="row stackem">
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Month</span>
+                                        @Html.DropDownListFor(model => model.CurrentMonth, (SelectList)Model.MonthList, new { @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                    </div>
+                                    <br />
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Year</span>
+                                        @Html.DropDownListFor(model => model.CurrentYear, (SelectList)Model.YearList, new { @class = "form-control ng-pristine ng-untouched ng-valid ng-not-empty" })
+                                    </div>
+                                    <br />
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Sales Type</span>
+                                        <select class="form-control ng-pristine ng-untouched ng-valid ng-empty" id="salesTypeDDL" name="salesTypeDDL">
+                                            <option value="New">New Sales</option>
+                                            <option value="Renew">Renewal Sales</option>
+                                        </select>
+                                    </div>
+                                    <br />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-footer">
+                        <a class="btn btn-default pull-right" href="javascript:void(0);" role="button" id="btnSearch">Search</a>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-left:15px;margin-bottom:15px">
+            <input type="button" value="Excel" id="btnExcelExport" />
+            <a class="btn btn-default" id="SaveMonthlySales" style="padding: 2px 10px; border-color: currentColor; border-radius: 2px;">Save</a>
+        </div>
+
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+
+                    <div class="datagrid" id="NewSalesPanel">
+                        @(Html.Kendo().Grid<MonthlySalesVM>()
+                        .Name("monthly-sales-dashboard-report-grid")
+                            .Columns(columns =>
+                            {
+                                columns.Bound(item => item.PaymentExtension).Template(@<text></text>).ClientTemplate("<input id='chkPaymentExtension#=ContractID#'  name='chkPaymentExtension#=ContractID#' type='checkbox' class='checkbox' style='margin-left:5px' onchange=\"OnChangePaymentExtension(#= ContractID#);\" # if (PaymentExtension) { #" + "checked" + "# } # />").Title("Ext").Width(10);
+                                columns.Bound(item => item.Select).Template(@<text></text>).ClientTemplate("<input id='chkSelect#=ContractID#'  name='chkSelect#=ContractID#' type='checkbox' class='checkbox' style='margin-left:5px' onchange=\"OnChangeSelect(#= ContractID#);\" />").Title("Select").Width(10);
+                                columns.Bound(item => item.CustomerID).Title("Cust. ID").Width(3);
+                                columns.Bound(item => item.ContractID).Hidden();
+                                columns.Bound(item => item.State).Title("State").Width(2).HtmlAttributes(new { style = "overflow-wrap: anywhere;" });
+                                columns.Bound(item => item.SalesDate).Title("Sales Date").Width(4);
+                                columns.Bound(item => item.CustomerName).Title("Customer Name").Width(2);
+                                columns.Bound(item => item.SalesPrice).Format("{0:c}").Title("$ Sales Price").Width(5);
+                                columns.Bound(item => item.Promo).Format("{0:c}").Title("$ Promo").Width(5);
+                                columns.Bound(item => item.DownPayment).Format("{0:c}").Title("$ Down Pmt").Width(5);
+                                columns.Bound(item => item.MonthlyPayment).Format("{0:c}").Title("$ Monthly Pmt").Width(5);
+                                columns.Bound(item => item.WalkThrough).ClientTemplate("<input id='WalkThrough#=ContractID#' name='WalkThrough#=ContractID#' onchange=\"OnChangeWalkthrough('#= ContractID#');\" type='date' style='width:119px' value=#=WalkThrough#>").Title("Walk Through").Width(7);
+
+                                columns.Bound(item => item.HasEMS).Title("EMS").Width(3).ClientTemplate("<label id='lblEMS#=ContractID#'># if (HasEMS) { #" + "Y" + "# } #" + "# if (!HasEMS) { #" + "N" + " # } #</label>");
+                                columns.Bound(item => item.HasFrame).Title("Frame").Width(3).Template(@<text></text>).ClientTemplate("<label id='lblFrame#=ContractID#'># if (HasFrame) { #" + "Y" + "# } #" + "# if (!HasFrame) { #" + "N" + " # } #</label>");
+                                columns.Bound(item => item.HasMultiUser).Title("MU").Width(3).ClientTemplate("<label id='lblMultiUser#=ContractID#'># if (HasMultiUser) { #" + "Y" + "# } #" + "# if (!HasMultiUser) { #" + "N" + " # } #</label>");
+                                columns.Bound(item => item.MUCommission).Title("MU Comm.").Width(3).ClientTemplate("<input type='text' id='txtMUCommission#=ContractID#' value='#= formatToCurrency(MUCommission) #' style='width:40px' onkeypress='return isNumberKey(event)' onchange=\"OnChangeAnyCommission('txtMUCommission#=ContractID#');\" onkeyup=\"OnKeyupAnyCommission('#= ContractID#');\"/>").Hidden();
+                                columns.Bound(item => item.HasQBExport).Title("QB").Width(6).ClientTemplate("<label id='lblQBImporter#=ContractID#'># if (HasQBExport) { #" + "Y" + "# } #" + "# if (!HasQBExport) { #" + "N" + " # } #</label>");
+                                columns.Bound(item => item.QBCommission).Title("QB Comm.").Width(3).ClientTemplate("<input type='text' id='txtQBCommission#=ContractID#' value='#= formatToCurrency(QBCommission) #' style='width:40px' onkeypress='return isNumberKey(event)' onchange=\"OnChangeAnyCommission('txtQBCommission#=ContractID#');\" onkeyup=\"OnKeyupAnyCommission('#= ContractID#');\"/>").Hidden();
+                                columns.Bound(item => item.HasProAdvisor).Title("PA").Width(3).ClientTemplate("<label id='lblProAdvisor#=ContractID#'># if (HasProAdvisor) { #" + "Y" + "# } #" + "# if (!HasProAdvisor) { #" + "N" + " # } #</label>");
+                                columns.Bound(item => item.HasReporting).Title("Rep").Width(3).ClientTemplate("<label id='lblReporting#=ContractID#'># if (HasReporting) { #" + "Y" + "# } #" + "# if (!HasReporting) { #" + "N" + " # } #</label>");
+                                columns.Bound(item => item.HasImageEditor).Title("Img").Width(3).ClientTemplate("<label id='lblImageEditor#=ContractID#'># if (HasImageEditor) { #" + "Y" + "# } #" + "# if (!HasImageEditor) { #" + "N" + " # } #</label>");
+                                columns.Bound(item => item.HasBundle).Title("Bndl").Width(3).ClientTemplate("<label id='lblBundle#=ContractID#'># if (HasBundle) { #" + "Y" + "# } #" + "# if (!HasBundle) { #" + "N" + " # } #</label>");
+
+                                columns.Bound(item => item.SalesRep).Title("Sales Rep").Width(4);
+
+                                columns.Bound(item => item.ContractTermDescription).ClientTemplate("<label id='lblContractTermDescription#=ContractID#'>#= ContractTermDescription #</label>").Title("Contract Term").Width(5);
+                                columns.Bound(item => item.Commission).Title("Comm.").Width(5).ClientTemplate("<input type='text' id='txtCommission#=ContractID#' value='#= formatToCurrency(Commission) #' style='width:50px' onkeypress='return isNumberKey(event)' onchange=\"OnChangeAnyCommission('txtCommission#=ContractID#');\" onkeyup=\"OnKeyupAnyCommission('#= ContractID#');\"/>");
+                                columns.Bound(item => item.TotalCommission).Title("Total Comm.").Width(3).ClientTemplate("<input type='text' disabled id='txtTotalCommission#=ContractID#' value='#= formatToCurrency(TotalCommission) #' style='width:45px' />");
+                                columns.Bound(item => item.RowValChanged).HtmlAttributes(new { id = "RowValChanged#=ContractID#" }).Hidden();
+                                columns.Bound(item => item.MarkStatus).Width(6).ClientTemplate("<span id='markStatus#=ContractID#' style='font-size:20px'></span>").Title("");
+                                columns.Bound(item => item.PayCode).ClientTemplate("#= fillpayCodeCommissionDDL(ContractID, PayCode) #").Title("PayCode").Width(4);
+                            })
+                            .Selectable()
+                            .Pageable(pageable => pageable
+                                .Refresh(false)
+                             )
+                            .DataSource(dataSource => dataSource
+                                .Ajax()
+                                .ServerOperation(false)
+                                .Read(read => read.Action("GetNewSalesReport", "MonthlySalesDashboardReport").Data("GetSearchParameters"))
+                                .PageSize(100)
+                             )
+                            )
+                    </div>
+
+                    <div class="datagrid" id="RenewSalesPanel">
+                        @(Html.Kendo().Grid<MonthlySalesVM>()
+                        .Name("monthly-renew-sales-dashboard-report-grid")
+                            .Columns(columns =>
+                            {
+                            columns.Bound(item => item.PaymentExtension).Template(@<text></text>).ClientTemplate("<input id='chkPaymentExtension#=ContractID#'  name='chkPaymentExtension#=ContractID#' type='checkbox' class='checkbox' style='margin-left:5px' onchange=\"OnChangePaymentExtension(#= ContractID#);\" # if (PaymentExtension) { #" + "checked" + "# } # />").Title("Ext").Width(10);
+                            columns.Bound(item => item.Select).Template(@<text></text>).ClientTemplate("<input id='chkSelect#=ContractID#'  name='chkSelect#=ContractID#' type='checkbox' class='checkbox' style='margin-left:5px' onchange=\"OnChangeSelect(#= ContractID#);\" />").Title("Select").Width(17);
+                            columns.Bound(item => item.CustomerID).Title("Cust. ID").Width(3);
+                            columns.Bound(item => item.ContractID).Hidden();
+                            columns.Bound(item => item.PreviousCycleContractID).Hidden();
+                            columns.Bound(item => item.State).Title("State").Width(2).HtmlAttributes(new { style = "overflow-wrap: anywhere;" });
+                            columns.Bound(item => item.ExpectedRenewalDate).Title("Exp. Renewal Date").Width(4);
+                            columns.Bound(item => item.CustomerName).Title("Customer Name").Width(2).HtmlAttributes(new { style = "overflow-wrap: anywhere;" });
+                            columns.Bound(item => item.ActualRenewalDate).Title("Actual Renewal Date").Width(4).HtmlAttributes(new { style = "overflow-wrap: anywhere;" });
+                            columns.Bound(item => item.SalesPrice).Format("{0:c}").Title("$ Sales Price").Width(5);
+                            columns.Bound(item => item.RenewalDiscount).Format("{0:c}").Title("$ Renewal Discount").Width(5);
+                            columns.Bound(item => item.DownPayment).Format("{0:c}").Title("$ Down Pmt").Width(5);
+                            columns.Bound(item => item.MonthlyPayment).Format("{0:c}").Title("$ Monthly Pmt").Width(5);
+                            columns.Bound(item => item.PreviousCycleSalesPrice).Format("{0:c}").Title("$ Prev. Year Sales Price").Width(5);
+                            columns.Bound(item => item.SalesRep).Title("Sales Rep").Width(5);
+
+                            columns.Bound(item => item.HasEMS).Title("EMS").Width(3).ClientTemplate("<label id='lblEMS#=ContractID#'># if (HasEMS) { #" + "Y" + "# } #" + "# if (!HasEMS) { #" + "N" + " # } #</label>");
+                            columns.Bound(item => item.HasFrame).Title("Frame").Width(3).Template(@<text></text>).ClientTemplate("<label id='lblFrame#=ContractID#'># if (HasFrame) { #" + "Y" + "# } #" + "# if (!HasFrame) { #" + "N" + " # } #</label>");
+                            columns.Bound(item => item.HasMultiUser).Title("MU").Width(3).ClientTemplate("<label id='lblMultiUser#=ContractID#'># if (HasMultiUser) { #" + "Y" + "# } #" + "# if (!HasMultiUser) { #" + "N" + " # } #</label>");
+                            columns.Bound(item => item.MUCommission).Title("MU Comm.").Width(3).ClientTemplate("<input type='text' id='txtMUCommission#=ContractID#' value='#= formatToCurrency(MUCommission) #' style='width:40px' onkeypress='return isNumberKey(event)' onchange=\"OnChangeAnyCommission('txtMUCommission#=ContractID#');\" onkeyup=\"OnKeyupAnyCommission('#= ContractID#');\"/>").Hidden();
+                            columns.Bound(item => item.HasQBExport).Title("QB").Width(6).ClientTemplate("<label id='lblQBImporter#=ContractID#'># if (HasQBExport) { #" + "Y" + "# } #" + "# if (!HasQBExport) { #" + "N" + " # } #</label>");
+                            columns.Bound(item => item.QBCommission).Title("QB Comm.").Width(3).ClientTemplate("<input type='text' id='txtQBCommission#=ContractID#' value='#= formatToCurrency(QBCommission) #' style='width:40px' onkeypress='return isNumberKey(event)' onchange=\"OnChangeAnyCommission('txtQBCommission#=ContractID#');\" onkeyup=\"OnKeyupAnyCommission('#= ContractID#');\"/>").Hidden();
+                            columns.Bound(item => item.HasProAdvisor).Title("PA").Width(3).ClientTemplate("<label id='lblProAdvisor#=ContractID#'># if (HasProAdvisor) { #" + "Y" + "# } #" + "# if (!HasProAdvisor) { #" + "N" + " # } #</label>");
+                            columns.Bound(item => item.HasReporting).Title("Rep").Width(3).ClientTemplate("<label id='lblReporting#=ContractID#'># if (HasReporting) { #" + "Y" + "# } #" + "# if (!HasReporting) { #" + "N" + " # } #</label>");
+                            columns.Bound(item => item.HasImageEditor).Title("Img").Width(3).ClientTemplate("<label id='lblImageEditor#=ContractID#'># if (HasImageEditor) { #" + "Y" + "# } #" + "# if (!HasImageEditor) { #" + "N" + " # } #</label>");
+                            columns.Bound(item => item.HasBundle).Title("Bndl").Width(3).ClientTemplate("<label id='lblBundle#=ContractID#'># if (HasBundle) { #" + "Y" + "# } #" + "# if (!HasBundle) { #" + "N" + " # } #</label>");
+
+                            columns.Bound(item => item.TotalCommission).Title("Total Comm.").Width(3).ClientTemplate("<input type='text' disabled id='txtTotalCommission#=ContractID#' value='#= formatToCurrency(TotalCommission) #' style='width:45px' />");
+
+                            columns.Bound(item => item.Has1styrRenewal).Title("1st yr Renewal Y/N").Width(3).Template(@<text></text>).ClientTemplate("<label id='Has1styrRenewal#=ContractID#'># if (Has1styrRenewal) { #" + "Y" + "# } #" + "# if (!Has1styrRenewal) { #" + "N" + " # } #</label>");
+                            columns.Bound(item => item.HasLateRenewal).Title("Late Renewal (Y/N)").Width(3).ClientTemplate("<label id='lblHasLateRenewal#=ContractID#'># if (HasLateRenewal) { #" + "Y" + "# } #" + "# if (!HasLateRenewal) { #" + "N" + " # } #</label>");
+
+                            columns.Bound(item => item.RowValChanged).HtmlAttributes(new { id = "RowValChanged#=ContractID#" }).Hidden();
+                            columns.Bound(item => item.MarkStatus).Width(6).ClientTemplate("<span id='markStatus#=ContractID#' style='font-size:20px'></span>").Title("");
+                            })
+                            .Selectable()
+                            .Pageable(pageable => pageable
+                                .Refresh(false)
+                             )
+                            .DataSource(dataSource => dataSource
+                                .Ajax()
+                                .ServerOperation(false)
+                                .Read(read => read.Action("GetRenewSalesReport", "MonthlySalesDashboardReport").Data("GetSearchParameters"))
+                                .PageSize(100)
+                             )
+                        )
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </form>
+
+</div>

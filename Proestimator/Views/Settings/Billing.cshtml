@@ -1,0 +1,442 @@
+﻿@model Proestimator.ViewModel.BillingTabVM
+
+@using Proestimator.ViewModel;
+@using Proestimator.ViewModel.Contracts;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_Billing;
+}
+
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#AutoPaySelected').change(function () {
+
+            var autoPayOn = $("#AutoPaySelected").is(':checked');
+
+            $.ajax({
+                url: '@Url.Action("ChangeAutoPay", "Settings")',
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ "userID": @ViewBag.UserID, "loginID": @Model.LoginID , "isAutoPay": autoPayOn }),
+                success: function (result) {
+                    if (result)
+                    {
+                        ShowUserMessage(result, true, 5000);
+                    }
+                    else
+                    {
+                        var autoPayTurned = "@Proestimator.Resources.ProStrings.AutoPayTurned";
+
+                        if(autoPayOn == true)
+                        {
+                            autoPayTurned = autoPayTurned.replace("{0}", "on");
+                        }
+                        else
+                        {
+                            autoPayTurned = autoPayTurned.replace("{0}", "off");
+                        }
+
+                        RefreshAutoRenewButton($("#AutoRenewMessageOn").is(":visible"), !autoPayOn);
+                        ShowUserMessage(autoPayTurned, false, 5000);
+                    }
+                }
+            });
+        });
+
+        @if (!string.IsNullOrEmpty(Model.Message))
+        {
+            <text>ShowUserMessage("@Model.Message.Trim().Replace(Environment.NewLine, "")", true, 5000);</text>
+        }
+
+        $("#ClearErrorButton").click(function() {
+            $.ajax({
+                url: '@Url.Action("ClearCCError", "Settings")',
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ "userID": @ViewBag.UserID, "loginID": @Model.LoginID }),
+                success: function (result) {
+                    if (result) {
+                        ShowUserMessage(result, true, 5000);
+                    }
+                    else {
+                        $("#CardErrorContainer").hide();
+                    }
+                }
+            });
+        });
+
+        RefreshAutoRenewButton(@Model.AutoRenewOn.ToString().ToLower(), @((Model.HasSavedPaymentInfo && !Model.AutoPaySelected).ToString().ToLower()));
+
+        $("#btnChangeAutoRenew").click(function () {
+            applyLoading();
+
+            $.getJSON("/Settings/ChangeAutoRenew", { "userID": @ViewBag.UserID, "loginID": @Model.LoginID }, function (data) {
+                removeLoading();
+
+                if (data.Success == true)
+                {
+                    var table = $("#AutoRenewDetailsTable");
+                    table.empty();
+
+                    for(i = 0; i < data.AutoRenewDetails.length; i++)
+                    {
+                        table.append("<tr><td width='100'>" + data.AutoRenewDetails[i].Status + "</td><td>" + data.AutoRenewDetails[i].TimeStamp  + "</td></tr>");
+                    }
+
+                    RefreshAutoRenewButton(data.AutoRenewOn, data.TurnOnAutoPay);
+                }
+                else
+                {
+                    ShowUserMessage(data.ErrorMessage, true, 5000);
+                }
+            });
+        });
+    });
+
+    var _contractID = 0;
+
+    function ContractGridDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#contract-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+    }
+
+    function ContractGridLineSelectionChanged(arg) {
+
+        // Get the selected item and call the ClickedItem event
+        var row = $("#contract-grid").find(".k-state-selected").first();
+        _contractID = row.find("td").first().html();
+
+        var showAddOnButton = row.find("td:nth-child(2)").html();
+        if (showAddOnButton === "true")
+        {
+            $("#PickAddOnButton").show();
+            $("#PickAddOnButton").attr("href", "/@ViewBag.UserID/invoice/pick-addon/" + _contractID);
+        }
+        else
+        {
+            $("#PickAddOnButton").hide();
+        }
+
+        var digitalSignatureID = row.find("td:nth-child(3)").html();
+        if (digitalSignatureID > 0)
+        {
+            $("#ViewContractButton").show();
+            $("#ViewContractButton").attr("href", "/@ViewBag.UserID/settings/ViewContract/" + digitalSignatureID);
+        }
+        else
+        {
+            $("#ViewContractButton").hide();
+        }
+
+        RefreshInvoiceGrid();
+    }
+
+    function InvoiceGridDataChanged(arg) {
+
+        var grid = $("#invoice-grid").data("kendoGrid");
+        var dataSource = grid.dataSource;
+
+        //total records
+        var totalRecords = dataSource.total();
+
+        if (totalRecords > 0)
+        {
+            $("#invoicesContainer").show();
+        }
+        else
+        {
+            $("#invoicesContainer").hide();
+        }
+    }
+
+    function InvoiceGridLineSelectionChanged()
+    {
+
+    }
+
+    function GetInvoicesSearchParameters() {
+        var result =
+        {
+            userID: @ViewBag.UserID
+          , loginID: @Model.LoginID
+          , contractID: _contractID
+          , addOnID: 0
+        };
+        return result;
+    }
+
+    function RefreshInvoiceGrid() {
+        var grid = $("#invoice-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+            grid.dataSource.page(1);
+        }
+    }
+
+
+    function RefreshAutoRenewButton(on, payOn)
+    {
+        $("#btnChangeAutoRenew").val(on == true ? "@Proestimator.Resources.ProStrings.Settings_TurnOffAutoRenew" : "@Proestimator.Resources.ProStrings.Settings_TurnOnAutoRenew");
+
+        if (on == true)
+        {
+            $("#AutoRenewMessageOn").show();
+            if (payOn == true) {
+                $("#AutoPayMessageOn").show();
+            }
+            else {
+                $("#AutoPayMessageOn").hide();
+            }
+            $("#AutoRenewMessageOff").hide();
+        }
+        else
+        {
+            $("#AutoRenewMessageOn").hide();
+            $("#AutoPayMessageOn").hide();
+            $("#AutoRenewMessageOff").show();
+        }
+    }
+
+</script>
+
+<style>
+    h1 {
+        margin-bottom: 5px !important;
+        padding-top: 20px;
+    }
+
+    img {
+        margin: 0px auto !important;
+    }
+
+    @@media screen and (max-width:700px) {
+        #smEstimateNavRow {
+            border: 1px solid #349ad8;
+            background-color: #f5f9fb;
+            max-width: 92%;
+            padding-right: 30px;
+            margin-left: 20px;
+        }
+
+        #estimateNavigation {
+            margin-top: 15px;
+        }
+
+        .tabcontent2 {
+            width: 92.00%;
+            margin-left: 20px;
+        }
+    }
+
+</style>
+
+<div id="workDesk" class="page-container">
+
+
+    @using (Html.BeginForm("Billing", "Settings", FormMethod.Post, new { @class = "container" }))
+    {
+        @Html.Partial("SettingTopMenu")
+
+        <input type="hidden" id="redirectData" name="redirectDataField" />
+        <input id="submitButton" type="submit" value="@Proestimator.Resources.ProStrings.Save" class="button nav-btn" style="display: none;" />
+        @Html.HiddenFor(o => o.LoginID)
+    }
+    <div style="padding-left: 5px;padding-right: 20px">
+        <div class="tabcontent container tabcontent2">
+
+            <div class="container">
+
+                @if (Model.ShowContractRenewalButton)
+                {
+                    <div style="padding-top: 20px;">
+                        <p>Your contract will expire in @Model.ContractExpirationDays days.  <a class="button nav-btn" href="/@ViewBag.UserID/invoice/pick-contract">@Proestimator.Resources.ProStrings.RenewContract</a></p>
+                    </div>
+                }
+
+                @if (!String.IsNullOrEmpty(Model.TrialExpirationMessage))
+                {
+                    <div style="padding-top: 20px;">
+                        <p>@Model.TrialExpirationMessage  <a class="button nav-btn" href="/@ViewBag.UserID/invoice/pick-contract">@Proestimator.Resources.ProStrings.PickContract</a></p>
+                    </div>
+                }
+
+                <div class="container" style="padding-top: 20px;">
+                    @if (Model.NeedsPayment)
+                    {
+                        <div class="half-container">
+                        
+                            <h1>@Proestimator.Resources.ProStrings.DueInvoices</h1>
+
+                            <div id="due-invoice-grid-container" class="datagrid">
+                                @(Html.Kendo().Grid<InvoiceVM>(Model.DueInvoices)
+                                .Name("due-invoice-grid")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(item => item.ContractID).Hidden();
+                                    columns.Bound(item => item.Summary).Title(@Proestimator.Resources.ProStrings.Summary);
+                                    columns.Bound(item => item.InvoiceTotal).Format("{0:c}").Title(@Proestimator.Resources.ProStrings.InvoiceTotal);
+                                    columns.Bound(item => item.DueDate).Format("{0:MM/dd/yyyy}").Title(@Proestimator.Resources.ProStrings.Invoice_DueDate);
+                                })
+                                .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .ServerOperation(false)
+                                )
+                            )
+                            </div>
+
+                            <p>A payment of @Model.InvoiceAmount.ToString("C") is currently due.</p>
+                            <p>@Html.ActionLink(Proestimator.Resources.ProStrings.Billing_MakePayment, "CustomerInvoice", "Invoice", null, new { @class = "button nav-btn" })</p>
+                        
+                        </div>
+                    }
+
+                    @if (Model.CurrentContractIsEarlyRenewal)
+                    {
+                        <div class="half-container">
+                            <p style="text-align: center;">Customer Acknowledged early renewal policy on @Model.EarlyRenewalStamp.ToShortDateString()</p>
+                        </div>
+                    }
+                </div>
+
+                <div class="container">
+
+                    <div class="half-container" style="padding-left: 20px;">
+                        @if (Model.ShowAutoPay)
+                        {
+                            <h1>@Proestimator.Resources.ProStrings.Billing_AutoPayInfo</h1>
+
+                            <label>
+                                @Proestimator.Resources.ProStrings.CCCharge_AutoPayDescription
+                            </label>
+
+                            if (Model.HasSavedPaymentInfo)
+                            {
+                                <div id="SavedPaymentInfo">
+                                    @if (Model.ForceAutoPay)
+                                    {
+                                        <p><input type="checkbox" disabled checked="checked" />@Proestimator.Resources.ProStrings.CCCharge_AllowAutoPay</p>
+                                        <p><i>@Proestimator.Resources.ProStrings.Message_AutoPayForcedOn</i></p>
+                                    }
+                                    else
+                                    {
+                                        <p><label style="cursor: pointer;">@Html.CheckBoxFor(model => model.AutoPaySelected) @Proestimator.Resources.ProStrings.CCCharge_AllowAutoPay</label></p>
+                                    }
+
+                                    <table style="width: 250px; border: 1px solid black; font-size: 1em !important; padding-bottom: 15px; margin-bottom: 0px; margin: 0px auto;" cellpadding="5" cellspacing="0">
+                                        <tr>
+                                            <td style="text-align: center; background-color: #f5f9fb; border-bottom: 1px solid #349ad8;" colspan="2">
+                                                <p><b>@Proestimator.Resources.ProStrings.CCCharge_SavedInfo</b></p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align: right; width: 150px;">@Proestimator.Resources.ProStrings.CCCharge_Last4:</td>
+                                            <td>@Model.Last4</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align: right;">@Proestimator.Resources.ProStrings.CCCharge_ExpirationDate:</td>
+                                            <td>@Model.CardExpiration.ToShortDateString()</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" style="text-align: center;">
+                                                @if (Model.ForceAutoPay)
+                                                {
+                                                    <div id="ChangeCardButtonContainer" class="container center" style="padding-bottom: 20px;">
+                                                        <div style="width: 200px; margin: 0px auto;">
+                                                            <form action="/@ViewBag.UserID/settings/billing" method="POST" style="margin-left: -18px;">
+                                                                <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                                                                        data-key="@Model.StripeKey"
+                                                                        data-name="Web Est"
+                                                                        data-description="@Proestimator.Resources.ProStrings.WebEstPaymentInformation  "
+                                                                        data-zip-code="true"
+                                                                        data-allow-remember-me="false"
+                                                                        data-label="@Proestimator.Resources.ProStrings.ChangeCard"
+                                                                        data-panel-label="@Proestimator.Resources.ProStrings.ChangeCard"
+                                                                        data-image="https://stripe.com/img/documentation/checkout/marketplace.png"
+                                                                        data-locale="auto">
+                                                                </script>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <a class="button nav-btn" href="/@ViewBag.UserID/settings/delete-cc">@Proestimator.Resources.ProStrings.DeleteCardInfo</a>
+                                                }
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    @if (Model.CardHasError)
+                                    {
+                                        <div id="CardErrorContainer" style="border: 1px solid red; padding-left: 10px; padding-right: 10px;">
+                                            <p>@Proestimator.Resources.ProStrings.CardHasErrorMessage</p>
+                                            <p>Error: @Model.CardErrorMessage</p>
+                                            <p><input id="ClearErrorButton" type="button" class="button nav-btn" value="@Proestimator.Resources.ProStrings.ClearError"></p>
+                                        </div>
+                                    }
+                                </div>
+
+                            }
+                            else
+                            {
+                                <div id="SaveCardButtonContainer" class="container center" style="padding-bottom: 20px; padding-top: 20px;">
+                                    <div style="width: 200px; margin: 0px auto;">
+                                        <form action="/@ViewBag.UserID/settings/billing" method="POST" style="margin-left: -18px;">
+                                            <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                                                    data-key="@Model.StripeKey"
+                                                    data-name="Web Est"
+                                                    data-description="@Proestimator.Resources.ProStrings.WebEstPaymentInformation  "
+                                                    data-zip-code="true"
+                                                    data-allow-remember-me="false"
+                                                    data-label="@Proestimator.Resources.ProStrings.SaveCard"
+                                                    data-panel-label="@Proestimator.Resources.ProStrings.SaveCard"
+                                                    data-image="https://stripe.com/img/documentation/checkout/marketplace.png"
+                                                    data-locale="auto">
+                                            </script>
+                                        </form>
+                                    </div>
+                                </div>
+                            }
+
+                        }
+                    </div>
+
+                    <div class="half-container">
+                        <h1>@Proestimator.Resources.ProStrings.Settings_ContractAutoRenew</h1>
+                        <label style="text-align: center;">
+                            <span id="AutoRenewMessageOn" style="display: none;">@Proestimator.Resources.ProStrings.Settings_ContractAutoRenew_Expires_Description</span>
+                            <span id="AutoPayMessageOn" style="display: none;"><br />@Proestimator.Resources.ProStrings.Settings_AutoPay_TurnOn_Description</span>
+                            <span id="AutoRenewMessageOff" style="display: none;">@Proestimator.Resources.ProStrings.Settings_ContractAutoRenew_Manual_Description</span>
+                        </label>
+
+                        <div class="col sm_4_4" style="text-align: center; padding-top: 20px;">
+                            <input id="btnChangeAutoRenew" type="button" name="Auto Renew" class="button nav-btn do-not-disable" value="">
+                        </div>
+
+                        <table id="AutoRenewDetailsTable" style="padding-top: 15px; padding-left: 20px; margin-left: 100px; width: 200px;">
+                            @foreach (AutoRenewDetailVM detail in Model.AutoRenewDetails)
+                            {
+                                <tr><td width="100">@detail.Status</td><td>@detail.TimeStamp</td></tr>
+                            }
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>  

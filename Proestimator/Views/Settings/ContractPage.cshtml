@@ -1,0 +1,758 @@
+﻿@model Proestimator.ViewModel.Contracts.ContractTabVM
+
+@using Proestimator.ViewModel;
+@using Proestimator.ViewModel.Contracts;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.Billing_Contract;
+}
+
+
+<script>
+
+    var _addOnID = 0;
+    var _multiAddon = false;
+
+    $(document).ready(function () {
+        Bundled();
+        PaymentLinkButton();
+    });
+
+    // -------------------------------------------------------------------------------------------------------------------------------------------------
+    // Invoice Grid
+    // -------------------------------------------------------------------------------------------------------------------------------------------------
+    function InvoiceGridDataChanged(arg) {
+        var grid = $("#invoice-grid").data("kendoGrid");
+        var dataSource = grid.dataSource;
+
+        //total records
+        var totalRecords = dataSource.total();
+
+        if (totalRecords > 0)
+        {
+            $("#invoicesContainer").fadeIn();
+        }
+
+        // Show or hide the No Payment details
+        var hasPayment = false;
+        var deletable = false;
+
+        $.each(grid.items(), function (index, item) {
+            var uid = $(item).data("uid");
+            var dataItem = dataSource.getByUid(uid);
+
+            if (dataItem.Paid === true) {
+                hasPayment = true;
+            }
+            if (dataItem.Deletable === true) {
+                deletable = true;
+            }
+        });
+
+        grid.hideColumn(8);
+
+        if (hasPayment === false) {
+            $("#AddOnNoPayment").fadeIn();
+        }
+        else if (deletable == true) {
+            grid.showColumn(8);
+            $("#InvoiceNoPayment").fadeIn();
+        }
+    }
+
+    function InvoiceGridLineSelectionChanged()
+    {
+
+
+    }
+
+    function GetInvoicesSearchParameters() {
+        var result =
+        {
+            userID: @ViewBag.UserID
+          , loginID: @Model.LoginID
+          , contractID: @(Model.CurrentContract == null ? 0 : Model.CurrentContract.ContractID)
+          , addOnID: _addOnID
+        };
+        return result;
+    }
+
+    function LoadInvoices(addOnID, multiAddon) {
+        _addOnID = addOnID;
+        _multiAddon = multiAddon;
+
+        $("#AddOnNoPayment").fadeOut(300);
+        $("#InvoiceNoPayment").fadeOut(300);
+        $("#invoicesContainer").fadeOut(300, function () {
+            var grid = $("#invoice-grid").data("kendoGrid");
+
+            if (grid) {
+                grid.dataSource.read();
+            }
+        });
+    }
+
+    function DeleteAddOn() {
+        if (_addOnID > 0) {
+            applyLoading();
+
+            //DeleteAddOn(int userID, int loginID, int contractID, int addOnID)
+            $.getJSON("/Settings/DeleteAddOn", { "userID": @ViewBag.UserID, "loginID": @Model.LoginID, "contractID": @(Model.CurrentContract == null ? 0 : Model.CurrentContract.ContractID), "addOnID": _addOnID }, function (data) {
+                removeLoading();
+
+                if (data.Success == true)
+                {
+                    if (_multiAddon) {
+                        $("#AddOnDetailWrapper" + data.AddOnTypeID).find("#" + _addOnID).remove();
+                    }
+                    else {
+                        $("#AddOnDetailWrapper" + data.AddOnTypeID).find(".btnAddOnDetails").hide();
+                        $("#AddOnDetailWrapper" + data.AddOnTypeID).find(".btnAddAddOn").show();
+                        $("#AddOnDetailWrapper" + data.AddOnTypeID).find(".btnNeedsPayment").hide();
+                        Bundled();
+                    }
+
+                    $("#invoicesContainer").fadeOut(300);
+
+                    _addOnID = 0;
+                    _multiAddon = false;
+
+                    PaymentLinkButton();
+                }
+                else
+                {
+                    ShowUserMessage(data.ErrorMessage, true, 5000);
+                }
+            });
+        }
+    }
+
+    function DeleteInvoices() {
+        if (_addOnID > 0) {
+            applyLoading();
+
+            $.getJSON("/Settings/DeleteInvoices", { "userID": @ViewBag.UserID, "loginID": @Model.LoginID, "contractID": @(Model.CurrentContract == null ? 0 : Model.CurrentContract.ContractID), "addOnID": _addOnID }, function (data) {
+                removeLoading();
+
+                if (data.Success == true)
+                {
+                    if (_multiAddon) {
+                        $("#AddOnDetailWrapper" + data.TypeID).find(".muitiaddon").empty();
+                                $.each(data.AddOnDetails, function (i, result) {
+                                    $("#AddOnDetailWrapper" + data.TypeID).find(".muitiaddon").append("<div style='margin-bottom: 5px;' id='" + result.AddOnID + "'>");
+                                    $("#AddOnDetailWrapper" + data.TypeID).find("#" + result.AddOnID).append("<a href='javascript:LoadInvoices(" + result.AddOnID + ", true);' class='page-link do-not-disable'>" + result.AddOnTerms + "</a>");
+                                    if (result.NeedsPayment) {
+                                        $("#AddOnDetailWrapper" + data.TypeID).find("#" + result.AddOnID).append("<a href='/@ViewBag.UserID/settings/billing' class='page-link btnNeedsPayment' style='float: right; color: red !important;'>Needs Payment</a>");
+                                    }
+                                });
+                    }
+                    else {
+                        $("#AddOnDetailWrapper" + data.TypeID).find(".btnAddOnDetails").hide();
+                        $("#AddOnDetailWrapper" + data.TypeID).find(".btnAddAddOn").show();
+                        $("#AddOnDetailWrapper" + data.TypeID).find(".btnNeedsPayment").hide();
+                        Bundled();
+                    }
+
+                    $("#invoicesContainer").fadeOut(300);
+
+                    _addOnID = 0;
+                    _multiAddon = false;
+
+                    PaymentLinkButton();
+                }
+                else
+                {
+                    ShowUserMessage(data.ErrorMessage, true, 5000);
+                }
+            });
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------------------
+    // Add Ons Grid
+    // -------------------------------------------------------------------------------------------------------------------------------------------------
+    var _addOnTypeID = 0;
+    var _selectedAddOnIDs = [];
+    var _qty = 1;
+
+    function GetContractListParameters() {
+        var contractID = 0;
+        var qty = _qty;
+        _qty = 1;
+
+        @if (Model.CurrentContract != null)
+        {
+        <text>contractID = @Model.CurrentContract.ContractID;</text>
+        }
+        return { userID: @ViewBag.UserID, loginID: @Model.LoginID , contractID: contractID, contractTypeID: _addOnTypeID, qty: qty };
+    }
+
+    function LoadAddOnTerms(addOnTypeID, cancel) {
+        _addOnTypeID = addOnTypeID;
+
+        // Before fading out all grids, find out if our grid is already showing
+        var gridContainer = $("#AddOnGridContainer" + addOnTypeID);
+
+        if (gridContainer.is(":visible") && cancel) {
+            gridContainer.animate({ height: "hide", opacity: 0 }, 300);
+        }
+        else {
+            var grid = $("#AddOnGrid" + addOnTypeID).data("kendoGrid");
+            if ($("#SelectedAddOnQty" + addOnTypeID).val() != undefined) {
+                _qty = $("#SelectedAddOnQty" + addOnTypeID).val();
+            }
+            if (grid) {
+                grid.dataSource.read();
+            }
+
+            gridContainer.animate({ height: "show", opacity: 100 }, 300);
+        }
+    }
+
+    function SelectAddOn(addOnType) {
+        $.getJSON("/Settings/SelectAddOn", { "userID": @ViewBag.UserID, "loginID": @Model.LoginID, "contractID": @(Model.CurrentContract == null ? 0 : Model.CurrentContract.ContractID), "addOn": addOnType}, function (data) {
+        });
+    }
+
+    function AddOnGridDataChanged(e) {
+        var kgrid = $(e.sender.table[0].closest(".k-grid"));
+        var gridID = kgrid.attr("ID");
+
+        if (_selectedAddOnIDs[gridID.replace("AddOnGrid", "")] == undefined) {
+            var grid = $("#" + gridID).data("kendoGrid");
+            grid.select(grid.tbody.find("tr:first"));
+        }
+        else {
+            var rows = kgrid.find("tbody").find("tr");
+            rows.each(function (i, row) {
+                if ($(row).find("td").first().html() == _selectedAddOnIDs[gridID.replace("AddOnGrid", "")]) {
+                    $(row).addClass("k-state-selected");
+                }
+            });
+        }
+    }
+
+    function AddOnGridLineSelectionChanged(arg) {
+        var selected = $.map(this.select(), function (item) {
+            return $(item).find("td").first().html();
+        });
+
+        var addOnTypeID = $.map(this.select(), function (item) {
+            return $(item).closest(".addon-grid").attr("id").replace("AddOnGridContainer", "");
+        });
+
+        _selectedAddOnIDs[addOnTypeID] = selected;
+        //console.log(_selectedAddOnIDs);
+
+        //// Get the selected item and call the ClickedItem event
+        //var theSender = $(arg);
+        //var row = theSender.find(".k-state-selected").first();
+        //var contractTypeID = row.find("td").first().html();
+    }
+
+    function AddAddOn(typeID) {
+        var selectedID = parseInt(_selectedAddOnIDs[typeID], 10);
+        console.log(selectedID);
+
+        @if (Model.HasActiveContract && Model.CurrentContract != null)
+        {
+            <text>
+                if (selectedID > 0) {
+                    applyLoading();
+                    var qty = 1;
+                    var multi = false;
+                    if ($("#SelectedAddOnQty" + typeID).val() != undefined) {
+                        qty = $("#SelectedAddOnQty" + typeID).val();
+                        multi = true;
+                    }
+                    $.getJSON("/Settings/CreateAddOn", { "userID": @ViewBag.UserID, "loginID": @Model.LoginID, "contractID": @Model.CurrentContract.ContractID, "priceLevelID": selectedID, "contractTypeID": typeID, "qty": qty, "multiAddon": multi }, function (data) {
+
+                        removeLoading();
+
+                        if (data.Success == true)
+                        {
+                            if (data.NeedsPageRefresh) {
+                                location.reload();
+                            }
+
+                            if (multi) {
+                                $("#AddOnDetailWrapper" + typeID).find(".muitiaddon").empty();
+                                $.each(data.AddOnDetails, function (i, result) {
+                                    $("#AddOnDetailWrapper" + typeID).find(".muitiaddon").append("<div style='margin-bottom: 5px;' id='" + result.AddOnID + "'>");
+                                    $("#AddOnDetailWrapper" + typeID).find("#" + result.AddOnID).append("<a href='javascript:LoadInvoices(" + result.AddOnID + ", true);' class='page-link do-not-disable'>" + result.AddOnTerms + "</a>");
+                                    if (result.NeedsPayment) {
+                                        $("#AddOnDetailWrapper" + typeID).find("#" + result.AddOnID).append("<a href='/@ViewBag.UserID/settings/billing' class='page-link btnNeedsPayment' style='float: right; color: red !important;'>Needs Payment</a>");
+                                    }
+                                });
+                                PaymentLinkButton();
+                            }
+                            else {
+                                $("#AddOnDetailWrapper" + typeID).find(".btnAddOnDetails").text(data.AddOnTerms);
+                                $("#AddOnDetailWrapper" + typeID).find(".btnAddOnDetails").attr("href", "javascript:LoadInvoices(" + data.AddOnID + ", false);");
+
+                                $("#AddOnDetailWrapper" + typeID).find(".btnAddAddOn").fadeOut(300, function () {
+                                    $("#AddOnDetailWrapper" + typeID).find(".btnAddOnDetails").fadeIn(300);
+
+                                    if (data.NeedsPayment) {
+                                        $("#AddOnDetailWrapper" + typeID).find(".btnNeedsPayment").fadeIn(300);
+                                    }
+                                    else {
+                                        $("#AddOnDetailWrapper" + typeID).find(".btnNeedsPayment").hide();
+                                    }
+                                    if (typeID == 12) { Bundled(); }
+                                    PaymentLinkButton();
+                                });
+                            }
+
+                            var addOnGrid = $("#AddOnGridContainer" + typeID);
+                            addOnGrid.animate({ height: "hide", opacity: 0 }, 300)
+
+                            LoadInvoices(data.AddOnID, multi);
+                        }
+                        else
+                        {
+                            ShowUserMessage(data.ErrorMessage, true, 5000);
+                        }
+                    });
+                }
+</text>
+}
+    }
+
+    function Bundled() {
+        var bundled = $('#AddOnDetailWrapper12').find('.btnAddOnDetails').is(':visible'), i, $bundlable = $('.bundlable')
+        for (i = 0; i < $bundlable.length; i++) {
+            if ($bundlable.eq(i).find('.btnAddOnDetails').is(':visible') == false) {
+                if (bundled) {
+                    $bundlable.eq(i).find('.btnAddAddOn').fadeOut();
+                    $bundlable.eq(i).find('.bundled').fadeIn();
+                }
+                else {
+                    $bundlable.eq(i).find('.bundled').fadeOut();
+                    $bundlable.eq(i).find('.btnAddAddOn').fadeIn();
+                }
+            }
+        }
+    }
+
+    function PaymentLinkButton() {
+        var i, $payment = $('.btnNeedsPayment'), visible = false
+        for (i = 0; i < $payment.length; i++) {
+            if ($payment.eq(i).is(':visible')) {
+                visible = true;
+            }
+        }
+        if (visible) {
+            $('#paymentLink').fadeIn();
+        }
+        else {
+            $('#paymentLink').fadeOut();
+        }
+    }
+
+</script>
+
+<style>
+    h1 {
+        margin-bottom: 5px !important;
+        padding-top: 20px;
+    }
+
+    img {
+        margin: 0px auto !important;
+    }
+
+    .tabcontent2 {
+        min-height: 600px;
+    }
+
+    .add-on-details-row {
+        max-width: 350px;
+    }
+
+    @@media screen and (max-width:700px) {
+        #smEstimateNavRow {
+            border: 1px solid #349ad8;
+            background-color: #f5f9fb;
+            max-width: 92%;
+            padding-right: 30px;
+            margin-left: 20px;
+        }
+
+        #estimateNavigation {
+            margin-top: 15px;
+        }
+
+        .tabcontent2 {
+            width: 92.00%;
+            margin-left: 20px;
+        }
+    }
+
+    .field-value {
+        font-weight: bold;
+    }
+
+    .page-link {
+        color: black !important;
+        font-weight: normal;
+        text-decoration: underline;
+    }
+
+    .addon-grid {
+        display: none;
+        padding-top: 10px;
+    }
+
+    .k-grid tbody {
+        cursor: pointer;
+    }
+
+    .bundled {
+        margin: 0px;
+    }
+
+    .bundlable {
+        margin-left: 30px;
+    }
+</style>
+
+<div id="workDesk" class="page-container">
+
+
+    @using (Html.BeginForm("ContractPage", "Settings", FormMethod.Post, new { @class = "container" }))
+    {
+        @Html.Partial("SettingTopMenu")
+
+        <input type="hidden" id="redirectData" name="redirectDataField" />
+        <input id="submitButton" type="submit" value="@Proestimator.Resources.ProStrings.Save" class="button nav-btn" style="display: none;" />
+        @Html.HiddenFor(o => o.LoginID)
+
+        <div class="tabcontent container tabcontent2">
+
+            @if (Model.HasContractHistory)
+            {
+                <div style="position: fixed; width: 200px; padding-top: 5px;" class="inputLabel"><a class="page-link" href="/@ViewBag.UserID/settings/contract-history">View Contract History</a></div>
+            }
+
+            <div class="container">
+                @if (Model.HasActiveTrial)
+                {
+                    <div class="container">
+                        <fieldset style="text-align: center;">
+                            <h1>@Model.TrialExpirationMessage</h1>
+                            <p><a class="button nav-btn" href="/@ViewBag.UserID/invoice/pick-contract/">@Proestimator.Resources.ProStrings.PickContract</a></p>
+                        </fieldset>
+                    </div>
+                }
+
+                @if (Model.HasActiveContract)
+                {
+                    <div class="half-container">
+
+                        <fieldset>
+                            @if (Model.CurrentContract != null)
+                            {
+                                <h1>Your Contract</h1>
+
+                                <div class="field-wrapper">
+                                    <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.TermDescription</label>
+                                    <div class="field-control inputLabel field-value">
+                                        <a href="javascript:LoadInvoices(0, false)" class="page-link">@Model.CurrentContract.TermDescription</a>
+                                    </div>
+                                </div>
+
+                                <div class="field-wrapper">
+                                    <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.EffectiveDate</label>
+                                    <div class="field-control inputLabel field-value">
+                                        @Model.CurrentContract.EffectiveDate.ToShortDateString() - @Model.CurrentContract.ExpirationDate.ToShortDateString()
+                                    </div>
+                                </div>
+
+                                <div class="field-wrapper" style="padding-top: 20px;">
+                                    <label class="inputLabel field-label">&nbsp;</label>
+                                    <div class="field-control inputLabel field-value">
+                                        @if (Model.CurrentContract.DigitalSignatureID > 0)
+                                        {
+                                            <a id="ViewContractButton" class="button nav-btn do-not-disable" href="/@ViewBag.UserID/settings/ViewContract/@Model.CurrentContract.DigitalSignatureID" target="_blank">@Proestimator.Resources.ProStrings.ViewContract</a>
+                                        }
+
+                                    </div>
+                                </div>
+                            }
+
+                            @if (Model.ShowContractRenewalButton)
+                            {
+                                <div class="field-wrapper" style="padding-top: 20px;">
+                                    <label class="inputLabel field-label">&nbsp;</label>
+                                    <div class="field-control inputLabel field-value">
+                                        <p>Your contract will expire in @Model.ContractExpirationDays days.  <a class="button nav-btn" href="/@ViewBag.UserID/invoice/pick-contract">@Proestimator.Resources.ProStrings.RenewContract</a></p>
+                                    </div>
+                                </div>
+                            }
+                        </fieldset>
+
+                        @if (Model.HasInProgressContract)
+                        {
+                            <fieldset>
+
+                                <div class="field-wrapper">
+                                    <label class="inputLabel field-label">&nbsp;</label>
+                                    <div class="field-control inputLabel field-value">
+                                        <p>You have an in-progress renewal contract.</p>
+                                    </div>
+                                </div>
+
+                                <div class="field-wrapper">
+                                    <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.TermDescription</label>
+                                    <div class="field-control inputLabel field-value">
+                                        @Model.InProgressContract.TermDescription
+                                    </div>
+                                </div>
+
+                                <div class="field-wrapper">
+                                    <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.EffectiveDate</label>
+                                    <div class="field-control inputLabel field-value">
+                                        @Model.InProgressContract.EffectiveDate.ToShortDateString() - @Model.InProgressContract.ExpirationDate.ToShortDateString()
+                                    </div>
+                                </div>
+
+                                <div class="field-wrapper" style="padding-top: 20px;">
+                                    <label class="inputLabel field-label">&nbsp;</label>
+                                    <div class="field-control inputLabel field-value">
+                                        <a class="button nav-btn" href="/@ViewBag.UserID/invoice/subscription-confirm/@Model.InProgressContract.ContractID.ToString()">@Proestimator.Resources.ProStrings.Continue</a>
+                                        &nbsp;&nbsp;or <a class="page-link" href="/@ViewBag.UserID/invoice/pick-contract">@Proestimator.Resources.ProStrings.ChangeContract</a>
+                                    </div>
+                                </div>
+
+                            </fieldset>
+                        }
+
+                        @if (Model.HasFutureContract)
+                        {
+                            <fieldset>
+
+                                <div class="field-wrapper">
+                                    <label class="inputLabel field-label">&nbsp;</label>
+                                    <div class="field-control inputLabel field-value">
+                                        <p>Your next contract has already been paid for and becomes active on @Model.FutureContract.EffectiveDate.ToShortDateString().</p>
+                                    </div>
+                                </div>
+
+                                <div class="field-wrapper">
+                                    <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.TermDescription</label>
+                                    <div class="field-control inputLabel field-value">
+                                        @Model.FutureContract.TermDescription
+                                    </div>
+                                </div>
+
+                                <div class="field-wrapper">
+                                    <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.EffectiveDate</label>
+                                    <div class="field-control inputLabel field-value">
+                                        @Model.FutureContract.EffectiveDate.ToShortDateString() - @Model.FutureContract.ExpirationDate.ToShortDateString()
+                                    </div>
+                                </div>
+
+                            </fieldset>
+                        }
+                    </div>
+
+                    if (Model.CurrentContract != null)
+                    {
+                        <div class="half-container">
+                            <div style="margin: 0px auto; width: 140px;">
+                                <p style="float: left; font-size: 1.625em; font-weight: bold;">Add Ons</p>
+
+                                <a href="~/Files/Instructions/How to purchase Pro Estimator Add Ons.pdf" target="_blank" style="float: left;">
+                                    <img src="~/Images/help.png" width="20" height="20" style="margin-top: 31px !important; margin-left: 10px !important;" />
+                                </a>
+                            </div>
+
+                            @foreach (AddOnDetailsVM addOnDetails in Model.CurrentContract.AddOnDetails)
+                            {
+                                <div class="@("field-wrapper" + (addOnDetails.IsBundleable ? " bundlable" : ""))">
+                                    <label class="inputLabel field-label">@addOnDetails.AddOnType</label>
+                                    <div class="field-control inputLabel field-value add-on-details-row" id="@("AddOnDetailWrapper" + addOnDetails.AddOnTypeID)">
+
+                                        <div class="muitiaddon"></div>
+                                        <a href="javascript:LoadInvoices(@addOnDetails.AddOnID, false);" style="display: none;" class="page-link do-not-disable btnAddOnDetails">@addOnDetails.TermDescription</a>
+                                        <a href="javascript:LoadAddOnTerms(@addOnDetails.AddOnTypeID, false)" style="display: none;" class="page-link do-not-disable btnAddAddOn">Add</a>
+                                        <p class="bundled" style="display: none;">Bundled</p>
+                                        @if (@addOnDetails.AddOnType == "QB Exporter")
+                                                    {
+                                                       <label style="font-weight:normal">@Proestimator.Resources.ProStrings.QBExporterMessage</label>
+                                                    }
+
+                                        <a href="/@ViewBag.UserID/settings/billing" class="page-link btnNeedsPayment" style="display: none; float: right; color: red !important;">Needs Payment</a>
+
+
+                                        <div class="addon-grid" id="@("AddOnGridContainer" + addOnDetails.AddOnTypeID)">
+                                            <div class="datagrid">
+                                                @(Html.Kendo().Grid<ContractTermsVM>()
+                                        .Name("AddOnGrid" + addOnDetails.AddOnTypeID)
+                                        .Columns(columns =>
+                                        {
+                                            columns.Bound(item => item.ContractPriceLevelID).Hidden();
+                                            columns.Bound(item => item.TermDescription).Title(@Proestimator.Resources.ProStrings.TermDescription);
+                                            columns.Bound(item => item.TermTotal).Format("{0:c}").Title(@Proestimator.Resources.ProStrings.TermTotal);
+                                            columns.Bound(item => item.Summary).HeaderHtmlAttributes(new { @class = "hide-large" }).HtmlAttributes(new { @class = "hide-large" }).Title(@Proestimator.Resources.ProStrings.Summary);
+                                        })
+                                        .Selectable()
+                                        .Events(events => events
+                                            .DataBound("AddOnGridDataChanged")
+                                            .Change("AddOnGridLineSelectionChanged")
+                                        )
+                                        .DataSource(dataSource => dataSource
+                                            .Ajax()
+                                            .ServerOperation(false)
+                                            .Sort(sort => sort.Add("NumberOfPayments"))
+                                            .Read(read => read.Action("GetAddOnContractOptions", "Invoice").Data("GetContractListParameters"))
+                                            .PageSize(20)
+                                        )
+                                        .AutoBind(false)
+                                                )
+                                                @if (addOnDetails.IsMultiAdd && addOnDetails.AddOnQtys.Count() > 0)
+                                                {
+                                                    <table style="margin-bottom: 0px;">
+                                                        <tr><td style="text-align: right;">Quantity:&nbsp;&nbsp;</td><td>@Html.DropDownList("SelectedAddOnQty" + addOnDetails.AddOnTypeID, addOnDetails.AddOnQtys)</td></tr>
+                                                    </table>
+                                                    <text>
+                                                        <script>
+                                                            $("@("#SelectedAddOnQty" + addOnDetails.AddOnTypeID)").val(@addOnDetails.SelectedAddOnQty);
+                                                            $(document).ready(function () {
+                                                                $("@("#SelectedAddOnQty" + addOnDetails.AddOnTypeID)").change(function () {
+                                                                    LoadAddOnTerms(@addOnDetails.AddOnTypeID, false);
+                                            });
+                                        });
+                                                        </script>
+                                                    </text>
+                                                }
+                                            </div>
+
+                                            <div style="padding-top: 15px; padding-bottom: 10px; text-align: right;">
+                                                <a class="button nav-btn AddAdOnButton do-not-disable" href="javascript:LoadAddOnTerms(@addOnDetails.AddOnTypeID, true)">@Proestimator.Resources.ProStrings.Cancel</a>
+                                                <a class="button nav-btn AddAdOnButton do-not-disable" href="javascript:AddAddOn(@addOnDetails.AddOnTypeID);">Add @addOnDetails.AddOnType</a>
+                                            </div>
+
+                                        </div>
+
+                                        @if (addOnDetails.IsMultiAdd && addOnDetails.HasAddOn)
+                                        {
+                                            foreach (AddOnDetailsVM addOnDetail in addOnDetails.AddOnDetails)
+                                            {
+                                                <text>
+                                                    <script>
+    $("@("#AddOnDetailWrapper" + addOnDetails.AddOnTypeID)").find(".muitiaddon").append("<div style='margin-bottom: 5px;' id='@addOnDetail.AddOnID'>");
+                                            $("@("#AddOnDetailWrapper" + addOnDetails.AddOnTypeID)").find("#@addOnDetail.AddOnID").append("<a href='javascript:LoadInvoices(@addOnDetail.AddOnID, true);' class='page-link do-not-disable'>@addOnDetail.TermDescription</a>");</script>
+                                                </text>
+                                                if (addOnDetail.NeedsPayment)
+                                                {
+                                                    <text>
+                                                        <script>$("@("#AddOnDetailWrapper" + addOnDetails.AddOnTypeID)").find("#@addOnDetail.AddOnID").append("<a href='/@ViewBag.UserID/settings/billing' class='page-link btnNeedsPayment' style='float: right; color: red !important;'>Needs Payment</a>");</script>
+                                                    </text>
+                                                }
+                                            }
+                                        }
+
+                                        @if (addOnDetails.HasAddOn && !addOnDetails.IsMultiAdd)
+                                        {
+                                            <text>
+                                                <script>$("@("#AddOnDetailWrapper" + addOnDetails.AddOnTypeID)").find(".btnAddOnDetails").fadeIn();</script>
+                                            </text>
+                                        }
+                                        else
+                                        {
+                                            if (addOnDetails.IsBundled)
+                                            {
+                                                <text>
+                                                    <script>$("@("#AddOnDetailWrapper" + addOnDetails.AddOnTypeID)").find(".bundled").fadeIn();</script>
+                                                </text>
+                                            }
+                                            else
+                                            {
+                                                <text>
+                                                    <script>$("@("#AddOnDetailWrapper" + addOnDetails.AddOnTypeID)").find(".btnAddAddOn").fadeIn();</script>
+                                                </text>
+                                            }
+                                        }
+
+                                        @if (addOnDetails.HasAddOn && addOnDetails.NeedsPayment && !addOnDetails.IsMultiAdd)
+                                        {
+                                            <text>
+                                                <script>$("@("#AddOnDetailWrapper" + addOnDetails.AddOnTypeID)").find(".btnNeedsPayment").show();</script>
+                                            </text>
+                                        }
+
+                                    </div>
+                                </div>
+                            }
+
+
+                        </div>
+                    }
+                }
+
+            </div>
+
+            <div id="paymentLink" class="container" style="display: none; text-align: center;padding-top: 40px; padding-bottom: 20px">
+                <p><b>To complete your add-on(s), please continue to make a payment.  Unpaid add-ons will be deleted when you leave this page.</b>.</p>
+                <a href="/@ViewBag.UserID/settings/billing" class="button nav-btn do-not-disable">Make a Payment</a>
+            </div>
+
+            <div class="container" style="padding-left: 20px;">
+
+                <div id="invoicesContainer" class="container" style="display: none;">
+                    <h1>Invoices</h1>
+
+                    <div class="datagrid">
+                        @(Html.Kendo().Grid<InvoiceVM>()
+                            .Name("invoice-grid")
+                            .Columns(columns =>
+                            {
+                                columns.Bound(item => item.InvoiceID).Hidden();
+                                columns.Bound(item => item.Summary).Title(@Proestimator.Resources.ProStrings.Summary);
+                                columns.Bound(item => item.InvoiceAmount).Format("{0:c}").Title(@Proestimator.Resources.ProStrings.InvoiceAmount);
+                                columns.Bound(item => item.SalesTax).Format("{0:c}").Title(@Proestimator.Resources.ProStrings.SalesTax);
+                                columns.Bound(item => item.InvoiceTotal).Format("{0:c}").Title(@Proestimator.Resources.ProStrings.InvoiceTotal);
+                                columns.Bound(item => item.Notes).Title(@Proestimator.Resources.ProStrings.Notes);
+                                columns.Bound(item => item.DueDate).Format("{0:MM/dd/yyyy}").Title(@Proestimator.Resources.ProStrings.Invoice_DueDate);
+                                columns.Bound(item => item.DatePaid).Format("{0:MM/dd/yyyy}").Title(@Proestimator.Resources.ProStrings.DatePaid);
+                                columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("# if (Deletable) { #" + "<img src='/images/checkmark.png' />" + "# } #").Title("Deletable").Hidden();
+                            })
+                            .Events(events => events
+                                .DataBound("InvoiceGridDataChanged")
+                                .Change("InvoiceGridLineSelectionChanged")
+                            ) 
+                            .DataSource(dataSource => dataSource
+                                .Ajax()
+                                .ServerOperation(false)
+                                .Read(read => read.Action("GetInvoicesForContractOrAddOn", "Settings").Data("GetInvoicesSearchParameters"))
+                            )
+                            .AutoBind(false)
+                        )
+                    </div>
+
+                    <div id="AddOnNoPayment" style="display: none;">
+                        <p>This add on is not active because it has not had any payments made for it.</p>
+
+                        <p>To make a payment go to the <a href="/@ViewBag.UserID/settings/billing" class="page-link">Billing</a> tab.</p>
+
+                        <p>To remove the add on click here: <a class="button nav-btn do-not-disable" href="javascript:DeleteAddOn();">Delete Add On</a></p>
+                    </div>
+
+                    <div id="InvoiceNoPayment" style="display: none;">
+                        <p>Some add on does not have any payments made for it (associated invoices are checked under Deletable column).</p>
+
+                        <p>To make a payment go to the <a href="/@ViewBag.UserID/settings/billing" class="page-link">Billing</a> tab.</p>
+
+                        <p>To remove the add on click here: <a class="button nav-btn do-not-disable" href="javascript:DeleteInvoices();">Delete Add On</a></p>
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+    }
+
+</div>  

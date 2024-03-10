@@ -1,0 +1,573 @@
+﻿@model Proestimator.ViewModel.PDR.PDRMatrixMobile
+
+@using System.Linq;
+@using Proestimator.ViewModel.PDR;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PDR;
+}
+
+<link href="@Url.Content("~/Content/css/PDR_Matrix.css?id=15")" rel="stylesheet" type="text/css" />
+
+<script src="~/Scripts/PDRAdditionalOperations.js"></script>
+
+<style>
+    .pdr-row-selected {
+        background-color: #1d69a6 !important;
+        color: white;
+    }
+
+    .pdr-small-grid-square {
+        border: 1px solid black;
+        float: left;
+        width: 25%;
+        height: 50px;
+        padding-top: 15px;
+    }
+
+    .popup-panel-container {
+        display: none;
+        position: fixed;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        background-color: transparent;
+        z-index: 100000;
+        overflow-y: scroll;
+    }
+
+    .pdr-popup-panel {
+        display: block !important;
+        padding: 0px;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .popup-header {
+        height: 50px;
+        border: 1px solid #349ad8;
+        background-color: #f5f9fb;
+    }
+
+        .popup-header h2 {
+            margin: 11px;
+            float: left;
+        }
+
+    .popup-loading {
+        background-color: white;
+        position: relative;
+        opacity: .5;
+        display: none;
+    }
+
+    .close-x {
+        width: 30px;
+        height: 30px;
+        background-color: #1d69a6;
+        float: right;
+        margin: 10px;
+        cursor: pointer;
+    }
+</style>
+
+
+<script>
+    // this is mobile
+    var _saving = false;
+    var _popupEstimateDataPanelID;
+    var _popupRates;
+    var _popupQuantityID;
+    var _popupSizeID;
+    var _popupPanelID;
+    var _scrollPosition = 0;
+    var _isAddingAdditionalOperation = false;
+    var _pdrAdditionalOperationsData;
+
+    _pdrUserID = @ViewBag.UserID;
+    _pdrEstimateID = @ViewBag.EstimateID;
+
+    function GetFirstClass(element) {
+        if (element.attr("class"))
+        {
+            return element.attr("class").split(" ")[0];
+        }
+
+        return "";
+    }
+
+    // Needed because they are called by the container and exist in the full size PDRMatrix
+    function RefreshPDRAutoExpanded() { }
+
+    function ShowPDRRowDetailsMobile(estimateDataPanelID) {
+        _popupEstimateDataPanelID = estimateDataPanelID;
+
+        $.ajax({
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            url: "/PDR/GetPDRDetails",
+            type: "POST",
+            processData: false,
+            data: JSON.stringify({ "userID": @ViewBag.UserID, "estimateDataPanelID": estimateDataPanelID }),
+            success: function (response) {
+
+                _popupRates = response.PanelRates;
+
+                _popupQuantityID = response.QuantityID;
+                _popupSizeID = response.SizeID;
+                _popupPanelID = response.PanelID;
+
+                // Select drop down defaults
+                $("#PDRMatrixMobile_DescriptionPresetsSmall").val(0);
+                $("#PDRMatrixMobile_Popup_OversizedSize").val("_1in");
+                $("#PDRMatrixMobile_Popup_OversizedDepth").val("Shallow");
+
+                // Load the data
+                $("#pdr-mobile-popup-title").text(response.Panel);
+                $("#PDRMatrixMobile_Popup_OversizedDentQuantityList").val(response.OversizedDentCount);
+                $("#PDRMatrixMobile_Popup_MultipliersList").val(response.MultiplierID);
+                $("#DescriptionSmall").val(response.Description);
+                $("#CustomChargeSmall").val(response.CustomCharge);
+
+                $("#small-oversized-container").empty();
+                for(i = 0; i < response.OversizedDents.length; i++)
+                {
+                    $("#small-oversized-container").append(GetMobileOversizedDentHTML(response.OversizedDents[i].ID, response.OversizedDents[i].Description, response.OversizedDents[i].Amount));
+                }
+
+                var dentSizesDropDown = $("#PDRMatrixMobile_Popup_DentSizes");
+
+                if (_popupQuantityID > 0) {
+                    dentSizesDropDown.val(_popupQuantityID);
+                }
+                else {
+                    dentSizesDropDown.val(1);
+                }
+
+                dentSizesDropDown.trigger("change");
+
+                $("#PDRMatrixContainer").show();
+                PDRMobileFadeIn();
+            },
+            error: function (er) {
+                ShowPDRMessage(er);
+                console.log("Error: " + er);
+            }
+        });
+    }
+
+    var _pdrBackgroundOpened = false;
+
+    function PDRMobileFadeIn() {
+        _scrollPosition = $(window).scrollTop();
+
+        $(".pdr-mobile-details-container").fadeIn(300, function () {
+            _pdrBackgroundOpened = $(".pdr-form-container").is(":visible");
+            console.log("Background opened: " + _pdrBackgroundOpened);
+            $(".pdr-form-container").hide();
+            $(".graphical-footer").hide();
+        });
+    }
+
+    function PDRMobileFadeOut() {
+        if (_pdrBackgroundOpened === true) {
+            $(".pdr-form-container").show();
+        }
+
+        $(".graphical-footer").show();
+        $(window).scrollTop(_scrollPosition);
+        $(".pdr-mobile-details-container").fadeOut(300);
+    }
+
+    function SavePDRPopup()
+    {
+        if (_saving == false) {
+            _saving = true;
+
+            var rowData = {
+                ID: _popupEstimateDataPanelID,
+                SelectedID: "",
+                SelectedMultiplier: $("#PDRMatrixMobile_Popup_MultipliersList").val(),
+                SelectedOversizedDentQuantity: $("#PDRMatrixMobile_Popup_OversizedDentQuantityList").val(),
+                Description: $("#DescriptionSmall").val(),
+                CustomCharge: $("#CustomChargeSmall").val(),
+                QuantityID: _popupQuantityID,
+                SizeID: _popupSizeID,
+                IsExpanded: false,
+                SaveDetails: true
+            };
+
+            $.ajax({
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                url: "/PDR/SavePDRSingleLine",
+                type: "POST",
+                processData: false,
+                data: JSON.stringify({ "userID": @ViewBag.UserID, "loginID": @Model.LoginID, "estimateID": @Model.EstimateID, "data": rowData }),
+                success: function (response) {
+                    _saving = false;
+
+                    RefreshHeaderInfo(@ViewBag.EstimateID);
+
+                    if (response.Success) {
+                        LoadEstimateLineItemList();
+
+                        $(".main-" + _popupEstimateDataPanelID).find(".pdr-matrix-dent-container-small").find("span").text(response.ErrorMessage);
+                    }
+                    else {
+                        ShowPDRMessage(response.ErrorMessage);
+                        console.debug(response.ErrorMessage);
+                    }
+
+                    PDRMobileFadeOut();
+
+                    RefreshBigPDRGrid();
+                },
+                error: function (er) {
+                    _saving = false;
+                    ShowPDRMessage(er);
+                    console.debug("Error: " + er);
+
+                    $(".pdr-mobile-details-container").hide();
+                    $(".pdr-form-container").show();
+                    $(".graphical-footer").show();
+
+                    $(window).scrollTop(_scrollPosition);
+                }
+            });
+        }
+    }
+
+    function MobilePDRRowClicked(rowID) {
+        // Remove hilight from other rows and add to the clicked row
+        $(".pdr-row-selected").removeClass("pdr-row-selected");
+
+        $(this).parent(".matrix-row").addClass("pdr-row-selected");
+
+        ShowPDRRowDetailsMobile(rowID);
+    }
+
+    $(document).ready(function () {
+
+        $("#btnPDRClose").click(function () {
+            HidePDR();
+        });
+
+        $("#popupMatrixContainer").find(".pdr-small-grid-square").click(function () {
+            var sizeID = $(this).attr("id").replace("popupMatrix", "");
+            var quantityID = $("#PDRMatrixMobile_Popup_DentSizes").val();
+
+            $(".size-selector-selected-mobile").removeClass("size-selector-selected-mobile");
+
+            if (_popupSizeID == sizeID && _popupQuantityID == quantityID) {
+                _popupSizeID = 0;
+                _popupQuantityID = 0;
+            }
+            else {
+                _popupSizeID = sizeID;
+                _popupQuantityID = quantityID;
+
+                $(this).addClass("size-selector-selected-mobile");
+            }
+        });
+
+        $("#PDRMatrixMobile_Popup_DentSizes").change(function () {
+            var quantityID = $(this).val();
+            var rateDetails = _popupRates.find(e => e.QuantityID == quantityID);
+
+            $("#popupMatrix6").find("p").text(rateDetails.DimeRate);
+            $("#popupMatrix8").find("p").text(rateDetails.NickelRate);
+            $("#popupMatrix10").find("p").text(rateDetails.QuarterRate);
+            $("#popupMatrix7").find("p").text(rateDetails.HalfDollarRate);
+
+            $(".size-selector-selected-mobile").removeClass("size-selector-selected-mobile");
+            console.log("Popup quantity ID" + _popupQuantityID + ", Selected: " + quantityID);
+            if (_popupQuantityID == quantityID) {
+                $("#popupMatrix" + _popupSizeID).addClass("size-selector-selected-mobile");
+            }
+
+            console.log(rateDetails);
+        });
+
+        $("#detailsPopupSave").click(function () {
+            SavePDRPopup();
+        });
+
+        $("#detailsPopupCancel").click(function () {
+            PDRMobileFadeOut();
+        });
+
+        $("#detailsRANDI").click(function () {
+            OpenAdditionalOperations(_popupPanelID);
+        });
+
+        $("#PDRAdditionalOperationsCancel").click(function () {
+            CloseAdditionalOperations();
+        });
+
+        $("#PDRAdditionalOperations_Background").click(function () {
+            return false;
+        });
+
+        // Set up a handler for the mobile popup add oversized dent
+        $(".add-overized-small").click(function () {
+            var selectedSize = $("#PDRMatrixMobile_Popup_OversizedSize").val();
+            var selectedDepth = $("#PDRMatrixMobile_Popup_OversizedDepth").val();
+
+            $.getJSON('@Url.Action("AddOversized", "PDR")', { userID: @ViewBag.UserID, estimateID: @Model.EstimateID, panelID: _popupEstimateDataPanelID, size: selectedSize, depth: selectedDepth }, function (data) {
+                if (data.Success == true) {
+                    var newhtml = GetMobileOversizedDentHTML(data.ID, data.Description, data.Amount);
+                    var oversizedList = $("#small-oversized-container");
+                    $(newhtml).hide().appendTo(oversizedList).fadeIn(500);
+
+                    //expandable.animate({
+                    //    height: (expandable.height() + 23) + "px"
+                    //}, {
+                    //    duration: 500
+                    //});
+
+                } else {
+                    ShowPDRMessage(data.ErrorMessage);
+                }
+            });
+        });
+
+        // When the description presets is changed, copy the selected preset to the description and reselect the first item
+        $(".presets").change(function () {
+            var parentRow = $(this).parent().parent();
+            var selectedValue = $(this).children("option").filter(":selected").text();
+            var descriptionTextBox = parentRow.find(".description");
+            descriptionTextBox.val(selectedValue);
+            $(this).prop("selectedIndex", 0);
+        });
+
+        $("#PDRMatrixMobile_DescriptionPresetsSmall").change(function () {
+            var selectedDescription = $("#PDRMatrixMobile_DescriptionPresetsSmall").children("option").filter(":selected").text();
+            $("#DescriptionSmall").val(selectedDescription);
+        });
+
+        $("#PDRMatrix_Popup_DentSizes").change(function () {
+            var selectedValue = $("#PDRMatrix_Popup_DentSizes").children("option").filter(":selected").val();
+
+            // var searchText = _popupPanelID + "-" + selectedValue + "-" +
+            //GetSummary(int estimateID, int panelID)
+
+        });
+    });
+
+    function DeleteOversizedDent(id) {
+        $.getJSON('@Url.Action("DeleteOversized", "PDR")', { userID: @ViewBag.UserID, loginID: @Model.LoginID, id: id }, function (data) {
+            if (data.Success == true) {
+                // For full size
+                var expander = $(".oversize_" + id).parent().parent().parent();
+                expander.animate({
+                    height: (expander.height() - 23) + "px"
+                }, {
+                    duration: 500
+                });
+
+                $(".oversize_" + id).fadeOut(500, function () {
+                    $(".oversize_" + id).remove();
+                });
+
+                // For mobile
+                $(".oversized-" + id).fadeOut(500, function () { $(".oversized-" + id).remove(); });
+            } else {
+                ShowPDRMessage(data.ErrorMessage);
+            }
+        });
+    }
+
+    function RefreshMobilePDRGrid() {
+        $.getJSON('@Url.Action("GetPDRSummaryList", "PDR")', { estimateID: @ViewBag.EstimateID }, function (data) {
+            if (data) {
+                for (var i = 0; i < data.length; i++) {
+                    $(".main-" + data[i].ID).find(".pdr-matrix-dent-container-small").find("span").text(data[i].LineSummary);
+                }
+            } else {
+                ShowPDRMessage(data.ErrorMessage);
+            }
+        });
+    }
+
+    function GetMobileOversizedDentHTML(dataID, description, amount)
+    {
+        return "<div class='small-oversized-row oversized-" + dataID + "'>" +
+                "<div class='small-oversized-description'>" +
+                    "<p>" + description + "</p>" +
+                "</div>" +
+                "<div class='small-oversized-cost'>" +
+                    "<p>" + amount + "</p>" +
+                "</div>" +
+                "<div class='small-oversized-right'>" +
+                    "<input type='button' value='X' class='small-oversize-delete button nav-btn' name='" + dataID  + "' onclick='DeleteOversizedDent(" + dataID + ");' />" +
+                "</div>" +
+            "</div>";
+    }
+
+
+    function ShowPDRMessage(message) {
+
+        $(".message-container").empty();
+
+        var newP = $(document.createElement('p'));
+        newP.text(message);
+
+        $(".message-container").append(newP);
+
+        window.setTimeout(function () {
+            $(".message-container").empty();
+        }, 4000);
+    }
+
+</script>
+
+@* The Mobile PDR R&I popup *@
+<div id="PDRAdditionalOperations_Container" class="popup-panel-container">
+
+    <div id="PDRAdditionalOperations_Background" class="pdr-mobile-details">
+        <div class="pdr-mobile-details-top">
+            <h2><span id="additionalOperationsSection"></span> - Additional Operations</h2>
+
+            <select id="PDRAdditionalOperationsType">
+            </select>
+
+            <div id="PDRAdditionalOperations">
+                <label>@Proestimator.Resources.ProStrings.PartListNote</label>
+            </div>
+        </div>
+
+        <div class="pdr-mobile-details-bottom">
+            <input type="button" id="PDRAdditionalOperationsCancel" value="Close" class="button nav-btn do-not-disable" />
+        </div>
+    </div>
+
+</div>
+
+@* The PDR Row details popup for mobile *@
+<div class="pdr-mobile-details-container">
+    <div class="pdr-mobile-details">
+
+        <div class="pdr-mobile-details-top">
+            <div class="pdr-mobile-details-top-controls">
+
+                <h1 id="pdr-mobile-popup-title" style="margin-bottom: 5px;"></h1>
+
+                <p>@Proestimator.Resources.PDRStrings.Dents</p>
+                <p>
+                    @Html.DropDownList("Popup_DentSizes", new SelectList(Model.DentSizesList, "Value", "Text"))
+                </p>
+
+                <div style="text-align: center; height: 50px; background-color: #349ad8;">
+                    <div class="pdr-matrix-dent-size pdr-small-grid-square"><p>DIME</p></div>
+                    <div class="pdr-matrix-dent-size pdr-small-grid-square"><p>NKL</p></div>
+                    <div class="pdr-matrix-dent-size pdr-small-grid-square"><p>QTR</p></div>
+                    <div class="pdr-matrix-dent-size pdr-small-grid-square"><p>HALF</p></div>
+                </div>
+
+                <div id="popupMatrixContainer" style="text-align: center; height: 50px; margin-bottom: 10px;">
+                    <div id="popupMatrix6" class="Dime pdr-small-grid-square"><p>1</p></div>
+                    <div id="popupMatrix8" class="Nickel pdr-small-grid-square"><p>1</p></div>
+                    <div id="popupMatrix10" class="Quarter pdr-small-grid-square"><p>1</p></div>
+                    <div id="popupMatrix7" class="Half pdr-small-grid-square"><p>1</p></div>
+                </div>
+
+                <p>@Proestimator.Resources.ProStrings.Oversized</p>
+                <p>
+                    @Html.DropDownList("Popup_OversizedDentQuantityList", new SelectList(Model.OversizedDentQuantityList, "Value", "Text"))
+                </p>
+
+                @if (Model.MultipliersList.Count > 1)
+                {
+                    <p>@Proestimator.Resources.ProStrings.Multiplier</p>
+                    <p>
+                        @Html.DropDownList("Popup_MultipliersList", new SelectList(Model.MultipliersList, "Value", "Text"))
+                    </p>
+                }
+
+                <p>@Proestimator.Resources.ProStrings.Description</p>
+
+                @if (Model.DescriptionPresets.Count > 1)
+                {
+                    <p>
+                        @Html.DropDownList("DescriptionPresetsSmall", new SelectList(Model.DescriptionPresets, "Value", "Text"), new { style = "width: 100%;" })
+                    </p>
+                }
+
+                <p>
+                    <input type="text" id="DescriptionSmall" />
+                </p>
+
+                <p>@Proestimator.Resources.ProStrings.CustomCharge</p>
+                <p><input id="CustomChargeSmall" class="custom-charge" type="number" pattern="[0-9]*" inputmode="numeric" /></p>
+
+                <p>@Proestimator.Resources.ProStrings.OversizedDents</p>
+
+                <div style="min-height: 50px;">
+                    <div style="float: left; width: 30%; padding-right: 5px;">
+                        @Html.DropDownList("Popup_OversizedSize", new SelectList(Model.OversizedSizeList, "Value", "Text"), new { @class = "OversizedSize", style = "float: left;" })
+                    </div>
+                    <div style="float: left; width: 55%; padding-right: 5px;">
+                        @Html.DropDownList("Popup_OversizedDepth", new SelectList(Model.OversizedDepthList, "Value", "Text"), new { @class = "OversizedDepth", style = "float: left;" })
+                    </div>
+                    <div style="float: left; width: 15%;">
+                        <input type="button" value="+" style="height: 30px; margin: 0px;" class="add-overized-small button nav-btn do-not-disable" />
+                    </div>
+                </div>
+            </div>
+
+            <div id="small-oversized-container">
+
+            </div>
+        </div>
+
+        <div class="pdr-mobile-details-bottom">
+            @if (Model.ShowRAndIButton)
+            {
+                <hr />
+                <input type="button" id="detailsRANDI" value="R&I" class="button nav-btn do-not-disable" />
+                <hr />
+            }
+
+            <input type="button" id="detailsPopupSave" value="Save" class="button nav-btn do-not-disable" />
+            <input type="button" id="detailsPopupCancel" value="Cancel" class="button nav-btn do-not-disable" />
+        </div>
+
+    </div>
+
+</div>
+
+<div class="pdr-form-container">
+
+    <div class="small-screen">
+
+        <div class="pdr-matrix-table main-table">
+            <div id="mobile-header-1" class="pdr-matrix-table-header border-three-side">
+                <div class="pdr-matrix-panel-small"></div>
+            </div>
+
+            @for (int i = 0; i < Model.Panels.Count; i++)
+            {
+                if (Model.Panels[i].HasAnyPrice(1))
+                {
+                    <div class="@Model.Panels[i].PanelWrapperName pdr-panel-small matrix-row">
+                        <div class="main-@Model.Panels[i].ID pdr-panel-small-row" onclick="MobilePDRRowClicked(@Model.Panels[i].ID)">
+                            <div class="pdr-matrix-panel-small vertical-center-text">
+                                @Html.HiddenFor(model => model.Panels[i].PanelName)
+                                @Html.HiddenFor(model => model.Panels[i].PanelID, new { @class = "panel-id" })
+
+                                <span>@Model.Panels[i].PanelName</span>
+                            </div>
+
+                            <div class="pdr-matrix-dent-container-small vertical-center-text">
+                                <span>@Model.Panels[i].LineSummary</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+    </div>
+</div>

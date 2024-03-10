@@ -1,0 +1,284 @@
+﻿@model Proestimator.ViewModel.TechnicianVM
+
+@*@using Resources;*@
+@using System.Linq;
+@using Proestimator.Resources;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_LoginInformation;
+}
+
+<head>
+    <title></title>
+
+</head>
+<style>
+    table a {
+        color: black;
+    }
+
+    #technicianContent {
+        left: 50px;
+        /*position: relative;*/
+        /*transform: translate(50px);*/
+        margin-top: 35px;
+    }
+
+    #buttonsDiv {
+        position: relative;
+        /*left: 55px;*/
+    }
+
+    .hide-small { 
+        width:150px;
+    }
+
+    @@media screen and (max-width:900px) {
+        #smEstimateNavRow {
+            border: 1px solid #349ad8;
+            background-color: #f5f9fb;
+            max-width: 100%;
+            padding-right: 30px;
+        }
+
+        #estimateNavigation {
+            margin-top: 15px;
+        }
+
+        .hide-small { 
+            display:none;
+        }
+    }
+
+</style>
+
+<div id="workDesk" class="page-container">
+    
+    @using (Html.BeginForm("LoginInformation", "Settings", FormMethod.Post, new { @class = "container" }))
+    {
+
+        @Html.Partial("SettingTopMenu")
+
+        @*<input type="hidden" id="redirectData" name="redirectDataField" />*@
+        @Html.HiddenFor(o => o.LoginID)
+
+        <div class="tabcontent container">
+
+            <div id="lgRow1" class="container">
+
+                <div id="technicianContent" class="half-container">
+
+                    <div id="formHeadline" class="container">
+                        <h2>@*@Proestimator.Resources.ProStrings.Estimators*@</h2>
+                    </div>
+
+                    <div id="loginInfoFieldSet">
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.FirstName</label>
+                            <div class="field-control">
+                                <input type="text" id="FirstName" />
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.LastName</label>
+                            <div class="field-control">
+                                <input type="text" id="LastName" />
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.LaborType</label>
+                            <div class="field-control">
+                                @Html.DropDownListFor(model => model.LaborTypeID, Model.LaborTypeList)
+                            </div>
+                        </div> 
+
+                        <div class="container center" id="buttonsDiv" style="padding-bottom: 20px;">
+                            <input type="button" class="button nav-btn do-not-disable" onclick="SaveTechnician()" value="@Proestimator.Resources.ProStrings.Save" />
+                            <input type="button" class="button nav-btn do-not-disable" onclick="NewTechnician()" value="@Proestimator.Resources.ProStrings.New" />
+                        </div>
+
+                    </div>
+                </div>
+
+                <div id="technicianContent" class="half-container">
+
+                    <p>
+                        <label class="inputLabel"><input type="checkbox" id="chkShowDeletedTechnicians" />@Proestimator.Resources.ProStrings.ShowDeletedTechnicians</label>
+                    </p>
+
+                    <div class="datagrid">
+                        @(Html.Kendo().Grid<Proestimator.ViewModel.TechnicianVM>()
+                                .Name("grid")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(item => item.ID).Hidden();
+                                    columns.Bound(item => item.FirstName).MinScreenWidth(150).Title(@Proestimator.Resources.ProStrings.FirstName);
+                                    columns.Bound(item => item.LastName).MinScreenWidth(150).Title(@Proestimator.Resources.ProStrings.LastName);
+                                    columns.Bound(item => item.LaborTypeText).MinScreenWidth(150).Title(@Proestimator.Resources.ProStrings.LaborType);
+                                    columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<a class='button' onclick='EditTechnician(#= ID#)'>" + @Proestimator.Resources.ProStrings.Edit + "</a>").Width(50).Title("");
+                                    columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<a id=\"DeleteLink#=ID#\" class='button' onclick=\"DeleteTechnician(#= ID#,#=IsDeleted#)\"># if (!IsDeleted) { #" + @Proestimator.Resources.ProStrings.Delete + "# } #" + "# if (IsDeleted) { #" + @Proestimator.Resources.ProStrings.Restore + "# } # </a>").Width(50).Title("");
+                                })
+                        .Sortable()
+                        .Pageable(pageable => pageable
+                            .Refresh(false)
+                            .ButtonCount(8)
+                        )
+                        .Events(events => events
+                            .DataBound("onChange")
+                        )
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Sort(sort => sort.Add("LastView").Descending())
+                            .Read(read => read.Action("GetTechnicians", "Settings").Data("GetListParameters"))
+                        )
+                        )
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    }
+</div>
+<script>
+
+    var _technicianID = 0;
+
+    function EditTechnician(technicianID)
+    {
+        _technicianID = technicianID;
+
+        $.ajax({
+            url: '@Url.Action("GetTechnician", "Settings")',
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ "userID": @ViewBag.UserID, "technicianID": _technicianID }),
+            success: function (result) {
+                if (result)
+                {
+                    $("#FirstName").val(result.FirstName);
+                    $("#LastName").val(result.LastName);
+                    $("#LaborTypeID").val(result.LaborTypeID);
+                }
+                console.log(result);
+            }
+        });
+    }
+
+    function NewTechnician()
+    {
+        _technicianID = 0;
+        $("#FirstName").val("");
+        $("#LastName").val("");
+        $("#LaborTypeID").val("");
+    }
+
+    function DeleteTechnician(technicianID,restoreDeleteTechnician)
+    {
+        var loadingImage = $.parseHTML("<img src='/Images/animatedCircle.gif' width='15' height='15' id='Loading" + technicianID + "' />");
+        $("#DeleteLink" + technicianID).replaceWith(loadingImage);
+
+        $.ajax({
+            url: '@Url.Action("DeleteTechnician", "Settings")',
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ "userID": @ViewBag.UserID, "technicianID": technicianID, "restoreDeleteTechnician":restoreDeleteTechnician }),
+            success: function (result) {
+
+                if (result != "")
+                {
+                    ShowUserMessage(data, true, 5000);
+                }
+
+                RefreshGrid();
+            }
+        });
+    }
+
+    function SaveTechnician()
+    {
+        $.ajax({
+            url: '@Url.Action("SaveTechnician", "Settings")',
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ "userID": @ViewBag.UserID, "technicianID": _technicianID, "firstName": $("#FirstName").val(),
+                "lastName": $("#LastName").val(), "laborTypeID": $("#LaborTypeID").val(), "laborTypeText": $("#LaborTypeID option:selected").text() }),
+            success: function (result) {
+                if (result)
+                {
+                    ShowUserMessage(result, true, 4000);
+                }
+                else{
+                    ShowUserMessage("@Proestimator.Resources.ProStrings.EstimatorDataSaved", false, 3000);
+                    RefreshGrid();
+                    NewTechnician();
+                }
+            }
+        });
+    }
+
+    function GetListParameters() {
+        var result =
+        {
+                userID: @ViewBag.UserID
+              , loginID: @ViewBag.LoginID, 
+                showDeletedTechnicians:$("#chkShowDeletedTechnicians").is(":checked"),
+        };
+        return result
+    }
+
+    function RefreshGrid() {
+        var grid = $("#grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+            grid.refresh();
+
+            grid.dataSource.page(1);
+        }
+    }
+
+    function onChange(arg) {
+
+    }
+
+    $(document).ready(function () {
+
+        $("tbody").sortable({
+            items: "> tr",
+            appendTo: "parent",
+            tolerance: "move",
+            helper: "clone",
+            out: function (event, ui) {
+                console.log("Sortable done");
+                var data = [];
+                $("tbody tr").each(function (i, val) {
+                    data[i] = $(val).find("td:first").html();
+                });
+
+                $.ajax({
+                    url: "/Settings/ReOrderTechnicians",
+                    type: "POST",
+                    processData: true,
+                    // contentType: false,
+                    data: { data: data, loginID: @Model.LoginID, userID: @ViewBag.UserID },
+                    success: function (response) {
+                    }
+                });
+            }
+        }).disableSelection();
+
+        $("#chkShowDeletedTechnicians").change(function() {
+            RefreshGrid();
+        });
+
+    });
+
+</script>

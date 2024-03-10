@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="a4e56115-2664-4eaa-9906-be462dc9a688" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <GenerateTaskBasedAsynchronousMethod>true</GenerateTaskBasedAsynchronousMethod>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://proestimatorservice.web-est.com/ImportService.svc" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="ImportService.xsd" MetadataType="Schema" ID="5fb4754a-d4dc-467d-8097-7aaf684be271" SourceId="1" SourceUrl="http://proestimatorservice.web-est.com/ImportService.svc?xsd=xsd1" />
+    <MetadataFile FileName="ImportService1.xsd" MetadataType="Schema" ID="e53335d9-7b3f-445f-930a-449995acc729" SourceId="1" SourceUrl="http://proestimatorservice.web-est.com/ImportService.svc?xsd=xsd2" />
+    <MetadataFile FileName="ImportService.disco" MetadataType="Disco" ID="ac3e1d03-6bff-437d-9a58-4904da6e3ca1" SourceId="1" SourceUrl="http://proestimatorservice.web-est.com/ImportService.svc?disco" />
+    <MetadataFile FileName="ImportService2.xsd" MetadataType="Schema" ID="f0dccbaa-3e4b-4139-9010-74b12fbd48b9" SourceId="1" SourceUrl="http://proestimatorservice.web-est.com/ImportService.svc?xsd=xsd0" />
+    <MetadataFile FileName="ImportService.wsdl" MetadataType="Wsdl" ID="d657ad04-94b3-4364-b0ab-6e2ed1934ce9" SourceId="1" SourceUrl="http://proestimatorservice.web-est.com/ImportService.svc?wsdl" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

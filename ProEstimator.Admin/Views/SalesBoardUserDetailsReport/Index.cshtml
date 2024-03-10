@@ -1,0 +1,139 @@
+﻿@model ProEstimator.Admin.ViewModel.SalesBoard.SalesBoardVM
+
+@using ProEstimator.Admin.ViewModel.SalesBoard;
+
+@{
+    ViewBag.Title = "Administration - Sales Board User Details Report";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<style>
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .padd-top {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    .k-grid td {
+        white-space: normal;
+    }
+
+    .stackem {
+        margin-bottom: 15px;
+    }
+</style>
+
+<script>
+
+    function GetReportDeatailsSearchParameters() {
+        return { salesRepID: @Model.SelectedSalesRep, month: @Model.SelectedMonthSold, year: @Model.SelectedYearSold };
+    }
+
+    $(document).ready(function () {
+
+        // Do the acount id search
+        $("#btnyeartodatesalesboardreport").click(function () {
+
+            // Refresh the yeartodatesalesboardreport grid
+            var grid = $("#salesboarduserdetailsreport-grid").data("kendoGrid");
+
+            if (grid) {
+                grid.dataSource.read();
+            }
+        });
+    });
+
+    function DeleteSalesBoard(salesBoardID) {
+
+        $.ajax({
+            url: '@Url.Action("DeleteSalesBoard", "SalesBoardUserDetailsReport")',
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ "salesBoardID": salesBoardID }),
+            //beforeSend: function () {
+            //    applyLoading();
+            //},
+            success: function (result) {
+                console.log(result);
+
+                if (result.Success === true) {
+                    alert('Salesboard deleted successfully');
+
+                    // Refresh the salesboarduserdetailsreport grid
+                    var grid = $("#salesboarduserdetailsreport-grid").data("kendoGrid");
+
+                    if (grid) {
+                        grid.dataSource.read();
+                    }
+                }
+            },
+            error: function (error) {
+                //removeLoading();
+                //ShowUserMessage(error, true, 4000);
+            }
+        });
+    }
+
+</script>
+
+<div class="row padd-top">
+    <div class="col-lg-8 col-md-7 col-sm-6">
+        @{
+            if (string.IsNullOrEmpty(@Model.SelectedSalesRep))
+            {
+                <h3>
+                    Sales Board All User Details - @Model.SelectedMonthSold / @Model.SelectedYearSold
+                </h3>
+            }
+            else
+            {
+                <h3>
+                    Sales Board User Details - @Model.SelectedMonthSold / @Model.SelectedYearSold
+                </h3>
+            }
+        }
+    </div>
+    <form>
+        <div class="panel panel-default">
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="yeartodatesalesboardreport-grid-container" class="datagrid">
+                        @(Html.Kendo().Grid<SalesBoardUserDetailsReportVM>()
+                                .Name("salesboarduserdetailsreport-grid")
+                                .Columns(columns =>
+                                {
+                                    columns.Template(@<text></text>).ClientTemplate("<a href='javascript: void(0);' onclick=\"DeleteSalesBoard('#= SalesBoardID#')\">Delete</a>").Title("");
+                                    columns.Bound(item => item.Name).Title("Name");
+                                    columns.Bound(item => item.LoginId).Title("LoginID");
+                                    columns.Bound(item => item.CompanyName).Title("Company Name");
+                                    columns.Bound(item => item.NumberSold).Title("Estimatics");
+                                    columns.Bound(item => item.Frame).Title("Frame");
+                                    columns.Bound(item => item.Ems).Title("EMS");
+                                    columns.Bound(item => item.MultiUser).Title("Multi User");
+                                    columns.Bound(item => item.HasBundle).Title("Bundle");
+                                    columns.Bound(item => item.HasQBExporter).Title("QB Exporter");
+                                    columns.Bound(item => item.HasProAdvisor).Title("Pro Advisor");
+                                    columns.Bound(item => item.HasImages).Title("Images");
+                                    columns.Bound(item => item.HasReporting).Title("Reports");
+                                    columns.Bound(item => item.DateSold).Title("Date Sold");
+                                })
+                                .Sortable()
+                                .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .ServerOperation(false)
+                                    .Read(read => read.Action("GetSalesBoardUserDetailsReport", "SalesBoardUserDetailsReport").Data("GetReportDeatailsSearchParameters"))
+                                ))
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+

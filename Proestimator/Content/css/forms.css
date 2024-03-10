@@ -1,0 +1,108 @@
+﻿.container, .page-container, .half-container {
+    display: block;
+    float: left;
+    width: 100%;
+}
+
+.mobileOnly {
+    display: block;
+}
+
+.mobileSpacer {
+    padding-top: 20px;
+}
+
+@media (min-width: 700px) {
+    .page-container {
+        padding-bottom: 70px;
+    }
+}
+
+@media (min-width: 900px) {
+    .page-container {
+        padding-bottom: 40px;
+    }
+
+    .half-container {
+        width: 50%;
+    }
+
+    .mobileOnly {
+        display: none;
+    }
+
+    .mobileSpacer {
+        padding-top: 0px;
+    }
+}
+
+.field-wrapper {
+    width: 100%;
+    float: left;
+}
+
+.field-wrapper-half {
+    width: 50%;
+    float: left;
+}
+
+.form-spacer {
+    height: 15px;
+}
+
+@media (max-width: 900px) {
+    .field-wrapper-half {
+        width: 100%;
+    }
+}
+
+.field-label, .field-label-half {
+	float: left;
+    width: 100%;
+    text-align: left;
+    padding-right: 10px;
+}
+
+.field-control, .field-control-half {
+    float: left;
+	width: 100%;
+}
+
+@media (min-width: 500px) {
+    .field-label-half {
+	    width: 24.25% !important;
+    }
+
+    .field-control-half {
+	    width: 75%;
+    }
+
+    .field-label, .field-label-half {
+        text-align: right;
+    }
+}
+
+@media (min-width: 900px) {
+    .field-label-half {
+	    width: 49% !important;
+    }
+
+    .field-control-half {
+	    width: 49%;
+    }
+}
+
+@media (min-width: 500px) {
+    .field-label {
+	    width: 24.25% !important;
+    }
+
+    .field-control {
+	    width: 75%;
+    }
+}
+
+.error-message {
+    text-align: center;
+    color: red;
+}

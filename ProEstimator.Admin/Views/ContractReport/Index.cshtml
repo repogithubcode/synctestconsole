@@ -1,0 +1,264 @@
+@model ProEstimator.Admin.ViewModel.ContractReport.ContractReportVM
+
+@using ProEstimator.Admin.ViewModel.ContractReport;
+
+@{
+    ViewBag.Title = "Administration - Contracts With No Payment Report";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<style>
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .padd-top {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    .k-grid td {
+        white-space: normal;
+    }
+
+    .stackem {
+        margin-bottom: 5px;
+    }
+
+    #contract-report-grid {
+        cursor: pointer;
+    }
+
+    .ui-datepicker {
+        z-index: 1000 !important;
+    }
+</style>
+
+<script>
+
+    function GetSearchParameters() {
+        return {
+            loginIDFilter: $("#LoginID").val(), rangeStartFilter: $("#RangeStart").val(), rangeEndFilter: $("#RangeEnd").val(), salesRepFilter: $("#SalesRepDDL").val()
+        };
+    }
+
+    $(document).ready(function () {
+
+        $('#panelEmail').hide();
+
+        // Set up calendar controls
+        $("#RangeStart").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        // Set up calendar controls
+        $("#RangeEnd").datepicker({
+            showOn: "button",
+            buttonImage: "/images/calendar.png",
+            buttonImageOnly: true,
+            buttonText: "Select date"
+        });
+
+        // Do the acount id search
+        $("#btnSearch").click(function () {
+            $('#panelEmail').hide();
+            // Refresh the history grid
+            var grid = $("#contract-report-grid").data("kendoGrid");
+
+            if (grid) {
+                grid.dataSource.read();
+            }
+        });
+
+        //var currentDate = new Date();
+        var dateChange = new Date();
+        //dateChange.setDate(currentDate.getDate() - 7)
+
+        // RangeStart
+        var rangeStart = GetDayMonthYear(dateChange);
+        $("#RangeStart").val(rangeStart);
+
+        // RangeEnd
+        //dateChange = new Date();
+        var rangeEnd = GetDayMonthYear(dateChange);
+        $("#RangeEnd").val(rangeEnd);
+
+        function GetDayMonthYear(dateChange) {
+            var d = dateChange.getDate();
+            var day = (d < 10) ? '0' + d : d;
+            var m = dateChange.getMonth() + 1;
+            var month = (m < 10) ? '0' + m : m;
+            var yy = dateChange.getYear();
+            var year = (yy < 1000) ? yy + 1900 : yy;
+
+            var dateRange = month + "/" + day + "/" + year;
+
+            return dateRange;
+        }
+
+    });
+
+    function DetailsDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#contract-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+    }
+
+    function DetailsLineSelectionChanged(arg) {
+        var row = $("#contract-report-grid").find(".k-state-selected").first();
+
+        //console.log(row);
+        var contractID = row.find("td").first().html();
+        var loginID = row.find("td").eq(1).html();
+        var term = row.find("td").eq(2).html();
+        var created = row.find("td").eq(8).html();
+        var effective = row.find("td").eq(3).html();
+        var active = row.find("td").eq(6).html();
+        var deleted = row.find("td").eq(7).html();
+        var salesRep = row.find("td").eq(4).html();
+        var note = row.find("td").eq(5).html();
+        var renewal = row.find("td").eq(9).html();
+        
+        $("#writeEmail").empty();
+        $("#writeEmail").append("<b>Contract ID : </b>" + contractID);
+        $("#writeEmail").append("<br />");
+        $("#writeEmail").append("<b>Account # : </b>" + loginID);
+        $("#writeEmail").append("<br />");
+        $("#writeEmail").append("<b>Terms : </b>" + term);
+        $("#writeEmail").append("<br />");
+        $("#writeEmail").append("<b>Date Created/Selected : </b>" + created);
+        $("#writeEmail").append("<br />");
+        $("#writeEmail").append("<b>Effective Date : </b>" + effective);
+        $("#writeEmail").append("<br />");
+        $("#writeEmail").append("<br />");
+        $("#writeEmail").append("<b>Sales Rep : </b>" + salesRep);
+        $("#writeEmail").append("<br />");
+        $("#writeEmail").append("<br />");
+        $("#writeEmail").append("<b>Renewal : </b>" + renewal);
+        $("#writeEmail").append("<br />");
+        $("#writeEmail").append("<br />");
+        $("#writeEmail").append("<a style='cursor: pointer;' onclick='Open(" + loginID + ", " + contractID + ");'>For more details, Open a Page to Contract Maintenance</a>");
+        
+        $('#panelEmail').show();
+    }
+
+    function Open(login, contract) {
+        window.open('/Contract/List/Allsearch/' + login + '/0/0', '_blank');
+    }
+
+</script>
+
+<div class="page-container">
+    <div class="row padd-top">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>Contracts With No Payment Report</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="container">
+                            <div class="row stackem">
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Login ID</span>
+                                        <input type="text" class="form-control" placeholder="Login ID" aria-describedby="loginId" id="LoginID" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Range Start</span>
+                                        <input type="text" class="input-group-addon" placeholder="Range Start" aria-describedby="RangeStart" id="RangeStart" readonly="true" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">RangeEnd</span>
+                                        <input type="text" class="input-group-addon" placeholder="Range End" aria-describedby="RangeEnd" id="RangeEnd" readonly="true" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row stackem">
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Sales Rep#</span>
+                                        @Html.DropDownListFor(model => model.SelectedSalesRep, Model.SalesRepDDL, new { @id = "SalesRepDDL", style = "width: 185px;height:32px" })
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                </div>
+                                <div class="col-lg-4">
+                                    <a class="btn btn-primary" href="javascript:void(0);" style="width:95% !important" id="btnSearch" role="button">Search</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="datagrid">
+                    @(Html.Kendo().Grid<ContractGridVM>()
+                    .Name("contract-report-grid")
+                    .Columns(columns =>
+                        {
+                            columns.Bound(item => item.ID).Title("Contract ID");
+                            columns.Bound(item => item.LoginID).Title("Account #");
+                            columns.Bound(item => item.ContractTermDescription).Title("Terms");
+                            columns.Bound(item => item.EffectiveDate).Format("{0:MM/dd/yyyy}");
+                            columns.Bound(item => item.SalesRep);
+                            columns.Bound(item => item.Notes).Hidden();
+                            columns.Bound(item => item.Active).Hidden();
+                            columns.Bound(item => item.IsDeleted).Hidden();
+                            columns.Bound(item => item.DateCreated).Format("{0:MM/dd/yyyy hh:mm tt}");
+                            columns.Bound(item => item.IsRenewal).Hidden();
+                            columns.Template(@<text></text>).ClientTemplate("# if (IsRenewal) { #" + "<img src='/images/checkmark.png' />" + "# } #").Title("Renewal");
+                        })
+                        .Selectable()
+                        .Sortable()
+                        .Pageable(pageable => pageable
+                            .Refresh(false)
+                        )
+                        .Events(events => events
+                            .DataBound("DetailsDataChanged")
+                            .Change("DetailsLineSelectionChanged")
+                        )
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Read(read => read.Action("GetContractReport", "ContractReport").Data("GetSearchParameters"))
+                            .PageSize(25)
+                        )
+                    )
+                </div>
+            </div>
+        </div>
+
+        <div class="row" id="panelEmail">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>Contract Information</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="container">
+                            <div id="writeEmail"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

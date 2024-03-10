@@ -1,0 +1,14 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ProEstimator.Business.Model.Admin
+{
+    public class VmPromo
+    {
+        public string Id { get; set; }
+        public int InvoiceId { get; set; }
+    }
+}

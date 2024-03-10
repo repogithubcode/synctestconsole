@@ -1,0 +1,737 @@
+﻿@model Proestimator.ViewModel.PartSearch.PartsSearchVM
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_PartsLookup;
+}
+
+<style>
+    .search-section {
+        float: left; 
+        display: none;
+        overflow-y: auto;
+        height: 100%;
+        padding-left: 20px;
+    }
+
+    .disabled-controls {
+        opacity: 0.5;
+    }
+
+    @@media (max-width: 700px) {
+        .search-section {
+            width: 100%;
+            padding-bottom: 20px;
+            padding-left: 0px;
+            height: auto;
+        }
+    }
+</style>
+
+<script>
+
+    var _sectionKey = 0;
+    var _partDescription = "";
+
+    $(document).ready(function () {
+
+        $("#btnSearch").click(function () {
+            RefreshSectionsGrid();
+        });
+
+        $('#Year').change(function () {
+
+            $('#Make').empty();
+
+            $('#Make').append($('<option/>', {
+                value: "@Proestimator.Resources.ProStrings.Loading...",
+                text: "@Proestimator.Resources.ProStrings.Loading..."
+            }));
+
+            $('#Model').empty();
+            var year = $(this).val();
+            GetMakes(year);
+            RefreshVehicleSearchControls();
+            $("#SearchText").val("");
+            $("#SearchPartNumber").val("");
+            RefreshVehicleSearchControls();
+        });
+
+        $('#Make').change(function () {
+            $('#Model').empty();
+            $('#Model').append($('<option/>', {
+                value: "@Proestimator.Resources.ProStrings.Loading...",
+                text: "@Proestimator.Resources.ProStrings.Loading..."
+            }));
+
+            var year = $('#Year').val();
+            var make = $(this).val();
+            GetModels(year, make);
+            RefreshVehicleSearchControls();
+            $("#SearchText").val("");
+            $("#SearchPartNumber").val("");
+        });
+
+        $('#Model').change(function () {
+            RefreshVehicleSearchControls();
+        });
+
+        function GetMakes(Year) {
+            $.getJSON("@Url.Action("GetAllMakes", "Estimate")", { userID: @ViewBag.UserID, year: Year },
+                function (data) {
+                    var select = $("#Make");
+                    select.empty();
+                    $.each(data, function (index, itemData) {
+
+                        select.append($('<option/>', {
+                            value: itemData.Value,
+                            text: itemData.Text
+                        }));
+                    });
+                });
+        }
+
+        function GetModels(Year, Make) {
+            $.getJSON("@Url.Action("GetAllModels", "Estimate")", { userID: @ViewBag.UserID, year: Year, makeid: Make },
+                function (data) {
+                    var select = $("#Model");
+                    select.empty();
+                    $.each(data, function (index, itemData) {
+
+                        select.append($('<option/>', {
+                            value: itemData.Value,
+                            text: itemData.Text
+                        }));
+                    });
+                });
+        }
+
+        $("#btnPartLookupSearch").click(function () {
+            DoPartNumberSearch();
+        });
+
+        $("#btnSearchClear").click(function () {
+            ClearSectionSearch();
+        });
+
+        $("#PartLookupNumber").keypress(function (e) {
+            if (e.which == 13) {
+                DoPartNumberSearch();
+            }
+        });
+
+        $(document).keypress(function (e) {
+
+            if (e.which == 13 && e.target.id != "PartLookupNumber") {
+                RefreshSectionsGrid();
+            }
+        });
+
+        RefreshVehicleSearchControls();
+    });
+
+    function RefreshVehicleSearchControls() {
+        var modelSelection = $("#Model").prop("selectedIndex");
+
+        if (modelSelection > 0)
+        {
+            $(".known-vehicle-search").removeClass("disabled-controls");
+            $(".known-vehicle-search").find("input").prop("disabled", false);
+        }
+        else
+        {
+            $(".known-vehicle-search").addClass("disabled-controls");
+            $(".known-vehicle-search").find("input").prop("disabled", true);
+        }
+    }
+
+
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------
+    // The sections grid.
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------
+    function RefreshSectionsGrid() {
+        $("#labelMessage").text("");
+
+        var grid = $("#sections-grid").data("kendoGrid");
+
+        if (grid) {
+            if (grid.dataSource.page() != 1) {
+                grid.dataSource.page(1);
+            }
+            grid.dataSource.read();
+        }
+        $("#SectionsGridContainer").show();
+        $("#PartsGridContainer").hide();
+        $("#DetailsGridContainer").hide();
+        $("#VehicleSearchGrids").show();
+
+        $("#PartNumberLookupGrids").hide();
+    }
+
+    function GetSectionSearchParameters() {
+        var result =
+        {
+            userID: @ViewBag.UserID
+           , estimateID: $("#EstimateID").val()
+           , year: $("#Year").val() == null ? 0 : $("#Year").val()
+           , make: $("#Make").val() == null ? 0 : $("#Make").val()
+           , model: $("#Model").val() == null ? 0 : $("#Model").val()
+           , searchText: $("#SearchText").val()
+           , searchPartNumber: $("#SearchPartNumber").val()
+        };
+
+        return result;
+    }
+
+    function ClearSectionSearch() {
+        $("#Year")[0].selectedIndex = 0;
+        $('#Make').empty();
+        $('#Model').empty();
+        $("#SearchText").val("");
+        $("#SearchPartNumber").val("");
+        RefreshVehicleSearchControls();
+    }
+
+    function SectionsGridDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#sections-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                var partID = row.find("td").first().html();
+
+                row.toggleClass("k-state-hover");
+            }
+        );
+
+        // If there's one row, select it
+        if ($("#sections-grid").data("kendoGrid").dataSource.total() == 1) {
+            $("#sections-grid").data("kendoGrid").select($("#sections-grid").find("tbody").find("tr").first());
+        }
+    }
+
+    function SectionsGridLineSelectionChanged(arg) {
+
+        // Remove the Hover state from all rows
+        $(".k-state-hover").each(function (index) {
+            $(this).removeClass("k-state-hover");
+        });
+
+        // Get the selected item and call the ClickedItem event
+        var row = $("#sections-grid").find(".k-state-selected").first();
+        _sectionKey = row.find("td").first().html();
+
+        console.log(_sectionKey);
+        $("#PartsGridContainer").hide();
+        $("#DetailsGridContainer").hide();
+
+        RefreshPartsGrid();
+        //LoadCustomerDetails(customerID);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------
+    // The Parts grid.
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------
+    function RefreshPartsGrid() {
+        $("#labelMessage").text("");
+
+        var grid = $("#parts-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+            grid.dataSource.page(1);
+        }
+
+        $("#PartsGridContainer").show();
+    }
+
+    function GetPartSearchParameters() {
+        var result =
+        {
+            userID: @ViewBag.UserID
+           , estimateID: $("#EstimateID").val()
+           , year: $("#Year").val() == null ? 0 : $("#Year").val()
+           , make: $("#Make").val() == null ? 0 : $("#Make").val()
+           , model: $("#Model").val() == null ? 0 : $("#Model").val()
+           , searchText: $("#SearchText").val()
+           , searchPartNumber: $("#SearchPartNumber").val()
+           , sectionKey: _sectionKey
+        };
+
+        return result;
+    }
+
+    function PartsGridDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#parts-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                var partID = row.find("td").first().html();
+                $("#btnSearch").attr("disabled", false);
+
+                row.toggleClass("k-state-hover");
+            }
+        );
+
+        // If there's one row, select it
+        if ($("#parts-grid").data("kendoGrid").dataSource.total() == 1) {
+            $("#parts-grid").data("kendoGrid").select($("#parts-grid").find("tbody").find("tr").first());
+        }
+    }
+
+    function PartsGridLineSelectionChanged(arg) {
+
+        // Remove the Hover state from all rows
+        $("#parts-grid").find(".k-state-hover").each(function (index) {
+            $(this).removeClass("k-state-hover");
+        });
+
+        // Get the selected item and call the ClickedItem event
+        var row = $("#parts-grid").find(".k-state-selected").first();
+        _partDescription = row.find("td").first().html();
+
+        RefreshDetailsGrid();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------
+    // The Details grid.
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------
+    function RefreshDetailsGrid() {
+        $("#labelMessage").text("");
+
+        var grid = $("#details-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+            grid.dataSource.page(1);
+        }
+
+        $("#DetailsGridContainer").show();
+    }
+
+    function GetDetailsSearchParameters() {
+        var result =
+        {
+            userID: @ViewBag.UserID
+           , estimateID: $("#EstimateID").val()
+           , year: $("#Year").val() == null ? 0 : $("#Year").val()
+           , make: $("#Make").val() == null ? 0 : $("#Make").val()
+           , model: $("#Model").val() == null ? 0 : $("#Model").val()
+           , searchText: $("#SearchText").val()
+           , searchPartNumber: $("#SearchPartNumber").val()
+           , sectionKey: _sectionKey
+           , partDescription: _partDescription
+        };
+        console.log(result);
+        return result;
+    }
+
+    function DetailsGridDataChanged(arg) {
+
+        // Wire up hilighting the row when hovering.
+        $("#details-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                var partID = row.find("td").first().html();
+
+                row.toggleClass("k-state-hover");
+            }
+        );
+
+        // If there's one row, select it
+        if ($("#details-grid").data("kendoGrid").dataSource.total() == 1) {
+            $("#details-grid").data("kendoGrid").select($("#details-grid").find("tbody").find("tr").first());
+        }
+    }
+
+    function DetailsGridLineSelectionChanged(arg) {
+
+        // Remove the Hover state from all rows
+        $("#parts-grid").find(".k-state-hover").each(function (index) {
+            $(this).removeClass("k-state-hover");
+        });
+
+        //// Get the selected item and call the ClickedItem event
+        //var row = $("#parts-grid").find(".k-state-selected").first();
+        //var customerID = row.find("td").first().html();
+
+        //LoadCustomerDetails(customerID);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------
+    // The part number search
+    // -------------------------------------------------------------------------------------------------------------------------------------------------------
+    function DoPartNumberSearch()
+    {
+        var grid = $("#parts-full-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+            grid.dataSource.page(1);
+        }
+
+        $("#VehicleSearchGrids").hide();
+
+        $("#PartNumberLookupGrids").show();
+        $("#PartsByNumberResults").show();
+
+        $("#VehicleSearchResults").hide();
+    }
+
+    function GetPartsByNumberSearchParameters() {
+        var result = { searchPartNumber: $("#PartLookupNumber").val() };
+        return result;
+    }
+
+    function PartsByNumberResultsDataChanged(arg) {
+        // Wire up hilighting the row when hovering.
+        $("#parts-full-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                var partID = row.find("td").first().html();
+
+                row.toggleClass("k-state-hover");
+            }
+        );
+    }
+
+    function PartsByNumberResultsLineSelectionChanged(arg) {
+        // Remove the Hover state from all rows
+        $("#parts-full-grid").find(".k-state-hover").each(function (index) {
+            $(this).removeClass("k-state-hover");
+        });
+
+        /// Get the selected item and call the ClickedItem event
+        var row = $("#parts-full-grid").find(".k-state-selected").first();
+        _searchBarcode = row.find("td").first().html();
+
+        var grid = $("#parts-full-grid").data("kendoGrid");
+        var selectedItem = grid.dataItem(grid.select());
+
+        console.log(selectedItem);
+
+        _category = selectedItem.Category;
+        _subCategory = selectedItem.Subcategory;
+        _partDesc = selectedItem.PartDescription;
+        _partNumber = selectedItem.PartNumber;
+        _prtcDescription = selectedItem.DetailDescription;
+        _price = selectedItem.Price;
+
+        DoVechileSearch()
+    }
+
+    var _searchBarcode = "";
+    var _category = "";
+    var _subCategory = "";
+    var _partDesc = "";
+    var _partNumber = "";
+    var _prtcDescription = "";
+    var _price = "";
+
+    function GetVehicleSearchParameters() {
+        var result = {
+              userID: @ViewBag.UserID
+            , barcode: _searchBarcode
+            , category: _category
+            , subCategory: _subCategory
+            , partDesc: _partDesc
+            , partNumber: _partNumber
+            , prtcDescription: _prtcDescription
+            , price: _price
+        };
+        return result;
+    }
+
+    function DoVechileSearch() {
+        var grid = $("#vehicles-grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+            grid.dataSource.page(1);
+        }
+
+        $("#VehicleSearchResults").show();
+    }
+
+    function VehicleSearchResultsDataChanged(arg) {
+        // Wire up hilighting the row when hovering.
+        $("#vehicles-grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                var row = $(this).closest("tr");
+                var partID = row.find("td").first().html();
+
+                row.toggleClass("k-state-hover");
+            }
+        );
+    }
+
+    function VehicleSearchResultsLineSelectionChanged(arg) {
+        // Remove the Hover state from all rows
+        $("#vehicles-grid").find(".k-state-hover").each(function (index) {
+            $(this).removeClass("k-state-hover");
+        });
+
+        /// Get the selected item and call the ClickedItem event
+        //var row = $("#vehicles-grid").find(".k-state-selected").first();
+        //var serviceBarcode = row.find("td").first().html();
+    }
+
+</script>
+
+<div id="workDesk" class="page-container">
+
+    @using (Html.BeginForm("PartsLookUp", "Home", FormMethod.Post, new { @class = "container" }))
+    {
+        @Html.HiddenFor(o => o.EstimateID)
+
+        <div id="formHeader">
+
+            <div id="formHeadline" class="container">
+                <h2>@Proestimator.Resources.ProStrings.PartsLookupHeader</h2>
+            </div>
+
+            <div id="lgRow" class="container">
+
+                <div class="container" style="padding-bottom: 20px;">
+
+                    <div class="half-container">
+                        <div class="field-wrapper" style="display: @(Model.EstimateID == 0 || Model.Year == "0" ? "inline" : "none")">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.YearMakeModelHeader</label>
+
+                            <div class="field-control">
+                                <div id="vehicleContainer">
+                                    <div class="ddContainer">
+                                        @Html.DropDownListFor(model => model.Year, Model.YearsList)
+                                    </div>
+                                    <div class="ddContainer">
+                                        @Html.DropDownListFor(model => model.Make, Model.MakeList)
+                                    </div>
+                                    <div class="ddContainer">
+                                        @Html.DropDownListFor(model => model.Model, Model.ModelList)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper known-vehicle-search">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Description</label>
+
+                            <div class="field-control">
+                                <div class="field-control">
+                                    <input autocomplete="off" id="SearchText" name="SearchText" type="text" value="">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper known-vehicle-search">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.PartNumber</label>
+
+                            <div class="field-control">
+                                <div class="field-control">
+                                    <input autocomplete="off" id="SearchPartNumber" name="SearchPartNumber" type="text" value="">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper known-vehicle-search">
+                            <label class="inputLabel field-label"></label>
+
+                            <div class="field-control" style="text-align: left;">
+                                <input id="btnSearch" type="button" class="button nav-btn do-not-disable" value="@Proestimator.Resources.ProStrings.Search" />
+                                <input id="btnSearchClear" type="button" class="button nav-btn do-not-disable" value="@Proestimator.Resources.ProStrings.ClearSearch" />
+                                <br /><br /><label id="labelMessage" class="error-message"></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="half-container" style="display: @(Model.EstimateID == 0 || Model.Year == "0" ? "inline" : "none")">
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.PartNumber</label>
+
+                            <div class="field-control">
+                                <div class="field-control">
+                                    <input autocomplete="off" id="PartLookupNumber" type="text" value="">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label"></label>
+
+                            <div class="field-control" style="text-align: left;">
+                                <input id="btnPartLookupSearch" type="button" class="button nav-btn do-not-disable" value="@Proestimator.Resources.ProStrings.Search" />
+                                <br /><br /><label id="labelPartLookupMessage" class="error-message"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+     
+        </div>
+        
+        <div id="VehicleSearchGrids" class="container" style="padding-top: 20px;">
+            <div id="SectionsGridContainer" class="datagrid search-section">
+                @(Html.Kendo().Grid<ProEstimator.Business.Logic.PartSearchSection>()
+                    .Name("sections-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.SectionKey).Hidden();
+                            columns.Bound(item => item.SectionName).Encoded(false);
+                            columns.Bound(item => item.PartCount).Encoded(false);
+                        })
+                    .Sortable()
+                    .Selectable()
+                    .Pageable(pageable => pageable
+                        .Refresh(false)
+                        .ButtonCount(8)
+                    )
+                    .Events(events => events
+                        .DataBound("SectionsGridDataChanged")
+                        .Change("SectionsGridLineSelectionChanged")
+                    )
+                    .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .ServerOperation(false)
+                        .Sort(sort => sort.Add("LastView").Descending())
+                        .Read(read => read.Action("DoPartSearchSections", "Home").Data("GetSectionSearchParameters"))
+                        .PageSize(20)
+                    )
+                )
+            </div>
+
+            <div id="PartsGridContainer" class="datagrid search-section">
+                @(Html.Kendo().Grid<ProEstimator.Business.Logic.PartSearchPart>()
+                    .Name("parts-grid")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(item => item.UnhilightedDescription).Hidden();
+                        columns.Bound(item => item.PartDescription).Encoded(false);
+                        columns.Bound(item => item.DetailCount).Encoded(false);
+                    })
+                    .Sortable()
+                    .Selectable()
+                    .Pageable(pageable => pageable
+                        .Refresh(false)
+                        .ButtonCount(8)
+                    )
+                    .Events(events => events
+                        .DataBound("PartsGridDataChanged")
+                        .Change("PartsGridLineSelectionChanged")
+                    )
+                    .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .ServerOperation(false)
+                        .Sort(sort => sort.Add("LastView").Descending())
+                        .Read(read => read.Action("DoPartSearchParts", "Home").Data("GetPartSearchParameters"))
+                        .PageSize(20)
+                    )
+                )
+            </div>
+
+            <div id="DetailsGridContainer" class="datagrid search-section">
+                @(Html.Kendo().Grid<ProEstimator.Business.Logic.PartSearchDetail>()
+                    .Name("details-grid")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(item => item.Barcode).Hidden();
+                        columns.Bound(item => item.PartText).Encoded(false);
+                        columns.Bound(item => item.PartNumber).Encoded(false);
+                        columns.Bound(item => item.Price).Encoded(false);
+                        columns.Bound(item => item.DateRange).Encoded(false);
+                    })
+                        .Sortable()
+                        .Selectable()
+                        .Pageable(pageable => pageable
+                            .Refresh(false)
+                            .ButtonCount(8)
+                        )
+                        .Events(events => events
+                        .DataBound("DetailsGridDataChanged")
+                        .Change("DetailsGridLineSelectionChanged")
+                        )
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Sort(sort => sort.Add("LastView").Descending())
+                        .Read(read => read.Action("DoPartSearchDetails", "Home").Data("GetDetailsSearchParameters"))
+                            .PageSize(20)
+                        )
+                )
+            </div>
+        </div>
+        
+         <div id="PartNumberLookupGrids" class="container" style="padding-top: 20px;">
+            <div id="PartsByNumberResults" class="datagrid search-section">
+                @(Html.Kendo().Grid<Proestimator.ViewModel.PartSearch.PartSearchResultVM>()
+                    .Name("parts-full-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.ServiceBarcode).Hidden();
+                            columns.Bound(item => item.Category).Encoded(false).Title(@Proestimator.Resources.ProStrings.Category);
+                            columns.Bound(item => item.Subcategory).Encoded(false).Title(@Proestimator.Resources.ProStrings.Subcategory);
+                            columns.Bound(item => item.PartDescription).Title(@Proestimator.Resources.ProStrings.Part).Encoded(false);
+                            columns.Bound(item => item.DetailDescription).Title(@Proestimator.Resources.ProStrings.Detail).Encoded(false);
+                            columns.Bound(item => item.PartNumber).Title(@Proestimator.Resources.ProStrings.PartNumber).Encoded(false);
+                            columns.Bound(item => item.Price).Encoded(false).Title(@Proestimator.Resources.ProStrings.Price);
+                            columns.Bound(item => item.Make).Encoded(false).Title(@Proestimator.Resources.ProStrings.Make);
+                            columns.Bound(item => item.Model).Encoded(false).Title(@Proestimator.Resources.ProStrings.Model);
+                            columns.Bound(item => item.MinYear).Encoded(false).Title(@Proestimator.Resources.ProStrings.MinYear);
+                            columns.Bound(item => item.MaxYear).Encoded(false).Title(@Proestimator.Resources.ProStrings.MaxYear);
+                            columns.Bound(item => item.TotalVehicles).Encoded(false).Title(@Proestimator.Resources.ProStrings.TotalVehicles);
+                        })
+                    .Sortable()
+                    .Selectable()
+                    .Pageable(pageable => pageable
+                        .Refresh(false)
+                        .ButtonCount(8)
+                    )
+                    .Events(events => events
+                        .DataBound("PartsByNumberResultsDataChanged")
+                        .Change("PartsByNumberResultsLineSelectionChanged")
+                    )
+                    .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .ServerOperation(false)
+                        .Sort(sort => sort.Add("LastView").Descending())
+                        .Read(read => read.Action("DoSearchByPartNumber", "Home").Data("GetPartsByNumberSearchParameters"))
+                        .PageSize(20)
+                    )
+                )
+            </div>
+
+            <div id="VehicleSearchResults" class="datagrid search-section">
+                 @(Html.Kendo().Grid<Proestimator.ViewModel.PartSearch.SearchVehicleDetailVM>()
+                    .Name("vehicles-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.Make).Encoded(false);
+                            columns.Bound(item => item.Model).Encoded(false);
+                            columns.Bound(item => item.MinYear).Encoded(false);
+                            columns.Bound(item => item.MaxYear).Encoded(false);
+                        })
+                    .Sortable()
+                    .Selectable()
+                    .Pageable(pageable => pageable
+                        .Refresh(false)
+                        .ButtonCount(8)
+                    )
+                    .Events(events => events
+                        .DataBound("VehicleSearchResultsDataChanged")
+                        .Change("VehicleSearchResultsLineSelectionChanged")
+                    )
+                    .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .ServerOperation(false)
+                        .Sort(sort => sort.Add("LastView").Descending())
+                        .Read(read => read.Action("GetVehiclesForBarcode", "Home").Data("GetVehicleSearchParameters"))
+                        .PageSize(20)
+                    )
+                 )
+            </div>
+        </div>
+    }
+</div>

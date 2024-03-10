@@ -1,0 +1,32 @@
+﻿<div id="smEstimateNavRow" class="col sm_4_4 md_8_8">
+    <select id="estimateNavigation" class="lg_hide" onchange="SubmitAndRedirectAction(this.options[this.selectedIndex].value);">
+        <option value="@("/" + ViewBag.UserID + "/rates/" + Model)" @(ViewBag.RateProfileNavID == 0 ? "selected" : "")>@Proestimator.Resources.ProStrings.Rates</option>
+        <option value="@("/" + ViewBag.UserID + "/paint-finish/" + Model)" @(ViewBag.RateProfileNavID == 1 ? "selected" : "")>@Proestimator.Resources.ProStrings.PageTitle_PaintFinish</option>
+        <option value="@("/" + ViewBag.UserID + "/print-options/" + Model)" @(ViewBag.RateProfileNavID == 2 ? "selected" : "")>@Proestimator.Resources.ProStrings.PrintOptions</option>
+        <option value="@("/" + ViewBag.UserID + "/taxes/" + Model)" @(ViewBag.RateProfileNavID == 3 ? "selected" : "")>@Proestimator.Resources.ProStrings.Taxes</option>
+        <option value="@("/" + ViewBag.UserID + "/preset-charges/" + Model)" @(ViewBag.RateProfileNavID == 4 ? "selected" : "")>@Proestimator.Resources.ProStrings.PageTitle_PresetCharges</option>
+        <!--<option value="@("/" + ViewBag.UserID + "/pro-advisor/" + Model)" @(ViewBag.RateProfileNavID == 5 ? "selected" : "")>@Proestimator.Resources.ProStrings.PageTitle_AddOns</option>-->
+    </select> 
+</div> 
+<div id="lgEstimateNavRowRatesProfile" class="col lg_12_12 sm_hide">
+    <ul id="estimateList">
+        <a class="rateProfileTopMenuAnchor" href="@("javascript:SubmitAndRedirect('/" + ViewBag.UserID + "/rates/" + Model + "');")"><li id="estimateNav" class="rateProfileTopMenu">@Proestimator.Resources.ProStrings.Rates</li></a>
+        <a class="rateProfileTopMenuAnchor" href="@("javascript:SubmitAndRedirect('/" + ViewBag.UserID + "/paint-finish/" + Model + "');")"><li id="estimateNav" class="rateProfileTopMenu">@Proestimator.Resources.ProStrings.PageTitle_PaintFinish</li></a>
+        <a class="rateProfileTopMenuAnchor" href="@("javascript:SubmitAndRedirect('/" + ViewBag.UserID + "/print-options/" + Model + "');")"><li id="estimateNav" class="rateProfileTopMenu">@Proestimator.Resources.ProStrings.PrintOptions</li></a>
+        <a class="rateProfileTopMenuAnchor" href="@("javascript:SubmitAndRedirect('/" + ViewBag.UserID + "/taxes/" + Model + "');")"><li id="estimateNav" class="rateProfileTopMenu">@Proestimator.Resources.ProStrings.Taxes</li></a>
+        <a class="rateProfileTopMenuAnchor" href="@("javascript:SubmitAndRedirect('/" + ViewBag.UserID + "/preset-charges/" + Model + "');")"><li id="estimateNav" class="rateProfileTopMenu">@Proestimator.Resources.ProStrings.PageTitle_PresetCharges</li></a>
+        <!--<a href="@("javascript:SubmitAndRedirect('/" + ViewBag.LoginID + "/pro-advisor/" + Model + "');")"><li id="estimateNav" class="rateProfileTopMenu">@Proestimator.Resources.ProStrings.PageTitle_AddOns</li></a>-->
+    </ul>
+</div>  
+<script type="text/javascript">
+    if((@ViewBag.RateProfileNavID == "1") || (@ViewBag.RateProfileNavID == "2") || 
+                                        (@ViewBag.RateProfileNavID == "3") || (@ViewBag.RateProfileNavID == "4"))
+    {
+        console.log(@ViewBag.RateProfileNavID);
+        $("#lgEstimateNavRowRatesProfile").css({ "width": "100%", "height": "70px" });
+    }
+
+    if(@ViewBag.RateProfileNavID != "0"){
+        $('.rateProfileTopMenuAnchor:eq(0)').attr('id', 'estimateNavAnchorFirst');
+    }
+</script>

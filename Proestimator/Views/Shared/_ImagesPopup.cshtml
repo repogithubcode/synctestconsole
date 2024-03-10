@@ -1,0 +1,2072 @@
+﻿@model Proestimator.ViewModel.ImagesVM
+
+@using System.Linq;
+@using Kendo.Mvc.UI;
+@using Proestimator.ViewModel;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_Images;
+
+    string imageTemplate = "<div id='ThumbWrapper#ImageID#' class='thumb-wrapper'><div id='thumbinput#ImageID#' class='thumbinput'><input type='checkbox' id='Include#ImageID#' class='thumb-include' data-imageid='#ImageID#' #Selected# /></div><div id='thumbimage#ImageID#' class='thumbimage'><img id='Thumbnail#ImageID#' src=\"#ImagePath#\" onclick=\"LoadImageDetailsAfterConfirm(#ImageID#);\" onload=\"AdjustThumbnail(#ImageID#);\" /></div></div>";
+}
+
+<div id="imageTemplate" style="display: none;">
+    @Html.Raw(imageTemplate)
+</div>
+
+<script type="text/javascript" src="~/Scripts/tui-code-snippet.min.js"></script>
+<script type="text/javascript" src="~/Scripts/tui-color-picker.min.js"></script>
+<script type="text/javascript" src="~/Scripts/tui-image-editor.js"></script>
+<script type="text/javascript">
+
+    var _imageID = 0;
+    var _isRotating = false;
+    var _currentPageIndex = 1;
+    var _isModelPopup = false;
+    var popupWidth = 0;
+    var popupHeight = 0;
+    var path = "";
+    var _imageEditor;
+
+    function LoadImageDetails(imageID)
+    {
+        _isModelPopup = '@Model.IsModelPopup';
+
+        if(_isModelPopup == 'True')
+        {
+            applyLoadingPopup();
+        }
+
+        $("#DetailsContainer").fadeOut(300, function () {
+        $.getJSON("@Url.Action("GetImageDetails", "Estimate")", { userID: @ViewBag.UserID, imageID: imageID, loginID: @ViewBag.LoginID, estimateID: $("#EstimateID").val(), selectedPageIndex: _currentPageIndex }, function (data) {
+            if (data.ImageID > 0) {
+                $("#DetailsContainer").fadeIn(300);
+
+                var imgPath = data.ImagePath + "?r=" + Math.random();
+                if (imgPath.includes("_edit.")) {
+                    $('#btn-clear').show();
+                    $('#btn-clear2').show();
+                }
+                else {
+                    $('#btn-clear').hide();
+                    $('#btn-clear2').hide();
+                }
+
+                @if (Model.HasImagesContract)
+                {
+                    <text>
+                    _imageEditor.loadImageFromURL(imgPath, imgPath).then(function () {
+                        _imageEditor.clearUndoStack();
+                    });
+
+                    if (IsMobile()) {
+                        $("#imgImage").attr("src", imgPath);
+                    }
+                    </text>
+                }
+                else
+                {
+                    <text>
+                    $("#imgImage").attr("src", imgPath);
+                    </text>
+                }
+
+                path = data.ImagePath.replace("_thumb", "") + "?r=" + Math.random();
+
+                if (_imageID > 0) {
+                    $("#Thumbnail" + _imageID).removeClass("ImageSelected");
+                }
+                $("#Thumbnail" + imageID).addClass("ImageSelected");
+                _imageID = imageID;
+
+                $("#ImageTag").val(data.ImageTag);
+                $("#ImageTagCustom").val(data.ImageTagCustom);
+
+                $("#lblDimensions").text(data.ImageExtra.Width + " x " + data.ImageExtra.Height + " pixels");
+                $("#lblFileSize").text(data.ImageExtra.DiskSize);
+
+                popupWidth = data.ImageExtra.Width;
+                popupHeight = data.ImageExtra.Height;
+
+                EnableControls();
+
+                if(_currentPageIndex > 1)
+                {
+                    DisableControls();
+                }
+
+                if (data.FileExtension === "pdf")
+                {
+                    $("#RotatePDFImageRow").show();
+                    $("#RotateImageRow").hide();
+
+                    $("#SelectPageContainer").empty();
+                    var ddlTotalPageCount = "<select id='ddlTotalPageCount' name='ddlTotalPageCount' onchange='onChangeSelectPage()'>";
+                    for (pageIndex = 1; pageIndex <= data.PDFPageCount; pageIndex++) {
+
+                        if(pageIndex == _currentPageIndex)
+                        {
+                            ddlTotalPageCount = ddlTotalPageCount + "<option selected value='" + pageIndex + "'>" + pageIndex + "</option>";
+                        }
+                        else
+                        {
+                            ddlTotalPageCount = ddlTotalPageCount + "<option value='" + pageIndex + "'>" + pageIndex + "</option>";
+                        }
+                    }
+                    ddlTotalPageCount = ddlTotalPageCount + "</select>";
+                    $("#SelectPageContainer").append(ddlTotalPageCount);
+
+                    $("#PageDDLContainer").show();
+                    _currentPageIndex = 1;
+                }
+                else {
+
+                    $("#RotatePDFImageRow").hide();
+                    $("#RotateImageRow").show();
+
+                    $("#PageDDLContainer").hide();
+                }
+
+                if ($("#SupplementVersion").context.childNodes.length > 1)
+                {
+                    $("#SupplementVersionDiv").show();
+                    $("#SupplementVersion").val(data.SupplementVersion);
+                }
+                else{
+                    $("#SupplementVersionDiv").hide();
+                }
+            } else {
+                showMessage(imageID, data.ErrorMessage);
+            }
+
+            if(_isModelPopup == 'True')
+            {
+                removeLoadingPopup();
+            }
+        });
+        });
+    }
+
+    function imageEvents() {
+
+        @if (Model.HasImagesContract)
+        {
+            <text>
+
+        var activeObjectId;
+        var activeObjectType = "undefined";
+        var displayingSubMenu = $();
+        var x = new Array(4);
+        var y = new Array(4);
+
+        $('.menu-item').filter('.activatable').on('click', function () {
+            $('.menu-item').filter('.activatable').removeClass('active');
+            if ($(this).attr('id') != 'btn-rotation-left' && $(this).attr('id') != 'btn-rotation-right' && $(this).attr('id') != 'btn-rotation-left2' && $(this).attr('id') != 'btn-rotation-right2') {
+                $(this).addClass('active');
+            }
+            removeState();
+        });
+
+        $('#btn-undo, #btn-undo2').on('click', function () {
+            displayingSubMenu.hide();
+
+            if (!$(this).hasClass('disabled')) {
+                _imageEditor.discardSelection();
+                _imageEditor.undo();
+            }
+        });
+
+        $('#btn-redo, #btn-redo2').on('click', function () {
+            displayingSubMenu.hide();
+
+            if (!$(this).hasClass('disabled')) {
+                _imageEditor.discardSelection();
+                _imageEditor.redo();
+            }
+        });
+
+        $('.close').on('click', function () {
+            _imageEditor.stopDrawingMode();
+            displayingSubMenu.hide();
+            $('.menu-item').filter('.activatable').removeClass('active');
+        });
+
+        $('#btn-crop, #btn-crop2').on('click', function () {
+            _imageEditor.startDrawingMode('CROPPER');
+            displayingSubMenu.hide();
+            displayingSubMenu = $('.crop-sub-menu').show();
+        });
+
+        $('#btn-apply-crop, #btn-apply-crop2').on('click', function () {
+            _imageEditor.crop(_imageEditor.getCropzoneRect()).then(function () {
+                _imageEditor.stopDrawingMode();
+                resizeEditor();
+            });
+            displayingSubMenu.hide();
+            $('.menu-item').filter('.activatable').removeClass('active');
+        });
+
+        $('#btn-add-icon, #btn-add-icon2').on('click', function () {
+            displayingSubMenu.hide();
+            displayingSubMenu = $('.icon-sub-menu').show();
+            activateIconMode();
+        });
+
+        $('.icon-text').on('click', function (event) {
+            var element = event.target || event.srcElement;
+            var iconType = $(element).attr('data-icon-type');
+
+            var canvasSize = _imageEditor.getCanvasSize();
+            var newX = canvasSize.width / 2;
+            var newY = canvasSize.height / 2;
+            var strokeWidth = 5;
+            var initSize = 100;
+
+            if (iconType == 'circle') {
+                _imageEditor
+                    .addShape(iconType, {
+                        stroke: $('.tui-colorpicker-palette-hex').val(),
+                        fill: 'transparent',
+                        left: newX,
+                        top: newY,
+                        strokeWidth: strokeWidth,
+                        rx: initSize,
+                        ry: initSize
+                    });
+            }
+            else if (iconType == 'rect') {
+                _imageEditor
+                    .addShape(iconType, {
+                        stroke: $('.tui-colorpicker-palette-hex').val(),
+                        fill: 'transparent',
+                        left: newX,
+                        top: newY,
+                        strokeWidth: strokeWidth,
+                        width: initSize,
+                        height: initSize
+                    });
+            }
+            else {
+                _imageEditor
+                    .addIcon(iconType, {
+                        stroke: $('.tui-colorpicker-palette-hex').val(),
+                        fill: $('.tui-colorpicker-palette-hex').val(),
+                        left: newX,
+                        top: newY,
+                    });
+            }
+        });
+
+        $('#btn-text, #btn-text2').on('click', function () {
+            displayingSubMenu.hide();
+            displayingSubMenu = $('.text-sub-menu').show();
+            activateTextMode();
+        });
+
+        $('#icon-size-range, #icon-size-range2').on('change', function () {
+            _imageEditor.changeShape(activeObjectId, {
+                strokeWidth: parseInt(this.value / 10, 10),
+            });
+        });
+
+        $('#btn-clear, #btn-clear2').on('click', function () {
+            confirmOriginal();
+        });
+
+        $('#btn-rotation-left, #btn-rotation-left2').on('click', function () {
+            _imageEditor.stopDrawingMode();
+            displayingSubMenu.hide();
+            _imageEditor.rotate(-90);
+        });
+
+        $('#btn-rotation-right, #btn-rotation-right2').on('click', function () {
+            _imageEditor.stopDrawingMode();
+            displayingSubMenu.hide();
+            _imageEditor.rotate(90);
+        });
+
+        //for text size bar
+        $(document).on('input', '#input-font-size-range, #input-font-size-range2', function () {
+            if (activeObjectType === 'i-text') {
+                _imageEditor.changeTextStyle(activeObjectId, {
+                    fontSize: parseInt(this.value, 10),
+                });
+            }
+        });
+
+        //bold,italic,...
+        $('.btn-text-style').on('click', function (e) {
+            var styleType = $(this).attr('data-style-type');
+            var styleObj;
+
+            e.stopPropagation();
+
+            switch (styleType) {
+                case 'b':
+                    styleObj = { fontWeight: 'bold' };
+                    break;
+                case 'i':
+                    styleObj = { fontStyle: 'italic' };
+                    break;
+                case 'u':
+                    styleObj = { underline: true };
+                    break;
+                case 'l':
+                    styleObj = { textAlign: 'left' };
+                    break;
+                case 'c':
+                    styleObj = { textAlign: 'center' };
+                    break;
+                case 'r':
+                    styleObj = { textAlign: 'right' };
+                    break;
+                default:
+                    styleObj = {};
+            }
+
+            _imageEditor.changeTextStyle(activeObjectId, styleObj);
+        });
+
+        var textColorpicker = tui.colorPicker.create({
+            container: IsMobile() ? $('#tui-text-color-picker2')[0] : $('#tui-text-color-picker')[0],
+            color: '#000000',
+            preset: ['#000000', '#808080', '#FF0000', '#00FF00', '#FFFF00', '#0000FF', '#8F00FF', '#FFFFFF'],
+        });
+        textColorpicker.on('selectColor', function (event) {
+            if (activeObjectType === 'i-text') {
+                _imageEditor.changeTextStyle(activeObjectId, {
+                    fill: event.color,
+                });
+            }
+        });
+
+        var iconColorpicker = tui.colorPicker.create({
+            container: IsMobile() ? $('#tui-icon-color-picker2')[0] : $('#tui-icon-color-picker')[0],
+            color: '#000000',
+            preset: ['#000000', '#808080', '#FF0000', '#00FF00', '#FFFF00', '#0000FF', '#8F00FF', '#FFFFFF'],
+            detailTxt: 'Detail',
+        });
+
+        iconColorpicker.on('selectColor', function (event) {
+            if (activeObjectType !== 'i-text' && activeObjectType !== 'undefined') {
+                if (_imageEditor.getObjectProperties(activeObjectId, 'fill').fill == 'transparent') {
+                    _imageEditor.changeShape(activeObjectId, {
+                        stroke: event.color
+                    });
+                }
+                else {
+                    _imageEditor.changeShape(activeObjectId, {
+                        stroke: event.color,
+                        fill: event.color
+                    });
+                }
+            }
+        });
+
+        if (IsMobile()) {
+            _imageEditor = new tui.ImageEditor('#tui-image-editor-container', {
+                cssMaxWidth: screen.width * 0.95,
+                selectionStyle: {
+                    cornerSize: 20,
+                    rotatingPointOffset: 70,
+                },
+            });
+        }
+        else {
+            _imageEditor = new tui.ImageEditor('.tui-image-editor', {
+                cssMaxWidth: $('#DetailsContainer').width() * 0.7,
+                selectionStyle: {
+                    cornerSize: 20,
+                    rotatingPointOffset: 70,
+                },
+            });
+        }
+
+        _imageEditor.on('addText', function (pos) {
+            _imageEditor
+                .addText('Any Text', {
+                    position: pos.originPosition,
+                });
+            if(IsMobile()) {
+                $('.hover_bkgr').width(screen.width);
+                $('.hover_bkgr').height(screen.height);
+            }
+        });
+
+        _imageEditor.registerIcons({
+            circle: 'M 30.50,16.00 C 30.50, 24.01 24.01, 30.50 16.00, 30.50 7.99, 30.50 1.50, 24.01 1.50, 16.00 1.50, 7.99 7.99, 1.50 16.00, 1.50 24.01, 1.50 30.50, 7.99 30.50, 16.00 Z',
+            square: 'M 28.50, 2.50 C 29.05, 2.50 29.50, 2.95 29.50, 3.50 29.50, 3.50 29.50, 28.50 29.50, 28.50 29.50, 29.05 29.05, 29.50 28.50, 29.50 28.50, 29.50 3.50, 29.50 3.50, 29.50 2.95, 29.50 2.50, 29.05 2.50, 28.50 2.50, 28.50 2.50, 3.50 2.50, 3.50 2.50, 2.95 2.95, 2.50 3.50, 2.50 3.50, 2.50 28.50, 2.50 28.50, 2.50 Z',
+        });
+
+        _imageEditor.on('undoStackChanged', function (length) {
+            if (length) {
+                $('#btn-undo').removeClass('disabled');
+                $('#btn-undo2').removeClass('disabled');
+            } else {
+                $('#btn-undo').addClass('disabled');
+                $('#btn-undo2').addClass('disabled');
+            }
+            resizeEditor();
+        });
+
+        _imageEditor.on('redoStackChanged', function (length) {
+            if (length) {
+                $('#btn-redo').removeClass('disabled');
+                $('#btn-redo2').removeClass('disabled');
+            } else {
+                $('#btn-redo').addClass('disabled');
+                $('#btn-redo2').addClass('disabled');
+            }
+            resizeEditor();
+        });
+
+        _imageEditor.on('objectActivated', function (obj) {
+            activeObjectId = obj.id;
+            activeObjectType = obj.type;
+            if (obj.type === 'icon' || obj.type === 'circle' || obj.type === 'rect') {
+                displayingSubMenu.hide();
+                displayingSubMenu = $('.icon-sub-menu').show();
+                $('.menu-item').filter('.activatable').removeClass('active');
+                $('#btn-add-icon').addClass('active');
+                $('#btn-add-icon2').addClass('active');
+                $('#icon-size-range').val(obj.strokeWidth * 10);
+                $('#icon-size-range2').val(obj.strokeWidth * 10);
+                iconColorpicker.setColor(obj.stroke);
+                activateIconMode();
+            } else if (obj.type === 'i-text') {
+                displayingSubMenu.hide();
+                displayingSubMenu = $('.text-sub-menu').show();
+                $('.menu-item').filter('.activatable').removeClass('active');
+                $('#btn-text').addClass('active');
+                $('#btn-text2').addClass('active');
+                $('#input-font-size-range').val(obj.fontSize);
+                $('#input-font-size-range2').val(obj.fontSize);
+                textColorpicker.setColor(obj.fill);
+                activateTextMode();
+            }
+        });
+            </text>
+        }
+    }
+
+    function resizeEditor() {
+        var container = $('.tui-image-editor-canvas-container');
+        var height = parseFloat(container.css('max-height'));
+        $('.tui-image-editor').height(height);
+        $('#tui-image-editor-container').height(height);
+    }
+
+    function activateIconMode() {
+        _imageEditor.stopDrawingMode();
+    }
+
+    function activateTextMode() {
+        if (_imageEditor.getDrawingMode() !== 'TEXT') {
+            _imageEditor.stopDrawingMode();
+            _imageEditor.startDrawingMode('TEXT');
+        }
+    }
+
+    function removeState() {
+        _imageEditor.changeCursor('default');
+        _imageEditor.off('mousedown', 'ficon');
+    }
+
+    function confirmOriginal() {
+        GetUserConfirmation("@Proestimator.Resources.ProStrings.OriginalImageAlertMessage", confirmOriginalResponse);
+    }
+
+    function confirmOriginalResponse(yes) {
+        if (yes === true) {
+            $.getJSON("@Url.Action("RemoveEditImage", "Estimate")", { loginID: @ViewBag.LoginID, imageID: _imageID, userID: @ViewBag.UserID, estimateID: $("#EstimateID").val() }, function (data) {
+                if (data.Success) {
+
+                    var imageName = _imageEditor.getImageName();
+                    var origianlPath = imageName.substr(0, imageName.lastIndexOf("?")).replace("_edit", "") + "?r=" + Math.random();
+
+                    @if (Model.HasImagesContract)
+                    {
+                        <text>
+                        _imageEditor.loadImageFromURL(origianlPath, origianlPath).then(function () {
+                            _imageEditor.clearUndoStack();
+                        });
+                        if (IsMobile()) {
+                            $("#imgImage").removeAttr("src").attr('src', origianlPath);
+                            $('#btn-clear2').hide();
+                        }
+                        else {
+                            $('#btn-clear').hide();
+                        }
+                        </text>
+                    }
+                    else
+                    {
+                        <text>
+                        $("#imgImage").attr("src", originalPath);
+                        </text>
+                    }
+
+                    var src = $("#Thumbnail" + _imageID).attr('src').split('r=')[0];
+                    var i = src.lastIndexOf("/");
+                    var fname = src.substr(i + 1, src.length - i - 1).replace("_thumbedit", "_thumb");
+                    $("#Thumbnail" + _imageID).removeAttr("src").attr('src', src.substr(0, i + 1) + fname + "?r=" + Math.random());
+
+                    $("#lblDimensions").text(data.ImageInfo.Width + " x " + data.ImageInfo.Height + " pixels");
+                    $("#lblFileSize").text(data.ImageInfo.DiskSize);
+                }
+                else {
+                    showMessage(data.ErrorMessage);
+                }
+            });
+        }
+    }
+
+    @if (Model.HasImagesContract)
+    {
+        <text>
+            window.onbeforeunload = function () {
+                //return confirm("You're about to leave possibly without saving, are you sure?");
+                //return "You're about to leave possibly without saving, are you sure?";
+                //return confirm("");
+                if (IsMobile()) {
+                    if (!$('#btn-undo2').hasClass('disabled')) {
+                        return "";
+                        //GetUserConfirmation("@Proestimator.Resources.ProStrings.LoadImageAlertMessage", confirmNavResponse);
+                        //return Ans;
+                        /*var Ans = confirm("Are you sure you want change page!");
+                        if (Ans === true) {
+                            return true;
+                        }
+                        else {
+                            return false;//null
+                        }*/
+                    }
+                }
+                else {
+                    if (!$('#btn-undo').hasClass('disabled')) {
+                        return "";
+                    }
+                }
+            }
+        </text>
+    }
+
+    /*function confirmNavResponse(conf) {
+        if (conf === true) {
+            Ans = true;
+        }
+        else {
+            Ans = false;
+        }
+    }*/
+
+    var cImageId;
+    function LoadImageDetailsAfterConfirm(pImageId) {
+
+        @if (Model.HasImagesContract)
+        {
+            <text>
+            cImageId = pImageId;
+            if (IsMobile()) {
+                if ($('#btn-undo2').hasClass('disabled')) {
+                    LoadImageDetails(cImageId);
+                }
+                else {
+                    GetUserConfirmation("@Proestimator.Resources.ProStrings.LoadImageAlertMessage", confirmLoadResponse);
+                }
+            }
+            else {
+                if ($('#btn-undo').hasClass('disabled')) {
+                    LoadImageDetails(cImageId);
+                }
+                else {
+                    GetUserConfirmation("@Proestimator.Resources.ProStrings.LoadImageAlertMessage", confirmLoadResponse);
+                }
+            }
+            </text>
+        }
+        else
+        {
+            <text>
+            LoadImageDetails(pImageId);
+            </text>
+        }
+    }
+
+    function confirmLoadResponse(confirm) {
+        if (confirm === true) {
+            LoadImageDetails(cImageId);
+        }
+    }
+
+    function onChangeSelectPage(selectPageDropDownControl) {
+
+        var selectedPageIndex = $("#ddlTotalPageCount").val();
+        _currentPageIndex = selectedPageIndex;
+
+        LoadImageDetails(_imageID);
+
+        EnableControls();
+
+        if(selectedPageIndex > 1)
+        {
+            DisableControls();
+        }
+    }
+
+    function EnableControls() {
+        $("#ImageTag").prop("disabled", false);
+        $('#ImageTagCustom').removeAttr('readonly');
+        $("#SupplementVersion").prop("disabled", false);
+        $('#btnSaveAs').removeAttr('disabled');
+        $('#btnSave').removeAttr('disabled');
+        $('#btnDelete').removeAttr('disabled');
+
+        $("#ImageTag").removeClass("disable-control");
+        $("#ImageTagCustom").removeClass("disable-control");
+        $("#SupplementVersion").removeClass("disable-control");
+        $('#btnSaveAs').removeClass("disable-button");
+        $('#btnSave').removeClass("disable-button");
+        $('#btnDelete').removeClass("disable-button");
+        if (IsMobile()) {
+            $('#btn-undo2').show();
+            $('#btn-redo2').show();
+            $('#btn-crop2').show();
+            $('#btn-rotation-left2').show();
+            $('#btn-rotation-right2').show();
+            $('#btn-add-icon2').show();
+            $('#btn-text2').show();
+            $('#btnEdit').show();
+        }
+        else {
+            $('#btn-undo').show();
+            $('#btn-redo').show();
+            $('#btn-crop').show();
+            $('#btn-rotation-left').show();
+            $('#btn-rotation-right').show();
+            $('#btn-add-icon').show();
+            $('#btn-text').show();
+            //$('#btn-clear').show();
+        }
+    }
+
+    function DisableControls() {
+        $("#ImageTag").prop("disabled", true);
+        $('#ImageTagCustom').attr('readonly', true);
+        $("#SupplementVersion").prop("disabled", true);
+        $('#btnSaveAs').attr('disabled', true);
+        $('#btnSave').attr('disabled',true);
+        $('#btnDelete').attr('disabled',true);
+
+        $("#ImageTag").addClass("disable-control");
+        $("#ImageTagCustom").addClass("disable-control");
+        $("#SupplementVersion").addClass("disable-control");
+        $('#btnSaveAs').addClass("disable-button");
+        $('#btnSave').addClass("disable-button");
+        $('#btnDelete').addClass("disable-button");
+        _imageEditor.stopDrawingMode();
+        $('.text-sub-menu').hide();
+        $('.icon-sub-menu').hide();
+        $('.crop-sub-menu').hide();
+        $('.menu-item').filter('.activatable').removeClass('active');
+        if (IsMobile()) {
+            $('#btn-undo2').hide();
+            $('#btn-redo2').hide();
+            $('#btn-crop2').hide();
+            $('#btn-rotation-left2').hide();
+            $('#btn-rotation-right2').hide();
+            $('#btn-add-icon2').hide();
+            $('#btn-text2').hide();
+            $('#btn-clear2').hide();
+            $('#btnEdit').hide();
+        }
+        else {
+            $('#btn-undo').hide();
+            $('#btn-redo').hide();
+            $('#btn-crop').hide();
+            $('#btn-rotation-left').hide();
+            $('#btn-rotation-right').hide();
+            $('#btn-add-icon').hide();
+            $('#btn-text').hide();
+            $('#btn-clear').hide();
+        }
+    }
+
+    function deleteImage() {
+        GetUserConfirmation("@Proestimator.Resources.ProStrings.DeleteImageAlertMessage", DeleteImageResponse);
+    }
+
+    function DeleteImageResponse(yes)
+    {
+        if (yes === true)
+        {
+            $.getJSON("@Url.Action("DeleteImage", "Estimate")", { imageID: _imageID, userID: @ViewBag.UserID, estimateID: $("#EstimateID").val() }, function (data) {
+                if (data.Success) {
+
+                    $("#ThumbWrapper" + _imageID).remove();
+                    if(_isModelPopup == 'True')
+                    {
+                        applyLoadingPopup();
+
+                        if($('#ThumbnailContainer').find('input:checkbox').length > 0) {
+                            $('#ThumbnailContainer').find('input:checkbox:first').each(function(){
+                                var imageID = $(this).attr("data-imageid");
+                                LoadImageDetails(imageID);
+                            });
+                        }
+                        else
+                        {
+                            $("#DetailsContainer").hide();
+                            $('#ThumbnailContainer').html("<b>@Proestimator.Resources.ProStrings.NoImageFound</b>");
+                        }
+
+                        removeLoadingPopup();
+                    }
+                    else
+                    {
+                        $("#DetailsContainer").hide();
+                        _imageID = 0;
+                    }
+                } else {
+                    showMessage(data.ErrorMessage);
+                }
+            });
+        }
+    }
+
+    function editImage() {
+        $('.hover_bkgr').show();
+    }
+
+    var _saveCount = 0;
+
+    function saveImage(copy) {
+        _saveCount = 1;
+
+        // Save the image tags
+        var tagID = $("#ImageTag").val();
+        var tag = $("#ImageTagCustom").val();
+        var supplementVersion = 0;
+
+        if ($("#SupplementVersion").length > 0)
+        {
+            supplementVersion = $("#SupplementVersion").val();
+        }
+
+        $.getJSON("@Url.Action("SaveImage", "Estimate")", { userID: @ViewBag.UserID, loginID: @ViewBag.LoginID, estimateID: $("#EstimateID").val(), imageID: _imageID, tagID: tagID, tag: tag, supplementVersion: supplementVersion, copy: copy }, function (data) {
+            if (data.Success) {
+                _saveCount--;
+
+                @if (Model.HasImagesContract)
+                {
+                    <text>
+                    if (copy) {
+                        _saveCount++;
+                        if (!!(window.File && window.FileList && window.FileReader)) {
+                            SaveEditedImage(_imageEditor.toDataURL(), _imageEditor.getImageName(), copy, data);
+                        }
+                    }
+                    </text>
+                }
+
+                ShowSaveSuccess();
+            } else {
+                showMessage(result.ErrorMessage);
+            }
+        });
+
+        @if (Model.HasImagesContract)
+        {
+            <text>
+            // Save the image editing
+            if (!_imageEditor.isEmptyUndoStack() && !copy) {
+                _saveCount++;
+                if (!!(window.File && window.FileList && window.FileReader)) {
+                    SaveEditedImage(_imageEditor.toDataURL(), _imageEditor.getImageName(), copy, null);
+                }
+            }
+            </text>
+        }
+    }
+
+    function ShowSaveSuccess() {
+        console.log("Show save success " + _saveCount);
+        if (_saveCount == 0) {
+            showMessage("@Proestimator.Resources.ProStrings.ImageDataSaved");
+        }
+    }
+
+    function SaveEditedImage(file, imgName, bCopy, newImage) {
+        var data = new FormData();
+        data.append("Image", file.split(';base64,')[1]);
+        data.append("LoginID", @ViewBag.LoginID);
+        data.append("EstimateID", $("#EstimateID").val());
+        data.append("FilePath", imgName.substr(0, imgName.lastIndexOf("?")));
+        data.append("IsCopy", bCopy);
+        if (bCopy) {
+            data.append("ImageID", newImage.ImageID);
+        }
+        else {
+            data.append("ImageID", _imageID);
+        }
+        $.ajax({
+            url: "/Estimate/UploadEditImage",
+            type: "POST",
+            processData: false,
+            contentType: false,
+            data: data,
+            success: function (response) {
+                console.log("Edited image saved.");
+                if (response.Success == true) {
+                    _saveCount--;
+                    ShowSaveSuccess();
+
+                    /*if ($("#ddlTotalPageCount").length) {
+                        _currentPageIndex = $("#ddlTotalPageCount").val();
+                    }
+                    LoadImageDetails(_imageID);*/
+                    $('#btn-clear').show();
+                    $('#btn-clear2').show();
+                    _imageEditor.clearUndoStack();
+                    refreshImage(bCopy, newImage);
+                    $("#lblDimensions").text(response.ImageInfo.Width + " x " + response.ImageInfo.Height + " pixels");
+                    $("#lblFileSize").text(response.ImageInfo.DiskSize);
+                }
+                else {
+                    showMessage(response.ErrorMessage);
+                }
+            },
+            error: function (er) {
+                alert(er);
+            }
+        });
+    }
+
+    function showMessage(message) {
+        $("#error-message").text(message);
+
+        window.setTimeout(function () {
+            $("#error-message").text("");
+        }, 3000);
+    }
+
+    function refreshUploadMessage() {
+        _uploads--;
+        if (_uploads == 0) {
+            $("#uploadMessage").text("");
+        }
+    }
+
+    function refreshImage(isCopy, newImg) {
+        if (_imageID > 0) {
+            if (isCopy) {
+                var newHtml = $("#imageTemplate").html()
+                    .replaceAll("#ImagePath#", newImg.NewImagePath)
+                    .replaceAll("#ImageID#", newImg.ImageID)
+                    .replaceAll('#selected#=""', newImg.Include ? "checked" : "");
+                $("#ThumbnailContainer").append(newHtml);
+
+                LoadImageDetails(newImg.ImageID);
+            }
+            else {
+                var src = $("#Thumbnail" + _imageID).attr('src').split('r=')[0];
+                var i = src.lastIndexOf("/");
+                var fname = src.substr(i + 1, src.length - i - 1).replace("_thumbedit", "").replace("_thumb", "").replace(".", "_thumbedit.");
+                $("#Thumbnail" + _imageID).removeAttr("src").attr('src', src.substr(0, i + 1) + fname + "?r=" + Math.random());
+                if (IsMobile()) {
+                    fname = src.substr(0, i + 1) + fname.replace("_thumbedit", "_edit") + "?r=" + Math.random();
+                    $("#imgImage").removeAttr("src").attr('src', fname);
+                    _imageEditor.loadImageFromURL(fname, fname).then(function () {
+                        _imageEditor.clearUndoStack();
+                    });
+                    $('.hover_bkgr').hide();
+                }
+            }
+        }
+    }
+
+    var _uploads = 0;
+
+    $(document).ready(function () {
+        if (IsMobile()) { $('#btnEdit').show(); $('#img-editor-menu').hide(); $('.tui-image-editor').hide();}
+        else { $('#btnEdit').hide(); $('#img-editor-menu').show(); $('.tui-image-editor').show();}
+        if (isAdvancedUpload()) {
+            $(".box").addClass('has-advanced-upload');
+            $(".box").on("dragover", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(".box").addClass('is-dragover');
+            });
+            $(".box").on("dragenter", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(".box").addClass('is-dragover');
+            });
+            $(".box").on("dragleave", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(".box").removeClass('is-dragover');
+            });
+            $(".box").on("dragend", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(".box").removeClass('is-dragover');
+            });
+            $(".box").on("drop", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(".box").removeClass('is-dragover');
+                Upload(e.originalEvent.dataTransfer.files, true);
+            });
+        }
+
+        $("#uploadImage").change(function () {
+            if (isAdvancedUpload()) {
+                Upload($("#uploadImage").get(0).files, false);
+            }
+            else {
+                $('.box').addClass('is-uploading');
+                var iframeName = 'uploadiframe' + new Date().getTime(),
+                    iframe = document.createElement('iframe');
+
+                $iframe = $('<iframe name="' + iframeName + '" style="display: none;"></iframe>');
+
+                iframe.setAttribute('name', iframeName);
+                iframe.setAttribute('id', 'postframe');
+                iframe.style.display = 'none';
+                iframe.onclick = function () {
+                    move();
+                };
+
+                document.body.appendChild(iframe);
+
+                $("#uploadform").attr('target', iframeName);
+                $("#uploadform").attr("action", "/Estimate/UploadImage");
+                $("#uploadform").attr("method", "post");
+                $("#uploadform").attr("enctype", "multipart/form-data");
+                $("#uploadform").attr("encoding", "multipart/form-data");
+                $("#uploadform").attr("file", $('#uploadImage').val());
+                $("#uploadform").submit();
+                $("#postframe").click();
+
+                $("#postframe").load(function () {
+                    var i, j, response;
+                    i = iframe.contentDocument.body.innerHTML.indexOf(">{");
+                    j = iframe.contentDocument.body.innerHTML.indexOf("}<");
+                    if (i > -1 && j > -1) {
+                        response = JSON.parse(iframe.contentDocument.body.innerHTML.substring(i + 1, j + 1));
+                    }
+                    else {
+                        response = JSON.parse(iframe.contentDocument.body.innerHTML);
+                    }
+                    $("#uploadform").removeAttr('target');
+                    if (response.Success == true) {
+                        var newFullHtml = '';
+
+                        response.UploadImageResultArray.forEach(function (eachUploadImageResult) {
+                            var newHtml = $("#imageTemplate").html()
+                                .replaceAll("#ImagePath#", eachUploadImageResult.NewImagePath)
+                                .replaceAll("#ImageID#", eachUploadImageResult.ImageID)
+                                .replaceAll("#Selected#", eachUploadImageResult.Include === true ? "checked" : "")
+                                .replaceAll("#ImageTagID#", "0");
+
+                            newFullHtml = newFullHtml + '<br/>' + newHtml;
+                        })
+
+                        $("#ThumbnailContainer").append(newFullHtml);
+
+                        refreshUploadMessage();
+
+                        LoadImageDetails(response.UploadImageResultArray[0].ImageID);
+                    }
+                    else {
+                        refreshUploadMessage();
+                        alert(response.ErrorMessage);
+                        $("#uploadImage").val('');
+                    }
+                    iframe.parentNode.removeChild(iframe);
+                    showOriginal();
+                });
+                $("#postframe").error(function (er) {
+                    alert(er);
+                });
+            }
+        });
+
+        $(".thumb-include").on("change", function () {
+            //(int estimateID, int imageID, bool included)
+            $.getJSON('@Url.Action("SetImageIncluded", "Estimate")', { userID: @ViewBag.UserID, estimateID: @Model.EstimateID, imageID: $(this).attr("data-imageid"), included: $(this).is(":checked") }, function (data) {
+
+            });
+        });
+
+        $(".thumbinput").tooltip({
+            tooltipClass: "mytooltip",
+            position: { my: "left center", at: "right center" }
+        });
+
+        $("#ImagePreview").tooltip({
+            tooltipClass: "mytooltip",
+            position: { my: "left center", at: "right center" }
+        });
+
+        /*$(".menu-item").tooltip({
+            tooltipClass: "mytooltip",
+            //position: { my: "left center", at: "top center" }
+        });*/
+        $("#btn-undo, #btn-undo2").tooltip({
+            tooltipClass: "mytooltip",
+        });
+        $("#btn-redo, #btn-redo2").tooltip({
+            tooltipClass: "mytooltip",
+        });
+        $("#btn-crop, #btn-crop2").tooltip({
+            tooltipClass: "mytooltip",
+        });
+        $("#btn-rotation-left, #btn-rotation-left2").tooltip({
+            tooltipClass: "mytooltip",
+        });
+        $("#btn-rotation-right, #btn-rotation-right2").tooltip({
+            tooltipClass: "mytooltip",
+        });
+        $("#btn-add-icon, #btn-add-icon2").tooltip({
+            tooltipClass: "mytooltip",
+        });
+        $("#btn-text, #btn-text2").tooltip({
+            tooltipClass: "mytooltip",
+        });
+        $("#btn-clear, #btn-clear2").tooltip({
+            tooltipClass: "mytooltip",
+        });
+
+        $('.popupCloseButton').click(function () {
+            ClosePopup();
+        });
+
+        imageEvents();
+
+        if (!IsMobile()) {
+            $("#ThumbnailContainer").sortable({
+                update: function (event, ui) {
+                    var data = [];
+                    $('#ThumbnailContainer').find('input:checkbox').each(function (i, val) {
+                        data[i] = $(val).attr("data-imageid");
+                    });
+                    $.ajax({
+                        url: "/Estimate/ReOrderImages",
+                        type: "POST",
+                        processData: true,
+                        data: { data: data, estimateID: $("#EstimateID").val() },
+                        success: function (response) {
+                        }
+                    });
+                }
+            });
+        }
+    });
+
+    function ClosePopup() {
+        if (!_imageEditor.isEmptyUndoStack()) {
+            GetUserConfirmation("@Proestimator.Resources.ProStrings.CancelImageAlertMessage", confirmCloseResponse);
+        }
+        else {
+            $('.hover_bkgr').hide();
+        }
+    }
+
+    function confirmCloseResponse(isYes) {
+        if (isYes === true) {
+            _imageEditor.loadImageFromURL(_imageEditor.getImageName(), _imageEditor.getImageName()).then(function () {
+                _imageEditor.clearUndoStack();
+            });
+            $('.hover_bkgr').hide();
+        }
+    }
+
+    function AdjustThumbnail(imageID) {
+        if (!IsMobile()) {
+            var thumbinput, thumbimage;
+            thumbinput = $("#thumbinput" + imageID);
+            thumbimage = $("#thumbimage" + imageID);
+
+            $("#ThumbWrapper" + imageID).height($(thumbimage).height());
+            $(thumbinput).height($(thumbimage).height());
+            $(thumbinput).css("line-height", $(thumbinput).height() + "px");
+
+            $(thumbinput).attr('title', 'it is for the [only checked images] checkbox on the report generator');
+        }
+    }
+
+    function isAdvancedUpload () {
+        var div = document.createElement('div');
+        return (('draggable' in div) || ('ondragstart' in div && 'ondrop' in div)) && 'FormData' in window && 'FileReader' in window;
+    }
+
+    function showOriginal() {
+        clearInterval(id);
+        $("#myBar").width("100%");
+        setTimeout(function () {
+            $(".box").removeClass('is-uploading');
+        }, 500);
+    }
+
+    function Upload(files, isDrop) {
+        $(".box").addClass('is-uploading');
+
+            var data = new FormData();
+            if (files.length > 0) {
+                for (var i = 0; i < files.length; ++i) {
+                    data.append('Images' + (i + 1), files[i]);
+                    /*if (isDrop) {
+                        data.append(files[i].name, files[i]);
+                    }
+                    else {
+                        data.append('Images' + (i + 1), files[i]);
+                    }*/
+                }
+            }
+
+            data.append("LoginID", @ViewBag.LoginID);
+            data.append("EstimateID", $("#EstimateID").val());
+
+            _uploads++;
+        $.ajax({
+                url: "/Estimate/UploadImage",
+                type: "POST",
+                processData: false,
+                contentType: false,
+                data: data,
+            success: function (response) {
+                    if (response.Success == true)
+                    {
+                        var newFullHtml = '';
+
+                        response.UploadImageResultArray.forEach(function(eachUploadImageResult) {
+                            var newHtml = $("#imageTemplate").html()
+                            .replaceAll("#ImagePath#", eachUploadImageResult.NewImagePath)
+                            .replaceAll("#ImageID#", eachUploadImageResult.ImageID)
+                            .replaceAll("#Selected#", eachUploadImageResult.Include === true ? "checked" : "")
+                            .replaceAll("#ImageTagID#", "0");
+
+                            newFullHtml = newFullHtml + '<br/>' + newHtml;
+                        })
+
+                        $("#ThumbnailContainer").append(newFullHtml);
+
+                        refreshUploadMessage();
+
+                        LoadImageDetails(response.UploadImageResultArray[0].ImageID);
+                    }
+                    else {
+                        refreshUploadMessage();
+                        alert(response.ErrorMessage);
+                        $("#uploadImage").val('');
+                    }
+                    showOriginal();
+                },
+                beforeSend: function () {
+                    move();
+                },
+                error: function (er) {
+                    alert(er);
+                }
+            });
+    }
+
+    var id;
+    function move() {
+        var myBar = document.getElementById("myBar");
+        var increment = 4;//1,2,4,5,10,20,40,50,100
+        var width = increment;
+        id = setInterval(frame, 100);
+        function frame() {
+            if (width > 100) {
+                clearInterval(id);
+            } else {
+                myBar.style.width = width + '%';
+                /*width++;
+                if (width == 101) width = 1;*/
+                width = width + increment;
+                if (width == 100 + increment) width = increment;
+            }
+        }
+    }
+
+    function RotateImageLeft() {
+        DoRotate(_imageID, true);
+    }
+
+    function RotateImageRight() {
+        DoRotate(_imageID, false);
+    }
+
+    function DoRotate(imageID, left)
+    {
+        if (_isRotating === false)
+        {
+            _isRotating = true;
+
+            $(".rotate-button").css("opacity", 0.5);
+
+            $.getJSON('@Url.Action("RotateImage", "Estimate")', { userID: @ViewBag.UserID, loginID: @ViewBag.LoginID, estimateID: @Model.EstimateID, imageID: imageID, left: left }, function (data) {
+                _isRotating = false;
+                $(".rotate-button").css("opacity", 1.0);
+
+                if (data === "good")
+                {
+                    var imageNewUrl = $("#ImagePreview").attr("src") + "?r=" + Math.random();
+                    $("#ImagePreview").removeAttr("src").attr("src", imageNewUrl);
+
+                    var thumbNewUrl = $("#Thumbnail" + imageID).attr("src") + "?r=" + Math.random();
+                    $("#Thumbnail" + imageID).removeAttr("src").attr("src", thumbNewUrl);
+                }
+                else
+                {
+                    ShowUserMessage(data, true, 5000);
+                }
+            });
+        }
+        else{
+            console.log("already rotating");
+        }
+    }
+
+    // Rotate PDF Image
+
+    function RotatePDFImageLeft() {
+        DoRotatePDFImage(_imageID, true);
+    }
+
+    function RotatePDFImageRight() {
+        DoRotatePDFImage(_imageID, false);
+    }
+
+    function DoRotatePDFImage(imageID, left)
+    {
+        if (_isRotating === false)
+        {
+            _isRotating = true;
+
+            $(".rotate-button").css("opacity", 0.5);
+
+            var pageIndex = $("#ddlTotalPageCount").val();
+
+            $.getJSON('@Url.Action("RotatePDFImage", "Estimate")', { loginID: @Model.LoginID, estimateID: @Model.EstimateID, imageID: imageID, left: left, selectedPageIndex: pageIndex }, function (data) {
+                _isRotating = false;
+                $(".rotate-button").css("opacity", 1.0);
+
+                if (data === "good")
+                {
+                    var imageNewUrl = $("#ImagePreview").attr("src") + "?r=" + Math.random();
+                    $("#ImagePreview").removeAttr("src").attr("src", imageNewUrl);
+
+                    var thumbNewUrl = $("#Thumbnail" + imageID).attr("src") + "?r=" + Math.random();
+                    $("#Thumbnail" + imageID).removeAttr("src").attr("src", thumbNewUrl);
+                }
+                else
+                {
+                    ShowUserMessage(data, true, 5000);
+                }
+            });
+        }
+        else{
+            console.log("already rotating");
+        }
+    }
+
+</script>
+
+
+<link type="text/css" href="~/Content/css/tui-color-picker.css" rel="stylesheet" />
+<style>
+    .menu {
+        padding: 0;
+        margin-bottom: 5px;
+        text-align: center;
+        color: #544b61;
+        font-weight: 400;
+        list-style-type: none;
+        user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        -webkit-user-select: none;
+    }
+
+    .menu-item {
+        padding: 10px;
+        display: inline-block;
+        cursor: pointer;
+        vertical-align: middle;
+    }
+
+        .menu-item a {
+            text-decoration: none;
+        }
+
+        .menu-item.no-pointer {
+            cursor: default;
+        }
+
+        .menu-item.active,
+        .menu-item:hover {
+            background-color: #f3f3f3;
+        }
+
+        .menu-item.disabled {
+            cursor: default;
+            color: #bfbebe;
+            opacity: 0.3;
+        }
+
+    .sub-menu-container {
+        font-size: 14px;
+        margin-bottom: 1em;
+        display: none;
+    }
+
+    .tui-image-editor-canvas-container {
+        margin: 0 auto;
+        top: 50%;
+        transform: translateY(-50%);
+        -ms-transform: translateY(-50%);
+        -moz-transform: translateY(-50%);
+        -webkit-transform: translateY(-50%);
+        border: 1px dashed black;
+        overflow: hidden;
+    }
+
+    .tui-colorpicker-container {
+        margin: 5px auto 0;
+    }
+
+    .tui-colorpicker-palette-toggle-slider {
+        display: none;
+    }
+
+    .btn-text-style {
+        padding: 5px;
+        margin: 3px 1px;
+        border: 1px dashed #bfbebe;
+        outline: 0;
+        background-color: #eee;
+        cursor: pointer;
+    }
+
+    .icon-text {
+        font-size: 20px;
+    }
+
+    .rotate-container {
+        width: 100px;
+    }
+
+    .rotate-button {
+        cursor: pointer;
+        float: left;
+        margin-top: 0px;
+        margin-bottom: 0px;
+    }
+
+    .image-container img {
+        image-orientation: from-image !important;
+    }
+
+    #ThumbnailContainer {
+        height: 103px;
+        width: auto;
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+    }
+
+    .thumb-wrapper {
+        display: inline-block;
+        margin-right: 2px;
+        margin-top: 5px;
+    }
+
+    .thumbinput {
+        text-align: center;
+        height: 8px;
+    }
+
+    .thumbimage {
+        text-align: center;
+        height: 67px;
+    }
+
+    #ThumbnailContainer img {
+        cursor: pointer;
+        border: 1px solid black;
+        height: 63px;
+    }
+
+        #ThumbnailContainer img.ImageSelected {
+            border: 2px dashed red;
+            border-radius: 4px;
+            padding: 10px;
+            height: 63px;
+        }
+
+    #ThumbnailContainer.stick {
+        position: fixed;
+        z-index: 10001;
+    }
+
+    .mytooltip {
+        padding: 5px;
+        background: #c6ffd4;
+        position: absolute;
+        z-index: 1;
+        max-width: 300px;
+        -webkit-box-shadow: 0 0 5px #aaa;
+        box-shadow: 0 0 5px #aaa;
+        font-size: 14px;
+        border-radius: 5px;
+        margin-right: -10px;
+    }
+
+    #DetailsContainer {
+        display: none;
+    }
+
+        #DetailsContainer .button {
+            width: 49%;
+        }
+
+        #DetailsContainer select {
+            width: 100%;
+        }
+
+        #DetailsContainer p {
+            padding: 6px;
+            margin: 0px;
+            font-size: 0.8em;
+        }
+
+        #DetailsContainer span {
+            font-size: 12px;
+        }
+
+    #ImageTagContainer {
+        padding-top: 20px;
+    }
+
+    .rotate-space-wrapper {
+        width: 50%;
+        float: right;
+    }
+
+    .details-container {
+        clear: both;
+        width: 100%;
+        height: 30px;
+    }
+
+    .details-left {
+        float: left;
+        width: 30%;
+        text-align: right;
+    }
+
+    .details-right {
+        float: left;
+        width: 70%;
+    }
+
+    .disable-control {
+        color: grey;
+        opacity: 0.5;
+    }
+
+    .disable-button {
+        opacity: 0.5;
+    }
+
+    #loading-container-popup {
+        position: absolute;
+        left: 0;
+        top: 0;
+        background: rgba(255,255,255,.5);
+        display: none;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .image-popup-container {
+    }
+
+    @@media screen and (min-width: 900px) {
+
+        .image-popup-container {
+            position: fixed;
+            left: 114px;
+            top: 185px;
+            right: 0px;
+            bottom: 0px;
+        }
+
+        #estimateFormHeader2 {
+            position: fixed;
+            width: 100%;
+            height: 75px;
+            margin-left: -40px;
+            border-bottom: 1px solid black;
+            background-color: white;
+            padding-top: 3px
+        }
+
+        #formHeader-back2 {
+            width: 300px;
+            height: 100%;
+            padding-top: 40px;
+            position: absolute;
+            left: 0;
+            text-align: left;
+            padding-left: 15px;
+        }
+
+        #formHeader-center2 {
+            height: 100%;
+            text-align: center;
+            left: 600px;
+            margin-left: 300px;
+            margin-right: 300px;
+        }
+
+            #formHeader-center2 h1 {
+                padding: 0px;
+                margin: 0px;
+                display: block;
+                height: 15%;
+                font-size: 1.25em;
+            }
+
+        #formHeader-next2 {
+            padding-top: 43px;
+            height: 100%;
+            position: absolute;
+            right: 113px;
+            top: 0;
+            width: 300px;
+            text-align: right;
+            padding-right: 15px;
+        }
+
+        #container2 {
+            padding-left: 20px;
+            padding-right: 20px;
+            margin-top: 70px;
+        }
+
+        #ThumbnailContainer {
+            width: 220px;
+            overflow-y: auto;
+            position: fixed;
+            top: 185px;
+            height: calc(100% - 185px);
+        }
+
+        .thumb-wrapper {
+            display: block;
+            margin-right: 0px;
+            margin-top: 0px;
+        }
+
+        .thumbinput {
+            width: 20%; /*46px;*/
+            height: auto;
+            float: left;
+            text-align: right;
+        }
+
+        .thumbimage {
+            width: 80%; /*154px;*/
+            height: auto;
+            float: right;
+            text-align: left;
+        }
+
+        #ThumbnailContainer img {
+            width: 80%; /*150px;*/
+            height: auto;
+        }
+
+            #ThumbnailContainer img.ImageSelected {
+                width: 80%; /*150px;*/
+                height: auto;
+            }
+
+        #DetailsContainer {
+            display: none;
+            position: fixed;
+            top: 185px;
+            bottom: 0px;
+            left: 334px;
+            right: 0px;
+            /*height: 100%;*/
+            padding: 10px;
+        }
+
+            #DetailsContainer span {
+                font-size: 18px;
+            }
+
+        #ImageEditContainer {
+            width: 70%;
+            float: left;
+            overflow-y: auto;
+            height: 100%;
+        }
+
+        #ImageTagContainer {
+            width: 30%;
+            float: right;
+            padding-top: 0px;
+            padding-right: 20px;
+            overflow-y: auto;
+            height: 100%;
+        }
+    }
+
+    .box_withoutheader {
+        background-color: #e8eeef;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+    }
+
+    .box {
+        font-size: 1.25rem;
+        position: relative;
+        padding-left: 10px;
+        padding-right: 10px;
+        padding-bottom: 3px;
+        padding-top: 3px;
+        width: 70%;
+        height: 100%;
+    }
+
+    .box__input {
+        padding-top: 5px;
+        width: 100%;
+    }
+
+    .box__dragndrop,
+    .box__icon {
+        display: none;
+    }
+
+    .box.has-advanced-upload {
+        background-color: white;
+        outline: 2px dashed black;
+        outline-offset: -10px;
+    }
+
+        .box.has-advanced-upload .box__dragndrop {
+            display: inline;
+        }
+
+    .box.is-dragover {
+        background-color: grey;
+        outline-offset: -20px;
+        outline-color: #c8dadf;
+    }
+
+    .box.has-advanced-upload .box__icon {
+        width: 100%;
+        height: 20px;
+        fill: #92b0b3;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .box.is-uploading .box__input {
+        visibility: hidden;
+    }
+
+    .js .box__file {
+        width: 0.1px;
+        height: 0.1px;
+        opacity: 0;
+        overflow: hidden;
+        position: absolute;
+        z-index: -1;
+    }
+
+        .js .box__file + label {
+            max-width: 80%;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+            display: inline-block;
+            overflow: hidden;
+        }
+
+            .js .box__file + label:hover strong,
+            .box__file:focus + label strong,
+            .box__file.has-focus + label strong {
+                color: #39bfd3;
+            }
+
+        .js .box__file:focus + label,
+        .js .box__file.has-focus + label {
+            outline: 1px dotted #000;
+            outline: -webkit-focus-ring-color auto 5px;
+        }
+
+        .js .box__file + label * {
+            /* pointer-events: none; */ /* in case of FastClick lib use */
+        }
+
+    .no-js .box__file + label {
+        display: none;
+    }
+
+    #myProgress {
+        display: none;
+    }
+
+    #myBar {
+        width: 0%;
+        height: 30px;
+        background-color: #04AA6D;
+        text-align: center;
+        line-height: 30px;
+        color: white;
+    }
+
+    .box.is-uploading #myProgress {
+        display: block;
+        width: 600px;
+        height: 30px;
+        background-color: #ddd;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin: -15px 0 0 -300px;
+    }
+
+    .hover_bkgr {
+        background: rgba(0,0,0,.4);
+        cursor: pointer;
+        display: none;
+        height: 100%;
+        position: fixed;
+        text-align: center;
+        top: 0;
+        width: 100%;
+        z-index: 10000;
+    }
+
+        .hover_bkgr .helper {
+            display: inline-block;
+            height: 100%;
+            vertical-align: middle;
+        }
+
+        .hover_bkgr > div {
+            background-color: #fff;
+            box-shadow: 10px 10px 60px #555;
+            display: inline-block;
+            height: 95%;
+            max-width: 95%;
+            min-width: 200px;
+            min-height: 100px;
+            max-height: 95%;
+            vertical-align: middle;
+            width: 95%;
+            position: relative;
+            border-radius: 8px;
+            padding-top: 15px;
+            overflow-y: auto;
+        }
+
+    .popupCloseButton {
+        background-color: #fff;
+        border: 3px solid #999;
+        border-radius: 50px;
+        cursor: pointer;
+        display: inline-block;
+        font-family: arial;
+        font-weight: bold;
+        position: absolute;
+        top: -15px;
+        left: -15px;
+        font-size: 25px;
+        line-height: 30px;
+        width: 30px;
+        height: 30px;
+        text-align: center;
+    }
+
+        .popupCloseButton:hover {
+            background-color: #ccc;
+        }
+
+    .tui-image-editor-header-logo {
+        display: none;
+    }
+
+    .tui-colorpicker-palette-preview {
+        display: none;
+    }
+
+    #tui-icon-color-picker {
+        text-align: center;
+    }
+</style>
+
+<div class="image-popup-container">
+
+    <div id="ThumbnailContainer">
+        @foreach (ImageVM image in Model.Images)
+        {
+            @Html.Raw(imageTemplate
+                .Replace("#ImagePath#", image.ImagePath + "?r=" + new Random(DateTime.Now.Millisecond).Next(10000, 99999).ToString())
+                .Replace("#ImageID#", image.ImageID.ToString())
+                .Replace("#Selected#", image.Include ? "checked" : "")
+            );
+        }
+    </div>
+    <div id="DetailsContainer">
+        <div id="ImageEditContainer">
+            <div class="tui-image-editor"></div>
+            <img id="imgImage" />
+        </div>
+        <div id="ImageTagContainer">
+            <div class="details-container">
+                <div class="details-left">
+                    &nbsp;
+                </div>
+                <div class="details-right">
+                    @if (Model.HasImagesContract)
+                    {
+                        <input id="btnSaveAs" type="button" value="@Proestimator.Resources.ProStrings.SaveAsCopy" class="button do-not-disable" onclick="saveImage(true);" />
+                    }
+                    <input id="btnSave" type="button" value="@Proestimator.Resources.ProStrings.Save" class="button do-not-disable" onclick="saveImage(false);" />
+                    @if (Model.HasImagesContract)
+                    {
+                        <input id="btnEdit" type="button" value="@Proestimator.Resources.ProStrings.Edit" class="button do-not-disable" onclick="editImage();" />
+                    }
+                    <input id="btnDelete" type="button" style="float: right;" value="@Proestimator.Resources.ProStrings.DeleteButton" class="button do-not-disable" onclick="deleteImage();" />
+                    <p id="error-message" style="color: red; height: 30px; padding: 8px; text-align: center;">@Model.ErrorMessage</p>
+                </div>
+            </div>
+
+            <div class="details-container" id="PageDDLContainer">
+                <div class="details-left">
+                    <p>@Proestimator.Resources.ProStrings.SelectPage</p>
+                </div>
+                <div class="details-right" id="SelectPageContainer">
+
+                </div>
+            </div>
+
+            <div class="details-container">
+                <div class="details-left">
+                    <p>Dimensions:</p>
+                </div>
+                <div class="details-right">
+                    <p id="lblDimensions"></p>
+                </div>
+            </div>
+
+            <div class="details-container" style="margin-bottom: 30px;">
+                <div class="details-left">
+                    <p>File Size:</p>
+                </div>
+                <div class="details-right">
+                    <p id="lblFileSize"></p>
+                </div>
+            </div>
+
+            <div class="details-container">
+                <div class="details-left">
+                    <p>@Proestimator.Resources.ProStrings.ImageTag</p>
+                </div>
+                <div class="details-right">
+                    @Html.DropDownList("ImageTag", Model.ImageTags)
+                </div>
+            </div>
+
+            <div class="details-container">
+                <div class="details-left">
+                    <p>@Proestimator.Resources.ProStrings.CustomNote</p>
+                </div>
+                <div class="details-right">
+                    <input type="text" style="float: right;" id="ImageTagCustom" />
+                </div>
+            </div>
+
+            @if (Model.SupplementVersions.Count > 1)
+            {
+                <div class="details-container" id="SupplementVersionDiv">
+                    <div class="details-left">
+                        <p>@Proestimator.Resources.ProStrings.SupplementVersion</p>
+                    </div>
+                    <div class="details-right">
+                        @Html.DropDownList("SupplementVersion", Model.SupplementVersions)
+                    </div>
+                </div>
+            }
+
+            @if (Model.HasImagesContract)
+            {
+                <div id="img-editor-menu" class="details-container">
+                    <div class="details-left">
+                        <ul class="menu" style="text-align: right;">
+                            <li class="menu-item disabled" id="btn-undo" title="click to undo the last edit"><img src="~/Images/undo.png" width="20" height="20" /></li>
+                            <li class="menu-item disabled" id="btn-redo" title="click to redo the last undo"><img src="~/Images/undo.png" width="20" height="20" style="transform: scaleX(-1);" /></li>
+                        </ul>
+                    </div>
+                    <div class="details-right">
+                        <ul class="menu">
+                            <li class="menu-item activatable" id="btn-crop" title="Crop the image"><img src="~/Images/crop.png" width="20" height="20" /></li>
+                            <li class="menu-item activatable" id="btn-rotation-left" title="Rotate the image counter-clockwise by 90 degrees"><img src="~/Images/rotate-left.png" width="20" height="20" /></li>
+                            <li class="menu-item activatable" id="btn-rotation-right" title="Rotate the image clockwise by 90 degrees"><img src="~/Images/rotate-right.png" width="20" height="20" /></li>
+                            <li class="menu-item activatable" id="btn-add-icon" title="Add Arrows and other shapes to the image"><img src="~/Images/shapes.png" width="20" height="20" /></li>
+                            <li class="menu-item activatable" id="btn-text" title="Add text to the image"><img src="~/Images/text.png" width="20" height="20" /></li>
+                            <li class="menu-item" id="btn-clear" title="Restore the original image">Original</li>
+                        </ul>
+
+                        <div class="sub-menu-container crop-sub-menu">
+                            <ul class="menu">
+                                <li class="menu-item" id="btn-apply-crop">Apply</li>
+                                <li class="menu-item close" id="btn-cancel-crop">Cancel</li>
+                            </ul>
+                        </div>
+
+                        <div class="sub-menu-container icon-sub-menu">
+                            <ul class="menu">
+                                <li class="menu-item icon-text" data-icon-type="arrow">➡</li>
+                                <li class="menu-item icon-text" data-icon-type="cancel">✖</li>
+                                <li class="menu-item icon-text" data-icon-type="circle">O</li>
+                                <li class="menu-item icon-text" data-icon-type="rect">⬜</li>
+                                <li class="menu-item close">Close</li>
+                            </ul>
+
+                            <label class="no-pointer" style="text-align: center;">
+                                <input id="icon-size-range" type="range" min="100" max="500" value="100" />
+                            </label>
+
+                            <div id="tui-icon-color-picker">Icon color</div>
+                        </div>
+
+                        <div class="sub-menu-container text-sub-menu">
+                            <ul class="menu">
+                                <li class="menu-item btn-text-style" data-style-type="b">Bold</li>
+                                <li class="menu-item btn-text-style" data-style-type="i">Italic</li>
+                                <li class="menu-item btn-text-style" data-style-type="u">Underline</li>
+                                <li class="menu-item">
+                                    <label class="no-pointer">
+                                        <input id="input-font-size-range" type="range" min="10" max="200" value="10" />
+                                    </label>
+                                </li>
+                                <li class="menu-item">
+                                    <div id="tui-text-color-picker">Text color</div>
+                                </li>
+                                <li class="menu-item close">Close</li>
+                            </ul>
+                        </div>
+
+                    </div>
+
+                    @if (Model.EditorIsTrial)
+                    {
+                        <div class="error-message">
+                            <p>Note: the Image Editor feature is available for evaluation in a trial period. However it is not part of the base contract and requires the purchase of an add on to use once your trial has expired.</p>
+                        </div>
+                    }
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+    <div id="loading-container-popup">
+        <img id="loading-image-popup" src="~/Content/images/WebEstGlobalSmall.png" />
+    </div>
+
+</div>
+@if (Model.HasImagesContract)
+{
+    <div class="hover_bkgr">
+        <span class="helper"></span>
+        <div>
+            <div class="popupCloseButton">&times;</div>
+            <div id="tui-image-editor-container"></div>
+
+            <div id="img-editor-menu2" class="details-container">
+                <div class="details-left">
+                    <ul class="menu" style="text-align: right;">
+                        <li class="menu-item disabled" id="btn-undo2" title="click to undo the last edit"><img src="~/Images/undo.png" width="20" height="20" /></li>
+                        <li class="menu-item disabled" id="btn-redo2" title="click to redo the last undo"><img src="~/Images/undo.png" width="20" height="20" style="transform: scaleX(-1);" /></li>
+                    </ul>
+                </div>
+                <div class="details-right">
+                    <ul class="menu">
+                        <li class="menu-item activatable" id="btn-crop2" title="Crop the image"><img src="~/Images/crop.png" width="20" height="20" /></li>
+                        <li class="menu-item activatable" id="btn-rotation-left2" title="Rotate the image counter-clockwise by 90 degrees"><img src="~/Images/rotate-left.png" width="20" height="20" /></li>
+                        <li class="menu-item activatable" id="btn-rotation-right2" title="Rotate the image clockwise by 90 degrees"><img src="~/Images/rotate-right.png" width="20" height="20" /></li>
+                        <li class="menu-item activatable" id="btn-add-icon2" title="Add Arrows and other shapes to the image"><img src="~/Images/shapes.png" width="20" height="20" /></li>
+                        <li class="menu-item activatable" id="btn-text2" title="Add text to the image"><img src="~/Images/text.png" width="20" height="20" /></li>
+                        <li class="menu-item" id="btn-clear2" title="Restore the original image">Original</li>
+                    </ul>
+
+                    <div class="sub-menu-container crop-sub-menu">
+                        <ul class="menu">
+                            <li class="menu-item" id="btn-apply-crop2">Apply</li>
+                            <li class="menu-item close" id="btn-cancel-crop2">Cancel</li>
+                        </ul>
+                    </div>
+
+                    <div class="sub-menu-container icon-sub-menu">
+                        <ul class="menu">
+                            <li class="menu-item icon-text" data-icon-type="arrow">➡</li>
+                            <li class="menu-item icon-text" data-icon-type="cancel">✖</li>
+                            <li class="menu-item icon-text" data-icon-type="circle">O</li>
+                            <li class="menu-item icon-text" data-icon-type="rect">⬜</li>
+                            <li class="menu-item close">Close</li>
+                        </ul>
+
+                        <label class="no-pointer" style="text-align: center;">
+                            <input id="icon-size-range2" type="range" min="100" max="500" value="100" />
+                        </label>
+
+                        <div id="tui-icon-color-picker2">Icon color</div>
+                    </div>
+
+                    <div class="sub-menu-container text-sub-menu">
+                        <ul class="menu">
+                            <li class="menu-item btn-text-style" data-style-type="b">Bold</li>
+                            <li class="menu-item btn-text-style" data-style-type="i">Italic</li>
+                            <li class="menu-item btn-text-style" data-style-type="u">Underline</li>
+                            <li class="menu-item">
+                                <label class="no-pointer">
+                                    <input id="input-font-size-range2" type="range" min="10" max="200" value="10" />
+                                </label>
+                            </li>
+                            <li class="menu-item">
+                                <div id="tui-text-color-picker2">Text color</div>
+                            </li>
+                            <li class="menu-item close">Close</li>
+                        </ul>
+                    </div>
+
+                </div>
+                <input id="btnSaveClose" type="button" value="@Proestimator.Resources.ProStrings.SaveAndClose" class="button do-not-disable" onclick="saveImage(false);" />
+                <input id="btnCancel" type="button" value="@Proestimator.Resources.ProStrings.Cancel" class="button do-not-disable" onclick="ClosePopup();" />
+
+                @if (Model.EditorIsTrial)
+                {
+                    <div class="error-message">
+                        <p>Note: the Image Editor feature is available for evaluation in a trial period. However it is not part of the base contract and requires the purchase of an add on to use once your trial has expired.</p>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+}

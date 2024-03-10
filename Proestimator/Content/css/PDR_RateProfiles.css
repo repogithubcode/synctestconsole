@@ -1,0 +1,125 @@
+﻿#menucontainer {
+    margin-top: 0px;
+    clear: both; 
+    float: left; 
+    color: Red;
+    margin-bottom: 2px;
+    width:100%;
+}
+
+ul#submenu {
+    border-bottom: 1px #5C87B2 solid;
+    overflow: hidden;
+    padding: 0 0 2px;
+    position: relative;
+    margin: 0;
+    text-align: right;
+    background: #e4e4e4; /* Old browsers */
+    background: -moz-linear-gradient(top, #e4e4e4 0%, #cdcdcd 99%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e4e4e4), color-stop(99%,#cdcdcd)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top, #e4e4e4 0%,#cdcdcd 99%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top, #e4e4e4 0%,#cdcdcd 99%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top, #e4e4e4 0%,#cdcdcd 99%); /* IE10+ */
+    background: linear-gradient(to bottom, #e4e4e4 0%,#cdcdcd 99%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e4e4e4', endColorstr='#cdcdcd',GradientType=0 ); /* IE6-9 */
+}
+ul#submenu li {
+    float:left;
+    /*display: inline;*/
+    list-style: none;
+    padding: 7px 6px;
+}
+
+ul#submenu li#greeting {
+    padding: 10px 20px;
+    font-weight: bold;
+    text-decoration: none;
+    line-height: 2.8em;
+    color: #fff;
+}
+
+ 
+
+ul#submenu li a 
+{
+    border-right: 1px solid #000000;
+    border-right: 0px\9;
+    color: #000;
+    font-family:arial;
+    font-weight:bold;
+    font-size: 16px;
+    letter-spacing:0px;
+    padding: 0 40px;
+    text-decoration: none;
+    font-family:Arial;
+    text-transform: uppercase;
+}
+
+
+ul#submenu li:last-child a 
+{
+    border-right:0px;
+}
+
+ul#submenu li a:hover {
+    color: #edd934;
+    text-decoration: none;
+}
+
+ul#submenu li a:active {
+    color:#edd934;
+}
+
+ul#submenu li.selected a {
+    color:#edd934;
+}
+
+.pdr-rates-top-container {
+    width: 100%;
+    clear: both;
+}
+
+.pdr-rate-setting-container {
+    float: left;
+}
+
+.pdr-rate-setting-header {
+    height: 25px;
+    border: solid 1px #e4e4e4;
+}
+
+.pdr-rate-setting-header p {
+    margin: 0px;
+    padding: 3px;
+    font-size: 0.7em;
+}
+
+.pdr-rate-setting-content {
+    border: solid 1px #e4e4e4;
+    padding: 3px;
+    height: 40px;
+}
+
+
+.rates-section-container {
+    clear: both;
+}
+
+.rates-section-left {
+    float: left;
+}
+
+.rates-section-right {
+
+}
+
+.rates-section-row {
+    clear: both;
+}
+
+.rates-section {
+    background-color: white;
+    border: solid 1px #e4e4e4;
+    width: 400px;
+    float: left;
+}

@@ -1,0 +1,362 @@
+﻿@model Proestimator.ViewModel.AccountPreferencesVM
+
+@using Proestimator.ViewModel;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_AccountPreferences;
+    var culture = System.Threading.Thread.CurrentThread.CurrentUICulture.Name.ToLowerInvariant();
+}
+
+@helper selected(string c, string culture)
+{
+    if (c == culture)
+    {
+        @:checked="checked"
+    }
+}
+
+<style>
+
+    .font-size-left-es-1 {
+
+    }
+
+    .font-size-left-es-2 {
+
+    }
+
+    .font-size-right {
+    }
+
+    .section-title {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+    }
+
+    @@media (min-width: 1024px) {
+        .font-size-left {
+            padding-left: 10px;
+            width: 200px;
+            float: left;
+        }
+    }
+
+    @@media only screen and (max-width: 1023px) and (orientation: landscape) {
+        #smEstimateNavRow {
+            border: 1px solid #349ad8;
+            background-color: #f5f9fb;
+            max-width: 92%;
+            padding-right: 30px;
+            margin-left: 20px;
+        }
+
+        #estimateNavigation {
+            margin-top: 15px;
+        }
+
+        .font-size-left {
+            padding-left: 10px;
+            width: 185px;
+            float: left;
+        }
+    }
+
+    @@media only screen and (max-width: 1023px) and (orientation: portrait) {
+        #smEstimateNavRow {
+            border: 1px solid #349ad8;
+            background-color: #f5f9fb;
+            max-width: 92%;
+            padding-right: 30px;
+            margin-left: 20px;
+        }
+
+        #estimateNavigation {
+            margin-top: 15px;
+        }
+
+        .font-size-left {
+            padding-left: 10px;
+            width: 185px;
+        }
+    }
+</style>`
+
+<script>
+
+    $(document).ready(function () {
+
+        var mql = window.matchMedia("(orientation: portrait)");
+
+        // If there are matches, we're in portrait
+        if (mql.matches) {
+            console.log("Portrait orientation");
+            if ($(window).width() > 1024) {
+                SetCssforSpanish("300px", "left", "200px", "left");
+            }
+            else {
+                SetCssforSpanish("300px", "none", "200px", "none");
+            }
+        } else {
+            console.log("Landscape orientation");
+            if ($(window).width() > 1180) {
+                SetCssforSpanish("300px", "left", "300px", "left");
+            }
+            else if ($(window).width() > 1024) {
+                SetCssforSpanish("300px", "none", "200px", "left");
+            }
+            else {
+                SetCssforSpanish("300px", "none", "200px", "none");
+            }
+        }
+
+        // Add a media query change listener
+        mql.addListener(function (m) {
+            if (m.matches) {
+                console.log("Changed to portrait");
+                if ($(window).width() > 1024) {
+                    SetCssforSpanish("300px", "left", "200px", "left");
+                }
+                else {
+                    SetCssforSpanish("300px", "none", "200px", "none");
+                }
+            }
+            else {
+                console.log("Changed to landscape");
+                if ($(window).width() > 1180) {
+                    SetCssforSpanish("300px", "left", "300px", "left");
+                }
+                else if ($(window).width() > 1024) {
+                    SetCssforSpanish("300px", "none", "200px", "left");
+                }
+                else {
+                    SetCssforSpanish("300px", "none", "200px", "none");
+                }
+            }
+        });
+
+        function SetCssforSpanish(es1Width, es1FloatLeft, es2Width, es2FloatLeft) {
+            @{
+                if (culture == "es")
+                {
+                    <text>
+                        console.log('window width : ' + $(window).width());
+
+                        $('.font-size-left-es-1').css({ "padding-left": "10px" });
+                        $('.font-size-left-es-2').css({ "padding-left": "10px" });
+                        
+                        $('.font-size-left-es-1').css({ "width": es1Width });
+                        $('.font-size-left-es-1').css({ "float": es1FloatLeft });
+
+                        $('.font-size-left-es-2').css({ "width": es2Width });
+                        $('.font-size-left-es-2').css({ "float": es2FloatLeft });
+                    </text>
+                }
+            }
+        }
+
+    });
+
+
+</script>
+
+<div id="workDesk" class="page-container">
+
+    @using (Html.BeginForm("AccountPreferences", "Settings", FormMethod.Post, new { @class = "container" }))
+    {
+        @Html.Partial("SettingTopMenu")
+
+        <input type="hidden" id="redirectData" name="redirectDataField" />
+
+        @Html.HiddenFor(model => model.LoginID)
+        @Html.HiddenFor(model => model.UserID)
+
+        <div class="tabcontent container">
+            <div id="lgRow1" class="container">
+                <div id="customerField" class="col sm_4_4 md_4_8 lg_6_12 xl_7_14">
+                    <div>
+                        <p class="section-title">@Proestimator.Resources.ProStrings.Settings_ProgramPreferences</p>
+
+                        <div>
+                            <label class="light">@Html.CheckBoxFor(model => model.ShowAppraiser) @Proestimator.Resources.ProStrings.Settings_ShowAppraiserInstead</label>
+                        </div>
+                        <div>
+                            <label class="light">@Html.CheckBoxFor(model => model.ShowChatIconDesktop) @Proestimator.Resources.ProStrings.ShowChatIconDesktop</label>
+                        </div>
+                        <div>
+                            <label class="light">@Html.CheckBoxFor(model => model.ShowChatIconMobile) @Proestimator.Resources.ProStrings.ShowChatIconMobile</label>
+                        </div>
+                        <div>
+                            <label class="light">@Html.CheckBoxFor(model => model.AllowEstimateVehicleModsWithLineItems) @Proestimator.Resources.ProStrings.AllowEstimateVehicleModsWithLineItemsLabel</label>
+                        </div>
+                    </div>
+
+                    <div style="padding-top: 20px;">
+                        <p class="section-title">@Proestimator.Resources.ProStrings.Settings_EmailPreferences</p>
+
+                        <div id="emailBoxContainer">
+                            <label class="light">@Html.CheckBoxFor(model => model.EmailAutoCcOn) @Proestimator.Resources.ProStrings.EmailAutoCcOn</label>
+                        </div>
+                    </div>
+
+                    <div style="padding-top: 20px;">
+
+                        <p class="section-title">
+                            @Proestimator.Resources.ProStrings.Settings_LanguagePreferences
+                        </p>
+
+                        <div>
+                            <label class="light"><input name="Culture" id="en-us" value="en-us" type="radio" @selected("en-us", culture) /> English</label><br />
+                        </div>
+
+                        <div style="padding-top: 20px;">
+                            <label class="light"><input name="Culture" id="es" value="es" type="radio" @selected("es", culture) /> Español</label><br />
+                        </div>
+
+                    </div>
+
+                    <div style="padding-top: 20px;">
+
+                        <p class="section-title">
+                            @Proestimator.Resources.ProStrings.Settings_AddPartsPage
+                        </p>
+
+                        <div>
+                            <label class="light">@Html.CheckBoxFor(model => model.AddPartsShowAllYears) @Proestimator.Resources.ProStrings.ShowAllYears</label>
+                        </div>
+
+                        @if (Model.HasProAdvisorContract)
+                        {
+                            <div>
+                                <label class="light">@Html.CheckBoxFor(model => model.ProAdvisorEnabled) @Proestimator.Resources.ProStrings.ProAdvisorEnabled</label>
+                            </div>
+                        }
+
+                        <div>
+                            <label class="light">@Html.CheckBoxFor(model => model.UseLegacyPartsSectionDropdown) @Proestimator.Resources.ProStrings.UseLegacyPartsSectionDropdown2</label>
+                        </div>
+
+                    </div>
+
+                    <div style="padding-top: 20px;">
+                        <p class="section-title">
+                            @Proestimator.Resources.ProStrings.DownloadPreferences
+                        </p>
+                        <div id="programBoxContainer">
+                            <label class="light">@Html.RadioButtonFor(model => model.DownloadPDF, ProEstimatorData.PDFDownloadSetting.OpenNewTab) @Proestimator.Resources.ProStrings.NewTab</label>
+                        </div>
+                        <div id="programBoxContainer" style="padding-top: 20px;">
+                            <label class="light">@Html.RadioButtonFor(model => model.DownloadPDF, ProEstimatorData.PDFDownloadSetting.Download) @Proestimator.Resources.ProStrings.Download @Proestimator.Resources.ProStrings.File</label>
+                        </div>
+                    </div>
+
+                    @*<div style="padding-top: 20px;">
+                            <p class="section-title">@Proestimator.Resources.ProStrings.ProAdvisor</p>
+                            <div>
+                                <label class="light">@Html.CheckBoxFor(model => model.DisableProAdvisor) @Proestimator.Resources.ProStrings.Disable</label><br />
+                            </div>
+                        </div>*@
+                </div>
+
+                <div id="contactFields" class="col sm_4_4 md_4_8 lg_6_12 xl_7_14">
+
+                    <div>
+                        <p class="section-title">@Proestimator.Resources.ProStrings.Settings_ReportPreferences</p>
+
+                        <div>
+                            <div>
+                                <label class="light">@Html.CheckBoxFor(model => model.VehicleOptionsInFooter) @Proestimator.Resources.ProStrings.VehicleOptionsFooter</label><br />
+                            </div>
+
+                            <div>
+                                <label class="light">@Html.CheckBoxFor(model => model.IncludePartNotesOnPdfLineEntry) @Proestimator.Resources.ProStrings.IncludePartNotesOnPdfLineEntry</label><br />
+                            </div>
+
+                            <div>
+                                <label class="light">@Html.CheckBoxFor(model => model.PrintShopInfo) @Proestimator.Resources.ProStrings.PrintShopInfo</label><br />
+                            </div>
+
+                            <div>
+                                <label class="light">@Html.CheckBoxFor(model => model.PrintInspectionDate) @Proestimator.Resources.ProStrings.PrintInspectionDate</label><br />
+                            </div>
+
+                            <div class="col sm_4_4">
+                                <label class="light">@Html.CheckBoxFor(model => model.PrintHeaderInfoOnEstimateReport) @Proestimator.Resources.ProStrings.PrintHeaderInfoOnEstimateReport</label><br />
+                            </div>
+
+                            <div>
+                                <label class="light">@Html.CheckBoxFor(model => model.PrintRepairDays) @Proestimator.Resources.ProStrings.PrintDaysToRepair</label><br />
+                            </div>
+                            <div>
+                                <label class="light">@Html.CheckBoxFor(model => model.PrintEmailAddressInHeader) @Proestimator.Resources.ProStrings.PrintEmailAddressInHeader</label><br />
+                            </div>
+                            <div>
+                                <label class="light">@Html.CheckBoxFor(model => model.ManualEstimatePrintSortAscendingOrder) Manual Estimate Print Sort - Ascending Order</label><br />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="padding-top: 20px;">
+                        <p class="section-title">@Proestimator.Resources.ProStrings.ReportFontSizes</p>
+                        <div class="font-size-left font-size-left-es-1">@Proestimator.Resources.ProStrings.TopShopDetails:</div>
+
+                        <div>
+                            <label class="light">@Html.RadioButtonFor(model => model.FontSizeDetails, ProEstimatorData.FontSize.Small) @Proestimator.Resources.ProStrings.Small</label>
+                            <label class="light">@Html.RadioButtonFor(model => model.FontSizeDetails, ProEstimatorData.FontSize.Medium) @Proestimator.Resources.ProStrings.Medium</label>
+                            <label class="light">@Html.RadioButtonFor(model => model.FontSizeDetails, ProEstimatorData.FontSize.Large) @Proestimator.Resources.ProStrings.Large</label>
+                        </div>
+
+                        <div class="font-size-left font-size-left-es-2">@Proestimator.Resources.ProStrings.TopInformation: </div>
+                        <div>
+                            <label class="light">@Html.RadioButtonFor(model => model.FontSizeHeader, ProEstimatorData.FontSize.Small) @Proestimator.Resources.ProStrings.Small</label>
+                            <label class="light">@Html.RadioButtonFor(model => model.FontSizeHeader, ProEstimatorData.FontSize.Medium) @Proestimator.Resources.ProStrings.Medium</label>
+                            <label class="light">@Html.RadioButtonFor(model => model.FontSizeHeader, ProEstimatorData.FontSize.Large) @Proestimator.Resources.ProStrings.Large</label>
+                        </div>
+
+                        <div class="font-size-left font-size-left-es-2">@Proestimator.Resources.ProStrings.Titles: </div>
+                        <div>
+                            <label class="light">@Html.RadioButtonFor(model => model.FontSizeHeaders, ProEstimatorData.FontSize.Small) @Proestimator.Resources.ProStrings.Small</label>
+                            <label class="light">@Html.RadioButtonFor(model => model.FontSizeHeaders, ProEstimatorData.FontSize.Medium) @Proestimator.Resources.ProStrings.Medium</label>
+                            <label class="light">@Html.RadioButtonFor(model => model.FontSizeHeaders, ProEstimatorData.FontSize.Large) @Proestimator.Resources.ProStrings.Large</label>
+                        </div>
+
+                        <div class="font-size-left font-size-left-es-2">@Proestimator.Resources.ProStrings.LineItems: </div>
+                        <div>
+                            <label class="light">@Html.RadioButtonFor(model => model.FontSizeLines, ProEstimatorData.FontSize.Small) @Proestimator.Resources.ProStrings.Small</label>
+                            <label class="light">@Html.RadioButtonFor(model => model.FontSizeLines, ProEstimatorData.FontSize.Medium) @Proestimator.Resources.ProStrings.Medium</label>
+                            <label class="light">@Html.RadioButtonFor(model => model.FontSizeLines, ProEstimatorData.FontSize.Large) @Proestimator.Resources.ProStrings.Large</label>
+                        </div>
+
+                        <div class="font-size-left font-size-left-es-2">@Proestimator.Resources.ProStrings.TableHeaders: </div>
+                        <div>
+                            <label class="light">@Html.RadioButtonFor(model => model.FontSizeTableHeaders, ProEstimatorData.FontSize.Small) @Proestimator.Resources.ProStrings.Small</label>
+                            <label class="light">@Html.RadioButtonFor(model => model.FontSizeTableHeaders, ProEstimatorData.FontSize.Medium) @Proestimator.Resources.ProStrings.Medium</label>
+                            <label class="light">@Html.RadioButtonFor(model => model.FontSizeTableHeaders, ProEstimatorData.FontSize.Large) @Proestimator.Resources.ProStrings.Large</label>
+                        </div>
+
+                        <div class="font-size-left font-size-left-es-2">@Proestimator.Resources.ProStrings.TotalLines: </div>
+                        <div>
+                            <label class="light">@Html.RadioButtonFor(model => model.FontSizeTotals, ProEstimatorData.FontSize.Small) @Proestimator.Resources.ProStrings.Small</label>
+                            <label class="light">@Html.RadioButtonFor(model => model.FontSizeTotals, ProEstimatorData.FontSize.Medium) @Proestimator.Resources.ProStrings.Medium</label>
+                            <label class="light">@Html.RadioButtonFor(model => model.FontSizeTotals, ProEstimatorData.FontSize.Large) @Proestimator.Resources.ProStrings.Large</label>
+                        </div>
+                    </div>
+
+                    <div style="padding-top: 20px;">
+                        <p class="section-title">@Proestimator.Resources.ProStrings.TimeZone</p>
+
+                        <div>
+                            @Html.DropDownListFor(model => model.SelectedTimeZone, (SelectList)Model.TimeZones, new { @style = "max-width: 200px;" })
+                        </div>
+                    </div>
+
+                    <div id="saveLineItemsBtns" class="col sm_push_3_4 sm_1_4 md_push_7_8 md_1_8 lg_push_10_12 lg_2_12" style="margin-left: 50px;">
+                        <input id="submitButton" type="submit" name="Save" class="button nav-btn" value="@Proestimator.Resources.ProStrings.Save" />
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    }
+
+</div>

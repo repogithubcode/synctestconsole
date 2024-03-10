@@ -1,0 +1,95 @@
+﻿@model ProEstimator.Admin.ViewModel.LogIn.LogInPageVM
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>@ViewBag.Title - Web-Est Administration</title>
+    <link rel="stylesheet" href="@Url.Content("~/Content/bootstrap-theme-yeti.css")" />
+
+    <script src="@Url.Content("~/Scripts/jquery-1.10.2.min.js")" type="text/javascript"></script>
+
+    <script src="@Url.Content("~/Scripts/jquery-ui-1.12.1/jquery-ui.min.js")" type="text/javascript"></script>
+    <link rel="stylesheet" href="@Url.Content("~/Scripts/jquery-ui-1.12.1/jquery-ui.css")" />
+
+    <link rel="stylesheet" href="@Url.Content("~/Content/Style.css?id=1")" />
+
+    <meta name="viewport" content="width=device-width" />
+
+    <style class="ng-scope">
+        .input-group-addon {
+            min-width: 150px;
+            text-align: left;
+        }
+
+        .padd-top {
+            padding-top: 30px;
+            padding-bottom: 30px;
+            text-align: center;
+        }
+    </style>
+
+
+    <title>Pro-Estimator Administrator - Log In</title>
+</head>
+<body>
+    <div style="width: 99%;">
+        <div class="navbar navbar-default navbar-fixed-top" ng-controller="navbarController as nav">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">Web-Est Administration</a>
+                </div>
+
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                </div>
+            </div>
+        </div>
+
+        <div ui-view="" class="ng-scope" style="">
+            <!-- uiView: --><ui-view class="ng-scope" style="">
+
+                <div class="row padd-top ng-scope">
+                    <div class="col-md-4 col-md-offset-4">
+                        <h1>
+                            Please Sign In
+                        </h1>
+                    </div>
+                </div>
+                <div class="row ng-scope" style="margin-left: 0px; margin-right: 0px;">
+                    <div class="col-md-4 col-md-offset-4" style="padding-top: 30px;">
+                        @using (Html.BeginForm("Index", "LogIn", FormMethod.Post, new { autocomplete = "off", style = "width: 400px; margin: 0px auto;" }))
+                        {
+                            <div class="form-group has-success has-feedback">
+                                <label for="username" class="sr-only">User name</label>
+                                @Html.TextBoxFor(o => o.UserName, new { @class = "form-control ng-pristine ng-untouched ng-empty ng-invalid ng-invalid-required", placeholder = "User name" })
+                            </div>
+                            <div class="form-group has-success has-feedback">
+                                <label for="password" class="sr-only">Password</label>
+                                @Html.TextBoxFor(o => o.Password, new { @class = "form-control ng-pristine ng-untouched ng-empty ng-invalid ng-invalid-required", placeholder = "Password", @type = "password" })
+                            </div>
+                            <div class="checkbox">
+                                <label>
+                                    @Html.CheckBoxFor(o => o.RememberMe) Remember me
+                                </label>
+                            </div>
+                            <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+                            <br>
+                            if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                            {
+                                <div class="alert alert-dismissible alert-danger ng-hide">
+                                    <strong>@Model.ErrorMessage</strong>
+                                </div>
+                            }
+
+                        }
+                    </div>
+                </div>
+            </ui-view>
+        </div>
+    </div>
+</body>
+</html>

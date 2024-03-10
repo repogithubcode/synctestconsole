@@ -1,0 +1,135 @@
+﻿@model Proestimator.ViewModel.ConfirmUserNameVM
+
+@using Proestimator.Resources
+
+@{
+    ViewBag.Title = "Email Confirmation";
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+}
+
+<style>
+
+    .field-label {
+        width: 40% !important;
+    }
+
+    .field-control {
+        width: 60% !important;
+    }
+
+    .disabled {
+        color: gray !important;
+        background-color: lightgray !important;
+        opacity: 0.5;
+    }
+</style>
+
+<script>
+    $(document).ready(function ()
+    {
+        $("#rdoOrganization").change(function () {
+            $("#NewUserName").val('@Model.Organization');
+            $("#NewUserName").addClass("disabled");
+        });
+
+        $("#rdoEmail").change(function () {
+            $("#NewUserName").val('@Model.EmailAddress');
+            $("#NewUserName").addClass("disabled");
+        });
+
+        $("#NewUserName").focus(function () {
+            $("#rdoNew").prop("checked", true);
+            $("#NewUserName").removeClass("disabled");
+        });
+
+        $("#rdoNew").change(function () {
+            $("#NewUserName").removeClass("disabled");
+        });
+
+        $("#NewUserName").addClass("disabled");
+
+        if ($("#rdoOrganization").is(":checked"))
+        {
+            $("#NewUserName").val('@Model.Organization');
+        }
+
+        if ($("#rdoEmail").is(":checked"))
+        {
+            $("#NewUserName").val('@Model.EmailAddress');
+        }
+    });
+</script>
+
+<div class="container">
+    @using (Html.BeginForm("Confirm", "Login", FormMethod.Post, new { @class = "container" }))
+    {
+        @Html.ValidationSummary(true)
+
+        @Html.HiddenFor(o => o.Organization)
+        @Html.HiddenFor(o => o.EmailAddress)
+
+        <div id="loginFormContainer" class="container" style="max-width: 500px; margin: 20px auto; float: none;">
+            <div>
+                <div class="message-info">
+                    <p>We are changing the log in page from using a combination of "Login Name" and "Organization" to a single unique user name.</p>
+                    <p>Please confirm your new user name, we recommend using your e-mail address.</p>
+                </div>
+
+                <h1 style="margin-top: 40px;">Confirm User Name</h1>
+
+                @if (!string.IsNullOrEmpty(Model.Organization))
+                {
+                    <div class="field-wrapper">
+                        <label class="loginLabel field-label">@Proestimator.Resources.ProStrings.Login_Organization:</label>
+                        <div class="field-control">
+                            <label style="margin-top: 3px;">
+                                <input type="radio" id="rdoOrganization" name="user-radio" checked="checked" />@Model.Organization
+                            </label>
+                        </div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.EmailAddress))
+                {
+                    <div class="field-wrapper">
+                        <label class="loginLabel field-label">@Proestimator.Resources.ProStrings.EmailAddress:</label>
+                        <div class="field-control">
+                            <label style="margin-top: 3px;">
+                                <input type="radio" id="rdoEmail" name="user-radio" checked="checked" />@Model.EmailAddress
+                            </label>
+                        </div>
+                    </div>
+                }
+
+                <div class="field-wrapper">
+                    <label class="loginLabel field-label">@Proestimator.Resources.ProStrings.Login_NewUserName:</label>
+                    <div class="field-control">
+                        <label>
+                            <input type="radio" id="rdoNew" name="user-radio" />@Html.TextBoxFor(model => model.NewUserName, new { autocomplete = "off", @class = "textbox", @style = "width: calc(100% - 20px);" })
+                        </label>
+                    </div>
+                </div>
+
+                <div class="field-wrapper">
+                    <label class="loginLabel field-label"></label>
+                    <div class="field-control" style="text-align: center;">
+                        <input type="submit" value="@Proestimator.Resources.ProStrings.Submit" class="button" />
+                    </div>
+                </div>
+
+                <div class="field-wrapper">
+                    <label class="loginLabel field-label"></label>
+                    <div class="field-control">
+                        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                        {
+                            <label style="font-size:medium; color:red; text-align: center; padding-top: 10px;">@Model.ErrorMessage</label>
+                        }
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    }
+
+</div>

@@ -1,0 +1,362 @@
+﻿@model Proestimator.ViewModel.CustomerVM
+
+@using System.Linq;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_Customer;
+}
+
+<style>
+    .input-validation-error 
+    {
+        border: 1px solid #CD0A0A;
+    }
+</style>
+
+<script>
+    $(document).ready(function () {
+
+        $("#SelectedExistingCustomer").change(function () {
+            $("#submitButton").click();
+        });
+
+        $("#modal-window").on("click", "#btn-close", function () {
+            $("#modal-window").modal("hide");
+        });
+
+        $("#modal-window").dialog({
+            autoOpen: false,
+            modal: true,
+            title: "@Proestimator.Resources.ProStrings.SearchForExistingCustomer",
+            //width: 950,
+            width: $(window).width() * 0.8,
+            modal: true,
+
+            dialogClass: false,
+            draggable: false,
+            resizeable: false,
+
+            close: function () {
+                console.log('selectedCustomerID = ' + $('#hdnReturnValue').val());
+
+                if ($('#hdnReturnValue').val() != 'undefined' && $('#hdnReturnValue').val() != '')
+                {
+                    $("#SelectedExistingCustomer").val($('#hdnReturnValue').val());
+                    $("#SelectedExistingCustomer").trigger("change");
+                }
+            }
+        });
+    });
+
+    function AttachEstimateToDifferentCustomer(actionURL) {
+        $.ajax({
+            cache: false,
+            url: actionURL,
+            contentType: 'application/html; charset=utf-8',
+            type: 'GET',
+            dataType: 'html'
+        }).success(function (data) {
+            $('#modal-window .modal-body').html(data);
+            $('#modal-window').dialog('open');
+        }).error(function () {
+            alert("Error occcured while opening popup window. Please try again.")
+            return;
+        });
+    }
+
+</script>
+
+<input type="hidden" id="hdnReturnValue" name="hdnReturnValue" />
+
+<div id="modal-window" style="display:none;" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="workDesk" class="page-container">
+
+    @using (Html.BeginForm("Customer", "Estimate", FormMethod.Post, new { @id = "customerForm", @class = "container", autocomplete = "off" }))
+    {
+        <input type="hidden" id="redirectData" name="redirectDataField" />
+
+        @Html.HiddenFor(o => o.UserID)
+        @Html.HiddenFor(o => o.LoginID)
+        @Html.HiddenFor(o => o.EstimateID)
+
+        <div id="estimateFormHeader">
+
+            <div id="formHeader-back">
+                <a class="button nav-btn" data-link-id="Customer-EstimateList" href="javascript:SubmitAndRedirect('/@ViewBag.UserID');">@Proestimator.Resources.ProStrings.EstimateListPageButton</a>
+            </div>
+
+            <div id="formHeader-center">
+                <h1>@Proestimator.Resources.ProStrings.CustomerInformationHeader</h1>
+
+                @if (!Model.EstimateIsLocked)
+                {
+                    <a class="button nav-btn" href="/@Model.UserID/estimate/@Model.EstimateID/customer">@Proestimator.Resources.ProStrings.UndoChanges</a>
+                    <input id="submitButton" class="button nav-btn" type="submit" value="@Proestimator.Resources.ProStrings.Save" />
+
+                    <a class="button nav-btn" href="/@Model.UserID/estimate/@Model.EstimateID/new-customer">@Proestimator.Resources.ProStrings.NewBlankCustomer</a>
+                }
+
+                @if (Model.EstimateIsLocked)
+                {
+                    <p class="error-message">@Proestimator.Resources.ProStrings.Estimate_Message_LockedNoEdit</p>
+                }
+            </div>
+
+            <div id="formHeader-next">
+                <a class="button nav-btn" data-link-id="Vehicle-Next" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/estimate/@Model.EstimateID/vehicle');">@Proestimator.Resources.ProStrings.VehiclePageButton </a>
+            </div>
+
+        </div>
+
+        <div class="form-container">
+
+            @if (Model.EstimateCount > 1)
+            {
+                <div style="border-top: 2px solid red; border-bottom: 2px solid red; text-align: center; margin-bottom: 20px;">
+                    <p><i>Note:</i> There are @Model.EstimateCount.ToString() estimates linked to this customer, changes to this customer data will be reflected on all of their estimates.</p>
+                </div>
+            }
+
+            @* Part 1. Customer fields - Top left form *@
+            <div class="half-container">
+
+                <fieldset id="customerFieldSet">
+
+                    @Html.HiddenFor(model => model.Contact.ContactID, new { @id = "ContactID" })
+
+                    <legend><span class="number">1</span>@Proestimator.Resources.ProStrings.CustomerHeader</legend>
+
+                    @if (Model.ExistingCustomers.Count > 0)
+                    {
+                        <div class="field-wrapper">
+                            <label class="inputLabel field-label"></label>
+                            <div class="field-control">
+                                @Html.DropDownListFor(model => model.SelectedExistingCustomer, new SelectList(Model.ExistingCustomers, "CustomerID", "CustomerName"))
+                            </div>
+                        </div>
+
+                        <div class="field-wrapper" style="margin-bottom:10px">
+                            <label class="inputLabel field-label"></label>
+                            <div class="field-control">
+                                <a class="button nav-btn" id="btnAttachEstimateToDifferentCustomer" href="#" onclick="AttachEstimateToDifferentCustomer('/@ViewBag.UserID/estimate/@Model.EstimateID/customer-selection')">@Proestimator.Resources.ProStrings.SelectExistingCustomer</a>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="field-wrapper-half" style="margin-top: 10px;">
+                        <label class="inputLabel field-label-half">* @Proestimator.Resources.ProStrings.FirstName</label>
+                        <div class="field-control-half">
+                            @Html.TextBoxFor(model => model.Contact.FirstName, new { autocomplete = "off" })
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half" style="margin-top: 10px;">
+                        <label class="inputLabel field-label-half">* @Proestimator.Resources.ProStrings.LastName</label>
+                        <div class="field-control-half">
+                            @Html.TextBoxFor(model => model.Contact.LastName, new { autocomplete = "off" })
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper">
+                        <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Email</label>
+                        <div class="field-control">
+                            @Html.TextBoxFor(model => model.Contact.Email, new { autocomplete = "off", @class = "email-address" })
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper">
+                        <label class="inputLabel field-label">Secondary @Proestimator.Resources.ProStrings.Email</label>
+                        <div class="field-control">
+                            @Html.TextBoxFor(model => model.Contact.SecondaryEmail, new { autocomplete = "off", @class = "email-address" })
+                        </div>
+                    </div>
+
+                    @* Phone 1 *@
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">* @Proestimator.Resources.ProStrings.Phone 1</label>
+                        <div class="field-control-half">
+                            @Html.TextBoxFor(model => model.Contact.Phone1, new { @type = "tel", @class = "phone", autocomplete = "off" })
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Extension</label>
+                        <div class="field-control-half">
+                            @Html.TextBoxFor(model => model.Contact.Extension1, new { autocomplete = "off" })
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Phone 1 @Proestimator.Resources.ProStrings.Type</label>
+                        <div class="field-control-half">
+                            @Html.DropDownListFor(model => model.Contact.Phone1Type, Model.PhoneTypes)
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half"></label>
+                        <div class="field-control-half">
+                            <input type="text" style="opacity: 0;" />
+                        </div>
+                    </div>
+
+                    @* Phone 2 *@
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Phone 2</label>
+                        <div class="field-control-half">
+                            @Html.TextBoxFor(model => model.Contact.Phone2, new { @type = "tel", @class = "phone", autocomplete = "off" })
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Extension</label>
+                        <div class="field-control-half">
+                            @Html.TextBoxFor(model => model.Contact.Extension2, new { autocomplete = "off" })
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Phone 2 @Proestimator.Resources.ProStrings.Type</label>
+                        <div class="field-control-half">
+                            @Html.DropDownListFor(model => model.Contact.Phone2Type, Model.PhoneTypes)
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half"></label>
+                        <div class="field-control-half">
+                            <input type="text" style="opacity: 0;" />
+                        </div>
+                    </div>
+
+                    @* Phone 3 *@
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Phone 3</label>
+                        <div class="field-control-half">
+                            @Html.TextBoxFor(model => model.Contact.Phone3, new { @type = "tel", @class = "phone", autocomplete = "off" })
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Extension</label>
+                        <div class="field-control-half">
+                            @Html.TextBoxFor(model => model.Contact.Extension3, new { autocomplete = "off" })
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.Phone 3 @Proestimator.Resources.ProStrings.Type</label>
+                        <div class="field-control-half">
+                            @Html.DropDownListFor(model => model.Contact.Phone3Type, Model.PhoneTypes)
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half"></label>
+                        <div class="field-control-half">
+                            <input type="text" style="opacity: 0;" />
+                        </div>
+                    </div>
+
+                </fieldset>
+
+            </div>
+
+            @* Part 2. Contact fields - Top right form *@
+            <div class="half-container">
+
+                <fieldset>
+
+                    <legend><span class="number">2</span>@Proestimator.Resources.ProStrings.AddressHeader</legend>
+
+                    <div class="field-wrapper">
+                        <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Address1</label>
+                        <div class="field-control">
+                            @Html.TextBoxFor(model => model.Address.Line1, new { @class = "col", autocomplete = "off" })
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper">
+                        <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.Address2</label>
+                        <div class="field-control">
+                            @Html.TextBoxFor(model => model.Address.Line2, new { @class = "col", autocomplete = "off" })
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.City</label>
+                        <div class="field-control-half">
+                            @Html.TextBoxFor(model => model.Address.City, new { @class = "col", autocomplete = "off" })
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.State</label>
+                        <div class="field-control-half">
+                            @Html.DropDownListFor(model => model.Address.State, (SelectList)ViewBag.States)
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper-half">
+                        <label class="inputLabel field-label-half">* @Proestimator.Resources.ProStrings.Zip</label>
+                        <div class="field-control-half">
+                            @Html.TextBoxFor(model => model.Address.Zip, new { @type = "tel", autocomplete = "off" })
+                        </div>
+                    </div>
+
+                    @*
+                                    <div class="field-wrapper-half">
+                                        <label class="inputLabel field-label-half">@Proestimator.Resources.ProStrings.TimeZone</label>
+                                        <div class="field-control-half">
+                                            @{
+                        List<string> timezones = new List<string>();
+                        timezones.Add("Eastern");
+                        timezones.Add("Central");
+                        timezones.Add("Mountain");
+                        timezones.Add("Pacific");
+                                            }
+                                            @Html.DropDownListFor(model => model.Address.TimeZone, new SelectList(timezones))
+                                        </div>
+                                    </div>
+                    *@
+                </fieldset>
+            </div>
+        </div>
+
+        <div class="container">
+
+            @* Part 3. Notes fields - Bottom right form *@
+            <div id="notesFields" class="col sm_4_4 md_8_8  lg_6_12 xl_7_14">
+
+                <fieldset>
+
+                    <legend><span class="number">3</span>@Proestimator.Resources.ProStrings.NotesHeader</legend>
+
+                    <div class="field-wrapper">
+                        <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.CustomerBusinessName</label>
+                        <div class="field-control">
+                            @Html.TextBoxFor(model => model.Contact.BusinessName, new { @class = "col", autocomplete = "off" })
+                        </div>
+                    </div>
+
+                    <div class="field-wrapper">
+                        <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.CustomerNotes (@Proestimator.Resources.ProStrings.Internal)</label>
+                        <div class="field-control">
+                            @Html.TextAreaFor(model => model.Contact.Notes, new { @class = "col", autocomplete = "off" })
+                        </div>
+                    </div>
+
+                </fieldset>
+            </div>
+        </div>
+    }
+</div>

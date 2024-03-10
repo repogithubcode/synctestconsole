@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/" xmlns:tns="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="https://lkqintegrationcteqc.ekeyconnect.com/Quotes.svc?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+  <xs:import schemaLocation="https://lkqintegrationcteqc.ekeyconnect.com/Quotes.svc?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Quotes.Business" />
+  <xs:import schemaLocation="https://lkqintegrationcteqc.ekeyconnect.com/Quotes.svc?xsd=xsd5" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+  <xs:import schemaLocation="https://lkqintegrationcteqc.ekeyconnect.com/Quotes.svc?xsd=xsd7" namespace="http://schemas.datacontract.org/2004/07/Keyless3.Core.Entities.Details" />
+  <xs:complexType name="UserRequest">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="UserRequestInfo" nillable="true" type="tns:UserInformation" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="UserRequest" nillable="true" type="tns:UserRequest" />
+  <xs:complexType name="UserInformation">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="AccountNumber" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="BusinessTypeForAccountNumber" type="tns:AccountNumberBusinessType" />
+      <xs:element minOccurs="0" name="UserName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="UserPassword" nillable="true" type="xs:string" />
+      <xs:element name="VerificationCode" type="ser:guid" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="UserInformation" nillable="true" type="tns:UserInformation" />
+  <xs:simpleType name="AccountNumberBusinessType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Aftermarket" />
+      <xs:enumeration value="Salvage" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="AccountNumberBusinessType" nillable="true" type="tns:AccountNumberBusinessType" />
+  <xs:complexType name="CallResponseOfQuoteiWTqBaeW">
+    <xs:annotation>
+      <xs:appinfo>
+        <GenericType Name="CallResponseOf{0}{#}" Namespace="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" xmlns="http://schemas.microsoft.com/2003/10/Serialization/">
+          <GenericParameter Name="Quote" Namespace="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Quotes.Business" />
+        </GenericType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:CallResponse">
+        <xs:sequence>
+          <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Quotes.Business" minOccurs="0" name="Value" nillable="true" type="q1:Quote" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="CallResponseOfQuoteiWTqBaeW" nillable="true" type="tns:CallResponseOfQuoteiWTqBaeW" />
+  <xs:complexType name="CallResponse">
+    <xs:sequence>
+      <xs:element xmlns:q2="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="ErrorMessages" nillable="true" type="q2:ArrayOfstring" />
+      <xs:element minOccurs="0" name="IsSuccessful" type="xs:boolean" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="CallResponse" nillable="true" type="tns:CallResponse" />
+  <xs:complexType name="CallResponseOfQuoteByViniWTqBaeW">
+    <xs:annotation>
+      <xs:appinfo>
+        <GenericType Name="CallResponseOf{0}{#}" Namespace="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" xmlns="http://schemas.microsoft.com/2003/10/Serialization/">
+          <GenericParameter Name="QuoteByVin" Namespace="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Quotes.Business" />
+        </GenericType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:CallResponse">
+        <xs:sequence>
+          <xs:element xmlns:q3="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Quotes.Business" minOccurs="0" name="Value" nillable="true" type="q3:QuoteByVin" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="CallResponseOfQuoteByViniWTqBaeW" nillable="true" type="tns:CallResponseOfQuoteByViniWTqBaeW" />
+  <xs:complexType name="CallResponseOfPurchaseOrderResponseiWTqBaeW">
+    <xs:annotation>
+      <xs:appinfo>
+        <GenericType Name="CallResponseOf{0}{#}" Namespace="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" xmlns="http://schemas.microsoft.com/2003/10/Serialization/">
+          <GenericParameter Name="PurchaseOrderResponse" Namespace="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Quotes.Business" />
+        </GenericType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:CallResponse">
+        <xs:sequence>
+          <xs:element xmlns:q4="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Quotes.Business" minOccurs="0" name="Value" nillable="true" type="q4:PurchaseOrderResponse" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="CallResponseOfPurchaseOrderResponseiWTqBaeW" nillable="true" type="tns:CallResponseOfPurchaseOrderResponseiWTqBaeW" />
+  <xs:complexType name="CallResponseOfRepairFacilityRegistrationiWTqBaeW">
+    <xs:annotation>
+      <xs:appinfo>
+        <GenericType Name="CallResponseOf{0}{#}" Namespace="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" xmlns="http://schemas.microsoft.com/2003/10/Serialization/">
+          <GenericParameter Name="RepairFacilityRegistration" Namespace="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Quotes.Business" />
+        </GenericType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:CallResponse">
+        <xs:sequence>
+          <xs:element xmlns:q5="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Quotes.Business" minOccurs="0" name="Value" nillable="true" type="q5:RepairFacilityRegistration" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="CallResponseOfRepairFacilityRegistrationiWTqBaeW" nillable="true" type="tns:CallResponseOfRepairFacilityRegistrationiWTqBaeW" />
+  <xs:complexType name="CallResponseOfArrayOfShipToAddresse2u4sgh6">
+    <xs:annotation>
+      <xs:appinfo>
+        <GenericType Name="CallResponseOf{0}{#}" Namespace="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" xmlns="http://schemas.microsoft.com/2003/10/Serialization/">
+          <GenericParameter Name="ArrayOfShipToAddress" Namespace="http://schemas.datacontract.org/2004/07/Keyless3.Core.Entities.Details" />
+        </GenericType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:CallResponse">
+        <xs:sequence>
+          <xs:element xmlns:q6="http://schemas.datacontract.org/2004/07/Keyless3.Core.Entities.Details" minOccurs="0" name="Value" nillable="true" type="q6:ArrayOfShipToAddress" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="CallResponseOfArrayOfShipToAddresse2u4sgh6" nillable="true" type="tns:CallResponseOfArrayOfShipToAddresse2u4sgh6" />
+</xs:schema>

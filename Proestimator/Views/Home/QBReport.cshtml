@@ -1,0 +1,71 @@
+﻿@model Proestimator.ViewModel.CustomReports.ReportsVM
+
+@using Proestimator.ViewModel.CustomReports;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_CustomReports;
+}
+
+<script>
+    function GetListParameters() {
+        var result =
+        {
+            loginID: @Model.LoginID,
+            };
+
+        return result
+    }
+
+    function RefreshGrid() {
+        var grid = $("#grid").data("kendoGrid");
+
+        if (grid)
+        {
+            grid.dataSource.read();
+            grid.refresh();
+
+            grid.dataSource.page(1);
+        }
+    }
+
+    $(document).ready(function () {
+        RefreshGrid();
+    });
+</script>
+
+<div id="workDesk" class="page-container">
+
+    @using (Html.BeginForm("CustomReports", "Settings", FormMethod.Post, new { @class = "container" }))
+    {
+        @Html.Partial("ReportsTopMenu")
+
+        <input type="hidden" id="redirectData" name="redirectDataField" />
+
+        <div class="tabcontent container">
+
+            <div id="lgRow1" class="container">
+
+                <div id="estimatorContent" class="half-container">
+
+                    <div class="qb-export-section">
+                        @if (Model.ShowQBExport)
+                {
+                            <a href="/@ViewBag.UserID/reports/qb-export" class="button nav-btn">@Proestimator.Resources.ProStrings.QBExport</a>
+                        }
+                        else
+                        {
+                            if (Model.QBExportActive)
+                            {
+                                <a class="button nav-btn" href="/@ViewBag.UserID/invoice/@Model.QBAddOnLink">@Proestimator.Resources.ProStrings.QBExportAddOnContract</a>
+                            }
+                        }
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    }
+
+</div>

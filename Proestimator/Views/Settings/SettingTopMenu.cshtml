@@ -1,0 +1,50 @@
+﻿<div id="smEstimateNavRow" class="col sm_4_4 md_8_8 lg_10_12">
+    <select id="estimateNavigation" onchange="if (this.selectedIndex == 3) { @if (ViewBag.AddOnsPermit && ViewBag.SettingsPermit) {<text>location = this.options[this.selectedIndex].value;</text>} else {<text>noPermission('Add Ons page', 'Settings page'); this.selectedIndex = 0; location = this.options[this.selectedIndex].value;</text>} }
+        else { location = this.options[this.selectedIndex].value; }">
+        <option value="estimators" @(ViewBag.settingsTopMenuID == 0 ? "selected" : "")>@Proestimator.Resources.ProStrings.Estimators</option>
+        <option value="account-preferences" @(ViewBag.settingsTopMenuID == 1 ? "selected" : "")>@Proestimator.Resources.ProStrings.PageTitle_AccountPreferences</option>
+        <option value="company-profile" @(ViewBag.settingsTopMenuID == 2 ? "selected" : "")>@Proestimator.Resources.ProStrings.PageTitle_CompanyProfile</option>
+        <option value="contract" @(ViewBag.settingsTopMenuID == 3 ? "selected" : "")>@Proestimator.Resources.ProStrings.Billing_Contract</option>
+        <option value="billing" @(ViewBag.settingsTopMenuID == 4 ? "selected" : "")>@Proestimator.Resources.ProStrings.PageTitle_Billing</option>
+        <option value="technicians" @(ViewBag.settingsTopMenuID == 5 ? "selected" : "")>@Proestimator.Resources.ProStrings.Technicians</option>
+        <option value="email-template" @(ViewBag.settingsTopMenuID == 6 ? "selected" : "")>@Proestimator.Resources.ProStrings.EmailTemplates</option>
+        @if (ViewBag.IsAdmin)
+        {
+            <text>
+                <option value="users" @(ViewBag.settingsTopMenuID == 7 ? "selected" : "")>@Proestimator.Resources.ProStrings.PageTitle_Users</option>
+            </text>
+        }  
+    </select>
+</div>
+<div id="lgEstimateNavRowRatesProfile" class="col lg_12_12 sm_hide">
+    <ul id="estimateList">
+        <a class="settingsTopMenuAnchor" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/settings/estimators');">
+        <li id="estimateNav" class="settingNavID">@Proestimator.Resources.ProStrings.Estimators</li></a>
+        <a class="settingsTopMenuAnchor" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/settings/account-preferences');">
+        <li id="estimateNav" class="settingNavID">@Proestimator.Resources.ProStrings.PageTitle_AccountPreferences</li></a>
+        <a class="settingsTopMenuAnchor" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/settings/company-profile');">
+        <li id="estimateNav" class="settingNavID">@Proestimator.Resources.ProStrings.PageTitle_CompanyProfile</li></a>
+        <a class="settingsTopMenuAnchor" href="@if (ViewBag.AddOnsPermit && ViewBag.SettingsPermit) {<text>javascript:SubmitAndRedirect('/@ViewBag.UserID/settings/contract');</text>} else {<text>javascript:noPermission('Add Ons page', 'Settings page');</text>}">
+        <li id="estimateNav" class="settingNavID">@Proestimator.Resources.ProStrings.Billing_Contract</li></a>
+        <a class="settingsTopMenuAnchor" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/settings/billing');">
+        <li id="estimateNav" class="settingNavID">@Proestimator.Resources.ProStrings.PageTitle_Billing</li></a>
+        <a class="settingsTopMenuAnchor" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/settings/technicians');">
+        <li id="estimateNav" class="settingNavID">@Proestimator.Resources.ProStrings.Technicians</li></a>
+        <a class="settingsTopMenuAnchor" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/settings/email-template');">
+        <li id="estimateNav" class="settingNavID">@Proestimator.Resources.ProStrings.EmailTemplates</li></a>
+        @if (ViewBag.IsAdmin)
+        {
+            <text>
+                <a class="settingsTopMenuAnchor" href="javascript:SubmitAndRedirect('/@ViewBag.UserID/settings/users');">
+                <li id="estimateNav" class="settingNavID">@Proestimator.Resources.ProStrings.PageTitle_Users</li></a>
+            </text>
+        }
+    </ul>
+</div>
+<script type="text/javascript">
+
+    if(@ViewBag.settingsTopMenuID != "0"){
+        $('.settingsTopMenuAnchor:eq(0)').attr('id', 'estimateNavAnchorFirst');
+    }
+
+</script>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://tempuri.org/" elementFormDefault="qualified" targetNamespace="http://tempuri.org/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="https://lkqintegrationcteqc.ekeyconnect.com/Quotes.svc?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" />
+  <xs:import schemaLocation="https://lkqintegrationcteqc.ekeyconnect.com/Quotes.svc?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Quotes.Business" />
+  <xs:import schemaLocation="https://lkqintegrationcteqc.ekeyconnect.com/Quotes.svc?xsd=xsd6" namespace="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Requests" />
+  <xs:element name="GetQuote">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" minOccurs="0" name="user" nillable="true" type="q1:UserRequest" />
+        <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Quotes.Business" minOccurs="0" name="estimate" nillable="true" type="q2:Estimate" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetQuoteResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q3="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" minOccurs="0" name="GetQuoteResult" nillable="true" type="q3:CallResponseOfQuoteiWTqBaeW" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetQuoteByVin">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q4="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" minOccurs="0" name="user" nillable="true" type="q4:UserRequest" />
+        <xs:element xmlns:q5="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Quotes.Business" minOccurs="0" name="estimate" nillable="true" type="q5:EstimateGeneric" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetQuoteByVinResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q6="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" minOccurs="0" name="GetQuoteByVinResult" nillable="true" type="q6:CallResponseOfQuoteByViniWTqBaeW" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ProcessOrder">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q7="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" minOccurs="0" name="user" nillable="true" type="q7:UserRequest" />
+        <xs:element xmlns:q8="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Quotes.Business" minOccurs="0" name="purchaseOrderRequest" nillable="true" type="q8:PurchaseOrderRequest" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ProcessOrderResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q9="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" minOccurs="0" name="ProcessOrderResult" nillable="true" type="q9:CallResponseOfPurchaseOrderResponseiWTqBaeW" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="RegisterRepairFacility">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q10="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Quotes.Business" minOccurs="0" name="request" nillable="true" type="q10:RegisterRepairFacilityRequest" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="RegisterRepairFacilityResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q11="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" minOccurs="0" name="RegisterRepairFacilityResult" nillable="true" type="q11:CallResponseOfRepairFacilityRegistrationiWTqBaeW" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="UnRegisterRepairFacility">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q12="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Quotes.Business" minOccurs="0" name="request" nillable="true" type="q12:UnRegisterRepairFacilityRequest" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="UnRegisterRepairFacilityResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q13="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" minOccurs="0" name="UnRegisterRepairFacilityResult" nillable="true" type="q13:CallResponse" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="UpdateInsurancePreferredLineItems">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q14="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" minOccurs="0" name="user" nillable="true" type="q14:UserRequest" />
+        <xs:element xmlns:q15="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Quotes.Business" minOccurs="0" name="updateRequest" nillable="true" type="q15:LineItemPreferenceRequest" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="UpdateInsurancePreferredLineItemsResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q16="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" minOccurs="0" name="UpdateInsurancePreferredLineItemsResult" nillable="true" type="q16:CallResponse" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetCustomerShipToAddresses">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q17="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Requests" minOccurs="0" name="request" nillable="true" type="q17:GetCustomerShipToAddressesRequest" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetCustomerShipToAddressesResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q18="http://schemas.datacontract.org/2004/07/LKQIntegrationService.Core.Entities" minOccurs="0" name="GetCustomerShipToAddressesResult" nillable="true" type="q18:CallResponseOfArrayOfShipToAddresse2u4sgh6" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

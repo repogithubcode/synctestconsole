@@ -1,0 +1,516 @@
+﻿@model Proestimator.ViewModel.ReportsVM
+
+@using Proestimator.ViewModel.CreateReports;
+@using Proestimator.ViewModel.Customer;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.CreateReportsHeader;
+}
+
+<style>
+    /*input[type="text"] {
+        width: 150px;
+    }*/
+
+    .report-details-left {
+        width: 40%;
+        float: left;
+        padding-right: 10px;
+    }
+
+    .report-details-right {
+        width: 50%;
+        float: left;
+        margin-top: 15px;
+    }
+
+    .report-list {
+        text-align: left;
+        font-weight: normal;
+        list-style: none;
+        padding-left: 0px;
+    }
+
+        .report-list li {
+            padding: 3px;
+            cursor: pointer;
+        }
+
+            .report-list li:hover {
+                background-color: #349ad8;
+            }
+
+    .report-type-selected {
+        background-color: #1d69a6;
+        color: white;
+    }
+
+    #options-section {
+        border: 1px solid black;
+        padding: 10px;
+    }
+
+        #options-section p {
+            text-align: left;
+            font-size: 0.8em;
+            margin-bottom: 5px;
+        }
+
+    .qb-export-section {
+        clear: both;
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    @@media (max-width: 700px) {
+        .report-details-left {
+            width: 100%;
+            float: left;
+        }
+
+        .report-details-right {
+            width: 100%;
+            float: left;
+            margin-top: 15px;
+        }
+    }
+
+    .inlineNote {
+        padding-bottom: 10px;
+    }
+
+    table a {
+        color: black;
+    }
+
+    #estimatorContent {
+        left: 50px;
+        /*position: relative;*/
+        /*transform: translate(50px);*/
+        margin-top: 35px;
+    }
+
+    #buttonsDiv {
+        position: relative;
+        /*left: 55px;*/
+    }
+
+    .hide-small {
+        width: 150px;
+    }
+</style>
+
+<script>
+    var _selectedReportType = "";
+
+    function GetListParameters() {
+        var result =
+        {
+            userID: @ViewBag.UserID,
+            reportType: _selectedReportType
+        };
+
+        return result
+    }
+
+    function GridDataChanged(arg) {
+
+        var row  = '';
+        $("#grid tbody tr").hover(
+            function () {
+                // Get the hovered row and its LineItemPreview data
+                row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+
+    }    
+
+    $(document).ready(function () {
+
+        $("#btnCreateReport").click(function () {
+
+            var extraParam = "";
+
+            if (_selectedReportType == "SalesReport")
+            {
+                extraParam = $("#SalesReportRange_DateStart").val() + ":" + $("#SalesReportRange_DateEnd").val();
+            }
+            else if (_selectedReportType == "CustomerList") {
+                extraParam = $("#CustomerListReportRange_DateStart").val() + ":" + $("#CustomerListReportRange_DateEnd").val();
+            }
+            else if (_selectedReportType == "CloseRatioReport") {
+                extraParam = $("#CloseRatioReportRange_DateStart").val() + ":" + $("#CloseRatioReportRange_DateEnd").val();
+            }
+
+            GenerateReport(_selectedReportType, extraParam);
+        });
+
+        ReportTypeSelected("SalesReport");
+
+        $("#chkShowDeletedCustomReports").change(function() {
+
+            if($("#chkShowDeletedCustomReports").is(":checked")==true)
+            {
+                $("#grid thead [data-index=4] .k-link").html("Restore")
+            }
+            else
+            {
+                $("#grid thead [data-index=4] .k-link").html("Delete")
+            }
+
+            RefreshGrid();
+        });
+
+        $('#SalesReportRange_DateStart').change(function () {
+            RefreshCustomerGrid();
+        });
+
+        $('#SalesReportRange_DateEnd').change(function () {
+            RefreshCustomerGrid();
+        });
+    });
+
+    function ReportTypeSelected(reportType) {
+
+        $("#options-section").show();
+
+        $("#SalesReport").toggle(reportType === "SalesReport");
+        $("#CustomerList").toggle(reportType === "CustomerList");
+        $("#SupplierList").toggle(reportType === "VendorsReport");
+        $("#SavedCustomerList").toggle(reportType === "SavedCustomerList");
+        $("#CloseRatioReport").toggle(reportType === "CloseRatioReport");
+
+        $("#divSaveReportsHistorySalesReport").toggle(reportType === "SalesReport");
+        $("#divSaveReportsHistoryCustomerList").toggle(reportType === "CustomerList");
+        $("#divSaveReportsHistorySupplierList").toggle(reportType === "VendorsReport");
+        $("#divSaveReportsHistorySavedCustomerList").toggle(reportType === "SavedCustomerList");
+        $("#divSaveReportsHistoryCloseRatioReport").toggle(reportType === "CloseRatioReport");
+
+        $("#btnCreateReport").show();
+
+        $(".report-type-selected").removeClass("report-type-selected");
+        $("#li" + reportType).addClass("report-type-selected");
+
+        _selectedReportType = reportType;
+
+        RefreshHistoryGrid();
+    }
+
+    function RefreshHistoryGrid() {
+        var grid = $("#grid").data("kendoGrid");
+
+        if (grid) {
+            grid.dataSource.read();
+            grid.dataSource.page(1);
+        }
+    }
+
+    function GenerateReport(reportType, extraParam)
+    {
+        var reportformat = $("#CustomReportFormat").val();
+
+        var estimatorID = '';
+        var customerIDs = '';
+        var inputErr = '';
+        if($('#SalesReport').css('display') == 'block')
+        {
+            estimatorID = $("#EstimatorID").val();
+            customerIDs = GetCustomerIDs();
+            if (customerIDs == '') {
+                inputErr += 'Please Select Customer(s)!';
+            }   
+        }
+        console.log('estimatorID = ' + estimatorID);
+
+        var includeClosedDeleted = '';
+        if($('#CustomerList').css('display') == 'block')
+        {
+            includeClosedDeleted = $("#IncludeClosedDeletedROs").is(":checked");
+        }
+
+        if($('#SavedCustomerList').css('display') == 'block')
+        {
+            includeClosedDeleted = $("#IncludeClosedDeletedCustomers").is(":checked");
+        }
+        console.log('includeClosedDeleted = ' + includeClosedDeleted);
+
+        var saveReportsHistory = false;
+        if (reportType === "SalesReport") {
+            saveReportsHistory = $("#SaveReportsHistorySalesReport").is(":checked");
+        } else if (reportType === "CustomerList") {
+            saveReportsHistory = $("#SaveReportsHistoryCustomerList").is(":checked");
+        } else if (reportType === "VendorsReport") {
+            saveReportsHistory = $("#SaveReportsHistorySupplierList").is(":checked");
+        } else if (reportType === "SavedCustomerList") {
+            saveReportsHistory = $("#SaveReportsHistorySavedCustomerList").is(":checked");
+        } else if (reportType === "CloseRatioReport") {
+            saveReportsHistory = $("#SaveReportsHistoryCloseRatioReport").is(":checked");
+        }
+
+        if (inputErr == '') {
+            $.ajax({
+                url: '@Url.Action("ShowReport", "Home")',
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ "userID": @ViewBag.UserID, "reportType": reportType, "reportformat": reportformat, "estimatorID": estimatorID, "includeClosedDeletedRO": includeClosedDeleted, "saveReportsHistory": saveReportsHistory, "extraParam": extraParam, "customerID": customerIDs }),
+                beforeSend: function () {
+                    applyLoading();
+                },
+                success: function (result) {
+                    console.log(result);
+                    removeLoading();
+
+                    if (result.Success === true) {
+                        // PDF file handling
+                        if (reportformat == "pdf") {
+                            var win = window.open(result.reportPath, "_blank");
+
+                            if (win)
+                                win.focus();
+                            else
+                                alert("@Proestimator.Resources.ProStrings.BrowserBlockedSite");
+                        }
+                        // XLSX file handling
+                        if (reportformat == "xlsx") {
+                            if (result.filename == '') {
+                                ShowUserMessage("@Proestimator.Resources.ProStrings.NoRecordInExcelToDisplay", true, 4000);
+                            }
+                            else {
+                                //use window.location.href for redirect to download action for download the file
+                                window.location.href = "@Url.RouteUrl(new { Controller = "Home", Action = "Download"})/?userID=" + @ViewBag.UserID + "&file=" + result.filename;
+                            }
+                        }
+
+                        RefreshHistoryGrid();
+                    }
+                    else {
+                        ShowUserMessage(result.ErrorMessage, true, 4000);
+                    }
+                },
+                error: function (error) {
+                    removeLoading();
+                    ShowUserMessage(error, true, 4000);
+                }
+            });
+        }
+        else {
+            ShowUserMessage(inputErr, true, 4000);
+        }
+    }
+
+    function GetDateParameters() {
+        var result =
+        {
+            loginID: @ViewBag.LoginID,
+            sDate: $("#SalesReportRange_DateStart").val(),
+            eDate: $("#SalesReportRange_DateEnd").val()
+        };
+        return result;
+    }
+
+    function UpdateCustomersSelectAll() {
+        var checked = $("#customerGridSelectAll").prop("checked");
+
+        $("#customergrid").find("tbody").find("tr").each(function (i, obj) {
+            $($(obj).find(".chkSelect")).prop('checked', checked);
+        });
+    }
+
+    function GetCustomerIDs() {
+        var checkedIDs = '';
+
+        $("#customergrid").find(".chkSelect").each(function (i, obj) {
+            if ($(this).prop("checked") === true) {
+                var id = $(this).attr("id");
+                checkedIDs += "," + id;
+            }
+        });
+    
+        return checkedIDs;
+    }
+
+    function RefreshCustomerGrid() {
+        var grid = $("#customergrid").data("kendoGrid");
+        if (grid) {
+            grid.dataSource.page(1);
+            grid.dataSource.read();
+        }
+    }
+
+    function CustomerGridDataChanged(arg) {
+        $("#customergrid thead [data-index=1] .k-link").html("<input type='checkbox' class='invoice-checkbox' id='customerGridSelectAll' onclick='UpdateCustomersSelectAll()' checked />")
+        UpdateCustomersSelectAll();
+    }
+</script>
+
+<div id="workDesk" class="page-container">
+
+    @if (ViewBag.ContractDeactivated != null && ViewBag.ContractDeactivated)
+    {
+        <p>Your Add On contract is currently deactivated</p>
+    }
+    else
+    {
+        using (Html.BeginForm("CustomReports", "Settings", FormMethod.Post, new { @class = "container" }))
+        {
+            @Html.Partial("ReportsTopMenu")
+
+            <input type="hidden" id="redirectData" name="redirectDataField" />
+
+            <div class="tabcontent container">
+
+                <div id="lgRow1" class="container">
+
+                    <div id="reportPanel" class="half-container">
+
+                        <div class="report-details-left">
+                            <ul class="report-list">
+                                <li id="liSalesReport" onclick="ReportTypeSelected('SalesReport')">@Proestimator.Resources.ProStrings.SalesReportHeader  <span style="font-size: 0.8em;">Closed R/O's only</span></li>
+                                <li id="liCustomerList" onclick="ReportTypeSelected('CustomerList')">@Proestimator.Resources.ProStrings.CustomerList <span style="font-size: 0.8em;">Closed R/O's only</span></li>
+                                <li id="liVendorsReport" onclick="ReportTypeSelected('VendorsReport')">@Proestimator.Resources.ProStrings.SupplierListHeader</li>
+                                <li id="liSavedCustomerList" onclick="@if (ViewBag.CustListPermit)
+                                {<text>ReportTypeSelected('SavedCustomerList')</text>}
+                                else
+                                {<text>noPermission('Saved Customer List');</text>}">@Proestimator.Resources.ProStrings.SavedCustomerList</li>
+                                <li id="liCloseRatioReport" onclick="ReportTypeSelected('CloseRatioReport')">@Proestimator.Resources.ProStrings.CloseRatioReport</li>
+                            </ul>
+                        </div>
+
+                        <div class="report-details-right">
+
+                            <div id="options-section" style="display: none;">
+
+                                <div id="SalesReport" class="col sm_4_4 md_8_8 lg_12_12" style="display: none; margin-bottom: 15px;">
+                                    <div class="inlineNote">
+                                        @Proestimator.Resources.ProStrings.CreateReportsNote <br>
+                                    </div>
+                                    <div class="col sm_2_4 md_4_8 lg_6_12" style="padding-right:10px;">
+                                        @Html.TextBoxFor(model => model.SalesReportRange.DateStart, new { autocomplete = "off", @class = "datepicker" })
+                                    </div>
+                                    <div class="col sm_2_4 md_4_8 lg_6_12" style="padding-left:10px;">
+                                        @Html.TextBoxFor(model => model.SalesReportRange.DateEnd, new { autocomplete = "off", @class = "datepicker" })
+                                    </div>
+                                    @Html.DropDownListFor(model => model.EstimatorID, Model.EstimatorSelections)
+
+                                    <div class="datagrid" style="max-height: 400px; overflow-y: scroll;">
+                                        @(Html.Kendo().Grid<CustomerSelectVM>()
+                    .Name("customergrid")
+                    .Columns(columns =>
+                    {
+                    columns.Bound(item => item.CustomerID).Hidden();
+                    columns.Bound("").Template(@<text></text>).ClientTemplate("<input id='#=CustomerID#' class='chkSelect' type='checkbox' # if (Selected) { #" + "checked" + "# } #  style='margin-left:5px;' />").Title("Select").Width("10%");
+                        columns.Bound(item => item.FirstName).Title("Customer First Name");
+                        columns.Bound(item => item.LastName).Title("Customer Last Name");
+                    })
+                .Events(events => events
+                    .DataBound("CustomerGridDataChanged")
+                )
+                .DataSource(dataSource => dataSource
+                    .Ajax()
+                    .ServerOperation(false)
+                    .Read(read => read.Action("GetCustomerByDate", "Home").Data("GetDateParameters"))
+                )
+                                    )
+                                    </div>
+                                </div>
+
+                                <div id="CustomerList" class="col sm_4_4 md_8_8 lg_12_12" style="display: none; margin-bottom: 15px;">
+                                    <div class="inlineNote">
+                                        @Proestimator.Resources.ProStrings.CreateReportsNote <br>
+                                    </div>
+                                    <div class="col sm_2_4 md_4_8 lg_6_12" style="padding-right:10px;">
+                                        @Html.TextBoxFor(model => model.CustomerListReportRange.DateStart, new { autocomplete = "off", @class = "datepicker" })
+                                    </div>
+                                    <div class="col sm_2_4 md_4_8 lg_6_12" style="padding-left:10px;">
+                                        @Html.TextBoxFor(model => model.CustomerListReportRange.DateEnd, new { autocomplete = "off", @class = "datepicker" })
+                                    </div>
+                                    <label class="light">@Html.CheckBoxFor(model => model.includeClosedDeleted, new { id = "IncludeClosedDeletedROs", name = "IncludeClosedDeletedROs" })@Proestimator.Resources.ProStrings.IncludeClosedDeletedRO</label>
+                                </div>
+
+                                <div id="SupplierList" class="col sm_4_4 md_8_8 lg_12_12" style="display: none;">
+
+                                </div>
+
+                                <div id="SavedCustomerList" class="col sm_4_4 md_8_8 lg_12_12" style="display: none; margin-bottom: 15px;">
+                                    <label class="light">@Html.CheckBoxFor(model => model.includeClosedDeleted, new { id = "IncludeClosedDeletedCustomers", name = "IncludeClosedDeletedCustomers" })@Proestimator.Resources.ProStrings.IncludeDeletedCustomers</label>
+                                </div>
+
+                                <div id="CloseRatioReport" class="col sm_4_4 md_8_8 lg_12_12" style="display: none;">
+                                    <div class="col sm_2_4 md_4_8 lg_6_12" style="padding-right:10px;">
+                                        @Html.TextBoxFor(model => model.CloseRatioReportRange.DateStart, new { autocomplete = "off", @class = "datepicker" })
+                                    </div>
+                                    <div class="col sm_2_4 md_4_8 lg_6_12" style="padding-left:10px;">
+                                        @Html.TextBoxFor(model => model.CloseRatioReportRange.DateEnd, new { autocomplete = "off", @class = "datepicker" })
+                                    </div>
+                                </div>
+
+                                @Html.DropDownList("CustomReportFormat", new SelectList(Model.ReportFormat, "Value", "Text")) <br />
+                                <input type="button" id="btnCreateReport" class="button do-not-disable" value="@Proestimator.Resources.ProStrings.CreateButton">
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div id="kendoGridPanel" class="half-container">
+
+                        <div style="margin-top:15px; margin-left: 10px">
+                            <div id="divSaveReportsHistorySalesReport" style="display: none">
+                                <label class="light">@Html.CheckBoxFor(model => model.SaveReportsHistorySalesReport) @Proestimator.Resources.ProStrings.SaveReportsHistory</label>
+                            </div>
+                            <div id="divSaveReportsHistoryCustomerList" style="display: none">
+                                <label class="light">@Html.CheckBoxFor(model => model.SaveReportsHistoryCustomerList) @Proestimator.Resources.ProStrings.SaveReportsHistory</label>
+                            </div>
+                            <div id="divSaveReportsHistorySupplierList" style="display: none">
+                                <label class="light">@Html.CheckBoxFor(model => model.SaveReportsHistorySupplierList) @Proestimator.Resources.ProStrings.SaveReportsHistory</label>
+                            </div>
+                            <div id="divSaveReportsHistorySavedCustomerList" style="display: none">
+                                <label class="light">@Html.CheckBoxFor(model => model.SaveReportsHistorySavedCustomerList) @Proestimator.Resources.ProStrings.SaveReportsHistory</label>
+                            </div>
+                            <div id="divSaveReportsHistoryCloseRatioReport" style="display: none">
+                                <label class="light">@Html.CheckBoxFor(model => model.SaveReportsHistoryCloseRatioReport) @Proestimator.Resources.ProStrings.SaveReportsHistory</label>
+                            </div>
+                        </div>
+
+                        <div class="container">
+                            <div class="datagrid">
+                                @(Html.Kendo().Grid<CreateReportHistoryListVM>()
+                        .Name("grid")
+                        .Columns(columns =>
+                        {
+                        columns.Bound(item => item.ID).Hidden();
+                        columns.Bound(item => item.LoginID).Hidden();
+                        columns.Bound(item => item.CreatedTimeStamp).MinScreenWidth(50).Title(@Proestimator.Resources.ProStrings.CreatedTimeStamp);
+                        columns.Bound(item => item.ReportFormat).MinScreenWidth(50).Title(@Proestimator.Resources.ProStrings.ReportFormat);
+                        columns.Bound("").Sortable(false).Template(@<text></text>).ClientTemplate("<a class=\"lg_hide\"><img src=\"/images/view.gif\"\" width=\"15\" height=\"15\" /></a><a class=\"sm_hide lg_display\" href=\"/" + @ViewBag.UserID + "/createreport/download" + "/#=FileName#\" target=\"_blank\"><img src=\"/images/view.gif\" width=\"15\" height=\"15\" /></a>").Title(@Proestimator.Resources.ProStrings.Report);
+                        })
+                    .Sortable()
+                    .Pageable(pageable => pageable
+                        .Refresh(false)
+                        .ButtonCount(8)
+                     )
+                     .Selectable()
+                    .Events(events => events
+                        .DataBound("GridDataChanged")
+
+                    )
+                    .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .ServerOperation(false)
+                        .Read(read => read.Action("GetCreateReportHisotry", "Home").Data("GetListParameters"))
+                        .PageSize(10)
+                    )
+)
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+    }
+    </div>

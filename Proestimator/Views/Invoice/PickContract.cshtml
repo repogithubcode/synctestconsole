@@ -1,0 +1,148 @@
+﻿@model Proestimator.ViewModel.Contracts.PickContractVM
+
+@using Proestimator.ViewModel.Contracts;
+
+@{
+    ViewBag.Title = Proestimator.Resources.ProStrings.PageTitle_RenewSubscription;
+}
+
+<style>
+    .datagrid {        
+        cursor: pointer;
+    }
+
+    .hide-small {
+    }
+
+    .hide-large {
+        display: none;
+    }
+
+    @@media (max-width: 700px) {
+        .hide-small {
+            display: none;
+        }
+
+        .hide-large {
+            display: block;
+        }
+    }
+</style>
+
+<script type="text/javascript">
+
+    function GetContractListParameters() {
+        return { userID: @ViewBag.UserID, loginID: @Model.LoginID };
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------------------
+    // Main contract grid events
+    // -------------------------------------------------------------------------------------------------------------------------------------------------
+    function ContractDataChanged(arg) {
+        GridDataChanged("contract-grid");
+    }
+
+    function ContractLineSelectionChanged(arg) {
+        GridLineSelectionChanged("contract-grid", "SelectedPaymentID");
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------------------
+    // Shared grid functions
+    // -------------------------------------------------------------------------------------------------------------------------------------------------
+    function GridDataChanged(gridName) {
+        // Wire up hilighting the row when hovering.
+        $("#" + gridName + " tbody tr").hover(
+            function () {
+                var row = $(this).closest("tr");
+                row.toggleClass("k-state-hover");
+            }
+        );
+    }
+
+    function GridLineSelectionChanged(gridName, hiddenID) {
+        DeselectGrid(gridName);        
+
+        // Get the selected item and call the ClickedItem event
+        var row = $("#" + gridName).find(".k-state-selected").first();
+        var contractTypeID = row.find("td").first().html();
+
+        $("#" + hiddenID).val(contractTypeID);
+
+        $("#submitButton").show();
+    }
+
+    function DeselectGrid(gridName) {
+        console.log("deselect grid " + gridName);
+
+        $("#" + gridName).find(".k-state-hover").removeClass("k-state-hover");
+        
+    }
+</script>
+
+<div class="page-container">
+    @using (Html.BeginForm())
+    {
+        @Html.HiddenFor(model => model.LoginID)
+        @Html.HiddenFor(model => model.SelectedPaymentID)
+
+        if (Model.CanPickContract)
+        {
+            <h2>Select Contract Terms</h2>
+        
+            <div class="datagrid">
+                @(Html.Kendo().Grid<ContractTermsVM>()
+                .Name("contract-grid")
+                .Columns(columns =>
+                {
+                    columns.Bound(item => item.ContractPriceLevelID).Hidden();
+                    columns.Bound(item => item.TermDescription).Title(@Proestimator.Resources.ProStrings.TermDescription);
+                    columns.Bound(item => item.TermTotal).Format("{0:c}").Title(@Proestimator.Resources.ProStrings.TermTotal);
+                    columns.Bound(item => item.DepositAmount).Format("{0:c}").HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.DepositAmount);
+                    columns.Bound(item => item.NumberOfPayments).HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.NumberOfPayments);
+                    columns.Bound(item => item.PaymentAmount).Format("{0:c}").HeaderHtmlAttributes(new { @class = "hide-small" }).HtmlAttributes(new { @class = "hide-small" }).Title(@Proestimator.Resources.ProStrings.PaymentAmount);
+                    columns.Bound("").Template(@<text></text>).ClientTemplate("# if (ForceAutoPay) { #" + "<img src='/images/checkmark.png' />" + "# } #").Title("Auto Pay").Title(@Proestimator.Resources.ProStrings.AutoPay);
+                    columns.Bound(item => item.Summary).HeaderHtmlAttributes(new { @class = "hide-large" }).HtmlAttributes(new { @class = "hide-large" }).Title(@Proestimator.Resources.ProStrings.Summary);
+                })
+                .Selectable()
+                .Events(events => events
+                    .DataBound("ContractDataChanged")
+                    .Change("ContractLineSelectionChanged")
+                )
+                .DataSource(dataSource => dataSource
+                    .Ajax()
+                    .ServerOperation(false)
+                    .Sort(sort => sort.Add("TermTotal"))
+                    .Read(read => read.Action("GetMainContractOptions", "Invoice").Data("GetContractListParameters"))
+                    .PageSize(20)
+                )
+                )
+            </div>
+        }
+
+        <div style="padding-top: 10px;">
+            @if (Model.IsRenewal)
+            {
+                <p style="float: left;">@Html.Raw(Model.RenewalMessage)</p>
+            }
+
+            <input id="submitButton" class="button forward nav-btn" style="display: none; float: right;" type="submit" name="Save" value="@Proestimator.Resources.ProStrings.SelectContractTerms" />
+        </div>
+
+        if (Model.InProgressContractExists)
+        {
+            <div class="container">
+                <hr />
+                <p><b>@Proestimator.Resources.ProStrings.Or</b> - @Proestimator.Resources.ProStrings.ContinueWithAlreadySelected <b>@Model.InProgressContractSummary</b></p>
+                <a class="button nav-btn" href="/@ViewBag.UserID/invoice/subscription-confirm/@Model.InProgressContractID">@Proestimator.Resources.ProStrings.Continue</a>
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(Model.RecentExpirationMessage))
+        {
+            <div class="container">
+                <p>@Html.Raw(Model.RecentExpirationMessage)</p>
+            </div>
+        }
+
+
+    }
+</div>

@@ -1,0 +1,565 @@
+﻿@model Proestimator.ViewModel.CustomReports.CustomReportTemplateVM
+
+@{
+    ViewBag.Title = "Custom Report Template Editor";
+}
+
+<script src="~/Content/jQuery-TE_v.1.4.0/jquery-te-1.4.0.min.js"></script>
+<link href="~/Content/jQuery-TE_v.1.4.0/jquery-te-1.4.0.css" rel="stylesheet" />
+
+<script>
+    $(document).ready(function () {
+
+        $("#MainForm").submit(function () {
+            var templateText = document.getElementById("EditorFrame").contentWindow.GetTemplate();
+            $("#Template").val(templateText);
+        });
+
+        // $('#cke_1_contents').attr({ height: '435px' });
+
+    });
+
+    function IFrameLoaded() 
+    {
+        document.getElementById("EditorFrame").contentWindow.SetupEditor($("#Template").val());
+    }
+
+    function Redirect(path) {
+        location.href = path;
+    }
+
+</script>
+
+<style>
+
+    #tagsList li:hover {
+        cursor: default;
+    }
+
+
+    .main-container {
+        clear: both;
+    }
+
+    .template-left-side {
+        float: left;
+        /*width: 350px;*/
+        padding: 5px;
+    }
+
+    .template-right-side {
+        float: right;
+        margin-top: -30px;
+        height: 100%;
+    }
+
+    .tags-container {
+        height: 450px;
+        overflow-x: hidden;
+        overflow-y: scroll;
+    }
+
+    .tags-container ul {
+        list-style: none;
+        padding-left: 5px;
+    }
+
+    .editor-container {
+        margin-left: 350px;
+        max-width: 1000px;
+    }
+
+    #tagsList li {
+        cursor: auto;
+    }
+
+    select.cke_dialog_ui_input_select {
+        color: black;
+    }
+
+  /*  .cke_editor_Template-TextArea {
+        height: calc(100% - 110px);
+        background-color: red;
+    }*/
+
+    .tab {
+        width: 854px;
+    }
+
+    .tabcontent {
+        width: 854px;
+        position: fixed;
+        bottom: 0px;
+        height: calc(100% - 213px);
+    }
+
+    #TabContentEditor {
+        padding: 0px;
+    }
+
+    @@media screen and (min-width: 900px) {
+        .template-left-side {
+            width: 330px;
+            position: fixed;
+            top: 110px;
+            height: calc(100% - 185px);
+        }
+
+        .template-right-side {
+            position: fixed;
+            top: 160px;
+            left: 463px;
+            height: calc(100% - 130px);
+            padding: 11px;
+        }
+
+        .tags-container {
+            height: auto;
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            bottom: 0px;
+            right: 0px;
+            overflow-x: hidden;
+            overflow-y: scroll;
+        }
+    }
+
+    .cke_inner {
+        height: 100%;
+    }
+
+    #cke_Template-TextArea {
+        height: calc(100% - 2px);
+    }
+
+    .cke_contents {
+        height: calc(100% - 102px) !important;
+    }
+
+    #TabContentPreview
+    {
+        padding: 0px;
+    }
+
+    #iframePreview {
+        width: 100%;
+        height: 100%;
+    }
+</style>
+
+@section scripts{
+    <script>
+        // Note: your instance name may differ.
+        var editor = '',
+            selection = '',
+            root = '',
+            textNodes = [],
+            ranges = [],
+            range, text, index;
+
+        $(document).ready(function () {
+            //initialize CKEditor by givin id of textarea
+            var mentionsFeedArr = ['EstimateID]]', 'EstimateNumber]]', 'WorkOrderNumber]]', 'ClaimNumber]]', 'PrintDate]]', 'PrintDateTime]]', 'CustomerFirstName]]', 'CustomerLastName]]'
+                                , 'CustomerEmail]]', 'CustomerSecondaryEmail]]', 'CustomerPhone1]]', 'CustomerPhone2]]', 'CustomerPhone3]]', 'CustomerBusinessName]]'
+                                , 'CustomerNotes]]', 'CustomerAddress1]]', 'CustomerAddress2]]', 'CustomerCity]]', 'CustomerState]]', 'CustomerZipCode]]'
+                                , 'VehicleDescription]]', 'VehicleVin]]', 'VehicleYear]]', 'VehicleMake]]', 'VehicleModel]]', 'VehicleTrim]]'
+                                , 'VehicleBody]]', 'VehiclePaintType]]', 'VehicleProductionDate]]', 'VehicleEngine]]', 'VehicleTransmission]]', 'VehicleDriveType]]'
+                                , 'VehiclePaintCode]]', 'VehiclePOI]]', 'VehicleMileageIn]]', 'VehicleMileageOut]]', 'VehicleValue]]', 'VehicleLicenseNumber]]'
+                                , 'VehicleLicenseState]]', 'VehicleExtColor]]', 'VehicleIntColor]]', 'VehicleStockNumber]]', 'VehicleNotes]]', 'VehicleAccessories]]'
+
+                                , 'InsuranceCompanyName]]', 'InsuranceAgentFirstName]]', 'InsuranceAgentLastName]]', 'InsuranceAgentPhone]]', 'InsuranceAgentPhoneExtension]]', 'InsuranceAgentFax]]'
+                                , 'InsuranceAgentEmail]]', 'InsuranceAdjusterFirstName]]', 'InsuranceAdjusterLastName]]', 'InsuranceAdjusterPhone]]', 'InsuranceAdjusterPhoneExtension]]', 'InsuranceAdjusterFax]]'
+                                , 'InsuranceAdjusterEmail]]', 'InsuranceClaimRepFirstName]]', 'InsuranceClaimRepLastName]]', 'InsuranceClaimRepPhone]]', 'InsuranceClaimRepPhoneExtension]]', 'InsuranceClaimRepFax]]'
+                                , 'InsuranceClaimRepEmail]]', 'InsurancePolicyNumber]]', 'InsuranceClaimNumber]]', 'InsuranceDeductible]]', 'InsuranceCoverageType]]', 'InsuranceDateOfLoss]]'
+                                , 'InsuranceClaimantFirstName]]', 'InsuranceClaimantLastName]]', 'InsuranceClaimantPhone]]', 'InsuranceClaimantPhoneExtension]]', 'InsuranceClaimantFax]]', 'InsuranceClaimantEmail]]'
+
+                                , 'InsuranceInsuredFirstName]]', 'InsuranceInsuredLastName]]', 'InsuranceInsuredPhone]]', 'InsuranceInsuredPhoneExtension]]', 'InsuranceInsuredFax]]', 'InsuranceInsuredEmail]]'
+                                , 'DetailsReportHeader]]', 'DetailsEstimateDescription]]', 'DetailsEstimator]]', 'DetailsEstimatorEmail]]', 'DetailsEstimatorPhone]]', 'DetailsRepairFacility]]'
+                                , 'DetailsEstimateLocation]]', 'DetailsEstimateNotes]]'
+
+                                , 'TotalsAmountPaid]]', 'TotalsAmountOwed]]'
+
+                                , 'DetailsPurchaseOrderNumber]]', 'DetailsInspectionDate]]', 'DetailsAssignmentDate]]', 'DetailsSupplementVersion]]', 'DetailsJobStatus]]', 'TotalsTaxableAmount]]'
+                                , 'TotalsTax]]', 'TotalsNonTaxableAmount]]', 'TotalsGrandTotal]]', 'TotalsDeductible]]', 'TotalsNetTotal]]', 'EstimateLastSupplementTotal]]', 'CompanyEmail]]'
+                                , 'CompanyName]]', 'CompanyPhone]]', 'CompanyAddress1]]', 'CompanyAddress2]]', 'CompanyCity]]', 'CompanyState]]'
+                                , 'CompanyZip]]'];
+
+            CKEDITOR.replace('Template-TextArea', {
+                extraPlugins: 'tableresize, find, mentions,placeholder,base64image,justify, spacingsliders,font', startupShowBorders: false, qtBorder: '0',
+                removePlugins: 'image,sourcearea,about',
+                mentions: [{ marker: '[[', feed: mentionsFeedArr, minChars: 0 }],
+                readOnly: false
+            });
+
+            CKEDITOR.config.width = 850;
+            // CKEDITOR.config.height = 1100;
+
+            CKEDITOR.config.fullPage = false;
+            CKEDITOR.config.removePlugins = 'resize, autogrow';
+            CKEDITOR.config.resize_enabled = false;
+
+            CKEDITOR.on('instanceReady', function (ev, data) {
+
+                var textToInsert = '';
+
+                editor = ev.editor;
+
+                ev.editor.document.on('drop', function (ev, data) {
+                    ev.data.preventDefault(true);
+
+                    //console.log(ev.data.$.dataTransfer.getData('Text'));
+                    InsertTextInCKEditor(ev.data.$.dataTransfer.getData('Text'));
+
+                });
+
+                // default when web page is loading
+                editorText = ev.editor.getData();
+                TagsHighlight(editorText);
+
+                // when value in text area is changed
+                ev.editor.on('change', function (ev, data) {
+
+                    var editorText = ev.editor.getData();
+                    TagsHighlight(editorText);
+
+                    var listBoxSelectedItemName = listBoxSelectedItem.name;
+                    ListBoxScrollAndHighlight(listBoxSelectedItemName);
+                });
+
+                ev.editor.document.on('click', function (ev, data) {
+                    ev.data.preventDefault(true);
+
+                    var editorText = ev.data.$.target.innerText;
+                    ListBoxScrollAndHighlight(editorText);
+                });
+            });
+
+            CKEDITOR.on('dialogDefinition', function (event) {
+                var dialogName = event.data.name;
+                var dialogDefinition = event.data.definition;
+
+                if (dialogName == 'placeholder') {
+
+                    var input = event.data.definition.getContents('info').get('name');
+                    input.type = 'select';
+                    var placholderTagsArr = new Array($("#tagsList li").length);
+
+                    var index = 0;
+                    $("#tagsList li").each(
+                      function () {
+                          placholderTagsArr[index] = [$(this).text()];
+                          index = index + 1;
+                      }
+                    );
+
+                    input.items = placholderTagsArr;
+                    input.setup = function (api2) {
+                        //console.log(api2.data.name);
+                        this.setValue(api2.data.name);
+                    };
+                }
+            });
+
+            ShowEditor();
+
+            $(window).unload(function () {
+                return "Handler for .unload() called.";
+            });
+        });
+
+        function CreatePreviewReport() {
+
+            var editorText = CKEDITOR.instances['Template-TextArea'].getData();
+
+            $.ajax({
+                url: "/SendEstimate/CreatePreviewReport/",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ "userID": @ViewBag.UserID, "editorText": editorText, "templateID": @Model.TemplateID }),
+                beforeSend: function () {
+                    // applyLoading();
+                },
+                success: function (result) {
+                    if (result.Success === true) {
+                        document.getElementById("iframePreview").contentWindow.document.body.innerHTML = result.EditorProcessedText;
+                    }
+                },
+                error: function (error) {
+                    removeLoading();
+                    ShowUserMessage(error, true, 4000);
+                }
+            });
+        }
+
+        function TagsHighlight(editorText) {
+
+            $("#tagsList li").each(
+              function () {
+                  var position = editorText.indexOf("[[" + $(this).text() + "]]");
+                  if (position > -1) {
+                      $(this).css('font-weight', 'bold');
+                  }
+                  else {
+                      $(this).css('font-weight', 'normal');
+                  }
+              }
+            );
+        }
+
+        function ListBoxScrollAndHighlight(listBoxSelectedItemName) {
+
+            if(listBoxSelectedItemName != undefined) {
+                var clickedListElement = '';
+                $("#tagsList li").each(
+                  function () {
+                      var position = listBoxSelectedItemName.indexOf("[[" + $(this).text() + "]]");
+                      if (position > -1) {
+                          clickedListElement = $(this);
+                      }
+                  }
+                );
+
+                if (clickedListElement != '') {
+                    var tagsContainer = $('#tagsContainer');
+                    var container = $('#tagsList');
+                    var scrollTo = $(clickedListElement);
+
+                    // Calculating new position of scrollbar
+                    var position = scrollTo.offset().top - tagsContainer.offset().top + tagsContainer.scrollTop();
+
+                    // Setting the value of scrollbar
+                    tagsContainer.animate({ scrollTop: position });
+                }
+            }
+        }
+
+        function TagsHighlightOnListItemClick(thisObj) {
+
+            $("#tagsList li").each(
+              function () {
+                  $(this).css('background-color', 'white');
+              }
+            );
+
+            $(thisObj).css('background-color', 'grey');
+
+            selection = editor.getSelection();
+            root = selection.root;
+
+            var highlightTag = thisObj.innerText;
+            //// Recursively search for text nodes starting from root.
+            //// You may want to search a specific branch starting from other element.
+            textNodes = [];
+            getTextNodes(root);
+
+            var startIndex = 0;
+            if (ranges.length <= 0) {
+                ranges = [];
+                var nodeText = '';
+                for (i = textNodes.length; i--;) {
+                    text = textNodes[i];
+                    //index = text.getText().indexOf(highlightTag);
+                    nodeText = text.getText();
+                    startIndex = 0;
+                    while ((index = nodeText.indexOf(highlightTag, startIndex)) > -1) {
+
+                        startIndex = index + highlightTag.length;
+
+                        range = editor.createRange();
+                        range.setStart(text, index);
+                        // setEnd
+                        range.setEnd(text, index + highlightTag.length);
+
+                        ranges.push(range);
+
+                        // Select all ranges "containing" phrase highlightTag
+                        selection.selectRanges(ranges);
+                    }
+                }
+            }
+            else {
+                ranges.shift(); // remove next element each time
+                selection.selectRanges(ranges);
+            }
+        }
+
+        function getTextNodes(element) {
+            var children = element.getChildren(),
+                child;
+
+            for (var i = children.count() ; i--;) {
+                child = children.getItem(i);
+                if (child.type == CKEDITOR.NODE_ELEMENT)
+                    getTextNodes(child);
+                else if (child.type == CKEDITOR.NODE_TEXT) {
+                    textNodes.push(child);
+                }
+            }
+        }
+
+        function InsertTextInCKEditor(textToInsert) {
+            CKEDITOR.instances['Template-TextArea'].insertHtml("[[" + textToInsert + "]]");
+        }
+
+        function insertAtCaret(text) {
+            var areaId = 'Template-TextArea';
+
+            var txtarea = document.getElementById(areaId);
+            if (!txtarea) {
+                return;
+            }
+
+            var scrollPos = txtarea.scrollTop;
+
+            txtarea.scrollTop = scrollPos;
+            InsertTextInCKEditor(text);
+        }
+
+        $("#tagsInputSearch").on('keyup', function () {
+            var value = $(this).val().toLowerCase();
+            $("#tagsList li").each(function () {
+                if ($(this).text().toLowerCase().search(value) > -1) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        })
+
+        function ShowEditor() {
+            $("#tabButtonEditor").addClass("active");
+            $("#tabButtonPreview").removeClass("active");
+
+            $("#TabContentEditor").show();
+            $("#TabContentPreview").hide();
+        }
+
+        function ShowPreview() {
+            $("#tabButtonEditor").removeClass("active");
+            $("#tabButtonPreview").addClass("active");
+
+            $("#TabContentEditor").hide();
+            $("#TabContentPreview").show();
+
+            CreatePreviewReport();
+        }
+
+    </script>
+}
+
+
+@using (Html.BeginForm("Edit", "CustomReport", FormMethod.Post, new { @id = "MainForm", @class = "container" }))
+{
+    <input type="hidden" id="redirectData" name="redirectDataField" />
+
+    @Html.HiddenFor(o => o.ID)
+    @Html.HiddenFor(o => o.UserID)
+    @Html.HiddenFor(o => o.LoginID)
+
+
+    <div class="template-left-side">
+
+        <fieldset style="margin-bottom:0px">
+
+            <div class="field-wrapper" style="margin-bottom:10px;">
+                <label class="inputLabel field-label">&nbsp;</label>
+                <div class="field-control">
+                    <a id="customReportsLink" class="button nav-btn" href="javascript:Redirect('/@ViewBag.UserID/reports/custom-report');"><- @Proestimator.Resources.ProStrings.PageTitle_CustomReports</a>
+                </div>
+            </div>
+
+            <div class="field-wrapper">
+                <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.ReportName</label>
+                <div class="field-control">
+                    @Html.TextBoxFor(o => o.Name)
+                </div>
+            </div>
+
+            <div class="field-wrapper">
+                <label class="inputLabel field-label"></label>
+                <div class="field-control">
+                    <label style="font-size: 0.8em;">
+                        @Html.CheckBoxFor(o => o.IsActive)
+                        @Proestimator.Resources.ProStrings.IsActive
+                    </label>
+                </div>
+            </div>
+
+            @if (ViewBag.IsStaffAccount)
+            {
+                <div class="field-wrapper">
+                    <label class="inputLabel field-label"></label>
+                    <div class="field-control">
+                        <label style="font-size: 0.8em;">
+                            @Html.CheckBoxFor(model => model.IsSystemReport)
+                            @Proestimator.Resources.ProStrings.IsSystemReport
+                        </label>
+                    </div>
+                </div>
+            }
+
+            @if (Model.IsRegularReport)
+            {
+                <div class="field-wrapper">
+                    <label class="inputLabel field-label">@Proestimator.Resources.ProStrings.ReportHeader</label>
+                    <div class="field-control">
+                        @Html.DropDownListFor(model => model.SelectedReportHeaderID, Model.ReportHeaderSelections)
+                    </div>
+                </div>
+
+                <div class="field-wrapper">
+                    <label class="inputLabel field-label">
+                        @Proestimator.Resources.ProStrings.ReportFooter
+                    </label>
+                    <div class="field-control">
+                        @Html.DropDownListFor(model => model.SelectedReportFooterID, Model.ReportFooterSelections)
+                    </div>
+                </div>
+            }
+
+            <div class="field-wrapper">
+                <label class="inputLabel field-label">&nbsp;</label>
+                <div class="field-control">
+                    <input id="submitButton" class="button nav-btn" type="submit" value="@Proestimator.Resources.ProStrings.Save" />
+                </div>
+            </div>
+
+        </fieldset>
+
+        <p>Use any of the following fields in your report by surrounding it with the brackets [[ and ]] character, like [[EstimateNumber]]</p>
+        <input type="text" id="tagsInputSearch" placeholder="Search" style="margin-bottom:0px">
+
+        <div class="tags-wrapper" style="position: relative; height: 300px;">
+            <div class="tags-container" id="tagsContainer">
+                <ul id="tagsList">
+                    @foreach (string tag in Model.Tags)
+                    {
+                        <li onclick="TagsHighlightOnListItemClick(this);">@tag</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="template-right-side">
+        <ul class="tab">
+            <li id="tabButtonEditor"><a href="javascript:void(0)" class="button" onclick="ShowEditor()">Editor</a></li>
+            <li id="tabButtonPreview"><a href="javascript:void(0)" class="button" onclick="ShowPreview()">Preview</a></li>
+        </ul>
+
+        <div id="TabContentEditor" class="container tabcontent flex-container">
+            @Html.TextAreaFor(x => x.Template, new { @class = "ckeditor", @id = "Template-TextArea" })
+        </div>
+
+        <div id="TabContentPreview" class="container tabcontent">
+            <iframe id="iframePreview"></iframe>
+        </div>
+        
+        <div style="position: absolute; top: -18px; left: 10px;">
+            <p style="margin: 5px;"><a href="https://www.youtube.com/watch?v=ZFd2PE1l6vU" target="_blank" style="color: black; text-decoration: underline;">Text editor help video</a></p>
+        </div>
+    </div>
+}
+

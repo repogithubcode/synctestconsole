@@ -1,0 +1,211 @@
+﻿@model ProEstimator.Admin.ViewModel.Logins.LoginFailureVM
+
+@using ProEstimator.Admin.ViewModel.Logins;
+
+@{
+    ViewBag.Title = "Administration - Login Session Report";
+    Layout = "~/Views/Shared/_LayoutPlain.cshtml";
+}
+
+<style>
+    .input-group-addon {
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .padd-top {
+        padding-top: 30px;
+        padding-bottom: 30px;
+    }
+
+    .header {
+        padding-bottom: 15px;
+        border-bottom: 1px solid black;
+        width: 100%;
+    }
+
+    .page-header {
+        border-bottom: 0px;
+        padding-top: 0px;
+        margin-top: 0px;
+    }
+
+    .details-form {
+        padding-top: 15px;
+        padding-bottom: 15px;
+        width: 100%;
+    }
+
+        .details-form:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        .details-form td {
+            padding: 1px;
+        }
+
+    .details-column {
+        float: left;
+        width: 50%;
+    }
+
+    input[type=text] {
+        width: 250px;
+    }
+
+    label {
+        font-weight: normal;
+    }
+
+    .save-container {
+        text-align: center;
+        padding: 10px;
+        border-top: 1px solid black;
+    }
+
+        .save-container input {
+            padding: 10px;
+            width: 150px;
+            font-size: 1.1em;
+        }
+
+    .new-confirm {
+        text-align: right;
+        display: none;
+    }
+
+    .checkbox-row {
+        padding-bottom: 20px;
+    }
+
+        .checkbox-row label {
+            padding-right: 20px;
+        }
+</style>
+
+<script>
+
+    function GetSearchParameters() {
+        return {
+            loginIDFilter: $("#loginID").val(), loginNameFilter: $("#loginName").val(), passwordFilter: $("#password").val()
+        };
+    }
+
+    $(document).ready(function () {
+
+        // Do the acount id search
+        $("#btnLoginFailureSearch").click(function () {
+
+            // Refresh the history grid
+            var grid = $("#login-grid").data("kendoGrid");
+
+            if (grid) {
+                grid.dataSource.read();
+            }
+        });
+
+        $("#filter").on("input", function (e) {
+
+            var grid = $("#login-grid").data("kendoGrid");
+            var valuetoFilter = e.target.value;
+
+            var filter = KendogridSearchFilter(grid, valuetoFilter);
+
+            grid.dataSource.filter(filter);
+        });
+    });
+
+</script>
+
+<div class="padd-top">
+    <div class="col-lg-8 col-md-7 col-sm-6">
+        <h3>
+            Login Failures
+        </h3>
+    </div>
+
+
+    <form id="UserMaintenance" name="failureLogins">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4>Customer Search</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="container">
+                            <div class="row stackem">
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Login ID</span>
+                                        <input type="text" class="form-control" placeholder="Login ID" aria-describedby="loginID" id="loginID" />
+                                    </div>
+                                    <br />
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Login Name</span>
+                                        <input type="text" class="form-control" placeholder="Login Name" aria-describedby="loginName" id="loginName" />
+                                    </div>
+                                    <br />
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">Password</span>
+                                        <input type="text" class="form-control" placeholder="Password" aria-describedby="password" id="password" />
+                                    </div>
+                                    <br />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-footer">
+                        <p class="pull-left" style="display:none;">
+                            If more than one customer matches the search criteria
+                            you will be provided with a list from which to choose.
+                        </p>
+
+                        <a class="btn btn-default pull-right" href="javascript:void(0);" role="button" id="btnLoginFailureSearch">Search</a>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="text-align: right;">
+            Search: <input type="text" id="filter" />
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div id="customer-grid-container" class="datagrid">
+                    @(Html.Kendo().Grid<LoginFailureVM>()
+                        .Name("login-grid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(item => item.ID).Title("Id").Hidden();
+                            columns.Bound(item => item.LoginId).Title("LoginId");
+                            columns.Bound(item => item.LoginName).Title("Login Name");
+                            columns.Bound(item => item.Password).Title("Password");
+                            columns.Bound(item => item.TimeDate).Title("TimeDate");
+                            columns.Bound(item => item.UserAddress).Title("User Address");
+                            columns.Bound(item => item.Reason).Title("Reason").Hidden();
+                            columns.Bound(item => item.SalesRep).Title("Sales Rep");
+                        })
+                        .Sortable()
+                        .Selectable()
+                        .Pageable(pageable => pageable
+                            .Refresh(false)
+                        )
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .ServerOperation(false)
+                            .Read(read => read.Action("GetLoginFailureReport", "LoginFailures").Data("GetSearchParameters"))
+                            .PageSize(30)
+                        )
+                    )
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
