@@ -2770,7 +2770,11 @@ namespace Proestimator.Controllers
                             result.ImageInfo.Width = tempImage.Width;
                             result.ImageInfo.Height = tempImage.Height;
                         }
-                        result.ImageInfo.DiskSize = GetDiskSize(Path.Combine(imageFolder, imageID.ToString() + "." + ext));
+                        string diskPath = Path.Combine(imageFolder, imageID.ToString() + "." + ext);
+                        if(Path.GetFullPath(diskPath).StartsWith(imageFolder, StringComparison.OrdinalIgnoreCase))
+                        {
+                            result.ImageInfo.DiskSize = GetDiskSize(diskPath);
+                        }
                     }
                 }
             }
@@ -3029,7 +3033,11 @@ namespace Proestimator.Controllers
                     string fileName = filePart.Replace("_edit", "").Replace(".", "_edit.");
 
                     //System.IO.File.WriteAllBytes(Path.Combine(imageFolder, fileName + "_edit." + extension), imageBytes);
-                    System.IO.File.WriteAllBytes(Path.Combine(imageFolder, fileName), imageBytes);
+                    string diskPath = Path.Combine(imageFolder, fileName);
+                    if (Path.GetFullPath(diskPath).StartsWith(imageFolder, StringComparison.OrdinalIgnoreCase))
+                    {
+                        System.IO.File.WriteAllBytes(Path.Combine(imageFolder, fileName), imageBytes);
+                    }
                     /*if (System.IO.File.Exists(Path.Combine(imageFolder, fileName)))
                     {
                         System.IO.File.Delete(Path.Combine(imageFolder, fileName));
@@ -3041,12 +3049,17 @@ namespace Proestimator.Controllers
                         stream.Close();
                     }*/
                     imageSmall.Save(Path.Combine(imageFolder, fileName.Replace("_edit", "_thumbedit")));
-                    using (System.IO.Stream stream = System.IO.File.OpenRead(Path.Combine(imageFolder, fileName)))
+                    
+                    if(Path.GetFullPath(diskPath).StartsWith(imageFolder, StringComparison.OrdinalIgnoreCase))
                     {
-                        System.Drawing.Image tempImage = System.Drawing.Image.FromStream(stream, false, false);
-                        result.ImageInfo.Width = tempImage.Width;
-                        result.ImageInfo.Height = tempImage.Height;
+                        using (System.IO.Stream stream = System.IO.File.OpenRead(Path.Combine(imageFolder, fileName)))
+                        {
+                            System.Drawing.Image tempImage = System.Drawing.Image.FromStream(stream, false, false);
+                            result.ImageInfo.Width = tempImage.Width;
+                            result.ImageInfo.Height = tempImage.Height;
+                        }
                     }
+
                     result.ImageInfo.DiskSize = GetDiskSize(Path.Combine(imageFolder, fileName));
                 }
 
@@ -3231,9 +3244,17 @@ namespace Proestimator.Controllers
                     ImageAndGraphic imageAndGraphic = new ImageAndGraphic(row);
 
                     // Only add if the image file exists
-                    if (System.IO.File.Exists(imagesLocation + imageAndGraphic.GraphicFileName + ".tif"))
+                    string graphicFileName = Path.Combine(imagesLocation, imageAndGraphic.GraphicFileName + ".tif");
+                    if(Path.GetFullPath(graphicFileName).StartsWith(imagesLocation, StringComparison.OrdinalIgnoreCase))
                     {
-                        imageList.Add(imageAndGraphic);
+                        if (System.IO.File.Exists(imagesLocation + imageAndGraphic.GraphicFileName + ".tif"))
+                        {
+                            imageList.Add(imageAndGraphic);
+                        }
+                        else
+                        {
+                            ErrorLogger.LogError("Image " + imageAndGraphic.GraphicFileName + " not found for vehicleID: " + vehicleID + " and GroupNumber: " + groupNumber, "PartsImageNotFound");
+                        }
                     }
                     else
                     {
