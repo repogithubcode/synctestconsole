@@ -160,8 +160,11 @@ namespace ProEstimator.Admin.Controllers
                     // Save the file to disk
                     string fileFullName = fileNameWoExtension + "_" + documentID + "." + extension;
                     string filePath = Path.Combine(documentsRootFolder, fileFullName);
-                    file.SaveAs(filePath);
-                    result = new UploadDocumentResult(documentID);
+                    if(Path.GetFullPath(filePath).StartsWith(documentsRootFolder, StringComparison.OrdinalIgnoreCase))
+                    {
+                        file.SaveAs(filePath);
+                        result = new UploadDocumentResult(documentID);
+                    }
                 }
                 else
                 {

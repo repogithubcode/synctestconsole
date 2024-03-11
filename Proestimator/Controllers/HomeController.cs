@@ -689,7 +689,7 @@ namespace Proestimator.Controllers
             string diskPath = Path.Combine(ConfigurationManager.AppSettings.Get("UserContentPath").ToString(), "FrameImagePdf", filename);
             if (!string.IsNullOrEmpty(diskPath) && Path.GetFullPath(diskPath).StartsWith(Path.Combine(ConfigurationManager.AppSettings.Get("UserContentPath").ToString(), "FrameImagePdf"), StringComparison.OrdinalIgnoreCase))
             {
-                if(System.IO.File.Exists(diskPath))
+                if (System.IO.File.Exists(diskPath))
                 {
                     var fileStream = new FileStream(diskPath, FileMode.Open, FileAccess.Read);
                     return new FileStreamResult(fileStream, "application/pdf");
@@ -1229,22 +1229,33 @@ namespace Proestimator.Controllers
         public ActionResult Download(int userID, string file)
         {
             ActiveLogin activeLogin = _siteLoginManager.GetActiveLogin(userID, GetComputerKey());
+            string reportsFolder = Path.Combine(ConfigurationManager.AppSettings.Get("UserContentPath").ToString(), activeLogin.LoginID.ToString(), "Reports");
             string diskPath = Path.Combine(ConfigurationManager.AppSettings.Get("UserContentPath").ToString(), activeLogin.LoginID.ToString(), "Reports", file);
 
-            byte[] fileBytes = System.IO.File.ReadAllBytes(diskPath);
-            return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, file);
+            if (!string.IsNullOrEmpty(diskPath) && Path.GetFullPath(diskPath).StartsWith(reportsFolder, StringComparison.OrdinalIgnoreCase))
+            {
+                byte[] fileBytes = System.IO.File.ReadAllBytes(diskPath);
+                return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, file);
+            }
+
+            //filename from querystring or estimate id from session is not valid...show the error message instead of blank screen.
+            return Content(@Proestimator.Resources.ProStrings.SomethingWentWrongOpenGenerateReport);
         }
 
         [Route("{userID}/view-report/{pdfName}")]
         public ActionResult ViewReport(int userID, string pdfName)
         {
+            string reportsFolder = Path.Combine(ConfigurationManager.AppSettings.Get("UserContentPath").ToString(), ActiveLogin.LoginID.ToString(), "Reports");
             string diskPath = Path.Combine(ConfigurationManager.AppSettings.Get("UserContentPath").ToString(), ActiveLogin.LoginID.ToString(), "Reports", pdfName);
 
-            if (!string.IsNullOrEmpty(diskPath) && System.IO.File.Exists(diskPath))
+            if (!string.IsNullOrEmpty(diskPath) && Path.GetFullPath(diskPath).StartsWith(reportsFolder, StringComparison.OrdinalIgnoreCase))
             {
-                var fileStream = new FileStream(diskPath, FileMode.Open, FileAccess.Read);
-                var fsResult = new FileStreamResult(fileStream, "application/pdf");
-                return fsResult;
+                if(System.IO.File.Exists(diskPath))
+                {
+                    var fileStream = new FileStream(diskPath, FileMode.Open, FileAccess.Read);
+                    var fsResult = new FileStreamResult(fileStream, "application/pdf");
+                    return fsResult;
+                }
             }
 
             //filename from querystring or estimate id from session is not valid...show the error message instead of blank screen.
@@ -1416,20 +1427,24 @@ namespace Proestimator.Controllers
         {
             ActiveLogin activeLogin = _siteLoginManager.GetActiveLogin(userID, GetComputerKey());
 
+            string reportsFolder = Path.Combine(ConfigurationManager.AppSettings.Get("UserContentPath").ToString(), activeLogin.LoginID.ToString(), "Reports");
             string diskPath = Path.Combine(ConfigurationManager.AppSettings.Get("UserContentPath").ToString(), activeLogin.LoginID.ToString(), "Reports", filename);
 
-            FileInfo fileInfo = new FileInfo(filename);
-
-            if (!string.IsNullOrEmpty(diskPath) && System.IO.File.Exists(diskPath))
+            if (!string.IsNullOrEmpty(diskPath) && Path.GetFullPath(diskPath).StartsWith(reportsFolder, StringComparison.OrdinalIgnoreCase))
             {
-                var fileStream = new FileStream(diskPath, FileMode.Open, FileAccess.Read);
-                if (fileInfo.Extension.Contains("pdf"))
+                if(System.IO.File.Exists(diskPath))
                 {
-                    return new FileStreamResult(fileStream, "application/pdf");
-                }
-                else
-                {
-                    return File(diskPath, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml", filename + ".xlsx");
+                    FileInfo fileInfo = new FileInfo(filename);
+
+                    var fileStream = new FileStream(diskPath, FileMode.Open, FileAccess.Read);
+                    if (fileInfo.Extension.Contains("pdf"))
+                    {
+                        return new FileStreamResult(fileStream, "application/pdf");
+                    }
+                    else
+                    {
+                        return File(diskPath, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml", filename + ".xlsx");
+                    }
                 }
             }
 

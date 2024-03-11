@@ -2,7 +2,6 @@
 using Kendo.Mvc.UI;
 using ProEstimator.Admin.ViewModel.DueInvoiceReport;
 using ProEstimator.Business.Logic;
-using ProEstimator.Business.Model;
 using ProEstimatorData;
 using ProEstimatorData.DataModel;
 using ProEstimatorData.DataModel.Admin;
@@ -11,7 +10,6 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Web.Mvc;
 
 namespace ProEstimator.Admin.Controllers
@@ -62,18 +60,6 @@ namespace ProEstimator.Admin.Controllers
                 rangeStartFilter = string.IsNullOrEmpty(rangeStartFilter) ? null : rangeStartFilter;
                 rangeEndFilter = string.IsNullOrEmpty(rangeEndFilter) ? null : rangeEndFilter;
 
-                if (rangeStartFilter.Contains("/") || rangeStartFilter.Contains(@"\") || rangeStartFilter.Contains("$") ||
-                    rangeStartFilter.Contains("..") || rangeStartFilter.Contains("?"))
-                {
-                    return null;
-                }
-
-                if (rangeEndFilter.Contains("/") || rangeEndFilter.Contains(@"\") || rangeEndFilter.Contains("$") ||
-                    rangeEndFilter.Contains("..") || rangeEndFilter.Contains("?"))
-                {
-                    return null;
-                }
-
                 autoPayFilter = string.Compare(autoPayFilter, "false", true) == 0 ? null : autoPayFilter;
                 paidFilter = string.Compare(paidFilter, "false", true) == 0 ? null : paidFilter;
                 hasStripeInfoFilter = string.Compare(hasStripeInfoFilter, "false", true) == 0 ? null : hasStripeInfoFilter;
@@ -95,30 +81,13 @@ namespace ProEstimator.Admin.Controllers
                     Directory.CreateDirectory(adminFolder);
                 }
 
-                Regex regex = new Regex(@"([a-zA-Z0-9\s_\\.\-:])+(.dat)$");
-                Match match = regex.Match(diskPath);
-
-                if (match.Success)
+                if (Path.GetFullPath(diskPath).StartsWith(adminFolder, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (Path.GetFullPath(diskPath).StartsWith(adminFolder, StringComparison.OrdinalIgnoreCase))
+                    if (System.IO.File.Exists(diskPath))
                     {
-                        if (System.IO.File.Exists(diskPath))
-                        {
-                            System.IO.File.Delete(diskPath);
-                        }
-                    }
-                    else
-                    {
-                        //return "File not found";
-                        return null;
+                        System.IO.File.Delete(diskPath);
                     }
                 }
-                else
-                {
-                    //return "File name not valid";
-                    return null;
-                }
-
 
                 spreadsheetWriter.WriteSpreadshet(table, diskPath);
 

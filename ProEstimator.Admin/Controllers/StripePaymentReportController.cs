@@ -61,21 +61,26 @@ namespace ProEstimator.Admin.Controllers
                     Directory.CreateDirectory(adminFolder);
                 }
 
-                if (System.IO.File.Exists(diskPath))
+                if(Path.GetFullPath(diskPath).StartsWith(adminFolder, StringComparison.OrdinalIgnoreCase))
                 {
-                    System.IO.File.Delete(diskPath);
+                    if (System.IO.File.Exists(diskPath))
+                    {
+                        System.IO.File.Delete(diskPath);
+                    }
+
+                    spreadsheetWriter.WriteSpreadshet(table, diskPath);
+
+                    byte[] fileBytes = System.IO.File.ReadAllBytes(diskPath);
+                    return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, "StripePaymentReport_" + startDateName + "_" + endDateName + ".xlsx");
                 }
-
-                spreadsheetWriter.WriteSpreadshet(table, diskPath);
-
-                byte[] fileBytes = System.IO.File.ReadAllBytes(diskPath);
-                return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, "StripePaymentReport_" + startDateName + "_" + endDateName + ".xlsx");
             }
             catch (Exception ex)
             {
                 ErrorLogger.LogError(ex, 0, "StripePaymentReport DownloadData");
                 return Content(ex.Message);
             }
+
+            return Content("Error generating data.");
         }
     }
 }

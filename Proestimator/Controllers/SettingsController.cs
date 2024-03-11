@@ -531,11 +531,15 @@ namespace Proestimator.Controllers
                         if (contentType.StartsWith("image/"))
                         {
                             string path = Path.Combine(imageFolder, loginInfo.ID.ToString() + "." + extension);
-                            file.SaveAs(path);
 
-                            loginInfo.LogoImageType = extension;
+                            if(Path.GetFullPath(path).StartsWith(imageFolder, StringComparison.OrdinalIgnoreCase))
+                            {
+                                file.SaveAs(path);
 
-                            model.LogoImagePath = loginInfo.GetLogoPath();
+                                loginInfo.LogoImageType = extension;
+
+                                model.LogoImagePath = loginInfo.GetLogoPath();
+                            }
                         }
                         else if (contentType == "application/pdf")
                         {
